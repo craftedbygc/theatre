@@ -119,11 +119,13 @@ const BasicKeyframedTrack: React.VFC<{
       />
     ))
 
+    const iconColor = graphEditorColors[color].iconColor
+
     return (
       <g
         style={{
           // @ts-ignore
-          '--main-color': graphEditorColors[color].iconColor,
+          '--main-color': iconColor,
         }}
       >
         {keyframeEditors}
