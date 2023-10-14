@@ -207,6 +207,7 @@ function useKeyframeContextMenu(node: SVGCircleElement | null, props: IProps) {
     menuItems: () => {
       return [
         {
+          type: 'normal',
           label: 'Delete',
           callback: () => {
             getStudio()!.transaction(({stateEditors}) => {

@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
 import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
-import type {UseDragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
+import type {DragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
 import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import {val} from '@unseenco/theatre-dataverse'
@@ -186,6 +186,7 @@ function useSingleKeyframeContextMenu(
 
       return [
         {
+          type: 'normal',
           label: copyableKeyframes.length > 0 ? 'Copy (selection)' : 'Copy',
           callback: () => {
             if (copyableKeyframes.length > 0) {
@@ -204,6 +205,7 @@ function useSingleKeyframeContextMenu(
           },
         },
         {
+          type: 'normal',
           label:
             props.selection !== undefined ? 'Delete (selection)' : 'Delete',
           callback: () => {
@@ -251,7 +253,7 @@ function useDragForSingleKeyframeDot(
 
   const {onClickFromDrag} = options
 
-  const useDragOpts = useMemo<UseDragOpts>(() => {
+  const useDragOpts = useMemo<DragOpts>(() => {
     return {
       debugName: 'KeyframeDot/useDragKeyframe',
       onDragStart(event) {

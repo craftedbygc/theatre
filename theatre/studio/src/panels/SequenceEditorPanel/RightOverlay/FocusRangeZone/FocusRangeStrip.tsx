@@ -139,6 +139,7 @@ const FocusRangeStrip: React.FC<{
       const existingRange = existingRangeD.getValue()
       return [
         {
+          type: 'normal',
           label: 'Delete focus range',
           callback: () => {
             getStudio()
@@ -153,6 +154,7 @@ const FocusRangeStrip: React.FC<{
           },
         },
         {
+          type: 'normal',
           label: existingRange?.enabled
             ? 'Disable focus range'
             : 'Enable focus range',

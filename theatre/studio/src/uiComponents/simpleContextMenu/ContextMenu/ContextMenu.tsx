@@ -1,5 +1,4 @@
 import useBoundingClientRect from '@unseenco/theatre-studio/uiComponents/useBoundingClientRect'
-import type {ElementType} from 'react'
 import {useMemo} from 'react'
 import {useContext} from 'react'
 import React, {useLayoutEffect, useState} from 'react'
@@ -10,6 +9,7 @@ import {PortalContext} from 'reakit'
 import useOnKeyDown from '@unseenco/theatre-studio/uiComponents/useOnKeyDown'
 import BaseMenu from './BaseMenu'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
+import type {ContextMenuItem} from '@unseenco/theatre-studio/uiComponents/chordial/chordialInternals'
 
 /**
  * How far from the menu should the pointer travel to auto close the menu
@@ -20,20 +20,13 @@ export type IContextMenuItemCustomNodeRenderFn = (controls: {
   closeMenu(): void
 }) => React.ReactElement
 
-export type IContextMenuItem = {
-  label: string | ElementType
-  callback?: (e: React.MouseEvent) => void
-  enabled?: boolean
-  // subs?: Item[]
-}
-
 export type IContextMenuItemsValue =
-  | IContextMenuItem[]
-  | (() => IContextMenuItem[])
+  | ContextMenuItem[]
+  | (() => ContextMenuItem[])
 
 export type ContextMenuProps = {
   items: IContextMenuItemsValue
-  displayName?: string
+  displayName?: React.ReactNode
   clickPoint: {
     clientX: number
     clientY: number
@@ -137,6 +130,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props) => {
     else
       return [
         {
+          type: 'normal' as const,
           /**
            * TODO Need design for this
            */
@@ -146,7 +140,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props) => {
           enabled: false,
         },
       ]
-  }, [props.items])
+  }, [props.items, props.displayName])
 
   return createPortal(
     <BaseMenu
@@ -160,3 +154,5 @@ const ContextMenu: React.FC<ContextMenuProps> = (props) => {
 }
 
 export default ContextMenu
+
+export type IContextMenuItem = ContextMenuItem

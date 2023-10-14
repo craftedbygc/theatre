@@ -11,7 +11,6 @@ import {PortalContext} from 'reakit'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 import useKeyboardShortcuts from './useKeyboardShortcuts'
 import PointerEventsHandler from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
-import {ProvidePointerCapturing} from './PointerCapturing'
 import {MountAll} from '@unseenco/theatre-studio/utils/renderInPortalInContext'
 import {PortalLayer, ProvideStyles} from '@unseenco/theatre-studio/css'
 import {
@@ -20,10 +19,8 @@ import {
 } from '@unseenco/theatre-shared/logger'
 import {ProvideLogger} from '@unseenco/theatre-studio/uiComponents/useLogger'
 import {Notifier} from '@unseenco/theatre-studio/notify'
-import {
-  ChordialRenderer,
-  useChordialCaptureEvents,
-} from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import {useChordialCaptureEvents} from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import {ChordialOverlay} from '@unseenco/theatre-studio/uiComponents/chordial/ChordialOverlay'
 
 const MakeRootHostContainStatic =
   typeof window !== 'undefined'
@@ -89,33 +86,31 @@ export default function UIRoot(props: {
 
     return !initialised ? null : (
       <ProvideLogger logger={logger}>
-        <ProvidePointerCapturing>
-          <MountExtensionComponents />
-          <PortalContext.Provider value={portalLayer}>
-            <ProvideStyles
-              target={
-                window.__IS_VISUAL_REGRESSION_TESTING === true
-                  ? undefined
-                  : props.containerShadow
-              }
-            >
-              <>
-                <MakeRootHostContainStatic />
-                <Container
-                  className={isStudioHidden ? 'invisible' : ''}
-                  // @ts-ignore
-                  ref={chordialRootRef}
-                >
-                  <PortalLayer ref={portalLayerRef} />
-                  <ChordialRenderer />
-                  <GlobalToolbar />
-                  <PanelsRoot />
-                  <Notifier />
-                </Container>
-              </>
-            </ProvideStyles>
-          </PortalContext.Provider>
-        </ProvidePointerCapturing>
+        <MountExtensionComponents />
+        <PortalContext.Provider value={portalLayer}>
+          <ProvideStyles
+            target={
+              window.__IS_VISUAL_REGRESSION_TESTING === true
+                ? undefined
+                : props.containerShadow
+            }
+          >
+            <>
+              <MakeRootHostContainStatic />
+              <Container
+                className={isStudioHidden ? 'invisible' : ''}
+                // @ts-ignore
+                ref={chordialRootRef}
+              >
+                <PortalLayer ref={portalLayerRef} />
+                <ChordialOverlay />
+                <GlobalToolbar />
+                <PanelsRoot />
+                <Notifier />
+              </Container>
+            </>
+          </ProvideStyles>
+        </PortalContext.Provider>
       </ProvideLogger>
     )
   }, [studio, portalLayerRef, portalLayer])

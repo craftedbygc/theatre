@@ -58,6 +58,7 @@ export const ObjectItem: React.VFC<{
         .filter((v) => v !== DEFAULT_SEQUENCE_VARIANT)
         .filter((v) => !isObjectOverriddenInVariant(sheetAddress, v, objectKey))
         .map((targetVariant) => ({
+          type: 'normal' as const,
           label: `Override in variant: ${targetVariant}`,
           callback: () => {
             getStudio()!.transaction(({stateEditors}) => {
@@ -83,6 +84,7 @@ export const ObjectItem: React.VFC<{
 
     return [
       {
+        type: 'normal',
         label: 'Remove override',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {

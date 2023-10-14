@@ -15,7 +15,7 @@ import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/Se
 import type {SequenceMarkerId} from '@unseenco/theatre-shared/utils/ids'
 import type {SheetAddress} from '@unseenco/theatre-shared/utils/addresses'
 import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
-import type {UseDragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
+import type {DragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
 import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
 import type {StudioHistoricStateSequenceEditorMarker} from '@unseenco/theatre-studio/store/types'
 import {zIndexes} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/SequenceEditorPanel'
@@ -215,6 +215,7 @@ function useMarkerContextMenu(
     menuItems() {
       return [
         {
+          type: 'normal',
           label: 'Remove marker',
           callback: () => {
             getStudio().transaction(({stateEditors}) => {
@@ -242,7 +243,7 @@ function useDragMarker(
   const propsRef = useRef(props)
   propsRef.current = props
 
-  const useDragOpts = useMemo<UseDragOpts>(() => {
+  const useDragOpts = useMemo<DragOpts>(() => {
     return {
       debugName: `MarkerDot/useDragMarker (${props.marker.id})`,
       onDragStart(_event) {

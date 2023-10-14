@@ -11,11 +11,7 @@ import {contextMenuShownContext} from '@unseenco/theatre-studio/panels/DetailPan
 import {closeAllTooltips} from '@unseenco/theatre-studio/uiComponents/Popover/TooltipContext'
 
 // re-exports
-export type {
-  IContextMenuItemsValue,
-  IContextMenuItem,
-  IRequestContextMenuOptions,
-}
+export type {IContextMenuItemsValue, IContextMenuItem}
 
 const emptyNode = <></>
 

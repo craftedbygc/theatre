@@ -1,6 +1,6 @@
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import getStudio from '@unseenco/theatre-studio/getStudio'
-import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import type {ContextMenuItem} from '@unseenco/theatre-studio/uiComponents/chordial/chordialInternals'
 import getDeep from '@unseenco/theatre-shared/utils/getDeep'
 import {usePrism} from '@unseenco/theatre-react'
 import type {
@@ -36,7 +36,7 @@ import {getSequenceStateFromSheet} from '@unseenco/theatre-core/sequences/sequen
 
 interface CommonStuff {
   beingScrubbed: boolean
-  contextMenuItems: Array<IContextMenuItem>
+  contextMenuItems: Array<ContextMenuItem>
   controlIndicators: React.ReactElement
 }
 
@@ -96,7 +96,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
       ),
     )
 
-    const contextMenuItems: IContextMenuItem[] = []
+    const contextMenuItems: ContextMenuItem[] = []
 
     const common: CommonStuff = {
       beingScrubbed: someDescendantsBeingScrubbed,
@@ -147,6 +147,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
 
     if (hasStatics || hasOneOrMoreSequencedTracks) {
       contextMenuItems.push({
+        type: 'normal',
         label: 'Reset all to default',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {
@@ -170,6 +171,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
 
     if (hasOneOrMoreSequencedTracks) {
       contextMenuItems.push({
+        type: 'normal',
         label: 'Make all static',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {
@@ -202,6 +204,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
       (hasOneOrMoreSequencedTracks && hasStatics)
     ) {
       contextMenuItems.push({
+        type: 'normal',
         label: 'Sequence all',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {

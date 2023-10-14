@@ -165,6 +165,7 @@ function pasteKeyframesContextMenuItem(
   keyframes: KeyframeWithPathToPropFromCommonRoot[],
 ): IContextMenuItem {
   return {
+    type: 'normal',
     label: 'Paste Keyframes',
     enabled: keyframes.length > 0,
     callback: () => {

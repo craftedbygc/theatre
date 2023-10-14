@@ -1,8 +1,6 @@
 import type * as propTypes from '@unseenco/theatre-core/propTypes'
 import {getPointerParts} from '@unseenco/theatre-dataverse'
 import type {Pointer, Prism} from '@unseenco/theatre-dataverse'
-import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
-import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import {last} from 'lodash-es'
 import React from 'react'
 import type {useEditingToolsForSimplePropInDetailsPanel} from '@unseenco/theatre-studio/propEditors/useEditingToolsForSimpleProp'
@@ -11,10 +9,9 @@ import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import {propNameTextCSS} from '@unseenco/theatre-studio/propEditors/utils/propNameTextCSS'
 import type {PropHighlighted} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
 import {rowIndentationFormulaCSS} from './rowIndentationFormulaCSS'
-import {getDetailRowHighlightBackground} from './getDetailRowHighlightBackground'
-import {mergeRefs} from 'react-merge-refs'
 import {useVal} from '@unseenco/theatre-react'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
 
 const Container = styled.div<{
   isHighlighted: PropHighlighted
@@ -23,19 +20,9 @@ const Container = styled.div<{
   height: 30px;
   justify-content: flex-start;
   align-items: stretch;
-  // We cannot calculate both the container (details panel) width and the descendant
-  // (this) width dynamically. This leads to the container width being calculated
-  // without this percentage being taken into consideration leads to horizontal
-  // clipping/scrolling--the same way as if we explicitly fixed either the container
-  // width, or the descendant width.
-  // The correct solution for tabulated UIs with dynamic container widths is to use
-  // CSS grid. For now I fixed this issue by just giving a great enough width
-  // to the details panel so most things don't break.
   --right-width: 40%;
   position: relative;
   ${pointerEventsAutoInNormalMode};
-
-  /* background-color: ${getDetailRowHighlightBackground}; */
 `
 
 const Left = styled.div`
@@ -115,26 +102,20 @@ export function SingleRowPropEditor<T>({
 
   const isHighlighted = useVal(isPropHighlightedD)
 
-  const [propNameContainerRef, propNameContainer] =
-    useRefAndState<HTMLDivElement | null>(null)
-
-  const [contextMenu] = useContextMenu(propNameContainer, {
-    displayName: `${title}`,
-    menuItems: editingTools.contextMenuItems,
-  })
-
   const {targetRef} = useChordial(() => {
-    return {title, items: []}
+    return {
+      title,
+      items: editingTools.contextMenuItems,
+    }
   })
 
   return (
     <Container isHighlighted={isHighlighted}>
-      {contextMenu}
       <Left>
         <ControlsContainer>{editingTools.controlIndicators}</ControlsContainer>
         <PropNameContainer
           isHighlighted={isHighlighted}
-          ref={mergeRefs([propNameContainerRef, targetRef])}
+          ref={targetRef as $FixMe}
         >
           {label}
         </PropNameContainer>

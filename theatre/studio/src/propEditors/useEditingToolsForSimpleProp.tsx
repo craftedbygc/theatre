@@ -5,7 +5,7 @@ import {getPointerParts, prism, val} from '@unseenco/theatre-dataverse'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import type Scrub from '@unseenco/theatre-studio/Scrub'
-import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import type {ContextMenuItem} from '@unseenco/theatre-studio/uiComponents/chordial/chordialInternals'
 import getDeep from '@unseenco/theatre-shared/utils/getDeep'
 import {usePrismInstance} from '@unseenco/theatre-react'
 import type {
@@ -37,7 +37,7 @@ import {
 interface EditingToolsCommon<T> {
   value: T
   beingScrubbed: boolean
-  contextMenuItems: Array<IContextMenuItem>
+  contextMenuItems: Array<ContextMenuItem>
   /** e.g. `< • >` or `<   >` for {@link EditingToolsSequenced} */
   controlIndicators: React.ReactElement
 
@@ -146,7 +146,7 @@ function createPrism<T extends SerializablePrimitive>(
         ),
       ) === true
 
-    const contextMenuItems: IContextMenuItem[] = []
+    const contextMenuItems: ContextMenuItem[] = []
 
     const common: EditingToolsCommon<T> = {
       ...editPropValue,
@@ -177,6 +177,7 @@ function createPrism<T extends SerializablePrimitive>(
           ) ?? activeVariant
 
         contextMenuItems.push({
+          type: 'normal',
           label: 'Make static',
           callback: () => {
             getStudio()!.transaction(({stateEditors}) => {
@@ -319,6 +320,7 @@ function createPrism<T extends SerializablePrimitive>(
 
     if (hasOwnStaticOverride) {
       contextMenuItems.push({
+        type: 'normal',
         label: 'Reset to default',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {
@@ -336,6 +338,7 @@ function createPrism<T extends SerializablePrimitive>(
 
     if (isSequencable) {
       contextMenuItems.push({
+        type: 'normal',
         label: 'Sequence',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {

@@ -5,10 +5,9 @@ import type {
   $FixMe,
   $IntentionalAny,
 } from '@unseenco/theatre-shared/utils/types'
-import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
 import {mergeRefs} from 'react-merge-refs'
-import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
 import ToolbarSwitchSelectContainer from './ToolbarSwitchSelectContainer'
+import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 
 export const Container = styled.button`
   ${pointerEventsAutoInNormalMode};
@@ -42,7 +41,6 @@ export const Container = styled.button`
     background: rgba(82, 88, 96, 0.8);
   }
 
-  /* Matches PinButton pinned state / OutlinePanel/BaseItem .selected */
   &.selected {
     color: rgba(255, 255, 255, 0.8);
     background: rgba(30, 88, 102, 0.7);
@@ -57,8 +55,6 @@ export const Container = styled.button`
     }
   }
 
-  // Don't blur if in a button group, because it already blurs. We need to blur
-  // on the group-level, otherwise we get seams.
   ${ToolbarSwitchSelectContainer} > & {
     backdrop-filter: none;
     filter: none;
@@ -82,15 +78,16 @@ export const Container = styled.button`
 
 const ToolbarIconButton: typeof Container = React.forwardRef(
   ({title, ...props}: $FixMe, ref: $FixMe) => {
-    const [tooltip, localRef] = useTooltip(
-      {enabled: typeof title === 'string'},
-      () => <MinimalTooltip>{title}</MinimalTooltip>,
-    )
+    const c = useChordial(() => {
+      return {
+        title,
+        items: [],
+      }
+    })
 
     return (
       <>
-        {tooltip}
-        <Container ref={mergeRefs([localRef, ref])} {...props} />{' '}
+        <Container ref={mergeRefs([c.targetRef, ref])} {...props} />{' '}
       </>
     )
   },
