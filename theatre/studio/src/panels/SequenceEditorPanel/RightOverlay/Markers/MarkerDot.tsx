@@ -174,7 +174,7 @@ const MarkerDotVisible: React.VFC<IMarkerDotVisibleProps> = ({
     close: closePopover,
   } = usePopover({debugName: 'MarkerPopover'}, () => {
     return (
-      <BasicPopover>
+      <BasicPopover showPopoverEdgeTriangle={true}>
         <MarkerEditorPopover
           marker={marker}
           layoutP={layoutP}
