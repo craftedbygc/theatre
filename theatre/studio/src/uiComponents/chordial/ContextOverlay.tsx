@@ -1,7 +1,7 @@
 import React from 'react'
 import {usePrism, useVal} from '@unseenco/theatre-react'
 import type {ChodrialElement, ChordialOpts} from './chordialInternals'
-import {contextActor, contextStatus} from './chordialInternals'
+import {contextActor, contextStatus} from './contextActor'
 import ContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/ContextMenu/ContextMenu'
 import {val} from '@unseenco/theatre-dataverse'
 
