@@ -1,3 +1,3 @@
-import type {Atom} from '@unseenco/theatre-dataverse'
+import type {Atom, Pointer} from '@unseenco/theatre-dataverse'
 
-export const collapsedMap = new Map<string, Atom<boolean>>()
+export const collapsedMap = new WeakMap<Pointer<{}>, Atom<boolean>>()
