@@ -58,7 +58,32 @@ export function getCoreTicker(): Ticker {
 }
 
 /**
- * Sets the rafDriver that is used by the core internally.
+ * Sets the `rafDriver` that Theatre's core uses internally to tick forward.
+ *
+ * Call this **before** any other `@theatre/core` API that would trigger tick creation
+ * (e.g. `onChange`, `sequence.play`, `val`). Calling it after the core ticker has
+ * already been initialised will throw.
+ *
+ * This is the recommended way to drive Theatre from your own
+ * `requestAnimationFrame` loop — for example when integrating with
+ * `@react-three/fiber`, `gsap`, `lenis`, or an XR session:
+ *
+ * ```ts
+ * import { createRafDriver, setCoreRafDriver } from '@theatre/core'
+ *
+ * const driver = createRafDriver({ name: 'MyRafDriver' })
+ * setCoreRafDriver(driver)
+ *
+ * function myLoop(time: number) {
+ *   driver.tick(time)
+ *   requestAnimationFrame(myLoop)
+ * }
+ * requestAnimationFrame(myLoop)
+ * ```
+ *
+ * Because you hold the `driver` reference you created, you do not need a separate
+ * `getCoreRafDriver()` call — just keep the reference around and call
+ * `driver.tick(time)` from your loop.
  */
 export function setCoreRafDriver(driver: IRafDriver) {
   if (coreRafDriver) {

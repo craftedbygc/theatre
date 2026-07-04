@@ -21,6 +21,7 @@ export {notify} from '@theatre/shared/notify'
 export {types}
 export {createRafDriver} from './rafDrivers'
 export type {IRafDriver} from './rafDrivers'
+export {setCoreRafDriver} from './coreTicker'
 
 /**
  * Returns a project of the given id, or creates one if it doesn't already exist.
