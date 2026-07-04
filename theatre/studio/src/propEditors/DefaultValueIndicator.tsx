@@ -17,7 +17,7 @@ const theme = {
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
   withStaticOverride: {
-    color: transparentize(0.85, `#C4C4C4`),
+    color: transparentize(0.2, `#339cb5`),
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
 }

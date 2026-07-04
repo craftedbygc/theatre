@@ -29,7 +29,7 @@ const Container = deriver(styled.div<{
   // The correct solution for tabulated UIs with dynamic container widths is to use
   // CSS grid. For now I fixed this issue by just giving a great enough width
   // to the details panel so most things don't break.
-  --right-width: 60%;
+  --right-width: 40%;
   position: relative;
   ${pointerEventsAutoInNormalMode};
 

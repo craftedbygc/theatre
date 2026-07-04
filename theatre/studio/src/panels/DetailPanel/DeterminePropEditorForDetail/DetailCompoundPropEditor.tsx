@@ -31,10 +31,10 @@ import {HiOutlineChevronRight} from 'react-icons/all'
 import memoizeFn from '@theatre/shared/utils/memoizeFn'
 
 const Container = styled.div`
-  --step: 15px;
-  --left-pad: 15px;
+  --step: 10px;
+  --left-pad: 5px;
   ${pointerEventsAutoInNormalMode};
-  --right-width: 60%;
+  --right-width: 40%;
 `
 
 const Header = styled.div<{isHighlighted: PropHighlighted}>`
