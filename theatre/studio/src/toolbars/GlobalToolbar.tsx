@@ -17,6 +17,7 @@ import {
 } from '@theatre/studio/uiComponents/icons'
 import DoubleChevronLeft from '@theatre/studio/uiComponents/icons/DoubleChevronLeft'
 import DoubleChevronRight from '@theatre/studio/uiComponents/icons/DoubleChevronRight'
+import TimelineIcon from '@theatre/studio/uiComponents/icons/TimelineIcon'
 import ToolbarIconButton from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
 import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
 import MoreMenu from './MoreMenu/MoreMenu'
@@ -106,6 +107,13 @@ const GlobalToolbar: React.FC = () => {
 
   const outlinePinned = useVal(getStudio().atomP.ahistoric.pinOutline) ?? true
   const detailsPinned = useVal(getStudio().atomP.ahistoric.pinDetails) ?? true
+  const sequenceEditorPinned =
+    useVal(getStudio().atomP.ahistoric.pinSequenceEditor) ?? true
+
+  const [timelineTooltip, timelineTriggerRef] = useTooltip(
+    {enterDelay: 200},
+    () => <BasicTooltip>Toggle Timeline</BasicTooltip>,
+  )
   const hasUpdates =
     useVal(getStudio().atomP.ahistoric.updateChecker.result.hasUpdates) === true
 
@@ -181,6 +189,21 @@ const GlobalToolbar: React.FC = () => {
             {conflicts.length}
           </NumberOfConflictsIndicator>
         ) : null}
+        {timelineTooltip}
+        <PinButton
+          ref={timelineTriggerRef as $IntentionalAny}
+          onClick={() => {
+            getStudio().transaction(({stateEditors, drafts}) => {
+              stateEditors.studio.ahistoric.setPinSequenceEditor(
+                !(drafts.ahistoric.pinSequenceEditor ?? true),
+              )
+            })
+          }}
+          icon={<TimelineIcon />}
+          pinHintIcon={<TimelineIcon />}
+          unpinHintIcon={<TimelineIcon />}
+          pinned={sequenceEditorPinned}
+        />
         <ExtensionToolbar showLeftDivider toolbarId="global" />
       </SubContainer>
       <SubContainer>

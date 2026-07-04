@@ -24,6 +24,10 @@ export type StudioAhistoricState = {
    */
   pinDetails?: boolean
   pinNotifications?: boolean
+  /**
+   * undefined means the sequence editor panel is pinned
+   */
+  pinSequenceEditor?: boolean
   visibilityState: 'everythingIsHidden' | 'everythingIsVisible'
   clipboard?: {
     keyframesWithRelativePaths?: KeyframeWithPathToPropFromCommonRoot[]

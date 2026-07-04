@@ -8,6 +8,9 @@ import SequenceEditorPanel from '@theatre/studio/panels/SequenceEditorPanel/Sequ
 
 const PanelsRoot: React.VFC = () => {
   const panes = useVal(getStudio().paneManager.allPanesD)
+  const pinSequenceEditor = useVal(
+    getStudio().atomP.ahistoric.pinSequenceEditor,
+  )
   const paneEls = Object.entries(panes).map(([instanceId, paneInstance]) => {
     return (
       <ExtensionPaneWrapper
@@ -22,7 +25,7 @@ const PanelsRoot: React.VFC = () => {
       {paneEls}
       <OutlinePanel />
       <DetailPanel />
-      <SequenceEditorPanel />
+      {pinSequenceEditor !== false && <SequenceEditorPanel />}
     </>
   )
 }

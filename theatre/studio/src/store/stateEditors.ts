@@ -436,6 +436,11 @@ namespace stateEditors {
       ) {
         drafts().ahistoric.pinNotifications = pinNotifications
       }
+      export function setPinSequenceEditor(
+        pinSequenceEditor: StudioAhistoricState['pinSequenceEditor'],
+      ) {
+        drafts().ahistoric.pinSequenceEditor = pinSequenceEditor
+      }
       export function setVisibilityState(
         visibilityState: StudioAhistoricState['visibilityState'],
       ) {
