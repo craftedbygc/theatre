@@ -23,17 +23,52 @@ import {Atom, prism, val} from '@theatre/dataverse'
 import EmptyState from './EmptyState'
 import useLockSet from '@theatre/studio/uiComponents/useLockSet'
 import {usePresenceListenersOnRootElement} from '@theatre/studio/uiComponents/usePresence'
+import BasePanel, {usePanel} from '@theatre/studio/panels/BasePanel/BasePanel'
+import PanelResizeHandle from '@theatre/studio/panels/BasePanel/PanelResizeHandle'
+import type {UIPanelId} from '@theatre/shared/utils/ids'
+import type {PanelPosition} from '@theatre/studio/store/types'
 
 const headerHeight = `32px`
+
+const defaultDetailPanelWidth = 350
+const defaultDetailPanelGutter = 8
+const defaultDetailPanelTop = 50
+
+const defaultPosition: PanelPosition = {
+  edges: {
+    left: {
+      from: 'screenRight',
+      distance:
+        (defaultDetailPanelGutter + defaultDetailPanelWidth) /
+        (typeof window !== 'undefined' ? window.innerWidth : 1920),
+    },
+    right: {
+      from: 'screenRight',
+      distance:
+        defaultDetailPanelGutter /
+        (typeof window !== 'undefined' ? window.innerWidth : 1920),
+    },
+    top: {
+      from: 'screenTop',
+      distance:
+        defaultDetailPanelTop /
+        (typeof window !== 'undefined' ? window.innerHeight : 1080),
+    },
+    bottom: {
+      from: 'screenTop',
+      distance:
+        (defaultDetailPanelTop + 350) /
+        (typeof window !== 'undefined' ? window.innerHeight : 1080),
+    },
+  },
+}
+
+const minDims = {width: 280, height: 200}
 
 const Container = styled.div<{pin: boolean}>`
   ${pointerEventsAutoInNormalMode};
   background-color: rgba(40, 43, 47, 0.8);
-  position: fixed;
-  right: 8px;
-  top: 50px;
-  // Temporary, see comment about CSS grid in SingleRowPropEditor.
-  width: 350px;
+  position: absolute;
   height: fit-content;
   z-index: ${panelZIndexes.propsPanel};
 
@@ -90,7 +125,8 @@ export const contextMenuShownContext = createContext<
   ReturnType<typeof useLockSet>
 >([false, () => () => {}])
 
-const DetailPanel: React.FC<{}> = (props) => {
+const DetailPanelContent: React.FC<{}> = () => {
+  const {dims} = usePanel()
   const pin = useVal(getStudio().atomP.ahistoric.pinDetails) !== false
 
   const hotspotActive = useHotspot('right')
@@ -116,6 +152,11 @@ const DetailPanel: React.FC<{}> = (props) => {
 
   return usePrism(() => {
     const selection = getOutlineSelection()
+    const containerStyle = {
+      left: dims.left + 'px',
+      top: dims.top + 'px',
+      width: dims.width + 'px',
+    }
 
     const obj = selection.find(isSheetObject)
 
@@ -125,6 +166,7 @@ const DetailPanel: React.FC<{}> = (props) => {
           data-testid="DetailPanel-Object"
           pin={showDetailsPanel}
           ref={setContainerElt}
+          style={containerStyle}
           onMouseEnter={() => {
             isDetailPanelHoveredB.set(true)
           }}
@@ -132,6 +174,7 @@ const DetailPanel: React.FC<{}> = (props) => {
             isDetailPanelHoveredB.set(false)
           }}
         >
+          <PanelResizeHandle which="Left" />
           <Header>
             <Title
               title={`${obj.sheet.address.sheetId}: ${obj.sheet.address.sheetInstanceId} > ${obj.address.objectKey}`}
@@ -156,7 +199,8 @@ const DetailPanel: React.FC<{}> = (props) => {
     const project = selection.find(isProject)
     if (project) {
       return (
-        <Container pin={showDetailsPanel}>
+        <Container pin={showDetailsPanel} style={containerStyle}>
+          <PanelResizeHandle which="Left" />
           <Header>
             <Title title={`${project.address.projectId}`}>
               <TitleBar_Piece>{project.address.projectId} </TitleBar_Piece>
@@ -172,6 +216,7 @@ const DetailPanel: React.FC<{}> = (props) => {
     return (
       <Container
         pin={showDetailsPanel}
+        style={containerStyle}
         onMouseEnter={() => {
           isDetailPanelHoveredB.set(true)
         }}
@@ -179,10 +224,11 @@ const DetailPanel: React.FC<{}> = (props) => {
           isDetailPanelHoveredB.set(false)
         }}
       >
+        <PanelResizeHandle which="Left" />
         <EmptyState />
       </Container>
     )
-  }, [showDetailsPanel])
+  }, [showDetailsPanel, dims])
 }
 
 export default () => {
@@ -190,7 +236,13 @@ export default () => {
 
   return (
     <contextMenuShownContext.Provider value={lockSet}>
-      <DetailPanel />
+      <BasePanel
+        panelId={'detailPanel' as UIPanelId}
+        defaultPosition={defaultPosition}
+        minDims={minDims}
+      >
+        <DetailPanelContent />
+      </BasePanel>
     </contextMenuShownContext.Provider>
   )
 }
