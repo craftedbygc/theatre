@@ -244,12 +244,18 @@ export class Studio {
     return new Scrub(this)
   }
 
-  tempTransaction(fn: (api: ITransactionPrivateApi) => void): CommitOrDiscard {
-    return this._store.tempTransaction(fn)
+  tempTransaction(
+    fn: (api: ITransactionPrivateApi) => void,
+    opts?: {undoable?: boolean},
+  ): CommitOrDiscard {
+    return this._store.tempTransaction(fn, opts)
   }
 
-  transaction(fn: (api: ITransactionPrivateApi) => void): void {
-    return this.tempTransaction(fn).commit()
+  transaction(
+    fn: (api: ITransactionPrivateApi) => void,
+    opts?: {undoable?: boolean},
+  ): void {
+    return this.tempTransaction(fn, opts).commit()
   }
 
   __dev_startHistoryFromScratch(newHistoricPart: StudioHistoricState) {

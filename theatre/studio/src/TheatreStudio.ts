@@ -256,6 +256,10 @@ export interface IStudio {
    *
    * Will roll back if an error is thrown.
    *
+   * Pass `{undoable: false}` to persist the changes without recording an undo
+   * level — useful for frequently-updated values such as a camera position that
+   * should survive a page refresh but should not pollute the undo/redo stack.
+   *
    * @example
    * Usage:
    * ```ts
@@ -263,9 +267,17 @@ export interface IStudio {
    *   set(obj.props.x, 10) // set the value of obj.props.x to 10
    *   unset(obj.props.y) // unset the override at obj.props.y
    * })
+   *
+   * // Non-undoable: persisted but not recorded in undo history
+   * studio.transaction(({set}) => {
+   *   set(obj.props.cameraPosition, newPos)
+   * }, {undoable: false})
    * ```
    */
-  transaction(fn: (api: ITransactionAPI) => void): void
+  transaction(
+    fn: (api: ITransactionAPI) => void,
+    opts?: {undoable?: boolean},
+  ): void
 
   /**
    * Creates a scrub, which is just like a transaction, except you
@@ -526,7 +538,10 @@ export default class TheatreStudio implements IStudio {
     getStudio().extend(extension, opts)
   }
 
-  transaction(fn: (api: ITransactionAPI) => void): void {
+  transaction(
+    fn: (api: ITransactionAPI) => void,
+    opts?: {undoable?: boolean},
+  ): void {
     return getStudio().transaction(({set, unset, stateEditors}) => {
       const __experimental_forgetObject = (object: TheatreSheetObject) => {
         if (!isSheetObjectPublicAPI(object)) {
@@ -558,7 +573,7 @@ export default class TheatreStudio implements IStudio {
         __experimental_forgetObject,
         __experimental_forgetSheet,
       })
-    })
+    }, opts)
   }
 
   private _getSelectionPrism(): Prism<(ISheetObject | ISheet)[]> {

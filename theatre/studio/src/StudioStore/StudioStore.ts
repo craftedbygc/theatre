@@ -112,7 +112,10 @@ export default class StudioStore {
     )
   }
 
-  tempTransaction(fn: (api: ITransactionPrivateApi) => void): CommitOrDiscard {
+  tempTransaction(
+    fn: (api: ITransactionPrivateApi) => void,
+    opts?: {undoable?: boolean},
+  ): CommitOrDiscard {
     const group = tempActionGroup()
     let errorDuringTransaction: Error | undefined = undefined
 
@@ -140,6 +143,7 @@ export default class StudioStore {
           ensureRunning,
           stateEditors,
           drafts,
+          opts,
         )
 
         try {

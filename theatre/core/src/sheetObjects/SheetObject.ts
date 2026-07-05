@@ -148,7 +148,27 @@ export default class SheetObject implements PointerToPrismProvider {
         )
 
         /**
-         * The third layer are the static values. Since these are (currently) commnon to all instances
+         * The third layer are the ahistoric static values — set via non-undoable
+         * transactions. These are persisted but never recorded in undo history.
+         * They are overridden by the historic static values (fourth layer), so
+         * any value explicitly set through the normal transaction API will always win.
+         */
+        const ahistoricStatics = val(this.template.getAhistoricStaticValues())
+
+        const withAhistoricStaticsCache = prism.memo(
+          'withAhistoricStatics',
+          () => new WeakMap(),
+          [],
+        )
+
+        const withAhistoricStatics = deepMergeWithCache(
+          withInitial,
+          ahistoricStatics,
+          withAhistoricStaticsCache,
+        )
+
+        /**
+         * The fourth layer are the (historic) static values. Since these are (currently) commnon to all instances
          * of the same SheetObject, we can read it from the template.
          */
         const statics = val(this.template.getStaticValues())
@@ -162,7 +182,7 @@ export default class SheetObject implements PointerToPrismProvider {
 
         // deep-merge the static values with the previous layer
         const withStatics = deepMergeWithCache(
-          withInitial,
+          withAhistoricStatics,
           statics,
           withStaticsCache,
         )

@@ -1,5 +1,5 @@
-import type {SheetId} from '@theatre/shared/utils/ids'
-import type {StrictRecord} from '@theatre/shared/utils/types'
+import type {ObjectAddressKey, SheetId} from '@theatre/shared/utils/ids'
+import type {SerializableMap, StrictRecord} from '@theatre/shared/utils/types'
 import type {SheetState_Historic} from './types/SheetState_Historic'
 
 type ProjectLoadingState =
@@ -11,11 +11,21 @@ type ProjectLoadingState =
     }
 
 /**
+ * Ahistoric sheet state — persisted but not undo-able.
+ */
+export interface SheetAhistoricState {
+  staticOverrides: {
+    byObject: StrictRecord<ObjectAddressKey, SerializableMap>
+  }
+}
+
+/**
  * Ahistoric state is persisted, but its changes
  * are not undoable.
  */
 export interface ProjectAhistoricState {
   ahistoricStuff: string
+  sheetsById?: StrictRecord<SheetId, SheetAhistoricState>
 }
 
 /**

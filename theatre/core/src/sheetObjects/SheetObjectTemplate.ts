@@ -33,6 +33,7 @@ import {
 } from '@theatre/shared/propTypes/utils'
 import getOrderingOfPropTypeConfig from './getOrderingOfPropTypeConfig'
 import type {SheetState_Historic} from '@theatre/core/projects/store/types/SheetState_Historic'
+import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 import {cloneDeep, unset} from 'lodash-es'
 
 function isObjectEmpty(obj: unknown): boolean {
@@ -77,6 +78,12 @@ export default class SheetObjectTemplate {
   readonly pointerToStaticOverrides: Pointer<
     SerializableMap<SerializablePrimitive> | undefined
   >
+  readonly pointerToAhistoricSheetState: Pointer<
+    SheetAhistoricState | undefined
+  >
+  readonly pointerToAhistoricStaticOverrides: Pointer<
+    SerializableMap<SerializablePrimitive> | undefined
+  >
 
   get staticConfig() {
     return this._config.get()
@@ -113,6 +120,16 @@ export default class SheetObjectTemplate {
 
     this.pointerToStaticOverrides =
       this.pointerToSheetState.staticOverrides.byObject[this.address.objectKey]
+
+    this.pointerToAhistoricSheetState =
+      this.sheetTemplate.project.pointers.ahistoric.sheetsById[
+        this.address.sheetId
+      ]
+
+    this.pointerToAhistoricStaticOverrides =
+      this.pointerToAhistoricSheetState.staticOverrides.byObject[
+        this.address.objectKey
+      ]
   }
 
   createInstance(
@@ -155,6 +172,21 @@ export default class SheetObjectTemplate {
       prism(() => {
         const json = val(this.pointerToStaticOverrides) ?? {}
 
+        const config = val(this.configPointer)
+        const deserialized = config.deserializeAndSanitize(json) || {}
+        return deserialized
+      }),
+    )
+  }
+
+  /**
+   * Returns values set via an ahistoric (non-undoable) transaction. These are
+   * persisted to storage but never recorded in the undo/redo history.
+   */
+  getAhistoricStaticValues(): Prism<SerializableMap> {
+    return this._cache.get('getAhistoricStaticValues', () =>
+      prism(() => {
+        const json = val(this.pointerToAhistoricStaticOverrides) ?? {}
         const config = val(this.configPointer)
         const deserialized = config.deserializeAndSanitize(json) || {}
         return deserialized

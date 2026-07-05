@@ -76,7 +76,9 @@ export default function createTransactionPrivateApi(
   ensureRunning: () => void,
   stateEditors: ITransactionPrivateApi['stateEditors'],
   drafts: ITransactionPrivateApi['drafts'],
+  opts?: {undoable?: boolean},
 ): ITransactionPrivateApi {
+  const isUndoable = opts?.undoable !== false
   return {
     set: (pointer, value) => {
       ensureRunning()
@@ -85,10 +87,6 @@ export default function createTransactionPrivateApi(
 
       const {root, path} = getPointerParts(pointer as Pointer<$FixMe>)
       if (isSheetObject(root)) {
-        const sequenceTracksTree = root.template
-          .getMapOfValidSequenceTracks_forStudio()
-          .getValue()
-
         const propConfig = getPropConfigByPath(root.template.staticConfig, path)
 
         if (!propConfig) {
@@ -130,25 +128,35 @@ export default function createTransactionPrivateApi(
 
           const propAddress = {...root.address, pathToProp: path}
 
-          const trackId = get(sequenceTracksTree, path) as $FixMe as
-            | SequenceTrackId
-            | undefined
+          if (isUndoable) {
+            const sequenceTracksTree = root.template
+              .getMapOfValidSequenceTracks_forStudio()
+              .getValue()
 
-          if (typeof trackId === 'string') {
-            const seq = root.sheet.getSequence()
-            seq.position = seq.closestGridPosition(seq.position)
-            stateEditors.coreByProject.historic.sheetsById.sequence.setKeyframeAtPosition(
-              {
-                ...propAddress,
-                trackId,
-                position: seq.position,
-                value: value as $FixMe,
-                snappingFunction: seq.closestGridPosition,
-                type: 'bezier',
-              },
-            )
+            const trackId = get(sequenceTracksTree, path) as $FixMe as
+              | SequenceTrackId
+              | undefined
+
+            if (typeof trackId === 'string') {
+              const seq = root.sheet.getSequence()
+              seq.position = seq.closestGridPosition(seq.position)
+              stateEditors.coreByProject.historic.sheetsById.sequence.setKeyframeAtPosition(
+                {
+                  ...propAddress,
+                  trackId,
+                  position: seq.position,
+                  value: value as $FixMe,
+                  snappingFunction: seq.closestGridPosition,
+                  type: 'bezier',
+                },
+              )
+            } else {
+              stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
+                {...propAddress, value: value as $FixMe},
+              )
+            }
           } else {
-            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
+            stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
               {...propAddress, value: value as $FixMe},
             )
           }
@@ -196,10 +204,6 @@ export default function createTransactionPrivateApi(
       ensureRunning()
       const {root, path} = getPointerParts(pointer as Pointer<$FixMe>)
       if (isSheetObject(root)) {
-        const sequenceTracksTree = root.template
-          .getMapOfValidSequenceTracks_forStudio()
-          .getValue()
-
         const defaultValue = getDeep(
           root.template.getDefaultValues().getValue(),
           path,
@@ -213,20 +217,30 @@ export default function createTransactionPrivateApi(
         const unsetStaticOrKeyframeProp = <T>(value: T, path: PathToProp) => {
           const propAddress = {...root.address, pathToProp: path}
 
-          const trackId = get(sequenceTracksTree, path) as $FixMe as
-            | SequenceTrackId
-            | undefined
+          if (isUndoable) {
+            const sequenceTracksTree = root.template
+              .getMapOfValidSequenceTracks_forStudio()
+              .getValue()
 
-          if (typeof trackId === 'string') {
-            stateEditors.coreByProject.historic.sheetsById.sequence.unsetKeyframeAtPosition(
-              {
-                ...propAddress,
-                trackId,
-                position: root.sheet.getSequence().positionSnappedToGrid,
-              },
-            )
-          } else if (propConfig !== undefined) {
-            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
+            const trackId = get(sequenceTracksTree, path) as $FixMe as
+              | SequenceTrackId
+              | undefined
+
+            if (typeof trackId === 'string') {
+              stateEditors.coreByProject.historic.sheetsById.sequence.unsetKeyframeAtPosition(
+                {
+                  ...propAddress,
+                  trackId,
+                  position: root.sheet.getSequence().positionSnappedToGrid,
+                },
+              )
+            } else if (propConfig !== undefined) {
+              stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
+                propAddress,
+              )
+            }
+          } else {
+            stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
               propAddress,
             )
           }

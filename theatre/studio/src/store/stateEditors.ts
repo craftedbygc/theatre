@@ -5,6 +5,7 @@ import type {
   KeyframeType,
   SheetState_Historic,
 } from '@theatre/core/projects/store/types/SheetState_Historic'
+import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 import type {Drafts} from '@theatre/studio/StudioStore/StudioStore'
 import type {
   ProjectAddress,
@@ -1077,6 +1078,53 @@ namespace stateEditors {
               if (!existingStaticOverrides) return
 
               removePathFromObject(existingStaticOverrides, p.pathToProp)
+            }
+          }
+        }
+      }
+    }
+
+    export namespace ahistoric {
+      export namespace sheetsById {
+        export function _ensure(
+          p: WithoutSheetInstance<SheetAddress>,
+        ): SheetAhistoricState {
+          const projectAhistoric = drafts().ahistoric.coreByProject[p.projectId]
+          projectAhistoric.sheetsById ??= {}
+          const sheetsById = projectAhistoric.sheetsById
+          if (!sheetsById[p.sheetId]) {
+            sheetsById[p.sheetId] = {staticOverrides: {byObject: {}}}
+          }
+          return sheetsById[p.sheetId]!
+        }
+
+        export namespace staticOverrides {
+          export namespace byObject {
+            function _ensure(p: WithoutSheetInstance<SheetObjectAddress>) {
+              const byObject =
+                stateEditors.coreByProject.ahistoric.sheetsById._ensure(p)
+                  .staticOverrides.byObject
+              byObject[p.objectKey] ??= {}
+              return byObject[p.objectKey]!
+            }
+
+            export function setValueOfPrimitiveProp(
+              p: WithoutSheetInstance<PropAddress> & {
+                value: SerializablePrimitive
+              },
+            ) {
+              const existingOverrides = _ensure(p)
+              set(existingOverrides, p.pathToProp, p.value)
+            }
+
+            export function unsetValueOfPrimitiveProp(
+              p: WithoutSheetInstance<PropAddress>,
+            ) {
+              const existingOverrides =
+                stateEditors.coreByProject.ahistoric.sheetsById._ensure(p)
+                  .staticOverrides.byObject[p.objectKey]
+              if (!existingOverrides) return
+              removePathFromObject(existingOverrides, p.pathToProp)
             }
           }
         }
