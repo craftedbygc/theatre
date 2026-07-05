@@ -38,7 +38,6 @@ Published packages → source location:
 - `@theatre/react` → `packages/react/`
 - `@theatre/r3f` → `packages/r3f/` — react-three-fiber binding
 - `@theatre/browser-bundles` → `packages/browser-bundles/`
-- `theatric` → `packages/theatric/`
 
 Non-published: `packages/playground` (dev harness + e2e), `packages/benchmarks`, `packages/saaz`, `packages/dataverse-experiments`, `packages/utils`, `packages/app`, `theatre/shared`, `theatre/devEnv`, `compat-tests`.
 

@@ -13,8 +13,7 @@ import {defer} from '../utils/testUtils'
  * @param {string} pkg
  * @returns boolean
  */
-const isTheatreDependency = (pkg) =>
-  pkg.startsWith('@theatre/') || pkg === 'theatric'
+const isTheatreDependency = (pkg) => pkg.startsWith('@theatre/')
 
 const verbose = !!argv['verbose']
 
@@ -269,7 +268,6 @@ const packagesToPublish = [
   '@theatre/react',
   '@theatre/browser-bundles',
   '@theatre/r3f',
-  'theatric',
 ]
 
 /**

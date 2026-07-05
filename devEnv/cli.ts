@@ -39,7 +39,6 @@ prog
       '@theatre/react',
       '@theatre/browser-bundles',
       '@theatre/r3f',
-      'theatric',
     ]
 
     await Promise.all([
@@ -54,7 +53,6 @@ prog.command('build', 'Builds all the main packages').action(async () => {
     '@theatre/react',
     '@theatre/browser-bundles',
     '@theatre/r3f',
-    'theatric',
   ]
   async function build() {
     await Promise.all([
@@ -84,7 +82,6 @@ prog
       '@theatre/react',
       '@theatre/browser-bundles',
       '@theatre/r3f',
-      'theatric',
     ]
 
     const packagesToPublish = [
@@ -94,7 +91,6 @@ prog
       '@theatre/react',
       '@theatre/browser-bundles',
       '@theatre/r3f',
-      'theatric',
     ]
 
     /**
@@ -109,7 +105,6 @@ prog
       'packages/react',
       'packages/browser-bundles',
       'packages/r3f',
-      'packages/theatric',
     ]
 
     // our packages will check for this env variable to make sure their
@@ -290,7 +285,6 @@ prog
       '@theatre/react',
       '@theatre/browser-bundles',
       '@theatre/r3f',
-      'theatric',
     ]
 
     /**

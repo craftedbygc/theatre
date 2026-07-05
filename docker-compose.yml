@@ -32,7 +32,7 @@ services:
       - /app/packages/playground/node_modules
       - /app/packages/r3f/node_modules
       - /app/packages/react/node_modules
-      - /app/packages/theatric/node_modules
+
       - /app/theatre/core/node_modules
       - /app/theatre/node_modules
       - /app/theatre/shared/node_modules
