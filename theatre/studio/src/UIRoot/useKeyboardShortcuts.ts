@@ -18,6 +18,15 @@ export function __experimental_enablePlayPauseKeyboardShortcut() {
   playPauseKeyboardShortcutIsEnabled = true
 }
 
+let visibilityToggleKeyboardShortcutIsEnabled = true
+export function disableVisibilityToggleKeyboardShortcut() {
+  visibilityToggleKeyboardShortcutIsEnabled = false
+}
+
+export function enableVisibilityToggleKeyboardShortcut() {
+  visibilityToggleKeyboardShortcutIsEnabled = true
+}
+
 export default function useKeyboardShortcuts() {
   const studio = getStudio()
   useEffect(() => {
@@ -140,6 +149,7 @@ export default function useKeyboardShortcuts() {
         e.altKey &&
         (e.key === '\\' || e.code === 'Backslash' || e.code === 'IntlBackslash')
       ) {
+        if (!visibilityToggleKeyboardShortcutIsEnabled) return
         studio.transaction(({stateEditors, drafts}) => {
           stateEditors.studio.ahistoric.setVisibilityState(
             drafts.ahistoric.visibilityState === 'everythingIsHidden'
