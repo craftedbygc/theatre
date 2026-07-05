@@ -153,8 +153,8 @@ const DetailPanelContent: React.FC<{}> = () => {
   return usePrism(() => {
     const selection = getOutlineSelection()
     const containerStyle = {
-      left: dims.left + 'px',
-      top: dims.top + 'px',
+      right: '12px',
+      top: '52px',
       width: dims.width + 'px',
     }
 
