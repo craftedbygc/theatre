@@ -11,6 +11,7 @@ type BroadcastDataEvent =
   | 'setSheetObject'
   | 'updateSheetObject'
   | 'updateTimeline'
+  | 'disconnect'
 
 interface BroadcastData {
   event: BroadcastDataEvent
@@ -46,6 +47,14 @@ export default class RemoteSync {
       this.channel.onmessage = (event: MessageEvent<BroadcastData>) => {
         this._handleIncoming(event.data)
       }
+    } else {
+      // Let every other window know to drop this window's overrides once
+      // it goes away, since otherwise they'd be stuck with the last values
+      // it broadcast (see `_handleIncoming`'s `'disconnect'` case).
+      const channel = this.channel
+      window.addEventListener('pagehide', () => {
+        channel.postMessage({event: 'disconnect', data: {}})
+      })
     }
   }
 
@@ -148,6 +157,12 @@ export default class RemoteSync {
         if (sheet) {
           this.activeSheet = sheet
           sheet.publicApi.sequence.position = msg.data.position
+        }
+        break
+      }
+      case 'disconnect': {
+        for (const obj of this.objects.values()) {
+          obj.setRemoteOverride({})
         }
         break
       }
