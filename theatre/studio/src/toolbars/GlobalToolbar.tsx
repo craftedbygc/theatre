@@ -18,6 +18,7 @@ import {
 import DoubleChevronLeft from '@theatre/studio/uiComponents/icons/DoubleChevronLeft'
 import DoubleChevronRight from '@theatre/studio/uiComponents/icons/DoubleChevronRight'
 import TimelineIcon from '@theatre/studio/uiComponents/icons/TimelineIcon'
+import RemoteEditorIcon from '@theatre/studio/uiComponents/icons/RemoteEditorIcon'
 import ToolbarIconButton from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
 import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
 import MoreMenu from './MoreMenu/MoreMenu'
@@ -76,6 +77,16 @@ const GroupDivider = styled.div`
 `
 
 let showedVisualTestingWarning = false
+
+const openRemoteEditorWindow = () => {
+  const url = new URL(window.location.href)
+  url.hash = 'editor'
+  window.open(
+    url.toString(),
+    'theatre-remote-editor',
+    'popup=1,width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes,noopener,noreferrer',
+  )
+}
 
 const GlobalToolbar: React.FC = () => {
   const conflicts = usePrism(() => {
@@ -204,6 +215,12 @@ const GlobalToolbar: React.FC = () => {
           unpinHintIcon={<TimelineIcon />}
           pinned={sequenceEditorPinned}
         />
+        <ToolbarIconButton
+          onClick={openRemoteEditorWindow}
+          title="Open remote editor window"
+        >
+          <RemoteEditorIcon />
+        </ToolbarIconButton>
         <ExtensionToolbar showLeftDivider toolbarId="global" />
       </SubContainer>
       <SubContainer>

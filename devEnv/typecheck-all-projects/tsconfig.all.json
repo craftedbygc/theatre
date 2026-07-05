@@ -12,6 +12,7 @@
     {"path": "../../packages/benchmarks"},
     {"path": "../../packages/react"},
     {"path": "../../packages/r3f"},
+    {"path": "../../packages/remote"},
     {"path": "../../examples/basic-dom"},
     {"path": "../../compat-tests"},
     {"path": "../../devEnv"}

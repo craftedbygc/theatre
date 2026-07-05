@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react'
 import type {CSSProperties} from 'react'
 import {types} from '@theatre/core'
 import {Box3D} from './Box3D'
-import {remote} from './Remote'
+import {remote} from '@theatre/remote'
 
 // Scene
 
