@@ -242,12 +242,14 @@ const GlobalToolbar: React.FC = () => {
           unpinHintIcon={<TimelineIcon />}
           pinned={sequenceEditorPinned}
         />
-        <ToolbarIconButton
-          onClick={openRemoteEditorWindow}
-          title="Open remote editor window"
-        >
-          <RemoteEditorIcon />
-        </ToolbarIconButton>
+        {window.location.hash !== '#editor' && (
+          <ToolbarIconButton
+            onClick={openRemoteEditorWindow}
+            title="Open remote editor window"
+          >
+            <RemoteEditorIcon />
+          </ToolbarIconButton>
+        )}
         <ExtensionToolbar showLeftDivider toolbarId="global" />
       </SubContainer>
       <SubContainer>
