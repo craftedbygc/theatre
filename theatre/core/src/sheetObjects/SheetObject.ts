@@ -12,6 +12,7 @@ import type {
   DeepPartialOfSerializableValue,
   SerializableMap,
   SerializableValue,
+  VoidFn,
 } from '@theatre/shared/utils/types'
 import {valToAtom} from '@theatre/shared/utils/valToAtom'
 import type {PointerToPrismProvider, Prism, Pointer} from '@theatre/dataverse'
@@ -22,6 +23,7 @@ import TheatreSheetObject from './TheatreSheetObject'
 import type {Interpolator, PropTypeConfig} from '@theatre/core/propTypes'
 import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
 import type {ILogger, IUtilContext} from '@theatre/shared/logger'
+import {onChange} from '@theatre/core/coreExports'
 
 /**
  * Internally, the sheet's actual configured value is not a specific type, since we
@@ -46,6 +48,13 @@ export default class SheetObject implements PointerToPrismProvider {
   readonly address: SheetObjectAddress
   readonly publicApi: TheatreSheetObject
   private readonly _initialValue = new Atom<SheetObjectPropsValue>({})
+  /**
+   * Highest-priority override layer, written to by `RemoteSync` when a value
+   * update arrives from a remote editor window (see `internal/RemoteSync.ts`).
+   * Empty (`{}`) unless a remote editor is actually connected, so it's a
+   * no-op merge for every app that never uses the remote-sync feature.
+   */
+  private readonly _remoteOverride = new Atom<SheetObjectPropsValue>({})
   private readonly _cache = new SimpleCache()
   readonly _logger: ILogger
   private readonly _internalUtilCtx: IUtilContext
@@ -193,6 +202,23 @@ export default class SheetObject implements PointerToPrismProvider {
           final = withSeqs
         }
 
+        /**
+         * The highest-priority layer is a remote override, set by `RemoteSync`
+         * when this object's value is being driven by a remote editor window.
+         * It's `{}` (a no-op merge) unless that's actually happening.
+         */
+        const remoteOverride = val(this._remoteOverride.pointer)
+        const withRemoteOverrideCache = prism.memo(
+          'withRemoteOverrideCache',
+          () => new WeakMap(),
+          [],
+        )
+        final = deepMergeWithCache(
+          final,
+          remoteOverride,
+          withRemoteOverrideCache,
+        )
+
         // Finally, we wrap the final value in an atom, so we can return a pointer to it.
         const a = valToAtom<SheetObjectPropsValue>('finalAtom', final)
 
@@ -333,5 +359,25 @@ export default class SheetObject implements PointerToPrismProvider {
   setInitialValue(val: DeepPartialOfSerializableValue<SheetObjectPropsValue>) {
     this.validateValue(this.propsP, val)
     this._initialValue.set(val)
+  }
+
+  /**
+   * Internal: called by `RemoteSync` when a value update for this object
+   * arrives from a remote editor window. Not exposed on the public API.
+   */
+  setRemoteOverride(val: SheetObjectPropsValue) {
+    this._remoteOverride.set(val)
+  }
+
+  /**
+   * Internal: used by `RemoteSync` to subscribe to this object's fully
+   * merged value (identical to what `TheatreSheetObject.onValuesChange()`
+   * exposes publicly), so it can be broadcast to remote listener windows.
+   */
+  onFinalValueChange(fn: (values: SheetObjectPropsValue) => void): VoidFn {
+    return onChange(
+      prism(() => val(this.getValues().getValue())),
+      fn,
+    )
   }
 }

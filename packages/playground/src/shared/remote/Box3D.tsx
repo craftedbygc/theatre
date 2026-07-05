@@ -2,7 +2,6 @@ import React, {useEffect, useRef} from 'react'
 import type {CSSProperties} from 'react'
 import {types} from '@theatre/core'
 import type {ISheet} from '@theatre/core'
-import {remote} from '@theatre/remote'
 
 // Box element
 export const BoxSize = 100
@@ -37,44 +36,38 @@ export const Box3D: React.FC<{
   useEffect(() => {
     const element = elementRef.current!
     const id = `Box - ${name}`
-    const sheetObj = remote.sheetObject(
-      sheet.address.sheetId,
-      id,
-      {
-        background: types.rgba({r: 16 / 255, g: 16 / 255, b: 16 / 255, a: 1}),
-        opacity: types.number(1, {range: [0, 1]}),
-        position: {
-          x: x,
-          y: y,
-          z: 0,
-        },
-        rotation: {
-          x: types.number(0, {range: [-360, 360]}),
-          y: types.number(0, {range: [-360, 360]}),
-          z: types.number(0, {range: [-360, 360]}),
-        },
-        scale: {
-          x: 1,
-          y: 1,
-          z: 1,
-        },
+    const sheetObj = sheet.object(id, {
+      background: types.rgba({r: 16 / 255, g: 16 / 255, b: 16 / 255, a: 1}),
+      opacity: types.number(1, {range: [0, 1]}),
+      position: {
+        x: x,
+        y: y,
+        z: 0,
       },
-      (values: any) => {
-        const {background, opacity, position, rotation, scale} = values
-        element.style.backgroundColor = `rgba(${background.r * 255}, ${
-          background.g * 255
-        }, ${background.b * 255}, 1)`
-        element.style.opacity = opacity
-        const translate3D = `translate3d(${position.x}px, ${position.y}px, ${position.z}px)`
-        const rotate3D = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`
-        const scale3D = `scaleX(${scale.x}) scaleY(${scale.y}) scaleZ(${scale.z})`
-        const transform = `${scale3D} ${translate3D} ${rotate3D}`
-        element.style.transform = transform
+      rotation: {
+        x: types.number(0, {range: [-360, 360]}),
+        y: types.number(0, {range: [-360, 360]}),
+        z: types.number(0, {range: [-360, 360]}),
       },
-    )
-    return () => {
-      if (sheetObj !== undefined) remote.unsubscribe(sheetObj)
-    }
+      scale: {
+        x: 1,
+        y: 1,
+        z: 1,
+      },
+    })
+    const unsubscribe = sheetObj.onValuesChange((values) => {
+      const {background, opacity, position, rotation, scale} = values
+      element.style.backgroundColor = `rgba(${background.r * 255}, ${
+        background.g * 255
+      }, ${background.b * 255}, 1)`
+      element.style.opacity = String(opacity)
+      const translate3D = `translate3d(${position.x}px, ${position.y}px, ${position.z}px)`
+      const rotate3D = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`
+      const scale3D = `scaleX(${scale.x}) scaleY(${scale.y}) scaleZ(${scale.z})`
+      const transform = `${scale3D} ${translate3D} ${rotate3D}`
+      element.style.transform = transform
+    })
+    return unsubscribe
   }, [])
 
   return (

@@ -9,6 +9,7 @@ import {PointerProxy} from '@theatre/dataverse'
 import {Atom} from '@theatre/dataverse'
 import initialiseProjectState from './initialiseProjectState'
 import projectsSingleton from './projectsSingleton'
+import RemoteSync from '@theatre/core/internal/RemoteSync'
 import type {ProjectState} from './store/storeTypes'
 import type {Deferred} from '@theatre/shared/utils/defer'
 import {defer} from '@theatre/shared/utils/defer'
@@ -83,6 +84,8 @@ export default class Project {
   sheetTemplatesP = this._sheetTemplates.pointer
   private _studio: Studio | undefined
   assetStorage: IStudioAssetStorage
+  /** Not private: `Sheet.createObject()` registers newly-created objects with it. */
+  readonly _remoteSync: RemoteSync
 
   type: 'Theatre_Project' = 'Theatre_Project'
   readonly _logger: ILogger
@@ -95,6 +98,7 @@ export default class Project {
     this._logger = _coreLogger({logging: {dev: true}}).named('Project', id)
     this._logger.traceDev('creating project')
     this.address = {projectId: id}
+    this._remoteSync = new RemoteSync(this)
 
     const onDiskStateAtom = new Atom<ProjectState>({
       ahistoric: {
@@ -219,6 +223,7 @@ export default class Project {
           })
 
         this._studioReadyDeferred.resolve(undefined)
+        this._remoteSync.attachStudio(studio)
       })
       .catch((err) => {
         console.error(err)
@@ -252,6 +257,8 @@ export default class Project {
       this._sheetTemplates.reduce((s) => ({...s, [sheetId]: template}))
     }
 
-    return template.getInstance(instanceId)
+    const sheet = template.getInstance(instanceId)
+    this._remoteSync.registerSheet(sheet)
+    return sheet
   }
 }

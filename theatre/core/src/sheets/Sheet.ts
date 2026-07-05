@@ -70,6 +70,7 @@ export default class Sheet {
     const object = objTemplate.createInstance(this, nativeObject, config)
 
     this._objects.setByPointer((p) => p[objectKey], object)
+    this.project._remoteSync.registerObject(object)
 
     return object
   }

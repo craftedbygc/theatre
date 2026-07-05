@@ -7968,7 +7968,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@theatre/remote@workspace:*, @theatre/remote@workspace:packages/remote":
+"@theatre/remote@workspace:packages/remote":
   version: 0.0.0-use.local
   resolution: "@theatre/remote@workspace:packages/remote"
   dependencies:
@@ -25391,7 +25391,6 @@ fsevents@^1.2.7:
     "@theatre/dataverse": "workspace:*"
     "@theatre/r3f": "workspace:*"
     "@theatre/react": "workspace:*"
-    "@theatre/remote": "workspace:*"
     "@theatre/studio": "workspace:*"
     "@types/jest": ^26.0.23
     "@types/lodash-es": ^4.17.4
