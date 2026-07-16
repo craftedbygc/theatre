@@ -21,7 +21,6 @@ import type {OnDiskState} from '@theatre/core/projects/store/storeTypes'
 import type {Deferred} from '@theatre/shared/utils/defer'
 import {defer} from '@theatre/shared/utils/defer'
 import type {ProjectId} from '@theatre/shared/utils/ids'
-import checkForUpdates from './checkForUpdates'
 import shallowEqual from 'shallowequal'
 import {createStore} from './IDBStorage'
 import {getAllPossibleAssetIDs} from '@theatre/shared/utils/assets'
@@ -203,9 +202,6 @@ export class Studio {
 
     if (process.env.NODE_ENV !== 'test') {
       this.ui.render()
-      checkForUpdates().catch((err) => {
-        console.error(err)
-      })
     }
   }
 

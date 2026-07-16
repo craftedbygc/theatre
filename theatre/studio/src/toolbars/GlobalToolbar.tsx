@@ -1,6 +1,6 @@
 import {usePrism, useVal} from '@theatre/react'
 import getStudio from '@theatre/studio/getStudio'
-import React, {useMemo, useRef} from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import type {$IntentionalAny} from '@theatre/dataverse/dist/types'
 import useTooltip from '@theatre/studio/uiComponents/Popover/useTooltip'
@@ -9,19 +9,12 @@ import BasicTooltip from '@theatre/studio/uiComponents/Popover/BasicTooltip'
 import {val} from '@theatre/dataverse'
 import ExtensionToolbar from './ExtensionToolbar/ExtensionToolbar'
 import PinButton from './PinButton'
-import {
-  Details,
-  Ellipsis,
-  Outline,
-  Bell,
-} from '@theatre/studio/uiComponents/icons'
+import {Details, Outline, Bell} from '@theatre/studio/uiComponents/icons'
 import DoubleChevronLeft from '@theatre/studio/uiComponents/icons/DoubleChevronLeft'
 import DoubleChevronRight from '@theatre/studio/uiComponents/icons/DoubleChevronRight'
 import TimelineIcon from '@theatre/studio/uiComponents/icons/TimelineIcon'
 import RemoteEditorIcon from '@theatre/studio/uiComponents/icons/RemoteEditorIcon'
 import ToolbarIconButton from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
-import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
-import MoreMenu from './MoreMenu/MoreMenu'
 import {
   useNotifications,
   useEmptyNotificationsTooltip,
@@ -79,8 +72,6 @@ const GroupDivider = styled.div`
   background: #373b40;
   opacity: 0.4;
 `
-
-let showedVisualTestingWarning = false
 
 let remoteEditorWindow: Window | null = null
 
@@ -152,52 +143,6 @@ const GlobalToolbar: React.FC = () => {
     {enterDelay: 200},
     () => <BasicTooltip>Toggle Timeline</BasicTooltip>,
   )
-  const hasUpdates =
-    useVal(getStudio().atomP.ahistoric.updateChecker.result.hasUpdates) === true
-
-  const moreMenu = usePopover(
-    () => {
-      const triggerBounds = moreMenuTriggerRef.current!.getBoundingClientRect()
-      return {
-        debugName: 'More Menu',
-
-        constraints: {
-          maxX: triggerBounds.right,
-          maxY: 8,
-          // MVP: Don't render the more menu all the way to the left
-          // when it doesn't fit on the screen height
-          // See https://linear.app/theatre/issue/P-178/bug-broken-updater-ui-in-simple-html-page
-          // 1/10 There's a better way to solve this.
-          // 1/10 Perhaps consider separate constraint like "rightSideMinX" & for future: "bottomSideMinY"
-          // 2/10 Or, consider constraints being a function of the dimensions of the box => constraints.
-          minX: triggerBounds.left - 140,
-          minY: 8,
-        },
-        verticalGap: 2,
-      }
-    },
-    () => {
-      return <MoreMenu />
-    },
-  )
-  const moreMenuTriggerRef = useRef<HTMLButtonElement>(null)
-
-  const showUpdatesBadge = useMemo(() => {
-    if (window.__IS_VISUAL_REGRESSION_TESTING) {
-      if (!showedVisualTestingWarning) {
-        showedVisualTestingWarning = true
-        console.warn(
-          "Visual regression testing enabled, so we're showing the updates badge unconditionally",
-        )
-      }
-    }
-    if (hasUpdates || window.__IS_VISUAL_REGRESSION_TESTING) {
-      return true
-    }
-
-    return hasUpdates
-  }, [hasUpdates])
-
   const {hasNotifications} = useNotifications()
 
   const [notificationsTooltip, notificationsTriggerRef] =
@@ -270,16 +215,6 @@ const GlobalToolbar: React.FC = () => {
         >
           {hasNotifications && <HasUpdatesBadge type="warning" />}
         </PinButton>
-        {moreMenu.node}
-        <ToolbarIconButton
-          ref={moreMenuTriggerRef}
-          onClick={(e) => {
-            moreMenu.toggle(e, moreMenuTriggerRef.current!)
-          }}
-        >
-          <Ellipsis />
-          {showUpdatesBadge && <HasUpdatesBadge type="info" />}
-        </ToolbarIconButton>
         <PinButton
           ref={triggerButtonRef as $IntentionalAny}
           onClick={() => {

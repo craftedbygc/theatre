@@ -5,10 +5,6 @@ import type {IRange, StrictRecord} from '@theatre/shared/utils/types'
 import type {PointableSet} from '@theatre/shared/utils/PointableSet'
 import type {StudioSheetItemKey} from '@theatre/shared/utils/ids'
 
-export type UpdateCheckerResponse =
-  | {hasUpdates: true; newVersion: string; releasePage: string}
-  | {hasUpdates: false}
-
 export type KeyframeWithPathToPropFromCommonRoot = {
   pathToProp: (string | number)[]
   keyframe: Keyframe
@@ -39,11 +35,6 @@ export type StudioAhistoricState = {
       distanceFromHorizontalEdge: number
       distanceFromVerticalEdge: number
     }
-  }
-  updateChecker?: {
-    // timestamp of the last time we checked for updates
-    lastChecked: number
-    result: UpdateCheckerResponse | 'error'
   }
   projects: {
     stateByProjectId: StrictRecord<
