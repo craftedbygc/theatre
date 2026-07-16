@@ -1,8 +1,13 @@
 import type Project from '@theatre/core/projects/Project'
+import type {
+  ProjectAhistoricState,
+  ProjectState_Historic,
+} from '@theatre/core/projects/store/storeTypes'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import type {Studio} from '@theatre/studio/Studio'
 import {getCoreTicker} from '@theatre/core/coreTicker'
+import {val} from '@theatre/dataverse'
 import type {SerializableMap} from '@theatre/shared/utils/types'
 import {isRemoteEditorWindow} from './remoteEditor'
 
@@ -16,6 +21,11 @@ type BroadcastDataEvent =
 interface BroadcastData {
   event: BroadcastDataEvent
   data: any
+}
+
+type DisconnectData = {
+  historic?: ProjectState_Historic
+  ahistoric?: ProjectAhistoricState
 }
 
 /**
@@ -48,12 +58,29 @@ export default class RemoteSync {
         this._handleIncoming(event.data)
       }
     } else {
-      // Let every other window know to drop this window's overrides once
-      // it goes away, since otherwise they'd be stuck with the last values
-      // it broadcast (see `_handleIncoming`'s `'disconnect'` case).
+      // Before disconnecting, push the editor's project state to listeners so
+      // they keep the edits made in the remote window (not just the transient
+      // override layer). Then drop overrides (see `'disconnect'` in
+      // `_handleIncoming`).
       const channel = this.channel
       window.addEventListener('pagehide', () => {
-        channel.postMessage({event: 'disconnect', data: {}})
+        const data: DisconnectData = {}
+        if (this.studio) {
+          const projectId = this.project.address.projectId
+          const historic = val(
+            this.studio.atomP.historic.coreByProject[projectId],
+          )
+          const ahistoric = val(
+            this.studio.atomP.ahistoric.coreByProject[projectId],
+          )
+          if (historic) {
+            data.historic = JSON.parse(JSON.stringify(historic))
+            if (ahistoric) {
+              data.ahistoric = JSON.parse(JSON.stringify(ahistoric))
+            }
+          }
+        }
+        channel.postMessage({event: 'disconnect', data})
       })
     }
   }
@@ -161,6 +188,19 @@ export default class RemoteSync {
         break
       }
       case 'disconnect': {
+        const {historic, ahistoric} = msg.data as DisconnectData
+        if (historic && this.studio) {
+          const projectId = this.project.address.projectId
+          this.studio.transaction(({drafts}) => {
+            drafts.historic.coreByProject[projectId] = historic
+            if (ahistoric) {
+              drafts.ahistoric.coreByProject[projectId] = ahistoric
+            }
+            drafts.ephemeral.coreByProject[projectId]!.loadingState = {
+              type: 'loaded',
+            }
+          })
+        }
         for (const obj of this.objects.values()) {
           obj.setRemoteOverride({})
         }
