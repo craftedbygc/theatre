@@ -6,6 +6,7 @@ import type {$IntentionalAny} from '@theatre/dataverse/dist/types'
 import useTooltip from '@theatre/studio/uiComponents/Popover/useTooltip'
 import ErrorTooltip from '@theatre/studio/uiComponents/Popover/ErrorTooltip'
 import BasicTooltip from '@theatre/studio/uiComponents/Popover/BasicTooltip'
+import MinimalTooltip from '@theatre/studio/uiComponents/Popover/MinimalTooltip'
 import {val} from '@theatre/dataverse'
 import ExtensionToolbar from './ExtensionToolbar/ExtensionToolbar'
 import PinButton from './PinButton'
@@ -141,7 +142,7 @@ const GlobalToolbar: React.FC = () => {
 
   const [timelineTooltip, timelineTriggerRef] = useTooltip(
     {enterDelay: 200},
-    () => <BasicTooltip>Toggle Timeline</BasicTooltip>,
+    () => <MinimalTooltip>Toggle Timeline</MinimalTooltip>,
   )
   const {hasNotifications} = useNotifications()
 
