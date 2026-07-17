@@ -1,14 +1,27 @@
 import styled from 'styled-components'
 import type {ComponentPropsWithRef, ReactNode} from 'react'
 import React, {forwardRef, useState} from 'react'
-import ToolbarIconButton from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
+import {Container as ToolbarIconButtonContainer} from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
 
-const Container = styled(ToolbarIconButton)<{pinned?: boolean}>`
+// Matches OutlinePanel/BaseItem `.selected` background.
+const outlineSelectedBackground = 'rgba(30, 88, 102, 0.7)'
+
+const Container = styled(ToolbarIconButtonContainer)<{pinned?: boolean}>`
   color: ${({pinned}) => (pinned ? 'rgba(255, 255, 255, 0.8)' : '#A8A8A9')};
 
-  border-bottom: 1px solid
-    ${({pinned}) =>
-      pinned ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.08)'};
+  background: ${({pinned}) => (pinned ? outlineSelectedBackground : undefined)};
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  &:hover {
+    background: ${({pinned}) =>
+      pinned ? 'rgba(30, 88, 102, 0.85)' : undefined};
+  }
+
+  &:active {
+    background: ${({pinned}) =>
+      pinned ? 'rgba(30, 88, 102, 0.95)' : undefined};
+  }
 `
 
 interface PinButtonProps extends ComponentPropsWithRef<'button'> {
