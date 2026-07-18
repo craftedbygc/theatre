@@ -95,7 +95,7 @@ function sequencePropOnVariant(
   })
 }
 
-function isPropSequencedOnVariant(
+function isPropDirectlySequencedOnVariant(
   obj: SheetObject,
   pathToProp: PathToProp,
   variant: string,
@@ -134,7 +134,11 @@ const DefaultOrStaticValueIndicator: React.FC<{
     if (!hasMultipleVariants) return []
 
     return variants.map((variant) => {
-      const isSequenced = isPropSequencedOnVariant(obj, pathToProp, variant)
+      const isSequenced = isPropDirectlySequencedOnVariant(
+        obj,
+        pathToProp,
+        variant,
+      )
       const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
       const isActive = variant === activeVariant
 

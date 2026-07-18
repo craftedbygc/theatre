@@ -26,6 +26,7 @@ import type {ILogger, IUtilContext} from '@theatre/shared/logger'
 import {
   getSequenceStateFromSheet,
   pointerToSequenceTrackData,
+  type SequenceVariantId,
 } from '@theatre/core/sequences/sequenceVariants'
 import {onChange} from '@theatre/core/coreExports'
 
@@ -296,8 +297,8 @@ export default class SheetObject implements PointerToPrismProvider {
         () => {
           const untaps: Array<() => void> = []
 
-          for (const {trackId, pathToProp} of tracksToProcess) {
-            const pr = this._trackIdToPrism(trackId)
+          for (const {trackId, pathToProp, trackVariant} of tracksToProcess) {
+            const pr = this._trackIdToPrism(trackId, trackVariant)
             const propConfig = getPropConfigByPath(
               config,
               pathToProp,
@@ -360,16 +361,17 @@ export default class SheetObject implements PointerToPrismProvider {
 
   protected _trackIdToPrism(
     trackId: SequenceTrackId,
+    trackVariant: SequenceVariantId,
   ): Prism<InterpolationTriple | undefined> {
-    const variantId = val(this.sheet.activeSequenceVariantP)
+    const activeVariant = val(this.sheet.activeSequenceVariantP)
     const trackP = pointerToSequenceTrackData(
       this.template.project.pointers.historic.sheetsById[this.address.sheetId],
-      variantId,
+      trackVariant,
       this.address.objectKey,
       trackId,
     )
 
-    const timeD = this.sheet.getSequence(variantId).positionPrism
+    const timeD = this.sheet.getSequence(activeVariant).positionPrism
 
     return interpolationTripleAtPosition(this._internalUtilCtx, trackP, timeD)
   }

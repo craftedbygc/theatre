@@ -7,7 +7,10 @@ import type {
   SequenceTrackId,
   SheetId,
 } from '@theatre/shared/utils/ids'
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
+import {
+  getSequenceStateFromSheet,
+  getSequenceVariantOwningTrackInSheetState,
+} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
 import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 import type {DopeSheetSelection} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
@@ -67,9 +70,16 @@ export function selectedKeyframeConnections(
     )
 
     for (const {objectKey, trackId} of flatSelectionTrackIds(selection)) {
+      const trackVariant =
+        getSequenceVariantOwningTrackInSheetState(
+          sheetState,
+          objectKey,
+          trackId,
+          sequenceVariant,
+        ) ?? sequenceVariant
       const track = getSequenceStateFromSheet(
         sheetState,
-        sequenceVariant,
+        trackVariant,
       )?.tracksByObject[objectKey]?.trackData[trackId]
 
       if (track) {
@@ -169,9 +179,16 @@ export function keyframesWithPaths({
   const sheetState = val(
     getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId],
   )
+  const trackVariant =
+    getSequenceVariantOwningTrackInSheetState(
+      sheetState,
+      objectKey,
+      trackId,
+      sequenceVariant,
+    ) ?? sequenceVariant
   const tracksByObject = getSequenceStateFromSheet(
     sheetState,
-    sequenceVariant,
+    trackVariant,
   )?.tracksByObject[objectKey]
   const track = tracksByObject?.trackData[trackId]
 

@@ -163,6 +163,13 @@ function createPrism<T extends SerializablePrimitive>(
       const isSequenced = typeof possibleSequenceTrackId === 'string'
 
       if (isSequenced) {
+        const sequenceTrackId = possibleSequenceTrackId as SequenceTrackId
+        const trackVariant =
+          obj.template.getSequenceVariantOwningTrack(
+            sequenceTrackId,
+            activeVariant,
+          ) ?? activeVariant
+
         contextMenuItems.push({
           label: 'Make static',
           callback: () => {
@@ -170,7 +177,7 @@ function createPrism<T extends SerializablePrimitive>(
               const propAddress = {
                 ...obj.address,
                 pathToProp,
-                sequenceVariant: activeVariant,
+                sequenceVariant: trackVariant,
               }
               stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsStatic(
                 {
@@ -182,7 +189,6 @@ function createPrism<T extends SerializablePrimitive>(
           },
         })
 
-        const sequenceTrackId = possibleSequenceTrackId as SequenceTrackId
         const nearbyKeyframes = prism.sub(
           'lcr',
           (): NearbyKeyframes => {
@@ -193,7 +199,7 @@ function createPrism<T extends SerializablePrimitive>(
             )
             const track = getSequenceStateFromSheet(
               sheetState,
-              activeVariant,
+              trackVariant,
             )?.tracksByObject[obj.address.objectKey]?.trackData[sequenceTrackId]
             const sequencePosition = val(
               obj.sheet.getSequence(activeVariant).positionPrism,
@@ -208,7 +214,7 @@ function createPrism<T extends SerializablePrimitive>(
               sequencePosition,
             )
           },
-          [sequenceTrackId, activeVariant],
+          [sequenceTrackId, activeVariant, trackVariant],
         )
 
         let shade: Shade

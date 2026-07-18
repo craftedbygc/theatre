@@ -102,4 +102,48 @@ describe(`SheetObjectTemplate`, () => {
       })
     })
   })
+
+  describe(`sequence variant inheritance`, () => {
+    it('inherits default variant tracks on other variants unless overridden', async () => {
+      const {obj, sheet} = await setupTestSheet({
+        staticOverrides: {byObject: {}},
+        sequencesById: {
+          default: {
+            type: 'PositionalSequence',
+            subUnitsPerUnit: 30,
+            length: 10,
+            tracksByObject: {
+              ['obj' as ObjectAddressKey]: {
+                trackIdByPropPath: {
+                  [encodePathToProp(['position', 'x'])]: asSequenceTrackId('x'),
+                },
+                trackData: {
+                  ['x' as SequenceTrackId]: null as $IntentionalAny,
+                },
+              },
+            },
+          },
+          mobile: {
+            type: 'PositionalSequence',
+            subUnitsPerUnit: 30,
+            length: 10,
+            tracksByObject: {},
+          },
+        },
+      })
+
+      sheet.publicApi.declareSequenceVariants(['default', 'mobile'])
+
+      const mobileTracks = obj.template
+        .getArrayOfValidSequenceTracks('mobile')
+        .getValue()
+
+      expect(mobileTracks).toHaveLength(1)
+      expect(mobileTracks[0]).toMatchObject({
+        pathToProp: ['position', 'x'],
+        trackId: 'x',
+        trackVariant: 'default',
+      })
+    })
+  })
 })

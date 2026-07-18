@@ -26,9 +26,12 @@ const PrimitivePropGraph: React.FC<{
         .sheetsById[sheetObject.address.sheetId],
     )
     const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+    const trackVariant =
+      sheetObject.template.getSequenceVariantOwningTrack(trackId, activeVariant) ??
+      activeVariant
     const trackData = getSequenceStateFromSheet(
       sheetState,
-      activeVariant,
+      trackVariant,
     )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
 
     if (trackData?.type !== 'BasicKeyframedTrack') {

@@ -3,15 +3,58 @@ import type {
   SheetState_Historic,
   TrackData,
 } from '@theatre/core/projects/store/types/SheetState_Historic'
+import type {PathToProp_Encoded} from '@theatre/shared/utils/addresses'
 import type {Pointer} from '@theatre/dataverse'
 import {val} from '@theatre/dataverse'
 import type {SequenceTrackId, ObjectAddressKey} from '@theatre/shared/utils/ids'
 import {InvalidArgumentError} from '@theatre/shared/utils/errors'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
+import type {StrictRecord} from '@theatre/shared/utils/types'
 
 export const DEFAULT_SEQUENCE_VARIANT = 'default' as const
 
 export type SequenceVariantId = string
+
+export type EffectiveSequenceTrack = {
+  trackId: SequenceTrackId
+  trackVariant: SequenceVariantId
+}
+
+/**
+ * Merges track maps so the default variant provides the base sequencing and the
+ * active variant overrides individual props when it has its own track.
+ */
+export function mergeSequenceTrackMaps(
+  defaultTracks: StrictRecord<PathToProp_Encoded, SequenceTrackId> | undefined,
+  overrideTracks:
+    | StrictRecord<PathToProp_Encoded, SequenceTrackId>
+    | undefined,
+  activeVariant: SequenceVariantId,
+): StrictRecord<PathToProp_Encoded, EffectiveSequenceTrack> {
+  const merged: StrictRecord<PathToProp_Encoded, EffectiveSequenceTrack> = {}
+
+  if (defaultTracks) {
+    for (const [encodedPath, trackId] of Object.entries(defaultTracks)) {
+      if (!trackId) continue
+      merged[encodedPath as PathToProp_Encoded] = {
+        trackId,
+        trackVariant: DEFAULT_SEQUENCE_VARIANT,
+      }
+    }
+  }
+
+  if (activeVariant !== DEFAULT_SEQUENCE_VARIANT && overrideTracks) {
+    for (const [encodedPath, trackId] of Object.entries(overrideTracks)) {
+      if (!trackId) continue
+      merged[encodedPath as PathToProp_Encoded] = {
+        trackId,
+        trackVariant: activeVariant,
+      }
+    }
+  }
+
+  return merged
+}
 
 const defaultEmptySequence = (): HistoricPositionalSequence => ({
   type: 'PositionalSequence',
@@ -53,6 +96,25 @@ export function getSequenceStateFromSheet(
   }
 
   return undefined
+}
+
+/**
+ * Returns which variant owns a given track for an object, checking the active
+ * variant first and then falling back to default.
+ */
+export function getSequenceVariantOwningTrackInSheetState(
+  sheetState: SheetState_Historic | undefined,
+  objectKey: ObjectAddressKey,
+  trackId: SequenceTrackId,
+  activeVariant: SequenceVariantId,
+): SequenceVariantId | undefined {
+  const findInVariant = (variantId: SequenceVariantId) => {
+    const trackData = getSequenceStateFromSheet(sheetState, variantId)
+      ?.tracksByObject[objectKey]?.trackData[trackId]
+    return trackData ? variantId : undefined
+  }
+
+  return findInVariant(activeVariant) ?? findInVariant(DEFAULT_SEQUENCE_VARIANT)
 }
 
 export function ensureSequenceStateInSheet(

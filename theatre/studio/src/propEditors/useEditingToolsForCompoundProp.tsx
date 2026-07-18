@@ -273,17 +273,22 @@ function ControlIndicators({
     it's unlikely that this optimization would matter.
     */
     const nearbyKeyframesInEachTrack = listOfDescendantTrackIds
-      .map((trackId) => ({
-        trackId,
-        track: getSequenceStateFromSheet(
-          val(
-            obj.template.project.pointers.historic.sheetsById[
-              obj.address.sheetId
-            ],
-          ),
-          activeVariant,
-        )?.tracksByObject[obj.address.objectKey]?.trackData[trackId],
-      }))
+      .map((trackId) => {
+        const trackVariant =
+          obj.template.getSequenceVariantOwningTrack(trackId, activeVariant) ??
+          activeVariant
+        return {
+          trackId,
+          track: getSequenceStateFromSheet(
+            val(
+              obj.template.project.pointers.historic.sheetsById[
+                obj.address.sheetId
+              ],
+            ),
+            trackVariant,
+          )?.tracksByObject[obj.address.objectKey]?.trackData[trackId],
+        }
+      })
       .filter(({track}) => !!track)
       .map((s) => ({
         ...s,

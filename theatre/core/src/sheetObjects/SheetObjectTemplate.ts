@@ -34,8 +34,12 @@ import {
 import getOrderingOfPropTypeConfig from './getOrderingOfPropTypeConfig'
 import type {SheetState_Historic} from '@theatre/core/projects/store/types/SheetState_Historic'
 import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  getSequenceStateFromSheet,
+  mergeSequenceTrackMaps,
+  type SequenceVariantId,
+} from '@theatre/core/sequences/sequenceVariants'
 import {cloneDeep, unset} from 'lodash-es'
 
 function isObjectEmpty(obj: unknown): boolean {
@@ -204,33 +208,60 @@ export default class SheetObjectTemplate {
    */
   getArrayOfValidSequenceTracks(
     sequenceVariant: SequenceVariantId,
-  ): Prism<Array<{pathToProp: PathToProp; trackId: SequenceTrackId}>> {
+  ): Prism<
+    Array<{
+      pathToProp: PathToProp
+      trackId: SequenceTrackId
+      trackVariant: SequenceVariantId
+    }>
+  > {
     return this._cache.get(
       `getArrayOfValidSequenceTracks:${sequenceVariant}`,
       () =>
-      prism((): Array<{pathToProp: PathToProp; trackId: SequenceTrackId}> => {
+      prism((): Array<{
+        pathToProp: PathToProp
+        trackId: SequenceTrackId
+        trackVariant: SequenceVariantId
+      }> => {
         const pointerToSheetState =
           this.project.pointers.historic.sheetsById[this.address.sheetId]
 
         const sheetState = val(pointerToSheetState)
-        const trackIdByPropPath = getSequenceStateFromSheet(
+
+        const defaultTrackIdByPropPath = getSequenceStateFromSheet(
           sheetState,
-          sequenceVariant,
+          DEFAULT_SEQUENCE_VARIANT,
         )?.tracksByObject[this.address.objectKey]?.trackIdByPropPath
 
-        if (!trackIdByPropPath) return emptyArray as $IntentionalAny
+        const variantTrackIdByPropPath =
+          sequenceVariant === DEFAULT_SEQUENCE_VARIANT
+            ? undefined
+            : getSequenceStateFromSheet(sheetState, sequenceVariant)
+                ?.tracksByObject[this.address.objectKey]?.trackIdByPropPath
+
+        const mergedTrackMap = mergeSequenceTrackMaps(
+          defaultTrackIdByPropPath,
+          variantTrackIdByPropPath,
+          sequenceVariant,
+        )
+
+        if (Object.keys(mergedTrackMap).length === 0) {
+          return emptyArray as $IntentionalAny
+        }
 
         const arrayOfIds: Array<{
           pathToProp: PathToProp
           trackId: SequenceTrackId
+          trackVariant: SequenceVariantId
         }> = []
-
-        if (!trackIdByPropPath) return emptyArray as $IntentionalAny
 
         const objectConfig = val(this.configPointer)
 
-        const _entries = Object.entries(trackIdByPropPath)
-        for (const [pathToPropInString, trackId] of _entries) {
+        for (const [pathToPropInString, effectiveTrack] of Object.entries(
+          mergedTrackMap,
+        )) {
+          if (!effectiveTrack) continue
+          const {trackId, trackVariant} = effectiveTrack
           const pathToProp = parsePathToProp(pathToPropInString)
           if (!pathToProp) continue
 
@@ -240,7 +271,7 @@ export default class SheetObjectTemplate {
 
           if (!isSequencable) continue
 
-          arrayOfIds.push({pathToProp, trackId: trackId!})
+          arrayOfIds.push({pathToProp, trackId, trackVariant})
         }
 
         const mapping = getOrderingOfPropTypeConfig(objectConfig)
@@ -293,6 +324,14 @@ export default class SheetObjectTemplate {
         return map
       }),
     )
+  }
+
+  getSequenceVariantOwningTrack(
+    trackId: SequenceTrackId,
+    activeVariant: SequenceVariantId,
+  ): SequenceVariantId | undefined {
+    const tracks = this.getArrayOfValidSequenceTracks(activeVariant).getValue()
+    return tracks.find((t) => t.trackId === trackId)?.trackVariant
   }
 
   /**

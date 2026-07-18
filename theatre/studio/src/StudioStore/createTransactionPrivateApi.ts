@@ -142,6 +142,11 @@ export default function createTransactionPrivateApi(
               | undefined
 
             if (typeof trackId === 'string') {
+              const trackVariant =
+                root.template.getSequenceVariantOwningTrack(
+                  trackId,
+                  activeVariant,
+                ) ?? activeVariant
               const seq = root.sheet.getSequence(activeVariant)
               seq.position = seq.closestGridPosition(seq.position)
               stateEditors.coreByProject.historic.sheetsById.sequence.setKeyframeAtPosition(
@@ -152,7 +157,7 @@ export default function createTransactionPrivateApi(
                   value: value as $FixMe,
                   snappingFunction: seq.closestGridPosition,
                   type: 'bezier',
-                  sequenceVariant: activeVariant,
+                  sequenceVariant: trackVariant,
                 },
               )
             } else {
@@ -235,13 +240,18 @@ export default function createTransactionPrivateApi(
               | undefined
 
             if (typeof trackId === 'string') {
+              const trackVariant =
+                root.template.getSequenceVariantOwningTrack(
+                  trackId,
+                  activeVariant,
+                ) ?? activeVariant
               stateEditors.coreByProject.historic.sheetsById.sequence.unsetKeyframeAtPosition(
                 {
                   ...propAddress,
                   trackId,
                   position: root.sheet.getSequence(activeVariant)
                     .positionSnappedToGrid,
-                  sequenceVariant: activeVariant,
+                  sequenceVariant: trackVariant,
                 },
               )
             } else if (propConfig !== undefined) {
