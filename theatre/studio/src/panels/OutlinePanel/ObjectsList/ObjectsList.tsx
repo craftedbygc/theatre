@@ -6,7 +6,13 @@ import styled from 'styled-components'
 import {ObjectItem} from './ObjectItem'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
-import {useCollapseStateInOutlinePanel} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import {
+  ensureNamespacePath,
+  type NamespacedObjects,
+  parseOutlineNamespacePath,
+  useCollapseStateInOutlinePanel,
+} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import getStudio from '@theatre/studio/getStudio'
 
 export const Li = styled.li<{isSelected: boolean}>`
   color: ${(props) => (props.isSelected ? 'white' : 'hsl(1, 1%, 80%)')};
@@ -26,6 +32,23 @@ const ObjectsList: React.FC<{
     objects.forEach((object) => {
       addToNamespace(rootObject, object)
     })
+
+    const outlineNamespaces = val(
+      getStudio().atomP.ahistoric.coreByProject[sheet.address.projectId]
+        .sheetsById[sheet.address.sheetId].outlineNamespaces,
+    )
+
+    if (outlineNamespaces) {
+      Object.keys(outlineNamespaces).forEach((namespacePathKey) => {
+        ensureNamespacePath(
+          rootObject,
+          parseOutlineNamespacePath(
+            namespacePathKey,
+            'sheet.declareOutlineNamespace',
+          ),
+        )
+      })
+    }
 
     return (
       <NamespaceTree
@@ -119,16 +142,6 @@ function Namespace(props: {
 }
 
 export default ObjectsList
-
-/** See {@link addToNamespace} for adding to the namespace, easily. */
-type NamespacedObjects = Map<
-  string,
-  {
-    object?: SheetObject
-    nested?: NamespacedObjects
-    path: string[]
-  }
->
 
 function addToNamespace(
   mutObjects: NamespacedObjects,

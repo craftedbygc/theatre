@@ -10,7 +10,7 @@ import {Atom} from '@theatre/dataverse'
 import initialiseProjectState from './initialiseProjectState'
 import projectsSingleton from './projectsSingleton'
 import RemoteSync from '@theatre/core/internal/RemoteSync'
-import type {ProjectState} from './store/storeTypes'
+import type {ProjectState, ProjectAhistoricState} from './store/storeTypes'
 import type {Deferred} from '@theatre/shared/utils/defer'
 import {defer} from '@theatre/shared/utils/defer'
 import globals from '@theatre/shared/globals'
@@ -24,6 +24,7 @@ import type {
   ITheatreLoggerConfig,
   ITheatreLoggingConfig,
 } from '@theatre/shared/logger'
+import type {OutlineNamespaceConfig} from '@theatre/shared/utils/outlineNamespaces'
 import {_coreLogger} from '@theatre/core/_coreLogger'
 
 type ICoreAssetStorage = {
@@ -83,6 +84,7 @@ export default class Project {
   }>({})
   sheetTemplatesP = this._sheetTemplates.pointer
   private _studio: Studio | undefined
+  private readonly _onDiskStateAtom: Atom<ProjectState>
   assetStorage: IStudioAssetStorage
   /** Not private: `Sheet.createObject()` registers newly-created objects with it. */
   readonly _remoteSync: RemoteSync
@@ -116,6 +118,7 @@ export default class Project {
         lastExportedObject: null,
       },
     })
+    this._onDiskStateAtom = onDiskStateAtom
 
     this._assetStorageReadyDeferred = defer()
     this.assetStorage = {
@@ -224,6 +227,7 @@ export default class Project {
 
         this._studioReadyDeferred.resolve(undefined)
         this._remoteSync.attachStudio(studio)
+        this._flushPendingOutlineNamespaces()
       })
       .catch((err) => {
         console.error(err)
@@ -260,5 +264,62 @@ export default class Project {
     const sheet = template.getInstance(instanceId)
     this._remoteSync.registerSheet(sheet)
     return sheet
+  }
+
+  _commitOutlineNamespaceConfig(
+    sheetId: SheetId,
+    namespacePathKey: string,
+    config: OutlineNamespaceConfig,
+  ) {
+    this._mutateCoreAhistoric((ahistoric) => {
+      ahistoric.sheetsById ??= {}
+      ahistoric.sheetsById[sheetId] ??= {staticOverrides: {byObject: {}}}
+      const sheetState = ahistoric.sheetsById[sheetId]!
+      sheetState.outlineNamespaces ??= {}
+      sheetState.outlineNamespaces[namespacePathKey] = {
+        ...sheetState.outlineNamespaces[namespacePathKey],
+        ...config,
+      }
+    })
+  }
+
+  private _flushPendingOutlineNamespaces() {
+    for (const [sheetId, template] of Object.entries(
+      this._sheetTemplates.get(),
+    )) {
+      if (!template) continue
+      for (const [namespacePathKey, config] of Object.entries(
+        template.getPendingOutlineNamespaces(),
+      )) {
+        if (!config) continue
+        this._commitOutlineNamespaceConfig(
+          sheetId as SheetId,
+          namespacePathKey,
+          config,
+        )
+      }
+    }
+  }
+
+  private _mutateCoreAhistoric(
+    fn: (ahistoric: ProjectAhistoricState) => void,
+  ) {
+    if (this._studio) {
+      this._studio.transaction(
+        ({drafts}) => {
+          const projectAhistoric =
+            drafts.ahistoric.coreByProject[this.address.projectId]
+          projectAhistoric.sheetsById ??= {}
+          fn(projectAhistoric)
+        },
+        {undoable: false},
+      )
+    } else {
+      this._onDiskStateAtom.reduce((state) => {
+        const ahistoric = {...state.ahistoric}
+        fn(ahistoric)
+        return {...state, ahistoric}
+      })
+    }
   }
 }
