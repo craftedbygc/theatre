@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
+import ReactDOM from 'react-dom/client'
 import {getProject, types} from '@theatre/core'
 import studio from '@theatre/studio'
 import extension from '@theatre/r3f/dist/extension'
@@ -95,4 +96,6 @@ const SequenceVariantsDemo: React.FC = () => {
   )
 }
 
-export default SequenceVariantsDemo
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <SequenceVariantsDemo />,
+)
