@@ -278,13 +278,13 @@ export default class SheetObject implements PointerToPrismProvider {
    */
   getSequencedValues(): Prism<Pointer<SheetObjectPropsValue>> {
     return prism(() => {
+      const activeVariant = val(this.sheet.activeSequenceVariantP)
+
       const tracksToProcessD = prism.memo(
         'tracksToProcess',
         () =>
-          this.template.getArrayOfValidSequenceTracks(
-            this.sheet.getActiveSequenceVariant(),
-          ),
-        [this.sheet.getActiveSequenceVariant()],
+          this.template.getArrayOfValidSequenceTracks(activeVariant),
+        [activeVariant],
       )
 
       const tracksToProcess = val(tracksToProcessD)
@@ -361,7 +361,7 @@ export default class SheetObject implements PointerToPrismProvider {
   protected _trackIdToPrism(
     trackId: SequenceTrackId,
   ): Prism<InterpolationTriple | undefined> {
-    const variantId = this.sheet.getActiveSequenceVariant()
+    const variantId = val(this.sheet.activeSequenceVariantP)
     const trackP = pointerToSequenceTrackData(
       this.template.project.pointers.historic.sheetsById[this.address.sheetId],
       variantId,

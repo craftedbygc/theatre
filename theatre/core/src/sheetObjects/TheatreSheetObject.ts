@@ -182,7 +182,7 @@ export default class TheatreSheetObject<
       return prism(() => {
         return {
           values: val(sheetObject.getValues().getValue()) as $FixMe,
-          variant: sheetObject.sheet.getActiveSequenceVariant(),
+          variant: val(sheetObject.sheet.activeSequenceVariantP),
         }
       })
     })

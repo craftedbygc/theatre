@@ -34,7 +34,10 @@ export type ObjectNativeObject = unknown
 export default class Sheet {
   private readonly _objects: Atom<SheetObjectMap> = new Atom<SheetObjectMap>({})
   private readonly _sequences: Record<string, Sequence> = {}
-  private _activeSequenceVariant: SequenceVariantId = DEFAULT_SEQUENCE_VARIANT
+  private readonly _activeSequenceVariant = new Atom<SequenceVariantId>(
+    DEFAULT_SEQUENCE_VARIANT,
+  )
+  readonly activeSequenceVariantP = this._activeSequenceVariant.pointer
   readonly address: SheetAddress
   readonly publicApi: TheatreSheet
   readonly project: Project
@@ -95,7 +98,8 @@ export default class Sheet {
   }
 
   getSequence(variant?: SequenceVariantId): Sequence {
-    const variantId = variant ?? this._activeSequenceVariant
+    const variantId =
+      variant ?? val(this._activeSequenceVariant.pointer)
     if (!this._sequences[variantId]) {
       const lengthD = prism(() => {
         const sheetState = val(
@@ -131,7 +135,7 @@ export default class Sheet {
   }
 
   getActiveSequenceVariant(): SequenceVariantId {
-    return this._activeSequenceVariant
+    return this._activeSequenceVariant.get()
   }
 
   setActiveSequenceVariant(variant: SequenceVariantId): void {
@@ -147,7 +151,7 @@ export default class Sheet {
           `Register variants via sheet.declareSequenceVariants([...]).`,
       )
     }
-    this._activeSequenceVariant = variantId
+    this._activeSequenceVariant.set(variantId)
   }
 }
 

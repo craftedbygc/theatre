@@ -5,7 +5,7 @@ import type {
 } from '@theatre/core/projects/store/types/SheetState_Historic'
 import type {Pointer} from '@theatre/dataverse'
 import {val} from '@theatre/dataverse'
-import type {SequenceTrackId} from '@theatre/shared/utils/ids'
+import type {SequenceTrackId, ObjectAddressKey} from '@theatre/shared/utils/ids'
 import {InvalidArgumentError} from '@theatre/shared/utils/errors'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
 
@@ -99,7 +99,7 @@ export function validateSequenceVariantIdOrThrow(
 export function pointerToSequenceTrackData(
   sheetStatePointer: Pointer<SheetState_Historic | undefined>,
   variantId: SequenceVariantId,
-  objectKey: string,
+  objectKey: ObjectAddressKey,
   trackId: SequenceTrackId,
 ): Pointer<TrackData | undefined> {
   const sheetState = val(sheetStatePointer)

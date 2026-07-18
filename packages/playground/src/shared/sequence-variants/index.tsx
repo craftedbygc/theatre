@@ -10,14 +10,38 @@ const project = getProject('Sequence Variants Demo')
 const sheet = project.sheet('Scene')
 sheet.declareSequenceVariants(['default', 'mobile', 'desktop'])
 
+const MOBILE_BREAKPOINT = 768
+
 const boxConfig = {
   x: types.number(0, {range: [-200, 200]}),
   y: types.number(0, {range: [-200, 200]}),
 }
 
+function variantForWidth(width: number): 'mobile' | 'desktop' {
+  return width < MOBILE_BREAKPOINT ? 'mobile' : 'desktop'
+}
+
 const SequenceVariantsDemo: React.FC = () => {
   const boxRef = useRef<HTMLDivElement>(null)
   const [activeVariant, setActiveVariant] = useState('default')
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024,
+  )
+
+  // Switch runtime variant on resize (breakpoint-based)
+  useEffect(() => {
+    const applyVariantForWidth = (width: number) => {
+      const variant = variantForWidth(width)
+      sheet.setActiveSequenceVariant(variant)
+      setWindowWidth(width)
+    }
+
+    applyVariantForWidth(window.innerWidth)
+
+    const onResize = () => applyVariantForWidth(window.innerWidth)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     const obj = sheet.object('Box', boxConfig)
@@ -45,31 +69,18 @@ const SequenceVariantsDemo: React.FC = () => {
       <h1 style={{marginTop: 0}}>Sequence Variants</h1>
       <p>
         This sheet has three sequence variants: <code>default</code>,{' '}
-        <code>mobile</code>, and <code>desktop</code>. Right-click the
-        sequence diamond on a property in the detail panel to choose which
-        variant to sequence.
+        <code>mobile</code>, and <code>desktop</code>. Resize the window below{' '}
+        {MOBILE_BREAKPOINT}px to automatically switch to the <code>mobile</code>{' '}
+        variant; above that uses <code>desktop</code>.
       </p>
       <p>
-        Active runtime variant: <strong>{activeVariant}</strong>
+        Window width: <strong>{windowWidth}px</strong> — Active runtime variant:{' '}
+        <strong>{activeVariant}</strong>
       </p>
-      <div style={{display: 'flex', gap: 8, marginBottom: 24}}>
-        {(['default', 'mobile', 'desktop'] as const).map((variant) => (
-          <button
-            key={variant}
-            onClick={() => sheet.setActiveSequenceVariant(variant)}
-            style={{
-              padding: '8px 16px',
-              background: activeVariant === variant ? '#339cb5' : '#333',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-            }}
-          >
-            {variant}
-          </button>
-        ))}
-      </div>
+      <p style={{color: '#888', fontSize: 14}}>
+        Right-click the sequence diamond on a property in the detail panel to
+        choose which variant to sequence in the studio.
+      </p>
       <div
         ref={boxRef}
         style={{
