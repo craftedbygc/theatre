@@ -9,6 +9,7 @@ import type Sheet from '@theatre/core/sheets/Sheet'
 import type {SheetAddress} from '@theatre/shared/utils/addresses'
 import {InvalidArgumentError} from '@theatre/shared/utils/errors'
 import {validateAndSanitiseSlashedPathOrThrow} from '@theatre/shared/utils/slashedPaths'
+import {parseOutlineNamespacePath} from '@theatre/shared/utils/outlineNamespaces'
 import type {$FixMe, $IntentionalAny} from '@theatre/shared/utils/types'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
 import deepEqual from 'fast-deep-equal'
@@ -111,6 +112,60 @@ export interface ISheet {
    * @param key - The `key` of the object previously given to `sheet.object(key, ...)`.
    */
   detachObject(key: string): void
+
+  /**
+   * Declares an outline namespace folder in the Studio. The folder appears in
+   * the outline panel even before any sheet objects are added under it.
+   *
+   * You can also use this to set the default collapsed state for a namespace
+   * folder. The default only applies when the user has not manually expanded
+   * or collapsed the folder yet.
+   *
+   * This method is part of `@theatre/core` so you can configure outline folders
+   * without importing `@theatre/studio`.
+   *
+   * @param namespacePath - The namespace path, e.g. `"My Folder"` or `"My Folder / Subfolder"`
+   * @param opts - Optional configuration for the namespace folder
+   *
+   * @example
+   * ```ts
+   * const sheet = project.sheet('Scene')
+   *
+   * // Create an empty folder ahead of time, collapsed by default
+   * sheet.declareOutlineNamespace('Props', {collapsed: true})
+   *
+   * // Later, add objects under that folder
+   * sheet.object('Props / Chair', {x: 0})
+   * sheet.object('Props / Table', {x: 0})
+   * ```
+   */
+  declareOutlineNamespace(
+    namespacePath: string,
+    opts?: {collapsed?: boolean},
+  ): void
+
+  /**
+   * Sets whether a namespace folder in the Studio outline panel is collapsed.
+   *
+   * Call this on load to force a folder closed every time your app starts.
+   * Unlike `declareOutlineNamespace()`, this overrides any previous user
+   * preference for the current session's initial render.
+   *
+   * @param namespacePath - The namespace path, e.g. `"My Folder"` or `"My Folder / Subfolder"`
+   * @param collapsed - Whether the folder should be collapsed
+   *
+   * @example
+   * ```ts
+   * const sheet = project.sheet('Scene')
+   *
+   * // Force a folder closed every time your app loads
+   * sheet.setOutlineNamespaceCollapsed('Props', true)
+   * ```
+   */
+  setOutlineNamespaceCollapsed(
+    namespacePath: string,
+    collapsed: boolean,
+  ): void
 
   /**
    * The Sequence of this Sheet
@@ -236,6 +291,35 @@ To fix this, make sure you are calling \`sheet.deleteObject("${sanitizedPath}")\
     }
 
     internal.deleteObject(sanitizedPath as ObjectAddressKey)
+  }
+
+  declareOutlineNamespace(
+    namespacePath: string,
+    opts?: {collapsed?: boolean},
+  ): void {
+    const internal = privateAPI(this)
+    const parsedPath = parseOutlineNamespacePath(
+      namespacePath,
+      'sheet.declareOutlineNamespace',
+    )
+    internal.template.setOutlineNamespaceConfig(
+      parsedPath.join(' / '),
+      {defaultCollapsed: opts?.collapsed},
+    )
+  }
+
+  setOutlineNamespaceCollapsed(
+    namespacePath: string,
+    collapsed: boolean,
+  ): void {
+    const internal = privateAPI(this)
+    const parsedPath = parseOutlineNamespacePath(
+      namespacePath,
+      'sheet.setOutlineNamespaceCollapsed',
+    )
+    internal.template.setOutlineNamespaceConfig(parsedPath.join(' / '), {
+      collapsed,
+    })
   }
 }
 

@@ -21,7 +21,6 @@ import type {
   KeyframeId,
   SequenceMarkerId,
   SequenceTrackId,
-  SheetId,
   UIPanelId,
 } from '@theatre/shared/utils/ids'
 import {
@@ -510,40 +509,6 @@ namespace stateEditors {
                 collapsedItemsInOutline[p.itemKey] = true
               } else {
                 delete collapsedItemsInOutline[p.itemKey]
-              }
-            }
-          }
-
-          export namespace declaredOutlineNamespaces {
-            export function _ensure(p: ProjectAddress) {
-              const projectState =
-                stateEditors.studio.ahistoric.projects.stateByProjectId._ensure(
-                  p,
-                )
-              if (!projectState.declaredOutlineNamespaces) {
-                projectState.declaredOutlineNamespaces = {}
-              }
-              return projectState.declaredOutlineNamespaces!
-            }
-
-            export function declare(
-              p: ProjectAddress & {
-                sheetId: SheetId
-                namespacePathKey: string
-                defaultCollapsed?: boolean
-              },
-            ) {
-              const declaredOutlineNamespaces =
-                stateEditors.studio.ahistoric.projects.stateByProjectId.declaredOutlineNamespaces._ensure(
-                  p,
-                )
-
-              if (!declaredOutlineNamespaces[p.sheetId]) {
-                declaredOutlineNamespaces[p.sheetId] = {}
-              }
-
-              declaredOutlineNamespaces[p.sheetId]![p.namespacePathKey] = {
-                defaultCollapsed: p.defaultCollapsed,
               }
             }
           }

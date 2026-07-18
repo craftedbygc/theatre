@@ -4,8 +4,10 @@ import getStudio from '@theatre/studio/getStudio'
 import {useVal} from '@theatre/react'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import {validateAndSanitiseSlashedPathOrThrow} from '@theatre/shared/utils/slashedPaths'
-import type {SheetId} from '@theatre/shared/utils/ids'
+import {
+  formatOutlineNamespacePathKey,
+  getOutlineNamespaceItemKey,
+} from '@theatre/shared/utils/outlineNamespaces'
 
 export type NamespacedObjects = Map<
   string,
@@ -16,25 +18,11 @@ export type NamespacedObjects = Map<
   }
 >
 
-export function formatOutlineNamespacePathKey(pathSegments: string[]): string {
-  return pathSegments.join(' / ')
-}
-
-export function parseOutlineNamespacePath(
-  namespacePath: string,
-  fnName: string,
-): string[] {
-  return validateAndSanitiseSlashedPathOrThrow(namespacePath, fnName).split(
-    /\s*\/\s*/g,
-  )
-}
-
-export function getOutlineNamespaceItemKey(
-  sheetId: SheetId,
-  pathSegments: string[],
-): string {
-  return `namespace:${sheetId}:${pathSegments.join('/')}`
-}
+export {
+  formatOutlineNamespacePathKey,
+  getOutlineNamespaceItemKey,
+  parseOutlineNamespacePath,
+} from '@theatre/shared/utils/outlineNamespaces'
 
 export function useCollapseStateInOutlinePanel(
   item: Project | Sheet | {type: 'namespace'; sheet: Sheet; path: string[]},
@@ -61,17 +49,20 @@ export function useCollapseStateInOutlinePanel(
       .collapsedItemsInOutline[itemKey],
   )
 
-  const defaultCollapsed =
+  const outlineNamespaceConfig =
     item.type === 'namespace'
       ? useVal(
-          getStudio().atomP.ahistoric.projects.stateByProjectId[projectId]
-            .declaredOutlineNamespaces[item.sheet.address.sheetId][
-            formatOutlineNamespacePathKey(item.path)
-          ].defaultCollapsed,
-        ) ?? false
-      : false
+          getStudio().atomP.ahistoric.coreByProject[projectId].sheetsById[
+            item.sheet.address.sheetId
+          ].outlineNamespaces[formatOutlineNamespacePathKey(item.path)],
+        )
+      : undefined
 
-  const isCollapsed = explicitCollapsed ?? defaultCollapsed
+  const isCollapsed =
+    explicitCollapsed ??
+    outlineNamespaceConfig?.collapsed ??
+    outlineNamespaceConfig?.defaultCollapsed ??
+    false
 
   const setCollapsed = useCallback(
     (isCollapsed: boolean) => {

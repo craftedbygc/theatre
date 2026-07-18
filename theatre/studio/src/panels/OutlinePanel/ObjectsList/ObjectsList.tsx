@@ -33,19 +33,18 @@ const ObjectsList: React.FC<{
       addToNamespace(rootObject, object)
     })
 
-    const declaredNamespaces = val(
-      getStudio().atomP.ahistoric.projects.stateByProjectId[
-        sheet.address.projectId
-      ].declaredOutlineNamespaces[sheet.address.sheetId],
+    const outlineNamespaces = val(
+      getStudio().atomP.ahistoric.coreByProject[sheet.address.projectId]
+        .sheetsById[sheet.address.sheetId].outlineNamespaces,
     )
 
-    if (declaredNamespaces) {
-      Object.keys(declaredNamespaces).forEach((namespacePathKey) => {
+    if (outlineNamespaces) {
+      Object.keys(outlineNamespaces).forEach((namespacePathKey) => {
         ensureNamespacePath(
           rootObject,
           parseOutlineNamespacePath(
             namespacePathKey,
-            'studio.ui.outline.declareNamespace',
+            'sheet.declareOutlineNamespace',
           ),
         )
       })

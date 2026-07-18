@@ -17,6 +17,17 @@ export interface SheetAhistoricState {
   staticOverrides: {
     byObject: StrictRecord<ObjectAddressKey, SerializableMap>
   }
+  /**
+   * Outline namespace folders configured via `sheet.declareOutlineNamespace()`
+   * and `sheet.setOutlineNamespaceCollapsed()`.
+   */
+  outlineNamespaces?: StrictRecord<
+    string,
+    {
+      defaultCollapsed?: boolean
+      collapsed?: boolean
+    }
+  >
 }
 
 /**

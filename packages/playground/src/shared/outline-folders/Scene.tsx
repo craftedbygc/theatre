@@ -85,7 +85,7 @@ export const Scene: React.FC<{project: IProject}> = ({project}) => {
       <h1 style={{marginTop: 0}}>Outline folder namespaces</h1>
       <p>
         Open the outline panel on the left. The <strong>Props</strong> folder is
-        collapsed by default via <code>studio.ui.outline.declareNamespace()</code>.
+        collapsed by default via <code>sheet.declareOutlineNamespace()</code>.
         There is also an empty <strong>Empty Folder</strong> declared ahead of
         time.
       </p>

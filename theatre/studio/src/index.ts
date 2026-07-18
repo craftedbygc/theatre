@@ -89,7 +89,6 @@ export type {
   PaneInstance,
   PaneClassDefinition,
   IStudioUI,
-  IStudioUIOutline,
   _StudioInitializeOpts,
   ToolsetConfig,
   ToolConfig,

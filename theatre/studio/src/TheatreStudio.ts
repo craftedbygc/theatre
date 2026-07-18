@@ -22,10 +22,6 @@ import {
 import type TheatreSheetObject from '@theatre/core/sheetObjects/TheatreSheetObject'
 import type TheatreSheet from '@theatre/core/sheets/TheatreSheet'
 import type {__UNSTABLE_Project_OnDiskState} from '@theatre/core'
-import {
-  getOutlineNamespaceItemKey,
-  parseOutlineNamespacePath,
-} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
 
 export interface ITransactionAPI {
   /**
@@ -189,63 +185,6 @@ export type PaneInstance<ClassName extends string> = {
   definition: PaneClassDefinition
 }
 
-export interface IStudioUIOutline {
-  /**
-   * Declares an outline namespace folder. The folder appears in the outline panel
-   * even before any sheet objects are added under it.
-   *
-   * You can also use this to set the default collapsed state for a namespace
-   * folder. The default only applies when the user has not manually expanded or
-   * collapsed the folder yet.
-   *
-   * @param sheet - The sheet that the namespace folder belongs to
-   * @param namespacePath - The namespace path, e.g. `"My Folder"` or `"My Folder / Subfolder"`
-   * @param opts - Optional configuration for the namespace folder
-   *
-   * @example
-   * ```ts
-   * const sheet = project.sheet('Scene')
-   *
-   * // Create an empty folder ahead of time, collapsed by default
-   * studio.ui.outline.declareNamespace(sheet, 'Props', {collapsed: true})
-   *
-   * // Later, add objects under that folder
-   * sheet.object('Props / Chair', {x: 0})
-   * sheet.object('Props / Table', {x: 0})
-   * ```
-   */
-  declareNamespace(
-    sheet: ISheet,
-    namespacePath: string,
-    opts?: {collapsed?: boolean},
-  ): void
-
-  /**
-   * Sets whether a namespace folder in the outline panel is collapsed.
-   *
-   * Use this to programmatically expand or collapse folders. Unlike
-   * `declareNamespace()`, this immediately sets the folder state and overrides
-   * any previous user preference.
-   *
-   * @param sheet - The sheet that the namespace folder belongs to
-   * @param namespacePath - The namespace path, e.g. `"My Folder"` or `"My Folder / Subfolder"`
-   * @param collapsed - Whether the folder should be collapsed
-   *
-   * @example
-   * ```ts
-   * const sheet = project.sheet('Scene')
-   *
-   * // Force a folder closed every time your app loads
-   * studio.ui.outline.setNamespaceCollapsed(sheet, 'Props', true)
-   * ```
-   */
-  setNamespaceCollapsed(
-    sheet: ISheet,
-    namespacePath: string,
-    collapsed: boolean,
-  ): void
-}
-
 export interface IStudioUI {
   /**
    * Temporarily hides the studio
@@ -259,11 +198,6 @@ export interface IStudioUI {
    * Makes the studio visible again.
    */
   restore(): void
-
-  /**
-   * APIs for controlling the outline panel.
-   */
-  readonly outline: IStudioUIOutline
 
   renderToolset(toolsetId: string, htmlNode: HTMLElement): () => void
 }
@@ -555,74 +489,6 @@ export default class TheatreStudio implements IStudio {
 
     restore() {
       getStudio().ui.restore()
-    },
-
-    outline: {
-      declareNamespace(
-        sheet: ISheet,
-        namespacePath: string,
-        opts?: {collapsed?: boolean},
-      ) {
-        if (!isSheetPublicAPI(sheet)) {
-          throw new Error(
-            `The sheet argument to studio.ui.outline.declareNamespace() must be the return value of project.sheet()`,
-          )
-        }
-
-        const parsedPath = parseOutlineNamespacePath(
-          namespacePath,
-          'studio.ui.outline.declareNamespace',
-        )
-
-        getStudio().transaction(
-          ({stateEditors}) => {
-            stateEditors.studio.ahistoric.projects.stateByProjectId.declaredOutlineNamespaces.declare(
-              {
-                projectId: sheet.address.projectId,
-                sheetId: sheet.address.sheetId,
-                namespacePathKey: parsedPath.join(' / '),
-                defaultCollapsed: opts?.collapsed,
-              },
-            )
-          },
-          {undoable: false},
-        )
-      },
-
-      setNamespaceCollapsed(
-        sheet: ISheet,
-        namespacePath: string,
-        collapsed: boolean,
-      ) {
-        if (!isSheetPublicAPI(sheet)) {
-          throw new Error(
-            `The sheet argument to studio.ui.outline.setNamespaceCollapsed() must be the return value of project.sheet()`,
-          )
-        }
-
-        const parsedPath = parseOutlineNamespacePath(
-          namespacePath,
-          'studio.ui.outline.setNamespaceCollapsed',
-        )
-
-        const itemKey = getOutlineNamespaceItemKey(
-          sheet.address.sheetId,
-          parsedPath,
-        )
-
-        getStudio().transaction(
-          ({stateEditors}) => {
-            stateEditors.studio.ahistoric.projects.stateByProjectId.collapsedItemsInOutline.set(
-              {
-                projectId: sheet.address.projectId,
-                isCollapsed: collapsed,
-                itemKey,
-              },
-            )
-          },
-          {undoable: false},
-        )
-      },
     },
 
     renderToolset(toolsetId: string, htmlNode: HTMLElement) {

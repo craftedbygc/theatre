@@ -18,6 +18,7 @@ import type {
   SheetInstanceId,
 } from '@theatre/shared/utils/ids'
 import type {StrictRecord} from '@theatre/shared/utils/types'
+import type {OutlineNamespaceConfig} from '@theatre/shared/utils/outlineNamespaces'
 
 type SheetTemplateObjectTemplateMap = StrictRecord<
   ObjectAddressKey,
@@ -33,6 +34,11 @@ export default class SheetTemplate {
 
   private _objectTemplates = new Atom<SheetTemplateObjectTemplateMap>({})
   readonly objectTemplatesP = this._objectTemplates.pointer
+
+  private readonly _pendingOutlineNamespaces: StrictRecord<
+    string,
+    OutlineNamespaceConfig
+  > = {}
 
   constructor(readonly project: Project, sheetId: SheetId) {
     this.address = {...project.address, sheetId}
@@ -69,5 +75,24 @@ export default class SheetTemplate {
     }
 
     return template
+  }
+
+  setOutlineNamespaceConfig(
+    namespacePathKey: string,
+    config: OutlineNamespaceConfig,
+  ) {
+    this._pendingOutlineNamespaces[namespacePathKey] = {
+      ...this._pendingOutlineNamespaces[namespacePathKey],
+      ...config,
+    }
+    this.project._commitOutlineNamespaceConfig(
+      this.address.sheetId,
+      namespacePathKey,
+      config,
+    )
+  }
+
+  getPendingOutlineNamespaces(): StrictRecord<string, OutlineNamespaceConfig> {
+    return this._pendingOutlineNamespaces
   }
 }
