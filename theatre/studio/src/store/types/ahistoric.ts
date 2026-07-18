@@ -41,6 +41,20 @@ export type StudioAhistoricState = {
       ProjectId,
       {
         collapsedItemsInOutline?: StrictRecord<string, boolean>
+        /**
+         * Namespace folders declared via `studio.ui.outline.declareNamespace()`.
+         * Keys are sheet IDs. Values map sanitized namespace paths (e.g.
+         * `"Folder / Subfolder"`) to their configuration.
+         */
+        declaredOutlineNamespaces?: StrictRecord<
+          SheetId,
+          StrictRecord<
+            string,
+            {
+              defaultCollapsed?: boolean
+            }
+          >
+        >
         stateBySheetId: StrictRecord<
           SheetId,
           {
