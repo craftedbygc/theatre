@@ -6,6 +6,12 @@ import type {
   SheetState_Historic,
 } from '@theatre/core/projects/store/types/SheetState_Historic'
 import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  ensureSequenceStateInSheet,
+  migrateSheetSequenceState,
+} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import type {Drafts} from '@theatre/studio/StudioStore/StudioStore'
 import type {
   ProjectAddress,
@@ -205,6 +211,16 @@ namespace stateEditors {
               stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId._ensure(
                 p,
               ).selectedInstanceId = p.sheetInstanceId
+            }
+
+            export function setActiveSequenceVariant(
+              p: WithoutSheetInstance<SheetAddress> & {
+                variant: SequenceVariantId
+              },
+            ) {
+              stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId._ensure(
+                p,
+              ).activeSequenceVariant = p.variant
             }
 
             export namespace sequenceEditor {
@@ -637,9 +653,16 @@ namespace stateEditors {
           if (!sheetState) return
           delete sheetState.staticOverrides.byObject[p.objectKey]
 
-          const sequence = sheetState.sequence
-          if (!sequence) return
-          delete sequence.tracksByObject[p.objectKey]
+          migrateSheetSequenceState(sheetState)
+          if (sheetState.sequencesById) {
+            for (const sequence of Object.values(sheetState.sequencesById)) {
+              if (!sequence) continue
+              delete sequence.tracksByObject[p.objectKey]
+            }
+          }
+          if (sheetState.sequence) {
+            delete sheetState.sequence.tracksByObject[p.objectKey]
+          }
         }
 
         export function forgetSheet(p: WithoutSheetInstance<SheetAddress>) {
@@ -654,21 +677,20 @@ namespace stateEditors {
 
         export namespace sequence {
           export function _ensure(
-            p: WithoutSheetInstance<SheetAddress>,
+            p: WithoutSheetInstance<SheetAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
           ): HistoricPositionalSequence {
             const s = stateEditors.coreByProject.historic.sheetsById._ensure(p)
-            s.sequence ??= {
-              subUnitsPerUnit: 30,
-              length: 10,
-              type: 'PositionalSequence',
-              tracksByObject: {},
-            }
-
-            return s.sequence!
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            return ensureSequenceStateInSheet(s, variantId)
           }
 
           export function setLength(
-            p: WithoutSheetInstance<SheetAddress> & {length: number},
+            p: WithoutSheetInstance<SheetAddress> & {
+              length: number
+              sequenceVariant?: SequenceVariantId
+            },
           ) {
             _ensure(p).length = clamp(
               parseFloat(p.length.toFixed(2)),
@@ -678,7 +700,9 @@ namespace stateEditors {
           }
 
           function _ensureTracksOfObject(
-            p: WithoutSheetInstance<SheetObjectAddress>,
+            p: WithoutSheetInstance<SheetObjectAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
           ) {
             const s =
               stateEditors.coreByProject.historic.sheetsById.sequence._ensure(
@@ -691,7 +715,9 @@ namespace stateEditors {
           }
 
           export function setPrimitivePropAsSequenced(
-            p: WithoutSheetInstance<PropAddress>,
+            p: WithoutSheetInstance<PropAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
             config: PropTypeConfig,
           ) {
             const tracks = _ensureTracksOfObject(p)
@@ -714,6 +740,7 @@ namespace stateEditors {
           export function setPrimitivePropAsStatic(
             p: WithoutSheetInstance<PropAddress> & {
               value: SerializablePrimitive
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const tracks = _ensureTracksOfObject(p)
@@ -788,6 +815,7 @@ namespace stateEditors {
               value: T
               snappingFunction: SnappingFunction
               type?: KeyframeType
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const position = p.snappingFunction(p.position)
@@ -835,6 +863,7 @@ namespace stateEditors {
             p: WithoutSheetInstance<SheetObjectAddress> & {
               trackId: SequenceTrackId
               position: number
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -858,6 +887,7 @@ namespace stateEditors {
               scale: number
               origin: number
               snappingFunction: SnappingFunction
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -966,6 +996,7 @@ namespace stateEditors {
             p: WithoutSheetInstance<SheetObjectAddress> & {
               trackId: SequenceTrackId
               keyframeIds: KeyframeId[]
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -997,6 +1028,7 @@ namespace stateEditors {
               trackId: SequenceTrackId
               keyframes: Array<Keyframe>
               snappingFunction: SnappingFunction
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)

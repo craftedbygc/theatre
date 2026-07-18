@@ -1,4 +1,6 @@
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
 import useDrag from '@theatre/studio/uiComponents/useDrag'
 import useKeyDown from '@theatre/studio/uiComponents/useKeyDown'
@@ -237,12 +239,19 @@ namespace utils {
     },
     primitiveProp(logger, layout, leaf, bounds, selectionByObjectKey) {
       const {sheetObject, trackId} = leaf
-      const trackData = val(
+      const sheetState = val(
         getStudio().atomP.historic.coreByProject[sheetObject.address.projectId]
-          .sheetsById[sheetObject.address.sheetId].sequence.tracksByObject[
-          sheetObject.address.objectKey
-        ].trackData[trackId],
-      )!
+          .sheetsById[sheetObject.address.sheetId],
+      )
+      const activeVariant = getStudioActiveSequenceVariant(
+        sheetObject.sheet.address,
+      )
+      const trackData = getSequenceStateFromSheet(
+        sheetState,
+        activeVariant,
+      )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
+
+      if (!trackData) return
 
       if (
         bounds.v[0] >
@@ -341,6 +350,7 @@ namespace utils {
     )
 
     const sheet = layout.tree.sheet
+    const activeVariant = getStudioActiveSequenceVariant(sheet.address)
     return {
       type: 'DopeSheetSelection',
       byObjectKey: selectionByObjectKey,
@@ -389,6 +399,7 @@ namespace utils {
                           objectKey,
                           projectId: origin.projectId,
                           sheetId: origin.sheetId,
+                          sequenceVariant: activeVariant,
                         })
                       }
                     }
@@ -418,6 +429,7 @@ namespace utils {
                 objectKey,
                 trackId,
                 keyframeIds: Object.keys(byKeyframeId),
+                sequenceVariant: activeVariant,
               })
             }
           }

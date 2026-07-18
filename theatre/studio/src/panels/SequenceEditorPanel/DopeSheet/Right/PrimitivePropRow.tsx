@@ -1,6 +1,8 @@
 import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
 import type {SequenceEditorTree_PrimitiveProp} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 import {usePrism} from '@theatre/react'
 import type {Pointer} from '@theatre/dataverse'
 import {val} from '@theatre/dataverse'
@@ -18,12 +20,15 @@ const PrimitivePropRow: React.VFC<{
     const {sheetObject} = leaf
     const {trackId} = leaf
 
-    const trackData = val(
+    const sheetState = val(
       getStudio()!.atomP.historic.coreByProject[sheetObject.address.projectId]
-        .sheetsById[sheetObject.address.sheetId].sequence.tracksByObject[
-        sheetObject.address.objectKey
-      ].trackData[trackId],
+        .sheetsById[sheetObject.address.sheetId],
     )
+    const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+    const trackData = getSequenceStateFromSheet(
+      sheetState,
+      activeVariant,
+    )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
 
     if (trackData?.type !== 'BasicKeyframedTrack') {
       logger.errorDev(

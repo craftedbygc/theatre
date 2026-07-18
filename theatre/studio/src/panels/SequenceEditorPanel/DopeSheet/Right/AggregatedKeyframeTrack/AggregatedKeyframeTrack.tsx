@@ -33,7 +33,12 @@ import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
 import useDrag from '@theatre/studio/uiComponents/useDrag'
 import {useLockFrameStampPositionRef} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 import {useCssCursorLock} from '@theatre/studio/uiComponents/PointerEventsHandler'
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {
+  getStudioActiveSequenceVariant,
+  pointerToActiveSheetSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
 import type {SheetObjectAddress} from '@theatre/shared/utils/addresses'
 import {
   decodePathToProp,
@@ -353,11 +358,16 @@ function pasteKeyframesSheet(
     ({pathToProp}) => pathToProp.length === 0,
   )
 
+  const sheetAddress = {projectId, sheetId}
+
   if (areKeyframesAllOnSingleTrack) {
     for (const object of viewModel.children.map((child) => child.sheetObject)) {
       const tracksByObject = pointerToPrism(
-        getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId]
-          .sequence.tracksByObject[object.address.objectKey],
+        pointerToActiveSheetSequence(
+          viewModel.sheet.project,
+          sheetId,
+          sheetAddress,
+        ).tracksByObject[object.address.objectKey],
       ).getValue()
 
       const trackIdsOnObject = Object.keys(tracksByObject?.trackData ?? {})
@@ -371,8 +381,11 @@ function pasteKeyframesSheet(
     }
   } else {
     const tracksByObject = pointerToPrism(
-      getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId]
-        .sequence.tracksByObject,
+      pointerToActiveSheetSequence(
+        viewModel.sheet.project,
+        sheetId,
+        sheetAddress,
+      ).tracksByObject,
     ).getValue()
 
     const placeableKeyframes = keyframes
@@ -417,10 +430,14 @@ function pasteKeyframesObjectOrCompound(
   sequence: Sequence,
 ) {
   const {projectId, sheetId, objectKey} = viewModel.sheetObject.address
+  const sheetAddress = {projectId, sheetId}
 
   const trackRecords = pointerToPrism(
-    getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId]
-      .sequence.tracksByObject[objectKey],
+    pointerToActiveSheetSequence(
+      viewModel.sheetObject.template.project,
+      sheetId,
+      sheetAddress,
+    ).tracksByObject[objectKey],
   ).getValue()
 
   const areKeyframesAllOnSingleTrack = keyframes.every(
@@ -503,6 +520,11 @@ function pasteKeyframesToMultipleTracks(
     keyframes.map(({keyframe}) => keyframe),
   )?.position!
 
+  const sequenceVariant = getStudioActiveSequenceVariant({
+    projectId: address.projectId,
+    sheetId: address.sheetId,
+  })
+
   getStudio()!.transaction(({stateEditors}) => {
     for (const trackId of trackIds) {
       for (const {keyframe} of keyframes) {
@@ -515,6 +537,7 @@ function pasteKeyframesToMultipleTracks(
             value: keyframe.value,
             snappingFunction: sequence.closestGridPosition,
             type: keyframe.type,
+            sequenceVariant,
           },
         )
       }
@@ -535,6 +558,11 @@ function pasteKeyframesToSpecificTracks(
     keyframesWithTracksToPlaceThemIn.map(({keyframe}) => keyframe),
   )?.position!
 
+  const sequenceVariant = getStudioActiveSequenceVariant({
+    projectId: keyframesWithTracksToPlaceThemIn[0].address.projectId,
+    sheetId: keyframesWithTracksToPlaceThemIn[0].address.sheetId,
+  })
+
   getStudio()!.transaction(({stateEditors}) => {
     for (const {
       keyframe,
@@ -550,6 +578,7 @@ function pasteKeyframesToSpecificTracks(
           value: keyframe.value,
           snappingFunction: sequence.closestGridPosition,
           type: keyframe.type,
+          sequenceVariant,
         },
       )
     }
@@ -604,10 +633,15 @@ function useDragForAggregateKeyframeDot(
             ? props.viewModel.sheet.address
             : props.viewModel.sheetObject.address
 
-        const tracksByObject = val(
+        const sheetState = val(
           getStudio()!.atomP.historic.coreByProject[address.projectId]
-            .sheetsById[address.sheetId].sequence.tracksByObject,
-        )!
+            .sheetsById[address.sheetId],
+        )
+        const sequenceVariant = getStudioActiveSequenceVariant(address)
+        const tracksByObject = getSequenceStateFromSheet(
+          sheetState,
+          sequenceVariant,
+        )!.tracksByObject
 
         // Calculate all the valid snap positions in the sequence editor,
         // excluding the child keyframes of this aggregate, and any selection it is part of.
@@ -685,6 +719,7 @@ function useDragForAggregateKeyframeDot(
             tempTransaction?.discard()
             tempTransaction = undefined
             tempTransaction = getStudio().tempTransaction(({stateEditors}) => {
+              const sequenceVariant = getStudioActiveSequenceVariant(address)
               for (const keyframe of keyframes) {
                 const original = keyframe.kf
                 stateEditors.coreByProject.historic.sheetsById.sequence.replaceKeyframes(
@@ -695,6 +730,7 @@ function useDragForAggregateKeyframeDot(
                     snappingFunction: val(
                       propsAtStartOfDrag.layoutP.sheet,
                     ).getSequence().closestGridPosition,
+                    sequenceVariant,
                   },
                 )
               }

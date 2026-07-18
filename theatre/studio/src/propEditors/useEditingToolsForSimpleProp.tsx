@@ -21,6 +21,12 @@ import {getNearbyKeyframesOfTrack} from './getNearbyKeyframesOfTrack'
 import type {NearbyKeyframesControls} from './NextPrevKeyframeCursors'
 import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
 import type {Asset, File as AssetFile} from '@theatre/shared/utils/assets'
+import {
+  getStudioActiveSequenceVariant,
+  setStudioActiveSequenceVariant,
+} from '@theatre/studio/utils/activeSequenceVariant'
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
+import {encodePathToProp} from '@theatre/shared/utils/addresses'
 
 interface EditingToolsCommon<T> {
   value: T
@@ -148,8 +154,9 @@ function createPrism<T extends SerializablePrimitive>(
     const isSequencable = isPropConfSequencable(propConfig)
 
     if (isSequencable) {
+      const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
       const validSequencedTracks = val(
-        obj.template.getMapOfValidSequenceTracks_forStudio(),
+        obj.template.getMapOfValidSequenceTracks_forStudio(activeVariant),
       )
       const possibleSequenceTrackId = getDeep(validSequencedTracks, pathToProp)
 
@@ -160,7 +167,11 @@ function createPrism<T extends SerializablePrimitive>(
           label: 'Make static',
           callback: () => {
             getStudio()!.transaction(({stateEditors}) => {
-              const propAddress = {...obj.address, pathToProp}
+              const propAddress = {
+                ...obj.address,
+                pathToProp,
+                sequenceVariant: activeVariant,
+              }
               stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsStatic(
                 {
                   ...propAddress,
@@ -175,14 +186,18 @@ function createPrism<T extends SerializablePrimitive>(
         const nearbyKeyframes = prism.sub(
           'lcr',
           (): NearbyKeyframes => {
-            const track = val(
+            const sheetState = val(
               obj.template.project.pointers.historic.sheetsById[
                 obj.address.sheetId
-              ].sequence.tracksByObject[obj.address.objectKey].trackData[
-                sequenceTrackId
               ],
             )
-            const sequencePosition = val(obj.sheet.getSequence().positionPrism)
+            const track = getSequenceStateFromSheet(
+              sheetState,
+              activeVariant,
+            )?.tracksByObject[obj.address.objectKey]?.trackData[sequenceTrackId]
+            const sequencePosition = val(
+              obj.sheet.getSequence(activeVariant).positionPrism,
+            )
             return getNearbyKeyframesOfTrack(
               obj,
               track && {
@@ -193,7 +208,7 @@ function createPrism<T extends SerializablePrimitive>(
               sequencePosition,
             )
           },
-          [sequenceTrackId],
+          [sequenceTrackId, activeVariant],
         )
 
         let shade: Shade
@@ -288,19 +303,64 @@ function createPrism<T extends SerializablePrimitive>(
     }
 
     if (isSequencable) {
-      contextMenuItems.push({
-        label: 'Sequence',
-        callback: () => {
-          getStudio()!.transaction(({stateEditors}) => {
-            const propAddress = {...obj.address, pathToProp}
+      const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
+      const variants = obj.sheet.template.getSequenceVariants()
+      const hasMultipleVariants = variants.length > 1
 
-            stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
-              propAddress,
-              propConfig,
-            )
-          })
-        },
-      })
+      if (hasMultipleVariants) {
+        for (const variant of variants) {
+          const sheetState = val(
+            obj.template.project.pointers.historic.sheetsById[
+              obj.address.sheetId
+            ],
+          )
+          const encodedPath = encodePathToProp(pathToProp)
+          const isSequencedOnVariant =
+            typeof getSequenceStateFromSheet(sheetState, variant)
+              ?.tracksByObject[obj.address.objectKey]?.trackIdByPropPath[
+              encodedPath
+            ] === 'string'
+
+          if (!isSequencedOnVariant) {
+            contextMenuItems.push({
+              label: `Sequence (${variant})`,
+              callback: () => {
+                getStudio()!.transaction(({stateEditors}) => {
+                  setStudioActiveSequenceVariant(obj.sheet.address, variant)
+                  const propAddress = {
+                    ...obj.address,
+                    pathToProp,
+                    sequenceVariant: variant,
+                  }
+
+                  stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
+                    propAddress,
+                    propConfig,
+                  )
+                })
+              },
+            })
+          }
+        }
+      } else {
+        contextMenuItems.push({
+          label: 'Sequence',
+          callback: () => {
+            getStudio()!.transaction(({stateEditors}) => {
+              const propAddress = {
+                ...obj.address,
+                pathToProp,
+                sequenceVariant: activeVariant,
+              }
+
+              stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
+                propAddress,
+                propConfig,
+              )
+            })
+          },
+        })
+      }
     }
 
     if (typeof staticOverride !== 'undefined') {

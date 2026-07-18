@@ -21,7 +21,16 @@ export interface SheetState_Historic {
   staticOverrides: {
     byObject: StrictRecord<ObjectAddressKey, SerializableMap>
   }
+  /**
+   * @deprecated Use `sequencesById` instead. Kept for backward compatibility with
+   * project states saved before sequence variants were introduced.
+   */
   sequence?: HistoricPositionalSequence
+  /**
+   * Each variant has its own sequence data (tracks, length, etc.), allowing the same
+   * sheet properties to be animated differently per variant (e.g. mobile vs desktop).
+   */
+  sequencesById?: StrictRecord<string, HistoricPositionalSequence>
 }
 
 // Question: What is this? The timeline position of a sequence?

@@ -13,6 +13,12 @@ import type {ObjectAddressKey, SheetInstanceId} from '@theatre/shared/utils/ids'
 import type {StrictRecord} from '@theatre/shared/utils/types'
 import type {ILogger} from '@theatre/shared/logger'
 import {isInteger} from 'lodash-es'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  getSequenceStateFromSheet,
+  validateSequenceVariantIdOrThrow,
+} from '@theatre/core/sequences/sequenceVariants'
 
 type SheetObjectMap = StrictRecord<ObjectAddressKey, SheetObject>
 
@@ -27,7 +33,8 @@ export type ObjectNativeObject = unknown
 
 export default class Sheet {
   private readonly _objects: Atom<SheetObjectMap> = new Atom<SheetObjectMap>({})
-  private _sequence: undefined | Sequence
+  private readonly _sequences: Record<string, Sequence> = {}
+  private _activeSequenceVariant: SequenceVariantId = DEFAULT_SEQUENCE_VARIANT
   readonly address: SheetAddress
   readonly publicApi: TheatreSheet
   readonly project: Project
@@ -87,32 +94,60 @@ export default class Sheet {
     })
   }
 
-  getSequence(): Sequence {
-    if (!this._sequence) {
+  getSequence(variant?: SequenceVariantId): Sequence {
+    const variantId = variant ?? this._activeSequenceVariant
+    if (!this._sequences[variantId]) {
       const lengthD = prism(() => {
-        const unsanitized = val(
-          this.project.pointers.historic.sheetsById[this.address.sheetId]
-            .sequence.length,
+        const sheetState = val(
+          this.project.pointers.historic.sheetsById[this.address.sheetId],
         )
+        const unsanitized = getSequenceStateFromSheet(
+          sheetState,
+          variantId,
+        )?.length
         return sanitizeSequenceLength(unsanitized)
       })
 
       const subUnitsPerUnitD = prism(() => {
-        const unsanitized = val(
-          this.project.pointers.historic.sheetsById[this.address.sheetId]
-            .sequence.subUnitsPerUnit,
+        const sheetState = val(
+          this.project.pointers.historic.sheetsById[this.address.sheetId],
         )
+        const unsanitized = getSequenceStateFromSheet(
+          sheetState,
+          variantId,
+        )?.subUnitsPerUnit
         return sanitizeSequenceSubUnitsPerUnit(unsanitized)
       })
 
-      this._sequence = new Sequence(
+      this._sequences[variantId] = new Sequence(
         this.template.project,
         this,
         lengthD,
         subUnitsPerUnitD,
+        variantId,
       )
     }
-    return this._sequence
+    return this._sequences[variantId]!
+  }
+
+  getActiveSequenceVariant(): SequenceVariantId {
+    return this._activeSequenceVariant
+  }
+
+  setActiveSequenceVariant(variant: SequenceVariantId): void {
+    const variantId = validateSequenceVariantIdOrThrow(
+      variant,
+      'sheet.setActiveSequenceVariant',
+    )
+    const registeredVariants = this.template.getSequenceVariants()
+    if (!registeredVariants.includes(variantId)) {
+      throw new Error(
+        `Variant "${variantId}" is not registered on this sheet. ` +
+          `Registered variants: ${registeredVariants.join(', ')}. ` +
+          `Register variants via sheet.declareSequenceVariants([...]).`,
+      )
+    }
+    this._activeSequenceVariant = variantId
   }
 }
 

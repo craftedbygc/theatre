@@ -1,5 +1,7 @@
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import getStudio from '@theatre/studio/getStudio'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 import type {PathToProp} from '@theatre/shared/utils/addresses'
 import type {SequenceTrackId} from '@theatre/shared/utils/ids'
 import {usePrism} from '@theatre/react'
@@ -19,12 +21,15 @@ const PrimitivePropGraph: React.FC<{
 }> = (props) => {
   return usePrism(() => {
     const {sheetObject, trackId} = props
-    const trackData = val(
+    const sheetState = val(
       getStudio()!.atomP.historic.coreByProject[sheetObject.address.projectId]
-        .sheetsById[sheetObject.address.sheetId].sequence.tracksByObject[
-        sheetObject.address.objectKey
-      ].trackData[trackId],
+        .sheetsById[sheetObject.address.sheetId],
     )
+    const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+    const trackData = getSequenceStateFromSheet(
+      sheetState,
+      activeVariant,
+    )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
 
     if (trackData?.type !== 'BasicKeyframedTrack') {
       console.error(

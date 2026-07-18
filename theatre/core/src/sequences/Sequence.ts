@@ -26,6 +26,11 @@ import type {ILogger} from '@theatre/shared/logger'
 import type {ISequence} from '..'
 import {notify} from '@theatre/shared/notify'
 import type {$IntentionalAny} from '@theatre/dataverse/src/types'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  getSequenceStateFromSheet,
+} from '@theatre/core/sequences/sequenceVariants'
 import {isSheetObject} from '@theatre/shared/instanceTypes'
 
 export type IPlaybackRange = [from: number, to: number]
@@ -62,13 +67,15 @@ export default class Sequence implements PointerToPrismProvider {
     readonly _sheet: Sheet,
     readonly _lengthD: Prism<number>,
     readonly _subUnitsPerUnitD: Prism<number>,
+    readonly _sequenceVariant: SequenceVariantId = DEFAULT_SEQUENCE_VARIANT,
     playbackController?: IPlaybackController,
   ) {
     this._logger = _project._logger
       .named('Sheet', _sheet.address.sheetId)
       .named('Instance', _sheet.address.sheetInstanceId)
+      .named('Variant', _sequenceVariant)
 
-    this.address = {...this._sheet.address, sequenceName: 'default'}
+    this.address = {...this._sheet.address, sequenceName: _sequenceVariant}
 
     this.publicApi = new TheatreSequence(this)
 
@@ -131,10 +138,13 @@ export default class Sequence implements PointerToPrismProvider {
       )
     }
 
-    const trackP = val(
-      this._project.pointers.historic.sheetsById[this._sheet.address.sheetId]
-        .sequence.tracksByObject[root.address.objectKey],
+    const sheetState = val(
+      this._project.pointers.historic.sheetsById[this._sheet.address.sheetId],
     )
+    const trackP = getSequenceStateFromSheet(
+      sheetState,
+      this._sequenceVariant,
+    )?.tracksByObject[root.address.objectKey]
 
     if (!trackP) {
       return []

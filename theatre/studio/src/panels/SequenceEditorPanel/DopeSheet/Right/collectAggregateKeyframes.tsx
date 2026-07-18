@@ -1,4 +1,4 @@
-import getStudio from '@theatre/studio/getStudio'
+import {pointerToActiveSheetSequence} from '@theatre/studio/utils/activeSequenceVariant'
 import {val} from '@theatre/dataverse'
 import type {
   SequenceEditorTree_PrimitiveProp,
@@ -124,12 +124,11 @@ function collectAggregateKeyframesPrimitiveProp(
 ): TrackWithId[] {
   const sheetObject = leaf.sheetObject
 
-  const projectId = sheetObject.address.projectId
-
-  const sheetObjectTracksP =
-    getStudio().atomP.historic.coreByProject[projectId].sheetsById[
-      sheetObject.address.sheetId
-    ].sequence.tracksByObject[sheetObject.address.objectKey]
+  const sheetObjectTracksP = pointerToActiveSheetSequence(
+    sheetObject.template.project,
+    sheetObject.address.sheetId,
+    sheetObject.sheet.address,
+  ).tracksByObject[sheetObject.address.objectKey]
   const trackId = val(
     sheetObjectTracksP.trackIdByPropPath[encodePathToProp(leaf.pathToProp)],
   )
@@ -182,11 +181,11 @@ function collectAggregateSnapPositionsPrimitiveProp(
   snapTargetPositions: {[key: string]: {[key: string]: number[]}},
 ): number[] {
   const sheetObject = leaf.sheetObject
-  const projectId = sheetObject.address.projectId
-  const sheetObjectTracksP =
-    getStudio().atomP.historic.coreByProject[projectId].sheetsById[
-      sheetObject.address.sheetId
-    ].sequence.tracksByObject[sheetObject.address.objectKey]
+  const sheetObjectTracksP = pointerToActiveSheetSequence(
+    sheetObject.template.project,
+    sheetObject.address.sheetId,
+    sheetObject.sheet.address,
+  ).tracksByObject[sheetObject.address.objectKey]
   const trackId = val(
     sheetObjectTracksP.trackIdByPropPath[encodePathToProp(leaf.pathToProp)],
   )

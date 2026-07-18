@@ -21,6 +21,7 @@ import type {
   SheetInstanceId,
   UIPanelId,
 } from '@theatre/shared/utils/ids'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 
 export type PanelPosition = {
   edges: {
@@ -94,6 +95,8 @@ export type StudioHistoricStateSequenceEditorMarker = {
  */
 export type StudioHistoricStateProjectSheet = {
   selectedInstanceId: undefined | SheetInstanceId
+  /** The sequence variant currently being edited in the studio UI */
+  activeSequenceVariant?: SequenceVariantId
   sequenceEditor: {
     markerSet?: PointableSet<
       SequenceMarkerId,

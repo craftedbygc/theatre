@@ -18,6 +18,7 @@ import logger from '@theatre/shared/logger'
 import {titleBarHeight} from '@theatre/studio/panels/BasePanel/common'
 import type {Studio} from '@theatre/studio/Studio'
 import type {UnknownValidCompoundProps} from '@theatre/core/propTypes/internals'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 
 /**
  * Base "view model" for each row with common
@@ -155,7 +156,9 @@ export const calculateSequenceEditorTree = (
     shouldRender: boolean,
   ) {
     const trackSetups = val(
-      sheetObject.template.getMapOfValidSequenceTracks_forStudio(),
+      sheetObject.template.getMapOfValidSequenceTracks_forStudio(
+        getStudioActiveSequenceVariant(sheetObject.sheet.address),
+      ),
     )
     const objectConfig = val(sheetObject.template.configPointer)
 

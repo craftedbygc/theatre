@@ -23,6 +23,10 @@ import TheatreSheetObject from './TheatreSheetObject'
 import type {Interpolator, PropTypeConfig} from '@theatre/core/propTypes'
 import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
 import type {ILogger, IUtilContext} from '@theatre/shared/logger'
+import {
+  getSequenceStateFromSheet,
+  pointerToSequenceTrackData,
+} from '@theatre/core/sequences/sequenceVariants'
 import {onChange} from '@theatre/core/coreExports'
 
 /**
@@ -276,8 +280,11 @@ export default class SheetObject implements PointerToPrismProvider {
     return prism(() => {
       const tracksToProcessD = prism.memo(
         'tracksToProcess',
-        () => this.template.getArrayOfValidSequenceTracks(),
-        [],
+        () =>
+          this.template.getArrayOfValidSequenceTracks(
+            this.sheet.getActiveSequenceVariant(),
+          ),
+        [this.sheet.getActiveSequenceVariant()],
       )
 
       const tracksToProcess = val(tracksToProcessD)
@@ -354,11 +361,15 @@ export default class SheetObject implements PointerToPrismProvider {
   protected _trackIdToPrism(
     trackId: SequenceTrackId,
   ): Prism<InterpolationTriple | undefined> {
-    const trackP =
-      this.template.project.pointers.historic.sheetsById[this.address.sheetId]
-        .sequence.tracksByObject[this.address.objectKey].trackData[trackId]
+    const variantId = this.sheet.getActiveSequenceVariant()
+    const trackP = pointerToSequenceTrackData(
+      this.template.project.pointers.historic.sheetsById[this.address.sheetId],
+      variantId,
+      this.address.objectKey,
+      trackId,
+    )
 
-    const timeD = this.sheet.getSequence().positionPrism
+    const timeD = this.sheet.getSequence(variantId).positionPrism
 
     return interpolationTripleAtPosition(this._internalUtilCtx, trackP, timeD)
   }
