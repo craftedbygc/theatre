@@ -115,6 +115,8 @@ export const calculateSequenceEditorTree = (
     studio.atomP.ahistoric.projects.stateByProjectId[sheet.address.projectId]
       .stateBySheetId[sheet.address.sheetId].sequence.collapsableItems
 
+  const activeSequenceVariant = getStudioActiveSequenceVariant(sheet.address)
+
   const isCollapsedP =
     collapsableItemSetP.byId[createStudioSheetItemKey.forSheet()].isCollapsed
   const isCollapsed = pointerToPrism(isCollapsedP).getValue() ?? false
@@ -157,7 +159,7 @@ export const calculateSequenceEditorTree = (
   ) {
     const trackSetups = val(
       sheetObject.template.getMapOfValidSequenceTracks_forStudio(
-        getStudioActiveSequenceVariant(sheetObject.sheet.address),
+        activeSequenceVariant,
       ),
     )
     const objectConfig = val(sheetObject.template.configPointer)

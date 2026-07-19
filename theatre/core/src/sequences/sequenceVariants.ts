@@ -165,6 +165,10 @@ export function valTracksByObjectForSheetVariant(
   sheetStatePointer: Pointer<SheetState_Historic | undefined>,
   variantId: SequenceVariantId,
 ): HistoricPositionalSequence['tracksByObject'] | undefined {
+  // Subscribe to the full map so adding a new variant key (e.g. `default` when
+  // only `mobile` already exists) invalidates dependents.
+  val(sheetStatePointer.sequencesById)
+
   const sequenceFromMap = val(sheetStatePointer.sequencesById[variantId])
   if (sequenceFromMap !== undefined) {
     return val(sheetStatePointer.sequencesById[variantId].tracksByObject)
@@ -187,8 +191,13 @@ export function valTrackIdByPropPathForObject(
 ):
   | StrictRecord<PathToProp_Encoded, SequenceTrackId>
   | undefined {
+  // Subscribe to the full map so adding a new variant key invalidates dependents.
+  val(sheetStatePointer.sequencesById)
+
   const sequenceFromMap = val(sheetStatePointer.sequencesById[variantId])
   if (sequenceFromMap !== undefined) {
+    // Subscribe to the tracks container so new object keys invalidate dependents.
+    val(sheetStatePointer.sequencesById[variantId].tracksByObject)
     return val(
       sheetStatePointer.sequencesById[variantId].tracksByObject[objectKey]
         ?.trackIdByPropPath,
@@ -196,6 +205,7 @@ export function valTrackIdByPropPathForObject(
   }
 
   if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+    val(sheetStatePointer.sequence?.tracksByObject)
     return val(
       sheetStatePointer.sequence?.tracksByObject[objectKey]?.trackIdByPropPath,
     )
