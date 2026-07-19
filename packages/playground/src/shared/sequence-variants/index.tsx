@@ -76,15 +76,13 @@ const SequenceVariantsDemo: React.FC = () => {
         to edit static and sequenced props for that variant. Values on{' '}
         <code>default</code> are inherited by other variants unless overridden.
         Resize below {MOBILE_BREAKPOINT}px to switch the runtime variant to{' '}
-        <code>mobile</code>.
+        <code>mobile</code>. While Studio is open, the preview follows the
+        variant selected in the outline panel and is not affected by resize.
       </p>
       <p>
-        Window width: <strong>{windowWidth}px</strong> — Active runtime variant:{' '}
-        <strong>{activeVariant}</strong>
-      </p>
-      <p style={{color: '#888', fontSize: 14}}>
-        Right-click the sequence diamond on a property in the detail panel to
-        choose which variant to sequence in the studio.
+        Window width: <strong>{windowWidth}px</strong> — Runtime variant:{' '}
+        <strong>{runtimeVariant}</strong> — Preview variant:{' '}
+        <strong>{previewVariant}</strong>
       </p>
       <div
         ref={boxRef}
