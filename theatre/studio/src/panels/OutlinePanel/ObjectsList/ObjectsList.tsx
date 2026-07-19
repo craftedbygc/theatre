@@ -8,10 +8,10 @@ import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
 import {
   ensureNamespacePath,
-  type NamespacedObjects,
   parseOutlineNamespacePath,
   useCollapseStateInOutlinePanel,
 } from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import type {NamespacedObjects} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
 import {isObjectOverriddenInVariant} from '@theatre/studio/utils/variantObjectOverrides'

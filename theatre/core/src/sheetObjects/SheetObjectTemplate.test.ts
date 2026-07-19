@@ -556,7 +556,6 @@ describe(`SheetObjectTemplate`, () => {
             projectId: sheet.address.projectId,
             sheetId: sheet.address.sheetId,
             objectKey: 'obj' as ObjectAddressKey,
-            pathToProp: ['position', 'x'],
             trackId: 'x' as SequenceTrackId,
             position: 0,
             value: 99,

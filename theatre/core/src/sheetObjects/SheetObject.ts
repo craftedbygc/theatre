@@ -23,11 +23,8 @@ import TheatreSheetObject from './TheatreSheetObject'
 import type {Interpolator, PropTypeConfig} from '@theatre/core/propTypes'
 import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
 import type {ILogger, IUtilContext} from '@theatre/shared/logger'
-import {
-  getSequenceStateFromSheet,
-  pointerToSequenceTrackData,
-  type SequenceVariantId,
-} from '@theatre/core/sequences/sequenceVariants'
+import {pointerToSequenceTrackData} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import {onChange} from '@theatre/core/coreExports'
 
 /**
@@ -113,10 +110,9 @@ export default class SheetObject implements PointerToPrismProvider {
          * recalculations are cheap.
          *
          * Question: What about object.initialValue which _could_ change on every frame, but isn't layerd on last?
-         * Answer: initialValue is seldom used (it's only used in `@theatre/r3f` as far as we know). So this won't
+         * Answer: initialValue is seldom used. So this won't
          * affect the majority of use cases. And in case it _is_ used, it's better for us to implement an alternative
-         * to `object.getValues()` that does not layer initialValue (and also skips defaultValue too). This is discussed
-         * in issue [P-208](https://linear.app/theatre/issue/P-208/use-overrides-rather-than-final-values-in-r3f).
+         * to `object.getValues()` that does not layer initialValue (and also skips defaultValue too).
          */
 
         /**
@@ -284,8 +280,7 @@ export default class SheetObject implements PointerToPrismProvider {
 
       const tracksToProcessD = prism.memo(
         'tracksToProcess',
-        () =>
-          this.template.getArrayOfValidSequenceTracks(activeVariant),
+        () => this.template.getArrayOfValidSequenceTracks(activeVariant),
         [activeVariant],
       )
 

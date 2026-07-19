@@ -38,7 +38,6 @@ prog
       '@theatre/dataverse',
       '@theatre/react',
       '@theatre/browser-bundles',
-      '@theatre/r3f',
     ]
 
     await Promise.all([
@@ -52,7 +51,6 @@ prog.command('build', 'Builds all the main packages').action(async () => {
     '@theatre/dataverse',
     '@theatre/react',
     '@theatre/browser-bundles',
-    '@theatre/r3f',
   ]
   async function build() {
     await Promise.all([
@@ -81,7 +79,6 @@ prog
       '@theatre/dataverse',
       '@theatre/react',
       '@theatre/browser-bundles',
-      '@theatre/r3f',
     ]
 
     const packagesToPublish = [
@@ -90,7 +87,6 @@ prog
       '@theatre/dataverse',
       '@theatre/react',
       '@theatre/browser-bundles',
-      '@theatre/r3f',
     ]
 
     /**
@@ -104,7 +100,6 @@ prog
       'packages/dataverse',
       'packages/react',
       'packages/browser-bundles',
-      'packages/r3f',
     ]
 
     // our packages will check for this env variable to make sure their
@@ -284,7 +279,6 @@ prog
       '@theatre/dataverse',
       '@theatre/react',
       '@theatre/browser-bundles',
-      '@theatre/r3f',
     ]
 
     /**
@@ -317,13 +311,8 @@ prog
      * @param packageName - Name of the package
      * @param commitHash - A commit hash
      */
-    function getNewVersionName(packageName: string, commitHash: string) {
-      // The `r3f` package has its own release schedule, so its version numbers
-      // are almost always different from the rest of the packages.
-      const pathToPackageJson =
-        packageName === '@theatre/r3f'
-          ? path.resolve(__dirname, '../', 'packages', 'r3f', 'package.json')
-          : path.resolve(__dirname, '../', './package.json')
+    function getNewVersionName(_packageName: string, commitHash: string) {
+      const pathToPackageJson = path.resolve(__dirname, '../', './package.json')
 
       const jsonData = JSON.parse(
         fs.readFileSync(pathToPackageJson, {encoding: 'utf-8'}),
@@ -359,8 +348,6 @@ prog
 
         let {version, dependencies, peerDependencies, devDependencies} =
           original
-        // The @theatre/r3f package curently doesn't track the same version number of the other packages like @theatre/core,
-        // so we need to generate version numbers independently for each package
         version = getNewVersionName(workspaceData.name, latestCommitHash)
         assignedVersionByPackageName[workspaceData.name] = version
         // Normally we don't have to override the package versions in dependencies because yarn would already convert

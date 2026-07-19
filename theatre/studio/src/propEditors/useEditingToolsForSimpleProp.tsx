@@ -406,7 +406,7 @@ function getPrism<T extends SerializablePrimitive>(
  * scrubbed. See how impl of {@link Scrub} manages
  * `state.flagsTransaction` to keep a list of these touched paths
  * for the UI to be able to recognize. (e.g. to highlight the
- * item in r3f as you change its scale).
+ * item in the scene as you change its scale).
  */
 export function useEditingToolsForSimplePropInDetailsPanel<
   T extends SerializablePrimitive,

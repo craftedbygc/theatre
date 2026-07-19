@@ -52,7 +52,7 @@ export function testServerAndPage({
     await page.close()
   })
 
-  test('The server runs, and the r3f setup works', async () => {
+  test('The server runs, and the Theatre setup works', async () => {
     // run the production server but don't wait for it to finish
 
     // just a random port I'm hoping is free everywhere.

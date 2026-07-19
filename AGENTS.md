@@ -29,14 +29,13 @@ CI order (`.github/workflows/ci.yml`): `Build`, `Lint`, `Test`, `Typecheck`, `Vi
 
 ## Architecture / package boundaries
 
-Yarn workspaces: `packages/*`, `examples/*`, `theatre`, `compat-tests`. Lerna is configured (`lerna.json`) but versions are managed manually; **all packages except `@theatre/r3f` share one version number** (set in root `package.json` and bumped by the release CLI). `@theatre/r3f` has its own release schedule.
+Yarn workspaces: `packages/*`, `examples/*`, `theatre`, `compat-tests`. Lerna is configured (`lerna.json`) but versions are managed manually; **all packages share one version number** (set in root `package.json` and bumped by the release CLI).
 
 Published packages → source location:
 - `@theatre/core` → `theatre/core/` — runtime animation library (Apache-2.0, ships in user bundles)
 - `@theatre/studio` → `theatre/studio/` — visual editor (AGPL-3.0, dev-time only)
 - `@theatre/dataverse` → `packages/dataverse/` — reactive dataflow
 - `@theatre/react` → `packages/react/`
-- `@theatre/r3f` → `packages/r3f/` — react-three-fiber binding
 - `@theatre/browser-bundles` → `packages/browser-bundles/`
 
 Non-published: `packages/playground` (dev harness + e2e), `packages/benchmarks`, `packages/saaz`, `packages/dataverse-experiments`, `packages/utils`, `packages/app`, `theatre/shared`, `theatre/devEnv`, `compat-tests`.

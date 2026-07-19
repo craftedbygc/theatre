@@ -1,8 +1,7 @@
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import {
-  DEFAULT_SEQUENCE_VARIANT,
-  type SequenceVariantId,
-} from '@theatre/core/sequences/sequenceVariants'
+// eslint-disable-next-line no-restricted-syntax
+import {DEFAULT_SEQUENCE_VARIANT} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
@@ -38,7 +37,9 @@ export const ObjectItem: React.VFC<{
 
   const selectionStatus = usePrism(() => {
     const outlineSelection = getOutlineSelection()
-    const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+    const activeVariant = getStudioActiveSequenceVariant(
+      sheetObject.sheet.address,
+    )
 
     return outlineSelection.includes(sheetObject) && activeVariant === variant
       ? 'selected'
@@ -53,10 +54,7 @@ export const ObjectItem: React.VFC<{
     if (variant === DEFAULT_SEQUENCE_VARIANT) {
       return variants
         .filter((v) => v !== DEFAULT_SEQUENCE_VARIANT)
-        .filter(
-          (v) =>
-            !isObjectOverriddenInVariant(sheetAddress, v, objectKey),
-        )
+        .filter((v) => !isObjectOverriddenInVariant(sheetAddress, v, objectKey))
         .map((targetVariant) => ({
           label: `Override in variant: ${targetVariant}`,
           callback: () => {

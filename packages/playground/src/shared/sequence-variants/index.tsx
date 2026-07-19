@@ -2,9 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import ReactDOM from 'react-dom/client'
 import {getProject, types} from '@theatre/core'
 import studio from '@theatre/studio'
-import extension from '@theatre/r3f/dist/extension'
 
-studio.extend(extension)
 studio.initialize()
 
 const project = getProject('Sequence Variants Demo')
@@ -74,11 +72,12 @@ const SequenceVariantsDemo: React.FC = () => {
         This sheet has three variants: <code>default</code>, <code>mobile</code>
         , and <code>desktop</code>. The default variant lists all sheet objects.
         Right-click an object there and choose{' '}
-        <code>Override in variant: …</code> to opt it into another variant folder.
-        Values on <code>default</code> are inherited unless overridden in that
-        variant. Resize below {MOBILE_BREAKPOINT}px to switch the runtime variant
-        to <code>mobile</code>. While Studio is open, the preview follows the
-        variant selected in the outline panel and is not affected by resize.
+        <code>Override in variant: …</code> to opt it into another variant
+        folder. Values on <code>default</code> are inherited unless overridden
+        in that variant. Resize below {MOBILE_BREAKPOINT}px to switch the
+        runtime variant to <code>mobile</code>. While Studio is open, the
+        preview follows the variant selected in the outline panel and is not
+        affected by resize.
       </p>
       <p>
         Window width: <strong>{windowWidth}px</strong> — Runtime variant:{' '}
