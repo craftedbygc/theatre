@@ -25,6 +25,7 @@ import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
 } from '@theatre/studio/utils/activeSequenceVariant'
+// eslint-disable-next-line no-restricted-syntax
 import {
   getSequenceStateFromSheet,
   getVariantOwnStaticOverridesByObject,
@@ -179,7 +180,7 @@ function createPrism<T extends SerializablePrimitive>(
               const propAddress = {
                 ...obj.address,
                 pathToProp,
-                sequenceVariant: trackVariant,
+                sequenceVariant: activeVariant,
               }
               stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsStatic(
                 {
@@ -199,10 +200,10 @@ function createPrism<T extends SerializablePrimitive>(
                 obj.address.sheetId
               ],
             )
-            const track = getSequenceStateFromSheet(
-              sheetState,
-              trackVariant,
-            )?.tracksByObject[obj.address.objectKey]?.trackData[sequenceTrackId]
+            const track = getSequenceStateFromSheet(sheetState, trackVariant)
+              ?.tracksByObject[obj.address.objectKey]?.trackData[
+              sequenceTrackId
+            ]
             const sequencePosition = val(
               getStudioSequence(obj.sheet).positionPrism,
             )
@@ -303,7 +304,9 @@ function createPrism<T extends SerializablePrimitive>(
     const ownStaticOverrides =
       getVariantOwnStaticOverridesByObject(
         val(
-          obj.template.project.pointers.historic.sheetsById[obj.address.sheetId],
+          obj.template.project.pointers.historic.sheetsById[
+            obj.address.sheetId
+          ],
         ),
         activeVariant,
       )?.[obj.address.objectKey] ?? {}
@@ -315,8 +318,14 @@ function createPrism<T extends SerializablePrimitive>(
       contextMenuItems.push({
         label: 'Reset to default',
         callback: () => {
-          getStudio()!.transaction(({unset: unset}) => {
-            unset(pointerToProp)
+          getStudio()!.transaction(({stateEditors}) => {
+            stateEditors.coreByProject.historic.sheetsById.sequence.resetPrimitivePropOnVariant(
+              {
+                ...obj.address,
+                pathToProp,
+                sequenceVariant: activeVariant,
+              },
+            )
           })
         },
       })

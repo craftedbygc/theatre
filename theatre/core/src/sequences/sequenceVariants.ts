@@ -7,6 +7,7 @@ import type {PathToProp_Encoded} from '@theatre/shared/utils/addresses'
 import type {Pointer} from '@theatre/dataverse'
 import {val} from '@theatre/dataverse'
 import type {SequenceTrackId, ObjectAddressKey} from '@theatre/shared/utils/ids'
+import {generateSequenceTrackId} from '@theatre/shared/utils/ids'
 import {InvalidArgumentError} from '@theatre/shared/utils/errors'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
 import type {SerializableMap, StrictRecord} from '@theatre/shared/utils/types'
@@ -27,9 +28,7 @@ export type EffectiveSequenceTrack = {
  */
 export function mergeSequenceTrackMaps(
   defaultTracks: StrictRecord<PathToProp_Encoded, SequenceTrackId> | undefined,
-  overrideTracks:
-    | StrictRecord<PathToProp_Encoded, SequenceTrackId>
-    | undefined,
+  overrideTracks: StrictRecord<PathToProp_Encoded, SequenceTrackId> | undefined,
   activeVariant: SequenceVariantId,
 ): StrictRecord<PathToProp_Encoded, EffectiveSequenceTrack> {
   const merged: StrictRecord<PathToProp_Encoded, EffectiveSequenceTrack> = {}
@@ -83,13 +82,6 @@ export function getEffectiveStaticOverrideForObject(
   variantId: SequenceVariantId,
   objectKey: ObjectAddressKey,
 ): SerializableMap | undefined {
-  if (
-    variantId !== DEFAULT_SEQUENCE_VARIANT &&
-    !isObjectAssignedToSequenceVariant(sheetState, variantId, objectKey)
-  ) {
-    return undefined
-  }
-
   const defaultOverrides =
     getDefaultStaticOverridesByObject(sheetState)?.[objectKey]
 
@@ -97,8 +89,13 @@ export function getEffectiveStaticOverrideForObject(
     return defaultOverrides
   }
 
-  const variantOverrides =
-    sheetState?.staticOverridesByVariant?.[variantId]?.byObject?.[objectKey]
+  const variantOverrides = isObjectAssignedToSequenceVariant(
+    sheetState,
+    variantId,
+    objectKey,
+  )
+    ? sheetState?.staticOverridesByVariant?.[variantId]?.byObject?.[objectKey]
+    : undefined
 
   if (!defaultOverrides && !variantOverrides) return undefined
   if (!variantOverrides) return defaultOverrides
@@ -115,7 +112,8 @@ export function isObjectAssignedToSequenceVariant(
   if (variantId === DEFAULT_SEQUENCE_VARIANT) return true
 
   return (
-    sheetState?.variantObjectOverrides?.[variantId]?.includes(objectKey) ?? false
+    sheetState?.variantObjectOverrides?.[variantId]?.includes(objectKey) ??
+    false
   )
 }
 
@@ -144,7 +142,9 @@ const defaultEmptySequence = (): HistoricPositionalSequence => ({
  * Migrates legacy `sequence` to `sequencesById.default` if needed.
  * Only call this on mutable draft state (e.g. in state editors).
  */
-export function migrateSheetSequenceState(sheetState: SheetState_Historic): void {
+export function migrateSheetSequenceState(
+  sheetState: SheetState_Historic,
+): void {
   if (!sheetState.sequencesById) {
     sheetState.sequencesById = {}
   }
@@ -207,9 +207,7 @@ export function valTrackIdByPropPathForObject(
   sheetStatePointer: Pointer<SheetState_Historic | undefined>,
   variantId: SequenceVariantId,
   objectKey: ObjectAddressKey,
-):
-  | StrictRecord<PathToProp_Encoded, SequenceTrackId>
-  | undefined {
+): StrictRecord<PathToProp_Encoded, SequenceTrackId> | undefined {
   // Subscribe to the full map so adding a new variant key invalidates dependents.
   val(sheetStatePointer.sequencesById)
 
@@ -231,6 +229,71 @@ export function valTrackIdByPropPathForObject(
   }
 
   return undefined
+}
+
+/**
+ * Reactive read of props that opt out of inheriting default-variant sequences.
+ */
+export function valUnsequencedPropPathsForObject(
+  sheetStatePointer: Pointer<SheetState_Historic | undefined>,
+  variantId: SequenceVariantId,
+  objectKey: ObjectAddressKey,
+): PathToProp_Encoded[] | undefined {
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) return undefined
+
+  val(sheetStatePointer.sequencesById)
+
+  const sequenceFromMap = val(sheetStatePointer.sequencesById[variantId])
+  if (sequenceFromMap !== undefined) {
+    val(sheetStatePointer.sequencesById[variantId].tracksByObject)
+    return val(
+      sheetStatePointer.sequencesById[variantId].tracksByObject[objectKey]
+        ?.unsequencedPropPaths,
+    )
+  }
+
+  return undefined
+}
+
+export function blockInheritedSequencePropOnVariantInSheet(
+  sheetState: SheetState_Historic,
+  variantId: SequenceVariantId,
+  objectKey: ObjectAddressKey,
+  encodedPropPath: PathToProp_Encoded,
+): void {
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) return
+
+  const tracksByObject = ensureSequenceStateInSheet(
+    sheetState,
+    variantId,
+  ).tracksByObject
+  tracksByObject[objectKey] ??= {trackData: {}, trackIdByPropPath: {}}
+  const objectTracks = tracksByObject[objectKey]!
+  objectTracks.unsequencedPropPaths ??= []
+  if (!objectTracks.unsequencedPropPaths.includes(encodedPropPath)) {
+    objectTracks.unsequencedPropPaths.push(encodedPropPath)
+  }
+}
+
+export function unblockInheritedSequencePropOnVariantInSheet(
+  sheetState: SheetState_Historic,
+  variantId: SequenceVariantId,
+  objectKey: ObjectAddressKey,
+  encodedPropPath: PathToProp_Encoded,
+): void {
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) return
+
+  const objectTracks = getSequenceStateFromSheet(sheetState, variantId)
+    ?.tracksByObject[objectKey]
+  if (!objectTracks?.unsequencedPropPaths) return
+
+  objectTracks.unsequencedPropPaths = objectTracks.unsequencedPropPaths.filter(
+    (p) => p !== encodedPropPath,
+  )
+
+  if (objectTracks.unsequencedPropPaths.length === 0) {
+    delete objectTracks.unsequencedPropPaths
+  }
 }
 
 /**
@@ -287,6 +350,64 @@ export function copyObjectSequenceTracksToVariantInSheet(
 
   const targetSequence = ensureSequenceStateInSheet(sheetState, targetVariant)
   targetSequence.tracksByObject[objectKey] = cloneDeep(sourceTracks)
+}
+
+/**
+ * Copies one prop's sequence track from the default variant into a non-default
+ * variant with a new track id so edits on either variant stay independent.
+ */
+export function copyPrimitivePropSequenceFromDefaultToVariantInSheet(
+  sheetState: SheetState_Historic,
+  objectKey: ObjectAddressKey,
+  targetVariant: SequenceVariantId,
+  encodedPropPath: PathToProp_Encoded,
+): boolean {
+  if (targetVariant === DEFAULT_SEQUENCE_VARIANT) return false
+
+  migrateSheetSequenceState(sheetState)
+
+  const defaultObjectTracks = getSequenceStateFromSheet(
+    sheetState,
+    DEFAULT_SEQUENCE_VARIANT,
+  )?.tracksByObject[objectKey]
+  const defaultTrackId = defaultObjectTracks?.trackIdByPropPath[encodedPropPath]
+
+  const targetSequence = ensureSequenceStateInSheet(sheetState, targetVariant)
+  targetSequence.tracksByObject[objectKey] ??= {
+    trackData: {},
+    trackIdByPropPath: {},
+  }
+  const targetObjectTracks = targetSequence.tracksByObject[objectKey]!
+
+  const existingVariantTrackId =
+    targetObjectTracks.trackIdByPropPath[encodedPropPath]
+  if (typeof existingVariantTrackId === 'string') {
+    delete targetObjectTracks.trackData[existingVariantTrackId]
+    delete targetObjectTracks.trackIdByPropPath[encodedPropPath]
+  }
+
+  if (targetObjectTracks.unsequencedPropPaths) {
+    targetObjectTracks.unsequencedPropPaths =
+      targetObjectTracks.unsequencedPropPaths.filter(
+        (path) => path !== encodedPropPath,
+      )
+    if (targetObjectTracks.unsequencedPropPaths.length === 0) {
+      delete targetObjectTracks.unsequencedPropPaths
+    }
+  }
+
+  if (typeof defaultTrackId !== 'string') {
+    return false
+  }
+
+  const defaultTrackData = defaultObjectTracks!.trackData[defaultTrackId]
+  if (!defaultTrackData) return false
+
+  const newTrackId = generateSequenceTrackId()
+  targetObjectTracks.trackData[newTrackId] = cloneDeep(defaultTrackData)
+  targetObjectTracks.trackIdByPropPath[encodedPropPath] = newTrackId
+
+  return true
 }
 
 export function validateSequenceVariantIdOrThrow(

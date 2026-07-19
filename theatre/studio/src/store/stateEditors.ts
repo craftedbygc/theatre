@@ -10,10 +10,14 @@ import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 // eslint-disable-next-line no-restricted-syntax
 import {
   DEFAULT_SEQUENCE_VARIANT,
+  blockInheritedSequencePropOnVariantInSheet,
+  copyObjectSequenceTracksToVariantInSheet,
+  copyPrimitivePropSequenceFromDefaultToVariantInSheet,
   ensureSequenceStateInSheet,
   ensureVariantStaticOverridesByObjectInSheet,
+  getSequenceStateFromSheet,
   migrateSheetSequenceState,
-  copyObjectSequenceTracksToVariantInSheet,
+  unblockInheritedSequencePropOnVariantInSheet,
 } from '@theatre/core/sequences/sequenceVariants'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import type {Drafts} from '@theatre/studio/StudioStore/StudioStore'
@@ -822,8 +826,19 @@ namespace stateEditors {
             },
             config: PropTypeConfig,
           ) {
-            const tracks = _ensureTracksOfObject(p)
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            const sheetState =
+              stateEditors.coreByProject.historic.sheetsById._ensure(p)
             const pathEncoded = encodePathToProp(p.pathToProp)
+
+            unblockInheritedSequencePropOnVariantInSheet(
+              sheetState,
+              variantId,
+              p.objectKey,
+              pathEncoded,
+            )
+
+            const tracks = _ensureTracksOfObject(p)
             const possibleTrackId = tracks.trackIdByPropPath[pathEncoded]
             if (typeof possibleTrackId === 'string') return
 
@@ -845,18 +860,76 @@ namespace stateEditors {
               sequenceVariant?: SequenceVariantId
             },
           ) {
-            const tracks = _ensureTracksOfObject(p)
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            const sheetState =
+              stateEditors.coreByProject.historic.sheetsById._ensure(p)
             const encodedPropPath = encodePathToProp(p.pathToProp)
-            const trackId = tracks.trackIdByPropPath[encodedPropPath]
+            const tracks = _ensureTracksOfObject({
+              ...p,
+              sequenceVariant: variantId,
+            })
+            const variantTrackId = tracks.trackIdByPropPath[encodedPropPath]
 
-            if (typeof trackId !== 'string') return
+            if (typeof variantTrackId === 'string') {
+              delete tracks.trackIdByPropPath[encodedPropPath]
+              delete tracks.trackData[variantTrackId]
+            }
 
-            delete tracks.trackIdByPropPath[encodedPropPath]
-            delete tracks.trackData[trackId]
+            if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+              if (typeof variantTrackId !== 'string') return
+            } else {
+              const defaultTrackId = getSequenceStateFromSheet(
+                sheetState,
+                DEFAULT_SEQUENCE_VARIANT,
+              )?.tracksByObject[p.objectKey]?.trackIdByPropPath[encodedPropPath]
+
+              if (typeof defaultTrackId === 'string') {
+                blockInheritedSequencePropOnVariantInSheet(
+                  sheetState,
+                  variantId,
+                  p.objectKey,
+                  encodedPropPath,
+                )
+              } else if (typeof variantTrackId !== 'string') {
+                return
+              }
+            }
 
             stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-              p,
+              {...p, sequenceVariant: variantId},
             )
+          }
+
+          export function resetPrimitivePropOnVariant(
+            p: WithoutSheetInstance<PropAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
+          ) {
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            const sheetState =
+              stateEditors.coreByProject.historic.sheetsById._ensure(p)
+            const encodedPropPath = encodePathToProp(p.pathToProp)
+
+            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
+              {...p, sequenceVariant: variantId},
+            )
+
+            if (variantId !== DEFAULT_SEQUENCE_VARIANT) {
+              copyPrimitivePropSequenceFromDefaultToVariantInSheet(
+                sheetState,
+                p.objectKey,
+                variantId,
+                encodedPropPath,
+              )
+              return
+            }
+
+            const tracks = _ensureTracksOfObject(p)
+            const variantTrackId = tracks.trackIdByPropPath[encodedPropPath]
+            if (typeof variantTrackId === 'string') {
+              delete tracks.trackIdByPropPath[encodedPropPath]
+              delete tracks.trackData[variantTrackId]
+            }
           }
 
           export function setCompoundPropAsStatic(
@@ -1220,6 +1293,15 @@ namespace stateEditors {
               const sheetState =
                 stateEditors.coreByProject.historic.sheetsById._ensure(p)
               const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+              const encodedPropPath = encodePathToProp(p.pathToProp)
+
+              unblockInheritedSequencePropOnVariantInSheet(
+                sheetState,
+                variantId,
+                p.objectKey,
+                encodedPropPath,
+              )
+
               const byObject = ensureVariantStaticOverridesByObjectInSheet(
                 sheetState,
                 variantId,

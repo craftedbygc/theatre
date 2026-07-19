@@ -31,6 +31,7 @@ import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
 } from '@theatre/studio/utils/activeSequenceVariant'
+// eslint-disable-next-line no-restricted-syntax
 import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 
 interface CommonStuff {
@@ -148,8 +149,20 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
       contextMenuItems.push({
         label: 'Reset all to default',
         callback: () => {
-          getStudio()!.transaction(({unset}) => {
-            unset(pointerToProp)
+          getStudio()!.transaction(({stateEditors}) => {
+            for (const {path: subPath, conf} of iteratePropType(
+              propConfig,
+              [],
+            )) {
+              if (isPropConfigComposite(conf)) continue
+              stateEditors.coreByProject.historic.sheetsById.sequence.resetPrimitivePropOnVariant(
+                {
+                  ...obj.address,
+                  pathToProp: [...pathToProp, ...subPath],
+                  sequenceVariant: activeVariant,
+                },
+              )
+            }
           })
         },
       })
@@ -264,9 +277,7 @@ function ControlIndicators({
     const pathToProp = getPointerParts(pointerToProp).path
     const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
 
-    const sequencePosition = val(
-      getStudioSequence(obj.sheet).positionPrism,
-    )
+    const sequencePosition = val(getStudioSequence(obj.sheet).positionPrism)
 
     /*
     2/10 perf concern:

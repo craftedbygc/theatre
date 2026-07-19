@@ -43,8 +43,9 @@ export interface SheetState_Historic {
    */
   sequencesById?: StrictRecord<string, HistoricPositionalSequence>
   /**
-   * Sheet objects explicitly opted into a non-default sequence variant. Only these
-   * objects inherit default static/sequence data on that variant.
+   * Sheet objects explicitly opted into a non-default sequence variant for editing
+   * variant-specific overrides in the outline. All objects inherit default static
+   * and sequence data on every variant unless overridden here.
    */
   variantObjectOverrides?: StrictRecord<string, ObjectAddressKey[]>
 }
@@ -77,6 +78,12 @@ export type HistoricPositionalSequence = {
       // Explicitly, this does not include prop paths for compound props (those
       // are sequenced by sequenecing their simple descendant props)
       trackIdByPropPath: StrictRecord<PathToProp_Encoded, SequenceTrackId>
+
+      /**
+       * Props on this variant that should not inherit default-variant sequences.
+       * Used when a prop is made static while inheriting from the default variant.
+       */
+      unsequencedPropPaths?: PathToProp_Encoded[]
 
       /**
        * A flat record of SequenceTrackId to TrackData. It's better
