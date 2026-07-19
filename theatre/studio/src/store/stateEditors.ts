@@ -26,6 +26,7 @@ import {encodePathToProp} from '@theatre/shared/utils/addresses'
 import type {
   StudioSheetItemKey,
   KeyframeId,
+  ObjectAddressKey,
   SequenceMarkerId,
   SequenceTrackId,
   UIPanelId,
@@ -222,6 +223,36 @@ namespace stateEditors {
               stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId._ensure(
                 p,
               ).activeSequenceVariant = p.variant
+            }
+
+            export function addVariantObjectOverride(
+              p: WithoutSheetInstance<SheetAddress> & {
+                variant: SequenceVariantId
+                objectKey: ObjectAddressKey
+              },
+            ) {
+              const sheetState = stateBySheetId._ensure(p)
+              sheetState.variantObjectOverrides ??= {}
+              sheetState.variantObjectOverrides[p.variant] ??= []
+              const list = sheetState.variantObjectOverrides[p.variant]!
+              if (!list.includes(p.objectKey)) {
+                list.push(p.objectKey)
+              }
+            }
+
+            export function removeVariantObjectOverride(
+              p: WithoutSheetInstance<SheetAddress> & {
+                variant: SequenceVariantId
+                objectKey: ObjectAddressKey
+              },
+            ) {
+              const sheetState = stateBySheetId._ensure(p)
+              const list = sheetState.variantObjectOverrides?.[p.variant]
+              if (!list) return
+
+              sheetState.variantObjectOverrides![p.variant] = list.filter(
+                (key) => key !== p.objectKey,
+              )
             }
 
             export namespace sequenceEditor {

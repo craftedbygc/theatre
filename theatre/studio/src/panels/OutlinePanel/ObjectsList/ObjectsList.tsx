@@ -14,6 +14,7 @@ import {
 } from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {isObjectOverriddenInVariant} from '@theatre/studio/utils/variantObjectOverrides'
 
 export const Li = styled.li<{isSelected: boolean}>`
   color: ${(props) => (props.isSelected ? 'white' : 'hsl(1, 1%, 80%)')};
@@ -26,9 +27,15 @@ const ObjectsList: React.FC<{
 }> = ({sheet, depth, variant}) => {
   return usePrism(() => {
     const objectsMap = val(sheet.objectsP)
-    const objects = Object.values(objectsMap).filter(
-      (a): a is SheetObject => a != null,
-    )
+    const objects = Object.values(objectsMap)
+      .filter((a): a is SheetObject => a != null)
+      .filter((object) =>
+        isObjectOverriddenInVariant(
+          sheet.address,
+          variant,
+          object.address.objectKey,
+        ),
+      )
 
     const rootObject: NamespacedObjects = new Map()
     objects.forEach((object) => {

@@ -141,6 +141,7 @@ const BaseItem: React.FC<{
   children?: React.ReactNode | undefined
   collapsed?: boolean
   setIsCollapsed?: (v: boolean) => void
+  headerRef?: React.Ref<HTMLDivElement>
 }> = ({
   label,
   children,
@@ -150,6 +151,7 @@ const BaseItem: React.FC<{
   labelDecoration,
   collapsed = false,
   setIsCollapsed,
+  headerRef,
 }) => {
   const canContainChildren = children !== undefined
 
@@ -161,7 +163,12 @@ const BaseItem: React.FC<{
       }
       className={collapsed ? 'collapsed' : ''}
     >
-      <Header className={selectionStatus} onClick={select ?? noop} data-header>
+      <Header
+        ref={headerRef}
+        className={selectionStatus}
+        onClick={select ?? noop}
+        data-header
+      >
         <Head_IconContainer>
           {canContainChildren ? (
             <Head_Icon_WithDescendants
