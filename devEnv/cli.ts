@@ -1,5 +1,5 @@
 import sade from 'sade'
-import {$, fs, path} from '@cspotcode/zx'
+import {$, cd, fs, path} from '@cspotcode/zx'
 
 if (process.platform === 'win32') {
   $.shell = 'cmd.exe'
@@ -89,6 +89,14 @@ prog
       '@unseenco/theatre-react',
       '@unseenco/theatre-browser-bundles',
     ]
+
+    const packageDirByName: Record<string, string> = {
+      '@unseenco/theatre-core': 'theatre/core',
+      '@unseenco/theatre-studio': 'theatre/studio',
+      '@unseenco/theatre-dataverse': 'packages/dataverse',
+      '@unseenco/theatre-react': 'packages/react',
+      '@unseenco/theatre-browser-bundles': 'packages/browser-bundles',
+    }
 
     /**
      * All these packages will have the same version from monorepo/package.json
@@ -221,12 +229,16 @@ prog
       // }
 
       console.log('Publishing to npm')
-      await Promise.all(
-        packagesToPublish.map(
-          (workspace) =>
-            $`yarn workspace ${workspace} npm publish --access public --tag ${npmTag}`,
-        ),
-      )
+      const repoRoot = path.join(__dirname, '..')
+      for (const packageName of packagesToPublish) {
+        const packageDir = path.join(repoRoot, packageDirByName[packageName])
+        console.log(
+          `Publishing ${packageName} from ${packageDirByName[packageName]}`,
+        )
+        cd(packageDir)
+        await $`npm publish --access public --tag ${npmTag}`
+      }
+      cd(repoRoot)
     }
 
     void release()
@@ -266,6 +278,46 @@ prog
       }
       $.verbose = wasVerbose
     }
+  })
+
+prog
+  .command(
+    'publish',
+    'Publishes all packages to npm (use after a release that failed at the publish step)',
+  )
+  .option('--tag <tag>', 'npm dist-tag', 'latest')
+  .action(async (opts) => {
+    const packagesToPublish = [
+      '@unseenco/theatre-core',
+      '@unseenco/theatre-studio',
+      '@unseenco/theatre-dataverse',
+      '@unseenco/theatre-react',
+      '@unseenco/theatre-browser-bundles',
+    ]
+
+    const packageDirByName: Record<string, string> = {
+      '@unseenco/theatre-core': 'theatre/core',
+      '@unseenco/theatre-studio': 'theatre/studio',
+      '@unseenco/theatre-dataverse': 'packages/dataverse',
+      '@unseenco/theatre-react': 'packages/react',
+      '@unseenco/theatre-browser-bundles': 'packages/browser-bundles',
+    }
+
+    // @ts-ignore ignore
+    process.env.THEATRE_IS_PUBLISHING = true
+
+    const npmTag = opts.tag ?? 'latest'
+    const repoRoot = path.join(__dirname, '..')
+
+    for (const packageName of packagesToPublish) {
+      const packageDir = path.join(repoRoot, packageDirByName[packageName])
+      console.log(
+        `Publishing ${packageName} from ${packageDirByName[packageName]}`,
+      )
+      cd(packageDir)
+      await $`npm publish --access public --tag ${npmTag}`
+    }
+    cd(repoRoot)
   })
 
 prog
