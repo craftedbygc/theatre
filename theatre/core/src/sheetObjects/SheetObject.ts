@@ -176,7 +176,7 @@ export default class SheetObject implements PointerToPrismProvider {
          * The fourth layer are the (historic) static values. Since these are (currently) commnon to all instances
          * of the same SheetObject, we can read it from the template.
          */
-        const activeVariant = val(this.sheet.activeSequenceVariantP)
+        const activeVariant = val(this.sheet.effectiveActiveSequenceVariantD)
         const statics = val(this.template.getStaticValues(activeVariant))
 
         // Similar to above, we need a separate but stable WeakMap to cache the result of merging the static values
@@ -280,7 +280,7 @@ export default class SheetObject implements PointerToPrismProvider {
    */
   getSequencedValues(): Prism<Pointer<SheetObjectPropsValue>> {
     return prism(() => {
-      const activeVariant = val(this.sheet.activeSequenceVariantP)
+      const activeVariant = val(this.sheet.effectiveActiveSequenceVariantD)
 
       const tracksToProcessD = prism.memo(
         'tracksToProcess',
@@ -364,7 +364,7 @@ export default class SheetObject implements PointerToPrismProvider {
     trackId: SequenceTrackId,
     trackVariant: SequenceVariantId,
   ): Prism<InterpolationTriple | undefined> {
-    const activeVariant = val(this.sheet.activeSequenceVariantP)
+    const activeVariant = val(this.sheet.effectiveActiveSequenceVariantD)
     const trackP = pointerToSequenceTrackData(
       this.template.project.pointers.historic.sheetsById[this.address.sheetId],
       trackVariant,

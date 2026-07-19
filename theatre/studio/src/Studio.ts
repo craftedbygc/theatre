@@ -26,6 +26,7 @@ import {createStore} from './IDBStorage'
 import {getAllPossibleAssetIDs} from '@theatre/shared/utils/assets'
 import {notify} from './notify'
 import type {RafDriverPrivateAPI} from '@theatre/core/rafDrivers'
+import {syncAllStudioPreviewVariants} from '@theatre/studio/utils/activeSequenceVariant'
 
 const DEFAULT_PERSISTENCE_KEY = 'theatre-0.4'
 
@@ -194,6 +195,8 @@ export class Studio {
       return
     }
 
+    syncAllStudioPreviewVariants(this)
+
     if (process.env.NODE_ENV !== 'test' && typeof window !== 'undefined') {
       await this.ui.ready
     }
@@ -218,6 +221,7 @@ export class Studio {
           project.attachToStudio(this)
         }
       }
+      syncAllStudioPreviewVariants(this)
     }
     projectsD.onStale(() => {
       attachToProjects(projectsD.getValue())

@@ -24,7 +24,8 @@ function variantForWidth(width: number): 'mobile' | 'desktop' {
 
 const SequenceVariantsDemo: React.FC = () => {
   const boxRef = useRef<HTMLDivElement>(null)
-  const [activeVariant, setActiveVariant] = useState('default')
+  const [previewVariant, setPreviewVariant] = useState('default')
+  const [runtimeVariant, setRuntimeVariant] = useState('default')
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1024,
   )
@@ -34,6 +35,7 @@ const SequenceVariantsDemo: React.FC = () => {
     const applyVariantForWidth = (width: number) => {
       const variant = variantForWidth(width)
       sheet.setActiveSequenceVariant(variant)
+      setRuntimeVariant(variant)
       setWindowWidth(width)
     }
 
@@ -48,7 +50,7 @@ const SequenceVariantsDemo: React.FC = () => {
     const obj = sheet.object('Box', boxConfig)
 
     const unsubscribe = obj.onValuesChange((values, {variant}) => {
-      setActiveVariant(variant)
+      setPreviewVariant(variant)
       const el = boxRef.current
       if (!el) return
       el.style.transform = `translate(${values.x}px, ${values.y}px)`
