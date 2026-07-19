@@ -246,6 +246,30 @@ export function ensureSequenceStateInSheet(
   return sheetState.sequencesById![variantId]!
 }
 
+/**
+ * Deep-copies an object's sequence tracks from the default variant into a
+ * non-default variant so edits on that variant are independent.
+ */
+export function copyObjectSequenceTracksToVariantInSheet(
+  sheetState: SheetState_Historic,
+  objectKey: ObjectAddressKey,
+  targetVariant: SequenceVariantId,
+): void {
+  if (targetVariant === DEFAULT_SEQUENCE_VARIANT) return
+
+  migrateSheetSequenceState(sheetState)
+
+  const sourceTracks = getSequenceStateFromSheet(
+    sheetState,
+    DEFAULT_SEQUENCE_VARIANT,
+  )?.tracksByObject[objectKey]
+
+  if (!sourceTracks) return
+
+  const targetSequence = ensureSequenceStateInSheet(sheetState, targetVariant)
+  targetSequence.tracksByObject[objectKey] = cloneDeep(sourceTracks)
+}
+
 export function validateSequenceVariantIdOrThrow(
   value: unknown,
   fnName: string,

@@ -30,6 +30,7 @@ import usePresence, {
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
+  getStudioTrackSequenceVariant,
 } from '@theatre/studio/utils/activeSequenceVariant'
 import {valTracksByObjectForSheetVariant} from '@theatre/core/sequences/sequenceVariants'
 
@@ -215,6 +216,10 @@ function useSingleKeyframeContextMenu(
                     ...props.leaf.sheetObject.address,
                     keyframeIds: [props.keyframe.id],
                     trackId: props.leaf.trackId,
+                    sequenceVariant: getStudioTrackSequenceVariant(
+                      props.leaf.sheetObject,
+                      props.leaf.trackId,
+                    ),
                   },
                 )
               })
@@ -349,6 +354,10 @@ function useDragForSingleKeyframeDot(
                   snappingFunction: getStudioSequence(
                     val(propsAtStartOfDrag.layoutP.sheet),
                   ).closestGridPosition,
+                  sequenceVariant: getStudioTrackSequenceVariant(
+                    propsAtStartOfDrag.leaf.sheetObject,
+                    propsAtStartOfDrag.leaf.trackId,
+                  ),
                 },
               )
             })

@@ -11,6 +11,7 @@ import {
   ensureSequenceStateInSheet,
   ensureVariantStaticOverridesByObjectInSheet,
   migrateSheetSequenceState,
+  copyObjectSequenceTracksToVariantInSheet,
 } from '@theatre/core/sequences/sequenceVariants'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import type {Drafts} from '@theatre/studio/StudioStore/StudioStore'
@@ -238,6 +239,15 @@ namespace stateEditors {
               if (!list.includes(p.objectKey)) {
                 list.push(p.objectKey)
               }
+
+              stateEditors.coreByProject.historic.sheetsById.copyObjectSequenceTracksToVariant(
+                {
+                  projectId: p.projectId,
+                  sheetId: p.sheetId,
+                  objectKey: p.objectKey,
+                  sequenceVariant: p.variant,
+                },
+              )
             }
 
             export function removeVariantObjectOverride(
@@ -737,6 +747,22 @@ namespace stateEditors {
           if (sequenceState) {
             delete sequenceState.tracksByObject[p.objectKey]
           }
+        }
+
+        export function copyObjectSequenceTracksToVariant(
+          p: WithoutSheetInstance<SheetObjectAddress> & {
+            sequenceVariant: SequenceVariantId
+          },
+        ) {
+          const sheetState =
+            drafts().historic.coreByProject[p.projectId].sheetsById[p.sheetId]
+          if (!sheetState) return
+
+          copyObjectSequenceTracksToVariantInSheet(
+            sheetState,
+            p.objectKey,
+            p.sequenceVariant,
+          )
         }
 
         export function forgetSheet(p: WithoutSheetInstance<SheetAddress>) {

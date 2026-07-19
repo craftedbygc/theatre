@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 import {setupTestSheet} from '@theatre/shared/testUtils'
+import getStudio from '@theatre/studio/getStudio'
 import {encodePathToProp} from '@theatre/shared/utils/addresses'
 import {asSequenceTrackId} from '@theatre/shared/utils/ids'
 import type {ObjectAddressKey, SequenceTrackId} from '@theatre/shared/utils/ids'
@@ -143,6 +144,64 @@ describe(`SheetObjectTemplate`, () => {
         pathToProp: ['position', 'x'],
         trackId: 'x',
         trackVariant: 'default',
+      })
+    })
+
+    it('copies default sequence tracks when overriding object into another variant', async () => {
+      const {obj, sheet} = await setupTestSheet({
+        staticOverrides: {byObject: {}},
+        sequencesById: {
+          default: {
+            type: 'PositionalSequence',
+            subUnitsPerUnit: 30,
+            length: 10,
+            tracksByObject: {
+              ['obj' as ObjectAddressKey]: {
+                trackIdByPropPath: {
+                  [encodePathToProp(['position', 'x'])]: asSequenceTrackId('x'),
+                },
+                trackData: {
+                  ['x' as SequenceTrackId]: {
+                    type: 'BasicKeyframedTrack',
+                    keyframes: [
+                      {
+                        id: 'kf1' as $IntentionalAny,
+                        position: 0,
+                        value: 1,
+                        connectedRight: true,
+                        handles: [0.5, 1, 0.5, 0],
+                        type: 'bezier',
+                      },
+                    ],
+                  } as $IntentionalAny,
+                },
+              },
+            },
+          },
+        },
+      })
+
+      sheet.publicApi.declareSequenceVariants(['default', 'mobile'])
+
+      getStudio()!.transaction(({stateEditors}) => {
+        stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.addVariantObjectOverride(
+          {
+            projectId: sheet.address.projectId,
+            sheetId: sheet.address.sheetId,
+            variant: 'mobile',
+            objectKey: 'obj' as ObjectAddressKey,
+          },
+        )
+      })
+
+      const mobileTracks = obj.template
+        .getArrayOfValidSequenceTracks('mobile')
+        .getValue()
+
+      expect(mobileTracks).toHaveLength(1)
+      expect(mobileTracks[0]).toMatchObject({
+        pathToProp: ['position', 'x'],
+        trackVariant: 'mobile',
       })
     })
 

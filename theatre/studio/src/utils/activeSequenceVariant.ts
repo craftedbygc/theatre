@@ -5,11 +5,12 @@ import {
 } from '@theatre/core/sequences/sequenceVariants'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import type Project from '@theatre/core/projects/Project'
+import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import type {Studio} from '@theatre/studio/Studio'
 import getStudio from '@theatre/studio/getStudio'
 import type {IStateEditors} from '@theatre/studio/store/stateEditors'
 import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
-import type {SheetId} from '@theatre/shared/utils/ids'
+import type {SequenceTrackId, SheetId} from '@theatre/shared/utils/ids'
 import {val} from '@theatre/dataverse'
 
 /**
@@ -101,6 +102,20 @@ export function setStudioActiveSequenceVariant(
   if (!project) return
 
   applyStudioPreviewVariantToSheetInstances(project, p, variant)
+}
+
+/**
+ * Returns which sequence variant owns the given track for the active studio variant.
+ */
+export function getStudioTrackSequenceVariant(
+  sheetObject: SheetObject,
+  trackId: SequenceTrackId,
+): SequenceVariantId {
+  const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+  return (
+    sheetObject.template.getSequenceVariantOwningTrack(trackId, activeVariant) ??
+    activeVariant
+  )
 }
 
 /**
