@@ -6,6 +6,8 @@ import type {
   SheetState_Historic,
 } from '@theatre/core/projects/store/types/SheetState_Historic'
 import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
+// stateEditors mutates core historic sheet state, so it needs these runtime helpers.
+// eslint-disable-next-line no-restricted-syntax
 import {
   DEFAULT_SEQUENCE_VARIANT,
   ensureSequenceStateInSheet,
@@ -135,9 +137,6 @@ namespace stateEditors {
                     type: 'Sheet',
                     ...item.template.address,
                   })
-                  stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.setSelectedInstanceId(
-                    item.address,
-                  )
                 } else if (isSheetTemplate(item)) {
                   newSelectionState.push({type: 'Sheet', ...item.address})
                 } else if (isSheetObject(item)) {
@@ -145,9 +144,6 @@ namespace stateEditors {
                     type: 'SheetObject',
                     ...item.template.address,
                   })
-                  stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.setSelectedInstanceId(
-                    item.sheet.address,
-                  )
                 } else if (isSheetObjectTemplate(item)) {
                   newSelectionState.push({type: 'SheetObject', ...item.address})
                 }
@@ -200,7 +196,6 @@ namespace stateEditors {
                 )
               if (!projectState.stateBySheetId[p.sheetId]) {
                 projectState.stateBySheetId[p.sheetId] = {
-                  selectedInstanceId: undefined,
                   sequenceEditor: {
                     selectedPropsByObject: {},
                   },
@@ -208,12 +203,6 @@ namespace stateEditors {
               }
 
               return projectState.stateBySheetId[p.sheetId]!
-            }
-
-            export function setSelectedInstanceId(p: SheetAddress) {
-              stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId._ensure(
-                p,
-              ).selectedInstanceId = p.sheetInstanceId
             }
 
             export function setActiveSequenceVariant(
@@ -756,8 +745,7 @@ namespace stateEditors {
             ?.byObject[p.objectKey]
 
           migrateSheetSequenceState(sheetState)
-          const sequenceState =
-            sheetState.sequencesById?.[p.sequenceVariant]
+          const sequenceState = sheetState.sequencesById?.[p.sequenceVariant]
           if (sequenceState) {
             delete sequenceState.tracksByObject[p.objectKey]
           }

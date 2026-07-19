@@ -47,11 +47,11 @@ export function useCollapseStateInOutlinePanel(
     item.type === 'namespace'
       ? getOutlineNamespaceItemKey(item.sheet.address.sheetId, item.path)
       : item.type === 'variant'
-      ? `variant:${item.sheet.address.sheetId}:${item.sheet.address.sheetInstanceId}:${item.variant}`
+      ? `variant:${item.sheet.address.sheetId}:${item.variant}`
       : item.type === 'Theatre_Project'
       ? 'project'
       : item.type === 'Theatre_Sheet'
-      ? `sheetInstance:${item.address.sheetId}:${item.address.sheetInstanceId}`
+      ? `sheet:${item.address.sheetId}`
       : 'unknown'
 
   const projectId =

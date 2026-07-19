@@ -1,17 +1,23 @@
 import type Sequence from '@theatre/core/sequences/Sequence'
-import {
-  DEFAULT_SEQUENCE_VARIANT,
-  type SequenceVariantId,
-} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import type Project from '@theatre/core/projects/Project'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import type {Studio} from '@theatre/studio/Studio'
 import getStudio from '@theatre/studio/getStudio'
 import type {IStateEditors} from '@theatre/studio/store/stateEditors'
-import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
-import type {SequenceTrackId, SheetId} from '@theatre/shared/utils/ids'
+import type {
+  WithoutSheetInstance,
+  SheetAddress,
+} from '@theatre/shared/utils/addresses'
+import type {
+  SequenceTrackId,
+  SheetId,
+  SheetInstanceId,
+} from '@theatre/shared/utils/ids'
 import {val} from '@theatre/dataverse'
+
+const DEFAULT_SEQUENCE_VARIANT = 'default' as SequenceVariantId
 
 /**
  * Returns the sequence for the variant currently being edited in Studio.
@@ -29,14 +35,15 @@ export function getStudioActiveSequenceVariant(
   if (!studio) return DEFAULT_SEQUENCE_VARIANT
 
   const variant = val(
-    studio.atomP.historic.projects.stateByProjectId[p.projectId]
-      .stateBySheetId[p.sheetId].activeSequenceVariant,
+    studio.atomP.historic.projects.stateByProjectId[p.projectId].stateBySheetId[
+      p.sheetId
+    ].activeSequenceVariant,
   )
 
   return variant ?? DEFAULT_SEQUENCE_VARIANT
 }
 
-function applyStudioPreviewVariantToSheetInstances(
+function applyStudioPreviewVariantToSheet(
   project: Project,
   p: WithoutSheetInstance<SheetAddress>,
   variant: SequenceVariantId,
@@ -44,10 +51,9 @@ function applyStudioPreviewVariantToSheetInstances(
   const template = val(project.sheetTemplatesP[p.sheetId])
   if (!template) return
 
-  const instances = val(template.instancesP)
-  for (const instance of Object.values(instances)) {
-    instance?.setStudioPreviewVariantOverride(variant)
-  }
+  template
+    .getInstance('default' as SheetInstanceId)
+    .setStudioPreviewVariantOverride(variant)
 }
 
 /**
@@ -62,14 +68,19 @@ export function syncAllStudioPreviewVariants(studio: Studio): void {
     if (!project) continue
 
     const projectState = val(
-      studio.atomP.historic.projects.stateByProjectId[project.address.projectId],
+      studio.atomP.historic.projects.stateByProjectId[
+        project.address.projectId
+      ],
     )
     if (!projectState) continue
 
-    for (const sheetId of Object.keys(projectState.stateBySheetId) as SheetId[]) {
+    for (const sheetId of Object.keys(
+      projectState.stateBySheetId,
+    ) as SheetId[]) {
       const sheetState = projectState.stateBySheetId[sheetId]
-      const variant = sheetState?.activeSequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
-      applyStudioPreviewVariantToSheetInstances(
+      const variant =
+        sheetState?.activeSequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+      applyStudioPreviewVariantToSheet(
         project,
         {projectId: project.address.projectId, sheetId},
         variant,
@@ -101,7 +112,7 @@ export function setStudioActiveSequenceVariant(
   const project = val(studio.projectsP)[p.projectId]
   if (!project) return
 
-  applyStudioPreviewVariantToSheetInstances(project, p, variant)
+  applyStudioPreviewVariantToSheet(project, p, variant)
 }
 
 /**
@@ -111,10 +122,14 @@ export function getStudioTrackSequenceVariant(
   sheetObject: SheetObject,
   trackId: SequenceTrackId,
 ): SequenceVariantId {
-  const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+  const activeVariant = getStudioActiveSequenceVariant(
+    sheetObject.sheet.address,
+  )
   return (
-    sheetObject.template.getSequenceVariantOwningTrack(trackId, activeVariant) ??
-    activeVariant
+    sheetObject.template.getSequenceVariantOwningTrack(
+      trackId,
+      activeVariant,
+    ) ?? activeVariant
   )
 }
 

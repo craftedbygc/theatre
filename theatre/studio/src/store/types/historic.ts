@@ -18,7 +18,6 @@ import type {
   ProjectId,
   SequenceMarkerId,
   SheetId,
-  SheetInstanceId,
   UIPanelId,
 } from '@theatre/shared/utils/ids'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
@@ -63,8 +62,8 @@ export type OutlineSelectionState =
   | ({type: 'Project'} & ProjectAddress)
   | ({type: 'Sheet'} & WithoutSheetInstance<SheetAddress>)
   | ({type: 'SheetVariant'} & WithoutSheetInstance<SheetAddress> & {
-      variant: SequenceVariantId
-    })
+        variant: SequenceVariantId
+      })
   | ({type: 'SheetObject'} & WithoutSheetInstance<SheetObjectAddress>)
 
 export type OutlineSelectable = Project | Sheet | SheetObject
@@ -97,7 +96,6 @@ export type StudioHistoricStateSequenceEditorMarker = {
  * See root {@link StudioHistoricState}
  */
 export type StudioHistoricStateProjectSheet = {
-  selectedInstanceId: undefined | SheetInstanceId
   /** The sequence variant currently being edited in the studio UI */
   activeSequenceVariant?: SequenceVariantId
   sequenceEditor: {

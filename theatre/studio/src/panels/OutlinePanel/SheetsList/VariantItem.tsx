@@ -28,9 +28,6 @@ export const VariantItem: React.FC<{
   const selectVariant = useCallback(() => {
     getStudio()!.transaction(({stateEditors}) => {
       setStudioActiveSequenceVariant(sheet.address, variant, stateEditors)
-      stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.setSelectedInstanceId(
-        sheet.address,
-      )
       stateEditors.studio.historic.panels.outline.selection.set([sheet])
     })
   }, [sheet, variant])
@@ -54,7 +51,7 @@ export const VariantItem: React.FC<{
             depth={depth + 1}
             sheet={sheet}
             variant={variant}
-            key={`objects-${sheet.address.sheetInstanceId}-${variant}`}
+            key={`objects-${sheet.address.sheetId}-${variant}`}
           />
         </Body>
       </BaseItem>

@@ -28,6 +28,7 @@ import {
   TitleBar_Punctuation,
 } from '@theatre/studio/panels/BasePanel/common'
 import type {UIPanelId} from '@theatre/shared/utils/ids'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 import {usePresenceListenersOnRootElement} from '@theatre/studio/uiComponents/usePresence'
 
 const Container = styled(PanelWrapper)`
@@ -193,6 +194,7 @@ const Header: React.FC<{layoutP: Pointer<SequenceEditorPanelLayout>}> = ({
 }) => {
   return usePrism(() => {
     const sheet = val(layoutP.sheet)
+    const activeVariant = getStudioActiveSequenceVariant(sheet.address)
     return (
       <Header_Container
         style={{
@@ -203,7 +205,7 @@ const Header: React.FC<{layoutP: Pointer<SequenceEditorPanelLayout>}> = ({
           <TitleBar_Piece>{sheet.address.sheetId} </TitleBar_Piece>
 
           <TitleBar_Punctuation>{':'}&nbsp;</TitleBar_Punctuation>
-          <TitleBar_Piece>{sheet.address.sheetInstanceId} </TitleBar_Piece>
+          <TitleBar_Piece>{activeVariant} </TitleBar_Piece>
 
           <TitleBar_Punctuation>&nbsp;{'>'}&nbsp;</TitleBar_Punctuation>
           <TitleBar_Piece>Sequence</TitleBar_Piece>

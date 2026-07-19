@@ -3,9 +3,8 @@ import type Sequence from '@theatre/core/sequences/Sequence'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import {val} from '@theatre/dataverse'
-import type {$IntentionalAny} from '@theatre/dataverse/src/types'
 import {isSheet, isSheetObject} from '@theatre/shared/instanceTypes'
-import type {SheetId} from '@theatre/shared/utils/ids'
+import type {SheetInstanceId} from '@theatre/shared/utils/ids'
 import {uniq} from 'lodash-es'
 import getStudio from './getStudio'
 import type {OutlineSelectable, OutlineSelection} from './store/types'
@@ -24,13 +23,13 @@ export const getOutlineSelection = (): OutlineSelection => {
     if (!sheetTemplate) {
       return
     }
-    const sheetInstance = getSelectedInstanceOfSheetId(project, s.sheetId)
-    if (!sheetInstance) return
+    const sheet = getSheetOfSheetId(project, s.sheetId)
+    if (!sheet) return
     if (s.type === 'Sheet' || s.type === 'SheetVariant') {
-      return sheetInstance
+      return sheet
     }
     if (s.type === 'SheetObject') {
-      const obj = val(sheetInstance.objectsP[s.objectKey])
+      const obj = val(sheet.objectsP[s.objectKey])
       if (!obj) return
       return obj
     }
@@ -42,35 +41,14 @@ export const getOutlineSelection = (): OutlineSelection => {
   )
 }
 
-export const getSelectedInstanceOfSheetId = (
+export const getSheetOfSheetId = (
   project: Project,
-  selectedSheetId: string,
+  sheetId: string,
 ): Sheet | undefined => {
-  const projectStateP =
-    getStudio()!.atomP.historic.projects.stateByProjectId[
-      project.address.projectId
-    ]
-
-  const instanceId = val(
-    projectStateP.stateBySheetId[selectedSheetId as SheetId].selectedInstanceId,
-  )
-
-  const template = val(project.sheetTemplatesP[selectedSheetId])
-
+  const template = val(project.sheetTemplatesP[sheetId])
   if (!template) return undefined
 
-  if (instanceId) {
-    return val(template.instancesP[instanceId])
-  } else {
-    // @todo #perf this will update every time an instance is added/removed.
-    const allInstances = val(template.instancesP)
-
-    return allInstances[keys(allInstances)[0]]
-  }
-}
-
-function keys<T extends object>(obj: T): Exclude<keyof T, symbol | number>[] {
-  return Object.keys(obj) as $IntentionalAny
+  return template.getInstance('default' as SheetInstanceId)
 }
 
 /**
