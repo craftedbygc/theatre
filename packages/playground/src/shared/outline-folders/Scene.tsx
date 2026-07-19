@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react'
 import type {CSSProperties} from 'react'
-import type {IProject} from '@theatre/core'
-import {types} from '@theatre/core'
+import type {IProject} from '@unseenco/theatre-core'
+import {types} from '@unseenco/theatre-core'
 
 const SceneCSS: CSSProperties = {
   overflow: 'hidden',
@@ -39,7 +39,11 @@ const propNames = [
   'Clock',
 ]
 
-function PropBox(props: {sheet: ReturnType<IProject['sheet']>; name: string; index: number}) {
+function PropBox(props: {
+  sheet: ReturnType<IProject['sheet']>
+  name: string
+  index: number
+}) {
   const elementRef = useRef<HTMLDivElement>(null)
   const {sheet, name, index} = props
 

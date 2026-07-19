@@ -1,27 +1,27 @@
-import {val} from '@theatre/dataverse'
+import {val} from '@unseenco/theatre-dataverse'
 import React, {useMemo, useRef} from 'react'
-import {ConnectorLine} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
-import {AggregateKeyframePositionIsSelected} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/AggregatedKeyframeTrack/AggregatedKeyframeTrack'
-import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import type {UseDragOpts} from '@theatre/studio/uiComponents/useDrag'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import getStudio from '@theatre/studio/getStudio'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
+import {ConnectorLine} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
+import {AggregateKeyframePositionIsSelected} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/AggregatedKeyframeTrack/AggregatedKeyframeTrack'
+import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import type {UseDragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
 import type {IAggregateKeyframeEditorUtils} from './useAggregateKeyframeEditorUtils'
-import CurveEditorPopover from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/CurveEditorPopover/CurveEditorPopover'
+import CurveEditorPopover from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/CurveEditorPopover/CurveEditorPopover'
 import {useAggregateKeyframeEditorUtils} from './useAggregateKeyframeEditorUtils'
 import type {IAggregateKeyframeEditorProps} from './AggregateKeyframeEditor'
 import styled from 'styled-components'
-import BasicPopover from '@theatre/studio/uiComponents/Popover/BasicPopover'
+import BasicPopover from '@unseenco/theatre-studio/uiComponents/Popover/BasicPopover'
 import {
   copyableKeyframesFromSelection,
   keyframesWithPaths,
-} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/selections'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import {commonRootOfPathsToProps} from '@theatre/shared/utils/addresses'
-import type {KeyframeWithPathToPropFromCommonRoot} from '@theatre/studio/store/types'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import {commonRootOfPathsToProps} from '@unseenco/theatre-shared/utils/addresses'
+import type {KeyframeWithPathToPropFromCommonRoot} from '@unseenco/theatre-studio/store/types'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const POPOVER_MARGIN_PX = 5
 const EasingPopoverWrapper = styled(BasicPopover)`
@@ -147,7 +147,9 @@ function useDragKeyframe(
         }
 
         const propsAtStartOfDrag = props
-        const sequence = getStudioSequence(val(propsAtStartOfDrag.layoutP.sheet))
+        const sequence = getStudioSequence(
+          val(propsAtStartOfDrag.layoutP.sheet),
+        )
 
         const toUnitSpace = val(
           propsAtStartOfDrag.layoutP.scaledSpace.toUnitSpace,

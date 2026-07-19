@@ -1,4 +1,4 @@
-[@theatre/dataverse](../README.md) / Ticker
+[@unseenco/theatre-dataverse](../README.md) / Ticker
 
 # Class: Ticker
 

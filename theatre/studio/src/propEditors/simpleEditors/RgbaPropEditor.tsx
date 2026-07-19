@@ -1,17 +1,17 @@
-import type {PropTypeConfig_Rgba} from '@theatre/core/propTypes'
-import type {Rgba} from '@theatre/shared/utils/color'
-import {validHexRegExp} from '@theatre/shared/utils/color'
+import type {PropTypeConfig_Rgba} from '@unseenco/theatre-core/propTypes'
+import type {Rgba} from '@unseenco/theatre-shared/utils/color'
+import {validHexRegExp} from '@unseenco/theatre-shared/utils/color'
 import {
   decorateRgba,
   rgba2hex,
   parseRgbaFromHex,
-} from '@theatre/shared/utils/color'
+} from '@unseenco/theatre-shared/utils/color'
 import React, {useCallback, useRef} from 'react'
-import {RgbaColorPicker} from '@theatre/studio/uiComponents/colorPicker'
+import {RgbaColorPicker} from '@unseenco/theatre-studio/uiComponents/colorPicker'
 import styled from 'styled-components'
-import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
-import BasicStringInput from '@theatre/studio/uiComponents/form/BasicStringInput'
-import {popoverBackgroundColor} from '@theatre/studio/uiComponents/Popover/BasicPopover'
+import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
+import BasicStringInput from '@unseenco/theatre-studio/uiComponents/form/BasicStringInput'
+import {popoverBackgroundColor} from '@unseenco/theatre-studio/uiComponents/Popover/BasicPopover'
 import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
 
 const RowContainer = styled.div`

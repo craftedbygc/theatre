@@ -1,26 +1,29 @@
-import {privateAPI, setPrivateAPI} from '@theatre/core/privateAPIs'
-import type {IProject} from '@theatre/core/projects/TheatreProject'
-import type TheatreSequence from '@theatre/core/sequences/TheatreSequence'
-import type {ISequence} from '@theatre/core/sequences/TheatreSequence'
-import type {PropTypeConfig_Compound} from '@theatre/core/propTypes'
-import {compound} from '@theatre/core/propTypes'
-import type {ISheetObject} from '@theatre/core/sheetObjects/TheatreSheetObject'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type {SheetAddress} from '@theatre/shared/utils/addresses'
-import {InvalidArgumentError} from '@theatre/shared/utils/errors'
-import {validateAndSanitiseSlashedPathOrThrow} from '@theatre/shared/utils/slashedPaths'
-import {parseOutlineNamespacePath} from '@theatre/shared/utils/outlineNamespaces'
-import type {$FixMe, $IntentionalAny} from '@theatre/shared/utils/types'
-import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
+import {privateAPI, setPrivateAPI} from '@unseenco/theatre-core/privateAPIs'
+import type {IProject} from '@unseenco/theatre-core/projects/TheatreProject'
+import type TheatreSequence from '@unseenco/theatre-core/sequences/TheatreSequence'
+import type {ISequence} from '@unseenco/theatre-core/sequences/TheatreSequence'
+import type {PropTypeConfig_Compound} from '@unseenco/theatre-core/propTypes'
+import {compound} from '@unseenco/theatre-core/propTypes'
+import type {ISheetObject} from '@unseenco/theatre-core/sheetObjects/TheatreSheetObject'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type {SheetAddress} from '@unseenco/theatre-shared/utils/addresses'
+import {InvalidArgumentError} from '@unseenco/theatre-shared/utils/errors'
+import {validateAndSanitiseSlashedPathOrThrow} from '@unseenco/theatre-shared/utils/slashedPaths'
+import {parseOutlineNamespacePath} from '@unseenco/theatre-shared/utils/outlineNamespaces'
+import type {
+  $FixMe,
+  $IntentionalAny,
+} from '@unseenco/theatre-shared/utils/types'
+import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
 import deepEqual from 'fast-deep-equal'
 import type {
   UnknownShorthandCompoundProps,
   UnknownValidCompoundProps,
-} from '@theatre/core/propTypes/internals'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type {ObjectAddressKey} from '@theatre/shared/utils/ids'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import {notify} from '@theatre/shared/notify'
+} from '@unseenco/theatre-core/propTypes/internals'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type {ObjectAddressKey} from '@unseenco/theatre-shared/utils/ids'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import {notify} from '@unseenco/theatre-shared/notify'
 
 export type SheetObjectPropTypeConfig =
   PropTypeConfig_Compound<UnknownValidCompoundProps>
@@ -122,8 +125,8 @@ export interface ISheet {
    * folder. The default only applies when the user has not manually expanded
    * or collapsed the folder yet.
    *
-   * This method is part of `@theatre/core` so you can configure outline folders
-   * without importing `@theatre/studio`.
+   * This method is part of `@unseenco/theatre-core` so you can configure outline folders
+   * without importing `@unseenco/theatre-studio`.
    *
    * @param namespacePath - The namespace path, e.g. `"My Folder"` or `"My Folder / Subfolder"`
    * @param opts - Optional configuration for the namespace folder
@@ -163,10 +166,7 @@ export interface ISheet {
    * sheet.setOutlineNamespaceCollapsed('Props', true)
    * ```
    */
-  setOutlineNamespaceCollapsed(
-    namespacePath: string,
-    collapsed: boolean,
-  ): void
+  setOutlineNamespaceCollapsed(namespacePath: string, collapsed: boolean): void
 
   /**
    * The Sequence of this Sheet (uses the currently active sequence variant)
@@ -345,10 +345,9 @@ To fix this, make sure you are calling \`sheet.deleteObject("${sanitizedPath}")\
       namespacePath,
       'sheet.declareOutlineNamespace',
     )
-    internal.template.setOutlineNamespaceConfig(
-      parsedPath.join(' / '),
-      {defaultCollapsed: opts?.collapsed},
-    )
+    internal.template.setOutlineNamespaceConfig(parsedPath.join(' / '), {
+      defaultCollapsed: opts?.collapsed,
+    })
   }
 
   setOutlineNamespaceCollapsed(

@@ -1,20 +1,20 @@
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 // eslint-disable-next-line no-restricted-syntax
-import {DEFAULT_SEQUENCE_VARIANT} from '@theatre/core/sequences/sequenceVariants'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
+import {DEFAULT_SEQUENCE_VARIANT} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
   setStudioActiveSequenceVariant,
-} from '@theatre/studio/utils/activeSequenceVariant'
-import {isObjectOverriddenInVariant} from '@theatre/studio/utils/variantObjectOverrides'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {isObjectOverriddenInVariant} from '@unseenco/theatre-studio/utils/variantObjectOverrides'
 import React from 'react'
-import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
-import {usePrism} from '@theatre/react'
-import {getOutlineSelection} from '@theatre/studio/selectors'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import type {IContextMenuItem} from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
+import BaseItem from '@unseenco/theatre-studio/panels/OutlinePanel/BaseItem'
+import {usePrism} from '@unseenco/theatre-react'
+import {getOutlineSelection} from '@unseenco/theatre-studio/selectors'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 
 export const ObjectItem: React.VFC<{
   sheetObject: SheetObject

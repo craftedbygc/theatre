@@ -1,48 +1,51 @@
-import type Project from '@theatre/core/projects/Project'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type SheetTemplate from '@theatre/core/sheets/SheetTemplate'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type SheetTemplate from '@unseenco/theatre-core/sheets/SheetTemplate'
 import type {
   SheetObjectActionsConfig,
   SheetObjectPropTypeConfig,
-} from '@theatre/core/sheets/TheatreSheet'
-import {emptyArray} from '@theatre/shared/utils'
+} from '@unseenco/theatre-core/sheets/TheatreSheet'
+import {emptyArray} from '@unseenco/theatre-shared/utils'
 import type {
   PathToProp,
   PathToProp_Encoded,
   SheetObjectAddress,
   WithoutSheetInstance,
-} from '@theatre/shared/utils/addresses'
-import getDeep from '@theatre/shared/utils/getDeep'
-import type {ObjectAddressKey, SequenceTrackId} from '@theatre/shared/utils/ids'
-import SimpleCache from '@theatre/shared/utils/SimpleCache'
+} from '@unseenco/theatre-shared/utils/addresses'
+import getDeep from '@unseenco/theatre-shared/utils/getDeep'
+import type {
+  ObjectAddressKey,
+  SequenceTrackId,
+} from '@unseenco/theatre-shared/utils/ids'
+import SimpleCache from '@unseenco/theatre-shared/utils/SimpleCache'
 import type {
   $FixMe,
   $IntentionalAny,
   SerializableMap,
   SerializablePrimitive,
   SerializableValue,
-} from '@theatre/shared/utils/types'
-import type {Prism, Pointer} from '@theatre/dataverse'
-import {Atom, getPointerParts, prism, val} from '@theatre/dataverse'
+} from '@unseenco/theatre-shared/utils/types'
+import type {Prism, Pointer} from '@unseenco/theatre-dataverse'
+import {Atom, getPointerParts, prism, val} from '@unseenco/theatre-dataverse'
 import set from 'lodash-es/set'
 import getPropDefaultsOfSheetObject from './getPropDefaultsOfSheetObject'
 import SheetObject from './SheetObject'
-import logger from '@theatre/shared/logger'
+import logger from '@unseenco/theatre-shared/logger'
 import {
   getPropConfigByPath,
   isPropConfSequencable,
-} from '@theatre/shared/propTypes/utils'
+} from '@unseenco/theatre-shared/propTypes/utils'
 import getOrderingOfPropTypeConfig from './getOrderingOfPropTypeConfig'
-import type {SheetState_Historic} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
+import type {SheetState_Historic} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {SheetAhistoricState} from '@unseenco/theatre-core/projects/store/storeTypes'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   getEffectiveStaticOverrideForObject,
   mergeSequenceTrackMaps,
   valUnsequencedPropPathsForObject,
   valTrackIdByPropPathForObject,
-} from '@theatre/core/sequences/sequenceVariants'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {cloneDeep, unset} from 'lodash-es'
 
 function isObjectEmpty(obj: unknown): boolean {

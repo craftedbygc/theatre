@@ -1,7 +1,10 @@
-import didYouMean from '@theatre/shared/utils/didYouMean'
-import type {$IntentionalAny} from '@theatre/shared/utils/types'
-import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
-import type {ToolConfig, ToolsetConfig} from '@theatre/studio/TheatreStudio'
+import didYouMean from '@unseenco/theatre-shared/utils/didYouMean'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
+import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
+import type {
+  ToolConfig,
+  ToolsetConfig,
+} from '@unseenco/theatre-studio/TheatreStudio'
 import React from 'react'
 import IconButton from './tools/IconButton'
 import Switch from './tools/Switch'

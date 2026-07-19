@@ -1,14 +1,17 @@
-import type {ProjectState} from '@theatre/core/projects/store/storeTypes'
+import type {ProjectState} from '@unseenco/theatre-core/projects/store/storeTypes'
 import type {
   ObjectAddressKey,
   ProjectId,
   SheetId,
-} from '@theatre/shared/utils/ids'
-import type {SerializableMap, StrictRecord} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-shared/utils/ids'
+import type {
+  SerializableMap,
+  StrictRecord,
+} from '@unseenco/theatre-shared/utils/types'
 import type {
   IExtension,
   PaneClassDefinition,
-} from '@theatre/studio/TheatreStudio'
+} from '@unseenco/theatre-studio/TheatreStudio'
 
 /**
  * Technically, all parts of the ephemeral state can be implemented

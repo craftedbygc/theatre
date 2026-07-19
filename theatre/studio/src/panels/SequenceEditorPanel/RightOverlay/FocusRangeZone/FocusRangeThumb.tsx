@@ -1,29 +1,32 @@
-import type {Pointer} from '@theatre/dataverse'
-import {prism, val} from '@theatre/dataverse'
-import {usePrism, useVal} from '@theatre/react'
-import type {$IntentionalAny, IRange} from '@theatre/shared/utils/types'
-import getStudio from '@theatre/studio/getStudio'
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {prism, val} from '@unseenco/theatre-dataverse'
+import {usePrism, useVal} from '@unseenco/theatre-react'
+import type {
+  $IntentionalAny,
+  IRange,
+} from '@unseenco/theatre-shared/utils/types'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
 import {
   topStripHeight,
   topStripTheme,
-} from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/TopStrip'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/TopStrip'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
 import {
   lockedCursorCssVarName,
   useCssCursorLock,
-} from '@theatre/studio/uiComponents/PointerEventsHandler'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
+} from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import React, {useMemo} from 'react'
 import styled from 'styled-components'
 import {
   includeLockFrameStampAttrs,
   useLockFrameStampPosition,
-} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 import {focusRangeStripTheme, RangeStrip} from './FocusRangeStrip'
-import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+import DopeSnap from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const TheDiv = styled.div<{enabled: boolean; type: 'start' | 'end'}>`
   position: absolute;
@@ -213,9 +216,8 @@ const FocusRangeThumb: React.FC<{
               )
             }
 
-            const newPositionInFrame = getStudioSequence(sheet).closestGridPosition(
-              newPosition,
-            )
+            const newPositionInFrame =
+              getStudioSequence(sheet).closestGridPosition(newPosition)
 
             if (tempTransaction !== undefined) {
               tempTransaction.discard()

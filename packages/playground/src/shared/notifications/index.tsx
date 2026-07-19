@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import studio from '@theatre/studio'
-import {getProject, notify} from '@theatre/core'
+import studio from '@unseenco/theatre-studio'
+import {getProject, notify} from '@unseenco/theatre-core'
 import {Scene} from './Scene'
 
 studio.initialize()

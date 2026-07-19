@@ -1,17 +1,17 @@
-import {privateAPI, setPrivateAPI} from '@theatre/core/privateAPIs'
-import Project from '@theatre/core/projects/Project'
-import type {ISheet} from '@theatre/core/sheets/TheatreSheet'
+import {privateAPI, setPrivateAPI} from '@unseenco/theatre-core/privateAPIs'
+import Project from '@unseenco/theatre-core/projects/Project'
+import type {ISheet} from '@unseenco/theatre-core/sheets/TheatreSheet'
 
-import type {ProjectAddress} from '@theatre/shared/utils/addresses'
-import type {Asset, File} from '@theatre/shared/utils/assets'
+import type {ProjectAddress} from '@unseenco/theatre-shared/utils/addresses'
+import type {Asset, File} from '@unseenco/theatre-shared/utils/assets'
 import type {
   ProjectId,
   SheetId,
   SheetInstanceId,
-} from '@theatre/shared/utils/ids'
-import {validateInstanceId} from '@theatre/shared/utils/sanitizers'
-import {validateAndSanitiseSlashedPathOrThrow} from '@theatre/shared/utils/slashedPaths'
-import type {$IntentionalAny} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-shared/utils/ids'
+import {validateInstanceId} from '@unseenco/theatre-shared/utils/sanitizers'
+import {validateAndSanitiseSlashedPathOrThrow} from '@unseenco/theatre-shared/utils/slashedPaths'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 
 /**
  * A project's config object (currently the only point of configuration is the project's state)
@@ -47,10 +47,10 @@ export type IProjectConfig = {
 export interface IProject {
   readonly type: 'Theatre_Project_PublicAPI'
   /**
-   * If `@theatre/studio` is used, this promise would resolve when studio has loaded
+   * If `@unseenco/theatre-studio` is used, this promise would resolve when studio has loaded
    * the state of the project into memory.
    *
-   * If `@theatre/studio` is not used, this promise is already resolved.
+   * If `@unseenco/theatre-studio` is not used, this promise is already resolved.
    */
   readonly ready: Promise<void>
   /**

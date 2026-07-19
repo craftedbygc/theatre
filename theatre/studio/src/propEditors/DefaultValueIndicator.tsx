@@ -1,16 +1,16 @@
 import {transparentize} from 'polished'
 import React from 'react'
 import styled from 'styled-components'
-import getStudio from '@theatre/studio/getStudio'
-import type {PathToProp} from '@theatre/shared/utils/addresses'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type {PropTypeConfig} from '@theatre/core/propTypes'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type {PropTypeConfig} from '@unseenco/theatre-core/propTypes'
 import {nextPrevCursorsTheme} from './NextPrevKeyframeCursors'
 import {
   isPropConfigComposite,
   iteratePropType,
-} from '@theatre/shared/propTypes/utils'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-shared/propTypes/utils'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const theme = {
   defaultState: {
@@ -62,7 +62,11 @@ const FilledIcon = styled.div`
   transform: rotate(45deg);
 `
 
-function sequenceProp(obj: SheetObject, propConfig: PropTypeConfig, pathToProp: PathToProp) {
+function sequenceProp(
+  obj: SheetObject,
+  propConfig: PropTypeConfig,
+  pathToProp: PathToProp,
+) {
   const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
 
   getStudio()!.transaction(({stateEditors}) => {

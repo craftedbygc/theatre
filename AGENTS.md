@@ -32,19 +32,19 @@ CI order (`.github/workflows/ci.yml`): `Build`, `Lint`, `Test`, `Typecheck`, `Vi
 Yarn workspaces: `packages/*`, `examples/*`, `theatre`, `compat-tests`. Lerna is configured (`lerna.json`) but versions are managed manually; **all packages share one version number** (set in root `package.json` and bumped by the release CLI).
 
 Published packages → source location:
-- `@theatre/core` → `theatre/core/` — runtime animation library (Apache-2.0, ships in user bundles)
-- `@theatre/studio` → `theatre/studio/` — visual editor (AGPL-3.0, dev-time only)
-- `@theatre/dataverse` → `packages/dataverse/` — reactive dataflow
-- `@theatre/react` → `packages/react/`
-- `@theatre/browser-bundles` → `packages/browser-bundles/`
+- `@unseenco/theatre-core` → `theatre/core/` — runtime animation library (Apache-2.0, ships in user bundles)
+- `@unseenco/theatre-studio` → `theatre/studio/` — visual editor (AGPL-3.0, dev-time only)
+- `@unseenco/theatre-dataverse` → `packages/dataverse/` — reactive dataflow
+- `@unseenco/theatre-react` → `packages/react/`
+- `@unseenco/theatre-browser-bundles` → `packages/browser-bundles/`
 
 Non-published: `packages/playground` (dev harness + e2e), `packages/saaz`, `packages/dataverse-experiments`, `packages/utils`, `packages/app`, `theatre/shared`, `theatre/devEnv`, `compat-tests`.
 
-TypeScript path aliases (`tsconfig.base.json`) map `@theatre/*` directly to `src/index.ts` of each package — imports resolve to source, not `dist`. Jest uses the same aliases (see `devEnv/getAliasesFromTsConfig.ts`). Don't add relative cross-package imports; use the `@theatre/*` aliases.
+TypeScript path aliases (`tsconfig.base.json`) map `@unseenco/theatre-*` directly to `src/index.ts` of each package — imports resolve to source, not `dist`. Jest uses the same aliases (see `devEnv/getAliasesFromTsConfig.ts`). Don't add relative cross-package imports; use the `@unseenco/theatre-*` aliases.
 
 ## Build / codegen quirks
 
-- `yarn cli build` runs TypeScript solution build AND each package's own `build` script in parallel. A package's `build` typically emits dist via esbuild (`devEnv/build.ts` per package) plus `api-extractor` for the public API surface. `@theatre/dataverse` also runs `build:api-json`.
+- `yarn cli build` runs TypeScript solution build AND each package's own `build` script in parallel. A package's `build` typically emits dist via esbuild (`devEnv/build.ts` per package) plus `api-extractor` for the public API surface. `@unseenco/theatre-dataverse` also runs `build:api-json`.
 - `examples/*` consume built `dist/` output — you MUST `yarn cli build` before running any example (`cd examples/<name> && yarn start`). The `playground` is the exception: it rebuilds packages live via Vite.
 - Types are emitted with `declarationMap`; consumers in the monorepo still resolve to source via path aliases.
 
@@ -55,14 +55,14 @@ TypeScript path aliases (`tsconfig.base.json`) map `@theatre/*` directly to `src
 - `setupFiles: theatre/shared/src/setupTestEnv.ts` is loaded for every unit test.
 - E2E (playwright) tests live in `packages/playground/src/tests/<name>/*.e2e.ts`. Run from the playground workspace, not root: `cd packages/playground && yarn test`. Filter with `--project=firefox`, `--headed`, `--debug` (inspector). Use `yarn playwright codegen http://localhost:8080/tests/<name>` after `yarn serve`.
 - **Visual regression** only runs in CI (Linux VM). To reproduce locally use `docker-compose up -d` then `docker-compose exec -it node bash` → `yarn && yarn test:e2e:ci`. If you can't use Docker, ask maintainers to update screenshots.
-- **Compat tests** are two-phase for a reason: `test:compat:install` spins up verdaccio, publishes a real build, and runs `npm install` in each `fixtures/*/package`. If install fails, the cause is almost always an unsatisfiable `dependency`/`peerDependency` on a `@theatre/*` package — fix that first, not the fixture. Some bundlers (notably CRA's webpack) walk `node_modules` up into the monorepo and break; symptoms often disappear outside the monorepo.
+- **Compat tests** are two-phase for a reason: `test:compat:install` spins up verdaccio, publishes a real build, and runs `npm install` in each `fixtures/*/package`. If install fails, the cause is almost always an unsatisfiable `dependency`/`peerDependency` on a `@unseenco/theatre-*` package — fix that first, not the fixture. Some bundlers (notably CRA's webpack) walk `node_modules` up into the monorepo and break; symptoms often disappear outside the monorepo.
 
 ## Pre-commit hook gotchas
 
 `.husky/pre-commit` runs:
 1. `yarn lint-staged` — eslint `--fix` on `(theatre|packages|devEnv|compat-tests)/**/*.(t|j)s?(x)`, prettier on all `(t|j)s?(x)`.
-2. `yarn workspace @theatre/dataverse run precommit` — regenerates `packages/dataverse/docs` via typedoc.
-3. Fails if `packages/dataverse/docs` has uncommitted changes — so any edit to dataverse's public API must come with regenerated docs in the same commit. Run `yarn workspace @theatre/dataverse run doc` if you edit dataverse source.
+2. `yarn workspace @unseenco/theatre-dataverse run precommit` — regenerates `packages/dataverse/docs` via typedoc.
+3. Fails if `packages/dataverse/docs` has uncommitted changes — so any edit to dataverse's public API must come with regenerated docs in the same commit. Run `yarn workspace @unseenco/theatre-dataverse run doc` if you edit dataverse source.
 
 ## Release flow (do not run unless asked)
 
@@ -70,7 +70,6 @@ TypeScript path aliases (`tsconfig.base.json`) map `@theatre/*` directly to `src
 - Valid version shapes: `x.y.z`, `x.y.z-dev.w`, `x.y.z-rc.w`, `x.y.z-beta.w` (regex-enforced).
 - Requires a clean git tree; sets `THEATRE_IS_PUBLISHING=1` so packages' `prepublish` guards pass.
 - Bumps versions in all `packagesWhoseVersionsShouldBump` (root + each package JSON), builds, commits + tags with the version string, then `npm publish --access public --tag <latest|dev|rc|beta>`.
-- Insiders builds are produced by `yarn cli prerelease ci` in CI only (needs `NPM_TOKEN` / `GITHUB_SHA`); versions look like `x.y.z-insiders.<commithash>`.
 
 ## Workflow conventions
 

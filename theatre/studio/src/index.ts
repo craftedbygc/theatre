@@ -4,14 +4,14 @@
  * @packageDocumentation
  */
 
-import {setStudio} from '@theatre/studio/getStudio'
-import {Studio} from '@theatre/studio/Studio'
+import {setStudio} from '@unseenco/theatre-studio/getStudio'
+import {Studio} from '@unseenco/theatre-studio/Studio'
 
-import * as globalVariableNames from '@theatre/shared/globalVariableNames'
-import type {$FixMe} from '@theatre/shared/utils/types'
+import * as globalVariableNames from '@unseenco/theatre-shared/globalVariableNames'
+import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
 import StudioBundle from './StudioBundle'
-import type CoreBundle from '@theatre/core/CoreBundle'
-import type {IStudio} from '@theatre/studio/TheatreStudio'
+import type CoreBundle from '@unseenco/theatre-core/CoreBundle'
+import type {IStudio} from '@unseenco/theatre-studio/TheatreStudio'
 
 const studioPrivateAPI = new Studio()
 setStudio(studioPrivateAPI)
@@ -39,14 +39,14 @@ function registerStudioBundle() {
       typeof existingStudioBundle.version === 'string'
     ) {
       throw new Error(
-        `It seems that the module '@theatre/studio' is loaded more than once. This could have two possible causes:\n` +
+        `It seems that the module '@unseenco/theatre-studio' is loaded more than once. This could have two possible causes:\n` +
           `1. You might have two separate versions of Theatre.js in node_modules.\n` +
           `2. Or this might be a bundling misconfiguration, in case you're using a bundler like Webpack/ESBuild/Rollup.\n\n` +
-          `Note that it **is okay** to import '@theatre/studio' multiple times. But those imports should point to the same module.`,
+          `Note that it **is okay** to import '@unseenco/theatre-studio' multiple times. But those imports should point to the same module.`,
       )
     } else {
       throw new Error(
-        `The variable window.${globalVariableNames.studioBundle} seems to be already set by a module other than @theatre/core.`,
+        `The variable window.${globalVariableNames.studioBundle} seems to be already set by a module other than @unseenco/theatre-core.`,
       )
     }
   }
@@ -73,7 +73,7 @@ function registerStudioBundle() {
 // export {default as ToolbarIconButton} from './uiComponents/toolbar/ToolbarIconButton'
 export {default as ToolbarDropdownSelect} from './uiComponents/toolbar/ToolbarDropdownSelect'
 
-import {notify} from '@theatre/studio/notify'
+import {notify} from '@unseenco/theatre-studio/notify'
 
 if (typeof window !== 'undefined') {
   // @ts-ignore
@@ -82,7 +82,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-export type {IScrub} from '@theatre/studio/Scrub'
+export type {IScrub} from '@unseenco/theatre-studio/Scrub'
 export type {
   IStudio,
   IExtension,
@@ -94,4 +94,4 @@ export type {
   ToolConfig,
   ToolConfigIcon,
   ToolConfigSwitch,
-} from '@theatre/studio/TheatreStudio'
+} from '@unseenco/theatre-studio/TheatreStudio'

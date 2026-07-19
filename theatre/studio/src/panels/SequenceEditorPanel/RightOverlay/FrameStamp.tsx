@@ -1,17 +1,17 @@
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
-import {usePrism, useVal} from '@theatre/react'
-import type {Pointer} from '@theatre/dataverse'
-import {val} from '@theatre/dataverse'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
+import {usePrism, useVal} from '@unseenco/theatre-react'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {val} from '@unseenco/theatre-dataverse'
 import React from 'react'
 import styled from 'styled-components'
-import {stampsGridTheme} from '@theatre/studio/panels/SequenceEditorPanel/FrameGrid/StampsGrid'
-import {zIndexes} from '@theatre/studio/panels/SequenceEditorPanel/SequenceEditorPanel'
+import {stampsGridTheme} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameGrid/StampsGrid'
+import {zIndexes} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/SequenceEditorPanel'
 import {topStripTheme} from './TopStrip'
 import {
   FrameStampPositionType,
   useFrameStampPositionD,
-} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: absolute;

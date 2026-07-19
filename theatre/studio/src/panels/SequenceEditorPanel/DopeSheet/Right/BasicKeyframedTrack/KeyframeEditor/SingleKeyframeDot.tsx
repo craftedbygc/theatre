@@ -1,38 +1,38 @@
 import React, {useMemo, useRef} from 'react'
 import styled from 'styled-components'
 
-import getStudio from '@theatre/studio/getStudio'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import type {UseDragOpts} from '@theatre/studio/uiComponents/useDrag'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import {val} from '@theatre/dataverse'
-import {useLockFrameStampPosition} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
-import {useCssCursorLock} from '@theatre/studio/uiComponents/PointerEventsHandler'
-import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import type {UseDragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import {val} from '@unseenco/theatre-dataverse'
+import {useLockFrameStampPosition} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {useCssCursorLock} from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
+import DopeSnap from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
 
 import type {ISingleKeyframeEditorProps} from './SingleKeyframeEditor'
-import {absoluteDims} from '@theatre/studio/utils/absoluteDims'
-import {useLogger} from '@theatre/studio/uiComponents/useLogger'
-import type {ILogger} from '@theatre/shared/logger'
-import {copyableKeyframesFromSelection} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/selections'
-import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
+import {absoluteDims} from '@unseenco/theatre-studio/utils/absoluteDims'
+import {useLogger} from '@unseenco/theatre-studio/uiComponents/useLogger'
+import type {ILogger} from '@unseenco/theatre-shared/logger'
+import {copyableKeyframesFromSelection} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import {
   collectKeyframeSnapPositions,
   snapToNone,
   snapToSome,
-} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
 import {useKeyframeInlineEditorPopover} from './useSingleKeyframeInlineEditorPopover'
 import usePresence, {
   PresenceFlag,
-} from '@theatre/studio/uiComponents/usePresence'
+} from '@unseenco/theatre-studio/uiComponents/usePresence'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
   getStudioTrackSequenceVariant,
-} from '@theatre/studio/utils/activeSequenceVariant'
-import {valTracksByObjectForSheetVariant} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {valTracksByObjectForSheetVariant} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
 
 export const DOT_SIZE_PX = 6
 const DOT_HOVER_SIZE_PX = DOT_SIZE_PX + 2

@@ -1,5 +1,5 @@
 {
-  "name": "@theatre/browser-bundles",
+  "name": "@unseenco/theatre-browser-bundles",
   "version": "0.7.0",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -28,7 +28,7 @@
     "typescript": "5.1.6"
   },
   "peerDependencies": {
-    "@theatre/core": "*",
-    "@theatre/studio": "*"
+    "@unseenco/theatre-core": "*",
+    "@unseenco/theatre-studio": "*"
   }
 }

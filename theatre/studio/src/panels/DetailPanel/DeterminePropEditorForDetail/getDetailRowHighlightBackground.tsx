@@ -1,4 +1,4 @@
-import type {PropHighlighted} from '@theatre/studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
+import type {PropHighlighted} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
 
 export function getDetailRowHighlightBackground({
   isHighlighted,

@@ -1,13 +1,16 @@
 import {
   DEFAULT_SEQUENCE_VARIANT,
   isObjectAssignedToSequenceVariant,
-} from '@theatre/core/sequences/sequenceVariants'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
-import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
-import type {ObjectAddressKey} from '@theatre/shared/utils/ids'
-import type {StrictRecord} from '@theatre/shared/utils/types'
-import {val} from '@theatre/dataverse'
+} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {
+  WithoutSheetInstance,
+  SheetAddress,
+} from '@unseenco/theatre-shared/utils/addresses'
+import type {ObjectAddressKey} from '@unseenco/theatre-shared/utils/ids'
+import type {StrictRecord} from '@unseenco/theatre-shared/utils/types'
+import {val} from '@unseenco/theatre-dataverse'
 
 export function getVariantObjectOverrides(
   p: WithoutSheetInstance<SheetAddress>,

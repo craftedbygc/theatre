@@ -1,15 +1,15 @@
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
-import type {SequenceEditorTree_PrimitiveProp} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
-import {usePrism} from '@theatre/react'
-import type {Pointer} from '@theatre/dataverse'
-import {val} from '@theatre/dataverse'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
+import type {SequenceEditorTree_PrimitiveProp} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/tree'
+import {getSequenceStateFromSheet} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {usePrism} from '@unseenco/theatre-react'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {val} from '@unseenco/theatre-dataverse'
 import React from 'react'
 import RightRow from './Row'
 import BasicKeyframedTrack from './BasicKeyframedTrack/BasicKeyframedTrack'
-import {useLogger} from '@theatre/studio/uiComponents/useLogger'
+import {useLogger} from '@unseenco/theatre-studio/uiComponents/useLogger'
 
 const PrimitivePropRow: React.VFC<{
   leaf: SequenceEditorTree_PrimitiveProp
@@ -24,14 +24,16 @@ const PrimitivePropRow: React.VFC<{
       getStudio()!.atomP.historic.coreByProject[sheetObject.address.projectId]
         .sheetsById[sheetObject.address.sheetId],
     )
-    const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+    const activeVariant = getStudioActiveSequenceVariant(
+      sheetObject.sheet.address,
+    )
     const trackVariant =
-      sheetObject.template.getSequenceVariantOwningTrack(trackId, activeVariant) ??
-      activeVariant
-    const trackData = getSequenceStateFromSheet(
-      sheetState,
-      trackVariant,
-    )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
+      sheetObject.template.getSequenceVariantOwningTrack(
+        trackId,
+        activeVariant,
+      ) ?? activeVariant
+    const trackData = getSequenceStateFromSheet(sheetState, trackVariant)
+      ?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
 
     if (trackData?.type !== 'BasicKeyframedTrack') {
       logger.errorDev(

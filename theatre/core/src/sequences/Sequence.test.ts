@@ -1,10 +1,16 @@
 /*
  * @jest-environment jsdom
  */
-import {setupTestSheet} from '@theatre/shared/testUtils'
-import {encodePathToProp} from '@theatre/shared/utils/addresses'
-import {asKeyframeId, asSequenceTrackId} from '@theatre/shared/utils/ids'
-import type {ObjectAddressKey, SequenceTrackId} from '@theatre/shared/utils/ids'
+import {setupTestSheet} from '@unseenco/theatre-shared/testUtils'
+import {encodePathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import {
+  asKeyframeId,
+  asSequenceTrackId,
+} from '@unseenco/theatre-shared/utils/ids'
+import type {
+  ObjectAddressKey,
+  SequenceTrackId,
+} from '@unseenco/theatre-shared/utils/ids'
 
 describe(`Sequence`, () => {
   test('sequence.getKeyframesOfSimpleProp()', async () => {

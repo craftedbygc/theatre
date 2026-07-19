@@ -2,7 +2,7 @@ import type {
   $FixMe,
   $IntentionalAny,
   ReduxReducer,
-} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-shared/utils/types'
 import identity from 'lodash-es/identity'
 import type {Store} from 'redux'
 import {compose, createStore} from 'redux'

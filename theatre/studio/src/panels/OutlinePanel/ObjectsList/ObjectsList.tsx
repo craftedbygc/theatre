@@ -1,20 +1,20 @@
-import type Sheet from '@theatre/core/sheets/Sheet'
-import {usePrism} from '@theatre/react'
-import {val} from '@theatre/dataverse'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import {usePrism} from '@unseenco/theatre-react'
+import {val} from '@unseenco/theatre-dataverse'
 import React from 'react'
 import styled from 'styled-components'
 import {ObjectItem} from './ObjectItem'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import BaseItem from '@unseenco/theatre-studio/panels/OutlinePanel/BaseItem'
 import {
   ensureNamespacePath,
   parseOutlineNamespacePath,
   useCollapseStateInOutlinePanel,
-} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
-import type {NamespacedObjects} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
-import {isObjectOverriddenInVariant} from '@theatre/studio/utils/variantObjectOverrides'
+} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import type {NamespacedObjects} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {isObjectOverriddenInVariant} from '@unseenco/theatre-studio/utils/variantObjectOverrides'
 
 export const Li = styled.li<{isSelected: boolean}>`
   color: ${(props) => (props.isSelected ? 'white' : 'hsl(1, 1%, 80%)')};

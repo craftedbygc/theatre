@@ -1,35 +1,38 @@
 import get from 'lodash-es/get'
 import React from 'react'
-import type {Prism, Pointer} from '@theatre/dataverse'
-import {getPointerParts, prism, val} from '@theatre/dataverse'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import getStudio from '@theatre/studio/getStudio'
-import type Scrub from '@theatre/studio/Scrub'
-import type {IContextMenuItem} from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import getDeep from '@theatre/shared/utils/getDeep'
-import {usePrismInstance} from '@theatre/react'
+import type {Prism, Pointer} from '@unseenco/theatre-dataverse'
+import {getPointerParts, prism, val} from '@unseenco/theatre-dataverse'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type Scrub from '@unseenco/theatre-studio/Scrub'
+import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import getDeep from '@unseenco/theatre-shared/utils/getDeep'
+import {usePrismInstance} from '@unseenco/theatre-react'
 import type {
   $IntentionalAny,
   SerializablePrimitive as SerializablePrimitive,
-} from '@theatre/shared/utils/types'
-import type {PropTypeConfig_AllSimples} from '@theatre/core/propTypes'
-import {isPropConfSequencable} from '@theatre/shared/propTypes/utils'
-import type {SequenceTrackId} from '@theatre/shared/utils/ids'
+} from '@unseenco/theatre-shared/utils/types'
+import type {PropTypeConfig_AllSimples} from '@unseenco/theatre-core/propTypes'
+import {isPropConfSequencable} from '@unseenco/theatre-shared/propTypes/utils'
+import type {SequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
 import DefaultOrStaticValueIndicator from './DefaultValueIndicator'
 import type {NearbyKeyframes} from './getNearbyKeyframesOfTrack'
 import {getNearbyKeyframesOfTrack} from './getNearbyKeyframesOfTrack'
 import type {NearbyKeyframesControls} from './NextPrevKeyframeCursors'
 import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
-import type {Asset, File as AssetFile} from '@theatre/shared/utils/assets'
+import type {
+  Asset,
+  File as AssetFile,
+} from '@unseenco/theatre-shared/utils/assets'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
-} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 // eslint-disable-next-line no-restricted-syntax
 import {
   getSequenceStateFromSheet,
   getVariantOwnStaticOverridesByObject,
-} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-core/sequences/sequenceVariants'
 
 interface EditingToolsCommon<T> {
   value: T

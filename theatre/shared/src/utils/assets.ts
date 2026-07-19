@@ -1,5 +1,5 @@
-import type Project from '@theatre/core/projects/Project'
-import {val} from '@theatre/dataverse'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import {val} from '@unseenco/theatre-dataverse'
 import forEachPropDeep from './forEachDeep'
 import type {$IntentionalAny} from './types'
 
@@ -10,8 +10,7 @@ export function getAllPossibleAssetIDs(project: Project, type?: string) {
     .concat(
       sheets.flatMap((sheet) =>
         Object.values(sheet?.staticOverridesByVariant ?? {}).flatMap(
-          (variantOverrides) =>
-            Object.values(variantOverrides?.byObject ?? {}),
+          (variantOverrides) => Object.values(variantOverrides?.byObject ?? {}),
         ),
       ),
     )

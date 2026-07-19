@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import type {ComponentPropsWithRef, ReactNode} from 'react'
 import React, {forwardRef, useState} from 'react'
-import {Container as ToolbarIconButtonContainer} from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
+import {Container as ToolbarIconButtonContainer} from '@unseenco/theatre-studio/uiComponents/toolbar/ToolbarIconButton'
 
 // Matches OutlinePanel/BaseItem `.selected` background.
 const outlineSelectedBackground = 'rgba(30, 88, 102, 0.7)'

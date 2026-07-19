@@ -1,7 +1,7 @@
-import type {SequenceEditorTree_AllRowTypes} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
-import type {PropAddress} from '@theatre/shared/utils/addresses'
+import type {SequenceEditorTree_AllRowTypes} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/tree'
+import type {PropAddress} from '@unseenco/theatre-shared/utils/addresses'
 import {useLayoutEffect} from 'react'
-import {whatPropIsHighlighted} from '@theatre/studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
+import {whatPropIsHighlighted} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
 
 /** This should ignore if  */
 export function usePropHighlightMouseEnter(

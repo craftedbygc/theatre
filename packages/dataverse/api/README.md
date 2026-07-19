@@ -1,6 +1,6 @@
-@theatre/dataverse
+@unseenco/theatre-dataverse
 
-# @theatre/dataverse
+# @unseenco/theatre-dataverse
 
 The animation-optimized FRP library powering the internals of Theatre.js.
 

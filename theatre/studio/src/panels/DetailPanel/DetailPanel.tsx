@@ -1,5 +1,5 @@
-import {getOutlineSelection} from '@theatre/studio/selectors'
-import {usePrism, useVal} from '@theatre/react'
+import {getOutlineSelection} from '@unseenco/theatre-studio/selectors'
+import {usePrism, useVal} from '@unseenco/theatre-react'
 import React, {
   createContext,
   useContext,
@@ -8,26 +8,28 @@ import React, {
   useState,
 } from 'react'
 import styled from 'styled-components'
-import {isProject, isSheetObject} from '@theatre/shared/instanceTypes'
+import {isProject, isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
 import {
   panelZIndexes,
   TitleBar_Piece,
   TitleBar_Punctuation,
-} from '@theatre/studio/panels/BasePanel/common'
-import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
+} from '@unseenco/theatre-studio/panels/BasePanel/common'
+import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import ObjectDetails from './ObjectDetails'
 import ProjectDetails from './ProjectDetails'
-import getStudio from '@theatre/studio/getStudio'
-import useHotspot from '@theatre/studio/uiComponents/useHotspot'
-import {Atom, prism, val} from '@theatre/dataverse'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import useHotspot from '@unseenco/theatre-studio/uiComponents/useHotspot'
+import {Atom, prism, val} from '@unseenco/theatre-dataverse'
 import EmptyState from './EmptyState'
-import useLockSet from '@theatre/studio/uiComponents/useLockSet'
-import {usePresenceListenersOnRootElement} from '@theatre/studio/uiComponents/usePresence'
-import BasePanel, {usePanel} from '@theatre/studio/panels/BasePanel/BasePanel'
-import PanelResizeHandle from '@theatre/studio/panels/BasePanel/PanelResizeHandle'
-import type {UIPanelId} from '@theatre/shared/utils/ids'
-import type {PanelPosition} from '@theatre/studio/store/types'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+import useLockSet from '@unseenco/theatre-studio/uiComponents/useLockSet'
+import {usePresenceListenersOnRootElement} from '@unseenco/theatre-studio/uiComponents/usePresence'
+import BasePanel, {
+  usePanel,
+} from '@unseenco/theatre-studio/panels/BasePanel/BasePanel'
+import PanelResizeHandle from '@unseenco/theatre-studio/panels/BasePanel/PanelResizeHandle'
+import type {UIPanelId} from '@unseenco/theatre-shared/utils/ids'
+import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const headerHeight = `32px`
 

@@ -1,4 +1,4 @@
-import {Atom} from '@theatre/dataverse'
+import {Atom} from '@unseenco/theatre-dataverse'
 import type {Store} from 'redux'
 
 export default function atomFromReduxStore<State>(

@@ -1,8 +1,8 @@
 import ReactDOM from 'react-dom'
 import './index.css'
 import reportWebVitals from './reportWebVitals'
-import studio from '@theatre/studio'
-import {getProject} from '@theatre/core'
+import studio from '@unseenco/theatre-studio'
+import {getProject} from '@unseenco/theatre-core'
 import React from 'react'
 import App from './App'
 

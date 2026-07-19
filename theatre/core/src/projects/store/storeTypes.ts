@@ -1,5 +1,11 @@
-import type {ObjectAddressKey, SheetId} from '@theatre/shared/utils/ids'
-import type {SerializableMap, StrictRecord} from '@theatre/shared/utils/types'
+import type {
+  ObjectAddressKey,
+  SheetId,
+} from '@unseenco/theatre-shared/utils/ids'
+import type {
+  SerializableMap,
+  StrictRecord,
+} from '@unseenco/theatre-shared/utils/types'
 import type {SheetState_Historic} from './types/SheetState_Historic'
 
 type ProjectLoadingState =
@@ -48,7 +54,7 @@ export interface ProjectEphemeralState {
 }
 
 /**
- * This is the state of each project that is consumable by `@theatre/core`.
+ * This is the state of each project that is consumable by `@unseenco/theatre-core`.
  * If the studio is present, this part of the state joins the studio's historic state,
  * at {@link StudioHistoricState.coreByProject}
  */

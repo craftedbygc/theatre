@@ -20,14 +20,14 @@ export async function createBundles(watch: boolean) {
         __IS_VISUAL_REGRESSION_TESTING: 'false',
       },
       external: [
-        '@theatre/dataverse',
+        '@unseenco/theatre-dataverse',
         /**
          * Prevents double-bundling react.
          *
          * @remarks
          * Ideally we'd want to just bundle our own fixed version of react to keep things
          * simple, but for now we keep react external because we're exposing these
-         * react-dependant API from \@theatre/studio:
+         * react-dependant API from \@unseenco/theatre-studio:
          *
          * - `ToolbarIconButton`
          * - `IStudio['extend']({globalToolbar: {component}})`
@@ -71,7 +71,7 @@ export async function createBundles(watch: boolean) {
      * I just disabled ESM builds because I couldn't get them to work
      * with create-react-app which uses webpack v4. I'm sure that's fixable,
      * but not worth the hassle right now. There is not much to tree-shake
-     * in \@theatre/core as we've done all the tree-shaking pre-bundle already.
+     * in \@unseenco/theatre-core as we've done all the tree-shaking pre-bundle already.
      */
 
     // build({

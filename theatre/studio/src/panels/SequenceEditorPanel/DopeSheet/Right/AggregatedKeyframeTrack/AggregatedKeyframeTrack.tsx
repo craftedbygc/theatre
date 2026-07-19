@@ -1,20 +1,20 @@
 import type {
   DopeSheetSelection,
   SequenceEditorPanelLayout,
-} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
 import type {
   SequenceEditorTree_PropWithChildren,
   SequenceEditorTree_Sheet,
   SequenceEditorTree_SheetObject,
-} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
-import {usePrism, useVal} from '@theatre/react'
-import type {Prism, Pointer} from '@theatre/dataverse'
-import {prism, val, pointerToPrism} from '@theatre/dataverse'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/tree'
+import {usePrism, useVal} from '@unseenco/theatre-react'
+import type {Prism, Pointer} from '@unseenco/theatre-dataverse'
+import {prism, val, pointerToPrism} from '@unseenco/theatre-dataverse'
 import React, {useMemo, Fragment} from 'react'
 import styled from 'styled-components'
-import type {IContextMenuItem} from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
+import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import type {
   IAggregateKeyframesAtPosition,
   IAggregateKeyframeEditorProps,
@@ -23,43 +23,46 @@ import AggregateKeyframeEditor from './AggregateKeyframeEditor/AggregateKeyframe
 import type {
   AggregatedKeyframes,
   KeyframeWithTrack,
-} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
-import {collectAggregateSnapPositionsObjectOrCompound} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
-import {useLogger} from '@theatre/studio/uiComponents/useLogger'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
+import {collectAggregateSnapPositionsObjectOrCompound} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
+import {useLogger} from '@unseenco/theatre-studio/uiComponents/useLogger'
 import {getAggregateKeyframeEditorUtilsPrismFn} from './AggregateKeyframeEditor/useAggregateKeyframeEditorUtils'
-import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
-import type {UseDragOpts} from '@theatre/studio/uiComponents/useDrag'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
-import {useLockFrameStampPositionRef} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
-import {useCssCursorLock} from '@theatre/studio/uiComponents/PointerEventsHandler'
-import {valTracksByObjectForSheetVariant} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
+import DopeSnap from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
+import type {UseDragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import {useLockFrameStampPositionRef} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {useCssCursorLock} from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
+import {valTracksByObjectForSheetVariant} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
   pointerToActiveSheetSequence,
-} from '@theatre/studio/utils/activeSequenceVariant'
-import type {SheetObjectAddress} from '@theatre/shared/utils/addresses'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import type {SheetObjectAddress} from '@unseenco/theatre-shared/utils/addresses'
 import {
   decodePathToProp,
   doesPathStartWith,
   encodePathToProp,
-} from '@theatre/shared/utils/addresses'
-import type {ObjectAddressKey, SequenceTrackId} from '@theatre/shared/utils/ids'
-import type Sequence from '@theatre/core/sequences/Sequence'
+} from '@unseenco/theatre-shared/utils/addresses'
+import type {
+  ObjectAddressKey,
+  SequenceTrackId,
+} from '@unseenco/theatre-shared/utils/ids'
+import type Sequence from '@unseenco/theatre-core/sequences/Sequence'
 import KeyframeSnapTarget, {
   snapPositionsStateD,
-} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
-import {emptyObject} from '@theatre/shared/utils'
-import type {KeyframeWithPathToPropFromCommonRoot} from '@theatre/studio/store/types'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
+import {emptyObject} from '@unseenco/theatre-shared/utils'
+import type {KeyframeWithPathToPropFromCommonRoot} from '@unseenco/theatre-studio/store/types'
 import {
   collectKeyframeSnapPositions,
   snapToNone,
   snapToSome,
-} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
-import {collectAggregateSnapPositionsSheet} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
+import {collectAggregateSnapPositionsSheet} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
 
 const AggregatedKeyframeTrackContainer = styled.div`
   position: relative;

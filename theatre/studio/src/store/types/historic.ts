@@ -1,17 +1,17 @@
-import type {ProjectState_Historic} from '@theatre/core/projects/store/storeTypes'
-import type {graphEditorColors} from '@theatre/studio/panels/SequenceEditorPanel/GraphEditor/GraphEditor'
+import type {ProjectState_Historic} from '@unseenco/theatre-core/projects/store/storeTypes'
+import type {graphEditorColors} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/GraphEditor/GraphEditor'
 import type {
   PathToProp_Encoded,
   ProjectAddress,
   SheetAddress,
   SheetObjectAddress,
   WithoutSheetInstance,
-} from '@theatre/shared/utils/addresses'
-import type {StrictRecord} from '@theatre/shared/utils/types'
-import type {PointableSet} from '@theatre/shared/utils/PointableSet'
-import type Project from '@theatre/core/projects/Project'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
+} from '@unseenco/theatre-shared/utils/addresses'
+import type {StrictRecord} from '@unseenco/theatre-shared/utils/types'
+import type {PointableSet} from '@unseenco/theatre-shared/utils/PointableSet'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import type {
   ObjectAddressKey,
   PaneInstanceId,
@@ -19,8 +19,8 @@ import type {
   SequenceMarkerId,
   SheetId,
   UIPanelId,
-} from '@theatre/shared/utils/ids'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-shared/utils/ids'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 
 export type PanelPosition = {
   edges: {

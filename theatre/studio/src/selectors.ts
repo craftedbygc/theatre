@@ -1,14 +1,14 @@
-import type Project from '@theatre/core/projects/Project'
-import type Sequence from '@theatre/core/sequences/Sequence'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import {val} from '@theatre/dataverse'
-import {isSheet, isSheetObject} from '@theatre/shared/instanceTypes'
-import type {SheetInstanceId} from '@theatre/shared/utils/ids'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import type Sequence from '@unseenco/theatre-core/sequences/Sequence'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import {val} from '@unseenco/theatre-dataverse'
+import {isSheet, isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
+import type {SheetInstanceId} from '@unseenco/theatre-shared/utils/ids'
 import {uniq} from 'lodash-es'
 import getStudio from './getStudio'
 import type {OutlineSelectable, OutlineSelection} from './store/types'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 export const getOutlineSelection = (): OutlineSelection => {
   const projects = val(getStudio().projectsP)

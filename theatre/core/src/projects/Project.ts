@@ -1,31 +1,31 @@
-import type {OnDiskState} from '@theatre/core/projects/store/storeTypes'
-import type TheatreProject from '@theatre/core/projects/TheatreProject'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import SheetTemplate from '@theatre/core/sheets/SheetTemplate'
-import type {Studio} from '@theatre/studio/Studio'
-import type {ProjectAddress} from '@theatre/shared/utils/addresses'
-import type {Pointer} from '@theatre/dataverse'
-import {PointerProxy} from '@theatre/dataverse'
-import {Atom} from '@theatre/dataverse'
+import type {OnDiskState} from '@unseenco/theatre-core/projects/store/storeTypes'
+import type TheatreProject from '@unseenco/theatre-core/projects/TheatreProject'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import SheetTemplate from '@unseenco/theatre-core/sheets/SheetTemplate'
+import type {Studio} from '@unseenco/theatre-studio/Studio'
+import type {ProjectAddress} from '@unseenco/theatre-shared/utils/addresses'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {PointerProxy} from '@unseenco/theatre-dataverse'
+import {Atom} from '@unseenco/theatre-dataverse'
 import initialiseProjectState from './initialiseProjectState'
 import projectsSingleton from './projectsSingleton'
-import RemoteSync from '@theatre/core/internal/RemoteSync'
+import RemoteSync from '@unseenco/theatre-core/internal/RemoteSync'
 import type {ProjectState, ProjectAhistoricState} from './store/storeTypes'
-import type {Deferred} from '@theatre/shared/utils/defer'
-import {defer} from '@theatre/shared/utils/defer'
-import globals from '@theatre/shared/globals'
+import type {Deferred} from '@unseenco/theatre-shared/utils/defer'
+import {defer} from '@unseenco/theatre-shared/utils/defer'
+import globals from '@unseenco/theatre-shared/globals'
 import type {
   ProjectId,
   SheetId,
   SheetInstanceId,
-} from '@theatre/shared/utils/ids'
+} from '@unseenco/theatre-shared/utils/ids'
 import type {
   ILogger,
   ITheatreLoggerConfig,
   ITheatreLoggingConfig,
-} from '@theatre/shared/logger'
-import type {OutlineNamespaceConfig} from '@theatre/shared/utils/outlineNamespaces'
-import {_coreLogger} from '@theatre/core/_coreLogger'
+} from '@unseenco/theatre-shared/logger'
+import type {OutlineNamespaceConfig} from '@unseenco/theatre-shared/utils/outlineNamespaces'
+import {_coreLogger} from '@unseenco/theatre-core/_coreLogger'
 
 type ICoreAssetStorage = {
   /** Returns a URL for the provided asset ID */
@@ -154,7 +154,7 @@ export default class Project {
 
     if (config.state) {
       setTimeout(() => {
-        // The user has provided config.state but in case @theatre/studio is loaded,
+        // The user has provided config.state but in case @unseenco/theatre-studio is loaded,
         // let's give it one tick to attach itself
         if (!this._studio) {
           this._studioReadyDeferred.resolve(undefined)
@@ -177,9 +177,9 @@ export default class Project {
           if (!this._studio) {
             throw new Error(
               `Argument config.state in Theatre.getProject("${id}", config) is empty. This is fine ` +
-                `while you are using @theatre/core along with @theatre/studio. But since @theatre/studio ` +
+                `while you are using @unseenco/theatre-core along with @unseenco/theatre-studio. But since @unseenco/theatre-studio ` +
                 `is not loaded, the state of project "${id}" will be empty.\n\n` +
-                `To fix this, you need to add @theatre/studio into the bundle and export ` +
+                `To fix this, you need to add @unseenco/theatre-studio into the bundle and export ` +
                 `the project's state. Learn how to do that at https://www.theatrejs.com/docs/latest/manual/projects#state\n`,
             )
           }
@@ -301,9 +301,7 @@ export default class Project {
     }
   }
 
-  private _mutateCoreAhistoric(
-    fn: (ahistoric: ProjectAhistoricState) => void,
-  ) {
+  private _mutateCoreAhistoric(fn: (ahistoric: ProjectAhistoricState) => void) {
     if (this._studio) {
       this._studio.transaction(
         ({drafts}) => {

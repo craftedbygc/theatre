@@ -1,25 +1,25 @@
-import {privateAPI, setPrivateAPI} from '@theatre/core/privateAPIs'
-import type {IProject} from '@theatre/core/projects/TheatreProject'
-import type {ISheet} from '@theatre/core/sheets/TheatreSheet'
-import type {SheetObjectAddress} from '@theatre/shared/utils/addresses'
-import SimpleCache from '@theatre/shared/utils/SimpleCache'
+import {privateAPI, setPrivateAPI} from '@unseenco/theatre-core/privateAPIs'
+import type {IProject} from '@unseenco/theatre-core/projects/TheatreProject'
+import type {ISheet} from '@unseenco/theatre-core/sheets/TheatreSheet'
+import type {SheetObjectAddress} from '@unseenco/theatre-shared/utils/addresses'
+import SimpleCache from '@unseenco/theatre-shared/utils/SimpleCache'
 import type {
   $FixMe,
   DeepPartialOfSerializableValue,
   VoidFn,
-} from '@theatre/shared/utils/types'
-import type {Prism, Pointer} from '@theatre/dataverse'
-import {prism, val} from '@theatre/dataverse'
+} from '@unseenco/theatre-shared/utils/types'
+import type {Prism, Pointer} from '@unseenco/theatre-dataverse'
+import {prism, val} from '@unseenco/theatre-dataverse'
 import type SheetObject from './SheetObject'
 import type {
   UnknownShorthandCompoundProps,
   PropsValue,
-} from '@theatre/core/propTypes/internals'
+} from '@unseenco/theatre-core/propTypes/internals'
 import {debounce} from 'lodash-es'
 import type {DebouncedFunc} from 'lodash-es'
-import type {IRafDriver} from '@theatre/core/rafDrivers'
-import {onChange} from '@theatre/core/coreExports'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import type {IRafDriver} from '@unseenco/theatre-core/rafDrivers'
+import {onChange} from '@unseenco/theatre-core/coreExports'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 
 export type SheetObjectValuesChangeMeta = {
   /**

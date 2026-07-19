@@ -2,15 +2,21 @@ import type {
   HistoricPositionalSequence,
   SheetState_Historic,
   TrackData,
-} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type {PathToProp_Encoded} from '@theatre/shared/utils/addresses'
-import type {Pointer} from '@theatre/dataverse'
-import {val} from '@theatre/dataverse'
-import type {SequenceTrackId, ObjectAddressKey} from '@theatre/shared/utils/ids'
-import {generateSequenceTrackId} from '@theatre/shared/utils/ids'
-import {InvalidArgumentError} from '@theatre/shared/utils/errors'
-import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
-import type {SerializableMap, StrictRecord} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {PathToProp_Encoded} from '@unseenco/theatre-shared/utils/addresses'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {val} from '@unseenco/theatre-dataverse'
+import type {
+  SequenceTrackId,
+  ObjectAddressKey,
+} from '@unseenco/theatre-shared/utils/ids'
+import {generateSequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
+import {InvalidArgumentError} from '@unseenco/theatre-shared/utils/errors'
+import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
+import type {
+  SerializableMap,
+  StrictRecord,
+} from '@unseenco/theatre-shared/utils/types'
 import {cloneDeep, merge} from 'lodash-es'
 
 export const DEFAULT_SEQUENCE_VARIANT = 'default' as const

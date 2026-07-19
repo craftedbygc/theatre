@@ -1,6 +1,6 @@
-import type {Prism} from '@theatre/dataverse'
-import {Atom} from '@theatre/dataverse'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
+import type {Prism} from '@unseenco/theatre-dataverse'
+import {Atom} from '@unseenco/theatre-dataverse'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import React, {
   createContext,
   useCallback,

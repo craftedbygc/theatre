@@ -1,5 +1,5 @@
-import * as core from '@theatre/core'
-import studio from '@theatre/studio'
+import * as core from '@unseenco/theatre-core'
+import studio from '@unseenco/theatre-studio'
 
 // @ts-ignore
 window.Theatre = {

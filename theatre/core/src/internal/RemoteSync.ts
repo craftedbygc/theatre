@@ -1,14 +1,14 @@
-import type Project from '@theatre/core/projects/Project'
+import type Project from '@unseenco/theatre-core/projects/Project'
 import type {
   ProjectAhistoricState,
   ProjectState_Historic,
-} from '@theatre/core/projects/store/storeTypes'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type {Studio} from '@theatre/studio/Studio'
-import {getCoreTicker} from '@theatre/core/coreTicker'
-import {val} from '@theatre/dataverse'
-import type {SerializableMap} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-core/projects/store/storeTypes'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type {Studio} from '@unseenco/theatre-studio/Studio'
+import {getCoreTicker} from '@unseenco/theatre-core/coreTicker'
+import {val} from '@unseenco/theatre-dataverse'
+import type {SerializableMap} from '@unseenco/theatre-shared/utils/types'
 import {isRemoteEditorWindow} from './remoteEditor'
 
 type BroadcastDataEvent =

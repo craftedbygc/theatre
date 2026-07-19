@@ -16,7 +16,7 @@
     "typecheck": "yarn run build:ts",
     "build:ts": "tsc --build ./devEnv/typecheck-all-projects/tsconfig.all.json",
     "test": "jest",
-    "test:compat:install": "yarn workspace @theatre/compat-tests run install-fixtures",
+    "test:compat:install": "yarn workspace @unseenco/theatre-compat-tests run install-fixtures",
     "test:compat:run": "jest --config jest.compat-tests.config.js",
     "postinstall": "husky install",
     "lint:all": "eslint . --ext ts,tsx --ignore-path=.gitignore --rulesdir ./devEnv/eslint/rules"
@@ -58,8 +58,5 @@
     "typescript": "5.1.6",
     "yaml": "^2.3.1"
   },
-  "packageManager": "yarn@3.2.0",
-  "dependencies": {
-    "@actions/core": "^1.10.0"
-  }
+  "packageManager": "yarn@3.2.0"
 }

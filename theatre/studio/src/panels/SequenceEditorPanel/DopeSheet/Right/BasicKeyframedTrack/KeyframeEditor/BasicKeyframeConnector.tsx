@@ -1,28 +1,28 @@
-import getStudio from '@theatre/studio/getStudio'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import {val} from '@theatre/dataverse'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import {val} from '@unseenco/theatre-dataverse'
 import React from 'react'
 import {useMemo, useRef} from 'react'
-import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
-import BasicPopover from '@theatre/studio/uiComponents/Popover/BasicPopover'
+import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
+import BasicPopover from '@unseenco/theatre-studio/uiComponents/Popover/BasicPopover'
 import CurveEditorPopover, {
   isConnectionEditingInCurvePopover,
 } from './CurveEditorPopover/CurveEditorPopover'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
 import type {ISingleKeyframeEditorProps} from './SingleKeyframeEditor'
-import type {IConnectorThemeValues} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
-import {ConnectorLine} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
+import type {IConnectorThemeValues} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
+import {ConnectorLine} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
 import {COLOR_POPOVER_BACK} from './CurveEditorPopover/colors'
-import {usePrism} from '@theatre/react'
-import type {KeyframeConnectionWithAddress} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/selections'
-import {copyableKeyframesFromSelection} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/selections'
-import {selectedKeyframeConnections} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import {usePrism} from '@unseenco/theatre-react'
+import type {KeyframeConnectionWithAddress} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import {copyableKeyframesFromSelection} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import {selectedKeyframeConnections} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
 
 import styled from 'styled-components'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const POPOVER_MARGIN = 5
 
@@ -176,7 +176,9 @@ function useDragKeyframe(
         }
 
         const propsAtStartOfDrag = props
-        const sequence = getStudioSequence(val(propsAtStartOfDrag.layoutP.sheet))
+        const sequence = getStudioSequence(
+          val(propsAtStartOfDrag.layoutP.sheet),
+        )
 
         const toUnitSpace = val(
           propsAtStartOfDrag.layoutP.scaledSpace.toUnitSpace,

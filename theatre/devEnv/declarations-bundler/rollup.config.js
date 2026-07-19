@@ -18,13 +18,15 @@ const config = ['studio', 'core'].map((which) => {
     },
     external: (s) => {
       if (
-        s === '@theatre/dataverse' ||
-        s.startsWith(`@theatre/${which === 'studio' ? 'core' : 'studio'}`)
+        s === '@unseenco/theatre-dataverse' ||
+        s.startsWith(
+          `@unseenco/theatre-${which === 'studio' ? 'core' : 'studio'}`,
+        )
       ) {
         return true
       }
 
-      if (s.startsWith('@theatre')) {
+      if (s.startsWith('@unseenco/theatre')) {
         return false
       }
 
@@ -40,11 +42,11 @@ const config = ['studio', 'core'].map((which) => {
       alias({
         entries: [
           {
-            find: `@theatre/${which}`,
+            find: `@unseenco/theatre-${which}`,
             replacement: fromPrivatePackage(`.temp/declarations/${which}/src`),
           },
           {
-            find: '@theatre/shared',
+            find: '@unseenco/theatre-shared',
             replacement: fromPrivatePackage('.temp/declarations/shared/src'),
           },
         ],

@@ -1,14 +1,14 @@
-import type {PathToProp_Encoded} from '@theatre/shared/utils/addresses'
+import type {PathToProp_Encoded} from '@unseenco/theatre-shared/utils/addresses'
 import type {
   KeyframeId,
   ObjectAddressKey,
   SequenceTrackId,
-} from '@theatre/shared/utils/ids'
+} from '@unseenco/theatre-shared/utils/ids'
 import type {
   SerializableMap,
   SerializableValue,
   StrictRecord,
-} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-shared/utils/types'
 
 export interface SheetState_Historic {
   /**

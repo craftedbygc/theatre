@@ -1,26 +1,26 @@
-import type {Prism} from '@theatre/dataverse'
-import {prism, val} from '@theatre/dataverse'
+import type {Prism} from '@unseenco/theatre-dataverse'
+import {prism, val} from '@unseenco/theatre-dataverse'
 import type {
   KeyframeId,
   ObjectAddressKey,
   ProjectId,
   SequenceTrackId,
   SheetId,
-} from '@theatre/shared/utils/ids'
+} from '@unseenco/theatre-shared/utils/ids'
 import {
   getSequenceStateFromSheet,
   getSequenceVariantOwningTrackInSheetState,
-} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
-import type {DopeSheetSelection} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
+} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import type {DopeSheetSelection} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
 import {
   commonRootOfPathsToProps,
   decodePathToProp,
-} from '@theatre/shared/utils/addresses'
-import type {StrictRecord} from '@theatre/shared/utils/types'
-import type {KeyframeWithPathToPropFromCommonRoot} from '@theatre/studio/store/types'
+} from '@unseenco/theatre-shared/utils/addresses'
+import type {StrictRecord} from '@unseenco/theatre-shared/utils/types'
+import type {KeyframeWithPathToPropFromCommonRoot} from '@unseenco/theatre-studio/store/types'
 
 /**
  * Keyframe connections are considered to be selected if the first
@@ -77,10 +77,8 @@ export function selectedKeyframeConnections(
           trackId,
           sequenceVariant,
         ) ?? sequenceVariant
-      const track = getSequenceStateFromSheet(
-        sheetState,
-        trackVariant,
-      )?.tracksByObject[objectKey]?.trackData[trackId]
+      const track = getSequenceStateFromSheet(sheetState, trackVariant)
+        ?.tracksByObject[objectKey]?.trackData[trackId]
 
       if (track) {
         ckfs = ckfs.concat(
@@ -186,10 +184,8 @@ export function keyframesWithPaths({
       trackId,
       sequenceVariant,
     ) ?? sequenceVariant
-  const tracksByObject = getSequenceStateFromSheet(
-    sheetState,
-    trackVariant,
-  )?.tracksByObject[objectKey]
+  const tracksByObject = getSequenceStateFromSheet(sheetState, trackVariant)
+    ?.tracksByObject[objectKey]
   const track = tracksByObject?.trackData[trackId]
 
   if (!track) return null

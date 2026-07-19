@@ -1,11 +1,11 @@
-import type {InterpolationTriple} from '@theatre/core/sequences/interpolationTripleAtPosition'
-import interpolationTripleAtPosition from '@theatre/core/sequences/interpolationTripleAtPosition'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type {SheetObjectAddress} from '@theatre/shared/utils/addresses'
-import deepMergeWithCache from '@theatre/shared/utils/deepMergeWithCache'
-import type {SequenceTrackId} from '@theatre/shared/utils/ids'
-import pointerDeep from '@theatre/shared/utils/pointerDeep'
-import SimpleCache from '@theatre/shared/utils/SimpleCache'
+import type {InterpolationTriple} from '@unseenco/theatre-core/sequences/interpolationTripleAtPosition'
+import interpolationTripleAtPosition from '@unseenco/theatre-core/sequences/interpolationTripleAtPosition'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type {SheetObjectAddress} from '@unseenco/theatre-shared/utils/addresses'
+import deepMergeWithCache from '@unseenco/theatre-shared/utils/deepMergeWithCache'
+import type {SequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
+import pointerDeep from '@unseenco/theatre-shared/utils/pointerDeep'
+import SimpleCache from '@unseenco/theatre-shared/utils/SimpleCache'
 import type {
   $FixMe,
   $IntentionalAny,
@@ -13,19 +13,32 @@ import type {
   SerializableMap,
   SerializableValue,
   VoidFn,
-} from '@theatre/shared/utils/types'
-import {valToAtom} from '@theatre/shared/utils/valToAtom'
-import type {PointerToPrismProvider, Prism, Pointer} from '@theatre/dataverse'
+} from '@unseenco/theatre-shared/utils/types'
+import {valToAtom} from '@unseenco/theatre-shared/utils/valToAtom'
+import type {
+  PointerToPrismProvider,
+  Prism,
+  Pointer,
+} from '@unseenco/theatre-dataverse'
 
-import {Atom, getPointerParts, pointer, prism, val} from '@theatre/dataverse'
+import {
+  Atom,
+  getPointerParts,
+  pointer,
+  prism,
+  val,
+} from '@unseenco/theatre-dataverse'
 import type SheetObjectTemplate from './SheetObjectTemplate'
 import TheatreSheetObject from './TheatreSheetObject'
-import type {Interpolator, PropTypeConfig} from '@theatre/core/propTypes'
-import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
-import type {ILogger, IUtilContext} from '@theatre/shared/logger'
-import {pointerToSequenceTrackData} from '@theatre/core/sequences/sequenceVariants'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import {onChange} from '@theatre/core/coreExports'
+import type {
+  Interpolator,
+  PropTypeConfig,
+} from '@unseenco/theatre-core/propTypes'
+import {getPropConfigByPath} from '@unseenco/theatre-shared/propTypes/utils'
+import type {ILogger, IUtilContext} from '@unseenco/theatre-shared/logger'
+import {pointerToSequenceTrackData} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import {onChange} from '@unseenco/theatre-core/coreExports'
 
 /**
  * Internally, the sheet's actual configured value is not a specific type, since we

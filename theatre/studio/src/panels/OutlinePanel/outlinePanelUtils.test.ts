@@ -5,7 +5,7 @@ import {
   parseOutlineNamespacePath,
 } from './outlinePanelUtils'
 import type {NamespacedObjects} from './outlinePanelUtils'
-import type {SheetId} from '@theatre/shared/utils/ids'
+import type {SheetId} from '@unseenco/theatre-shared/utils/ids'
 
 describe('outlinePanelUtils', () => {
   test('parseOutlineNamespacePath normalizes slashes', () => {

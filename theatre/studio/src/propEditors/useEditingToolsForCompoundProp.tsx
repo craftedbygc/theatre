@@ -1,38 +1,38 @@
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import getStudio from '@theatre/studio/getStudio'
-import type {IContextMenuItem} from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import getDeep from '@theatre/shared/utils/getDeep'
-import {usePrism} from '@theatre/react'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import getDeep from '@unseenco/theatre-shared/utils/getDeep'
+import {usePrism} from '@unseenco/theatre-react'
 import type {
   $IntentionalAny,
   SerializablePrimitive,
-} from '@theatre/shared/utils/types'
-import {getPointerParts, prism, val} from '@theatre/dataverse'
-import type {Pointer} from '@theatre/dataverse'
+} from '@unseenco/theatre-shared/utils/types'
+import {getPointerParts, prism, val} from '@unseenco/theatre-dataverse'
+import type {Pointer} from '@unseenco/theatre-dataverse'
 import get from 'lodash-es/get'
 import React from 'react'
 import DefaultOrStaticValueIndicator from './DefaultValueIndicator'
-import type {PropTypeConfig_Compound} from '@theatre/core/propTypes'
+import type {PropTypeConfig_Compound} from '@unseenco/theatre-core/propTypes'
 import {
   compoundHasSimpleDescendants,
   isPropConfigComposite,
   iteratePropType,
-} from '@theatre/shared/propTypes/utils'
-import type {SequenceTrackId} from '@theatre/shared/utils/ids'
-import {createStudioSheetItemKey} from '@theatre/shared/utils/ids'
-import type {IPropPathToTrackIdTree} from '@theatre/core/sheetObjects/SheetObjectTemplate'
-import pointerDeep from '@theatre/shared/utils/pointerDeep'
+} from '@unseenco/theatre-shared/propTypes/utils'
+import type {SequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
+import {createStudioSheetItemKey} from '@unseenco/theatre-shared/utils/ids'
+import type {IPropPathToTrackIdTree} from '@unseenco/theatre-core/sheetObjects/SheetObjectTemplate'
+import pointerDeep from '@unseenco/theatre-shared/utils/pointerDeep'
 import type {NearbyKeyframesControls} from './NextPrevKeyframeCursors'
 import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
 import {getNearbyKeyframesOfTrack} from './getNearbyKeyframesOfTrack'
-import type {KeyframeWithTrack} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
-import {emptyObject} from '@theatre/shared/utils'
+import type {KeyframeWithTrack} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
+import {emptyObject} from '@unseenco/theatre-shared/utils'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
-} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 // eslint-disable-next-line no-restricted-syntax
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
+import {getSequenceStateFromSheet} from '@unseenco/theatre-core/sequences/sequenceVariants'
 
 interface CommonStuff {
   beingScrubbed: boolean

@@ -1,5 +1,5 @@
-import type {$IntentionalAny} from '@theatre/shared/utils/types'
-import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
+import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import {transparentize} from 'polished'
 import React from 'react'
 import styled from 'styled-components'

@@ -1,13 +1,13 @@
-import {privateAPI, setPrivateAPI} from '@theatre/core/privateAPIs'
-import {defer} from '@theatre/shared/utils/defer'
+import {privateAPI, setPrivateAPI} from '@unseenco/theatre-core/privateAPIs'
+import {defer} from '@unseenco/theatre-shared/utils/defer'
 import type Sequence from './Sequence'
 import type {IPlaybackDirection, IPlaybackRange} from './Sequence'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
 import AudioPlaybackController from './playbackControllers/AudioPlaybackController'
-import {getCoreTicker} from '@theatre/core/coreTicker'
-import type {Pointer} from '@theatre/dataverse'
-import {notify} from '@theatre/shared/notify'
-import type {IRafDriver} from '@theatre/core/rafDrivers'
+import {getCoreTicker} from '@unseenco/theatre-core/coreTicker'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {notify} from '@unseenco/theatre-shared/notify'
+import type {IRafDriver} from '@unseenco/theatre-core/rafDrivers'
 
 interface IAttachAudioArgs {
   /**
@@ -107,7 +107,7 @@ export interface ISequence {
    *
    * @example Usage
    * ```ts
-   * import {onChange, val} from '@theatre/core'
+   * import {onChange, val} from '@unseenco/theatre-core'
    *
    * // let's assume `sheet` is a sheet
    * const sequence = sheet.sequence
@@ -269,8 +269,8 @@ export default class TheatreSequence implements ISequence {
         notify.warning(
           "Sequence can't be played",
           'You seem to have called `sequence.play()` before the project has finished loading.\n\n' +
-            'This would **not** a problem in production when using `@theatre/core`, since Theatre.js loads instantly in core mode. ' +
-            "However, when using `@theatre/studio`, it takes a few milliseconds for it to load your project's state, " +
+            'This would **not** a problem in production when using `@unseenco/theatre-core`, since Theatre.js loads instantly in core mode. ' +
+            "However, when using `@unseenco/theatre-studio`, it takes a few milliseconds for it to load your project's state, " +
             `before which your sequences cannot start playing.\n` +
             `\n` +
             'To fix this, simply defer calling `sequence.play()` until after the project is loaded, like this:\n\n' +

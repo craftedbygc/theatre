@@ -1,27 +1,27 @@
-import type {TrackData} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
-import type {SequenceEditorTree_PrimitiveProp} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
-import {usePrism, useVal} from '@theatre/react'
-import type {Pointer} from '@theatre/dataverse'
-import {val} from '@theatre/dataverse'
+import type {TrackData} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
+import type {SequenceEditorTree_PrimitiveProp} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/tree'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import {usePrism, useVal} from '@unseenco/theatre-react'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {val} from '@unseenco/theatre-dataverse'
 import React, {useMemo} from 'react'
 import styled from 'styled-components'
 import SingleKeyframeEditor from './KeyframeEditor/SingleKeyframeEditor'
-import type {IContextMenuItem} from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import getStudio from '@theatre/studio/getStudio'
-import {arePathsEqual} from '@theatre/shared/utils/addresses'
-import type {KeyframeWithPathToPropFromCommonRoot} from '@theatre/studio/store/types'
+import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {arePathsEqual} from '@unseenco/theatre-shared/utils/addresses'
+import type {KeyframeWithPathToPropFromCommonRoot} from '@unseenco/theatre-studio/store/types'
 import KeyframeSnapTarget, {
   snapPositionsStateD,
-} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
-import {createStudioSheetItemKey} from '@theatre/shared/utils/ids'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
+import {createStudioSheetItemKey} from '@unseenco/theatre-shared/utils/ids'
 import {
   getStudioSequence,
   getStudioTrackSequenceVariant,
-} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: relative;

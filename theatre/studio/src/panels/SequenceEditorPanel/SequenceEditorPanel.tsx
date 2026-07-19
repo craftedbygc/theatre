@@ -1,8 +1,8 @@
-import {getOutlineSelection} from '@theatre/studio/selectors'
-import {usePrism} from '@theatre/react'
-import {valToAtom} from '@theatre/shared/utils/valToAtom'
-import type {Pointer} from '@theatre/dataverse'
-import {prism, val} from '@theatre/dataverse'
+import {getOutlineSelection} from '@unseenco/theatre-studio/selectors'
+import {usePrism} from '@unseenco/theatre-react'
+import {valToAtom} from '@unseenco/theatre-shared/utils/valToAtom'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {prism, val} from '@unseenco/theatre-dataverse'
 import React, {useState} from 'react'
 import styled from 'styled-components'
 
@@ -11,14 +11,16 @@ import GraphEditor from './GraphEditor/GraphEditor'
 import type {PanelDims, SequenceEditorPanelLayout} from './layout/layout'
 import {sequenceEditorPanelLayout} from './layout/layout'
 import RightOverlay from './RightOverlay/RightOverlay'
-import BasePanel, {usePanel} from '@theatre/studio/panels/BasePanel/BasePanel'
-import type {PanelPosition} from '@theatre/studio/store/types'
-import PanelDragZone from '@theatre/studio/panels/BasePanel/PanelDragZone'
-import PanelWrapper from '@theatre/studio/panels/BasePanel/PanelWrapper'
+import BasePanel, {
+  usePanel,
+} from '@unseenco/theatre-studio/panels/BasePanel/BasePanel'
+import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
+import PanelDragZone from '@unseenco/theatre-studio/panels/BasePanel/PanelDragZone'
+import PanelWrapper from '@unseenco/theatre-studio/panels/BasePanel/PanelWrapper'
 import FrameStampPositionProvider from './FrameStampPositionProvider'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import {isSheet, isSheetObject} from '@theatre/shared/instanceTypes'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import {isSheet, isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
 import {uniq} from 'lodash-es'
 import GraphEditorToggle from './GraphEditorToggle'
 import {
@@ -26,10 +28,10 @@ import {
   TitleBar,
   TitleBar_Piece,
   TitleBar_Punctuation,
-} from '@theatre/studio/panels/BasePanel/common'
-import type {UIPanelId} from '@theatre/shared/utils/ids'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
-import {usePresenceListenersOnRootElement} from '@theatre/studio/uiComponents/usePresence'
+} from '@unseenco/theatre-studio/panels/BasePanel/common'
+import type {UIPanelId} from '@unseenco/theatre-shared/utils/ids'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {usePresenceListenersOnRootElement} from '@unseenco/theatre-studio/uiComponents/usePresence'
 
 const Container = styled(PanelWrapper)`
   z-index: ${panelZIndexes.sequenceEditorPanel};

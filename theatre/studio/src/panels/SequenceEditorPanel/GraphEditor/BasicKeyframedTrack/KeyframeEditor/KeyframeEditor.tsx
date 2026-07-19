@@ -1,25 +1,25 @@
 import type {
   Keyframe,
   TrackData,
-} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
+} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
 import type {
   SequenceTrackId,
   StudioSheetItemKey,
-} from '@theatre/shared/utils/ids'
-import type {Pointer} from '@theatre/dataverse'
+} from '@unseenco/theatre-shared/utils/ids'
+import type {Pointer} from '@unseenco/theatre-dataverse'
 import React from 'react'
 import styled from 'styled-components'
-import type {graphEditorColors} from '@theatre/studio/panels/SequenceEditorPanel/GraphEditor/GraphEditor'
-import type {ExtremumSpace} from '@theatre/studio/panels/SequenceEditorPanel/GraphEditor/BasicKeyframedTrack/BasicKeyframedTrack'
+import type {graphEditorColors} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/GraphEditor/GraphEditor'
+import type {ExtremumSpace} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/GraphEditor/BasicKeyframedTrack/BasicKeyframedTrack'
 import Curve from './Curve'
 import CurveHandle from './CurveHandle'
 import GraphEditorDotScalar from './GraphEditorDotScalar'
 import GraphEditorDotNonScalar from './GraphEditorDotNonScalar'
 import GraphEditorNonScalarDash from './GraphEditorNonScalarDash'
-import type {PropTypeConfig_AllSimples} from '@theatre/core/propTypes'
-import type {PathToProp} from '@theatre/shared/utils/addresses'
+import type {PropTypeConfig_AllSimples} from '@unseenco/theatre-core/propTypes'
+import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
 
 const Container = styled.g`
   /* position: absolute; */

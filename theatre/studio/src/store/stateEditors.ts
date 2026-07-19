@@ -4,8 +4,8 @@ import type {
   Keyframe,
   KeyframeType,
   SheetState_Historic,
-} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
+} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {SheetAhistoricState} from '@unseenco/theatre-core/projects/store/storeTypes'
 // stateEditors mutates core historic sheet state, so it needs these runtime helpers.
 // eslint-disable-next-line no-restricted-syntax
 import {
@@ -18,18 +18,18 @@ import {
   getSequenceStateFromSheet,
   migrateSheetSequenceState,
   unblockInheritedSequencePropOnVariantInSheet,
-} from '@theatre/core/sequences/sequenceVariants'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import type {Drafts} from '@theatre/studio/StudioStore/StudioStore'
+} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import type {Drafts} from '@unseenco/theatre-studio/StudioStore/StudioStore'
 import type {
   ProjectAddress,
   PropAddress,
   SheetAddress,
   SheetObjectAddress,
   WithoutSheetInstance,
-} from '@theatre/shared/utils/addresses'
-import {commonRootOfPathsToProps} from '@theatre/shared/utils/addresses'
-import {encodePathToProp} from '@theatre/shared/utils/addresses'
+} from '@unseenco/theatre-shared/utils/addresses'
+import {commonRootOfPathsToProps} from '@unseenco/theatre-shared/utils/addresses'
+import {encodePathToProp} from '@unseenco/theatre-shared/utils/addresses'
 import type {
   StudioSheetItemKey,
   KeyframeId,
@@ -37,26 +37,26 @@ import type {
   SequenceMarkerId,
   SequenceTrackId,
   UIPanelId,
-} from '@theatre/shared/utils/ids'
+} from '@unseenco/theatre-shared/utils/ids'
 import {
   generateKeyframeId,
   generateSequenceTrackId,
-} from '@theatre/shared/utils/ids'
-import removePathFromObject from '@theatre/shared/utils/removePathFromObject'
-import {transformNumber} from '@theatre/shared/utils/transformNumber'
+} from '@unseenco/theatre-shared/utils/ids'
+import removePathFromObject from '@unseenco/theatre-shared/utils/removePathFromObject'
+import {transformNumber} from '@unseenco/theatre-shared/utils/transformNumber'
 import type {
   IRange,
   SerializableMap,
   SerializablePrimitive,
   SerializableValue,
-} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-shared/utils/types'
 import {current} from 'immer'
 import findLastIndex from 'lodash-es/findLastIndex'
 import keyBy from 'lodash-es/keyBy'
 import pullFromArray from 'lodash-es/pull'
 import set from 'lodash-es/set'
 import sortBy from 'lodash-es/sortBy'
-import {graphEditorColors} from '@theatre/studio/panels/SequenceEditorPanel/GraphEditor/GraphEditor'
+import {graphEditorColors} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/GraphEditor/GraphEditor'
 import type {
   KeyframeWithPathToPropFromCommonRoot,
   OutlineSelectable,
@@ -73,11 +73,11 @@ import {
   isSheetObject,
   isSheetObjectTemplate,
   isSheetTemplate,
-} from '@theatre/shared/instanceTypes'
-import type SheetTemplate from '@theatre/core/sheets/SheetTemplate'
-import type SheetObjectTemplate from '@theatre/core/sheetObjects/SheetObjectTemplate'
-import type {PropTypeConfig} from '@theatre/core/propTypes'
-import {pointableSetUtil} from '@theatre/shared/utils/PointableSet'
+} from '@unseenco/theatre-shared/instanceTypes'
+import type SheetTemplate from '@unseenco/theatre-core/sheets/SheetTemplate'
+import type SheetObjectTemplate from '@unseenco/theatre-core/sheetObjects/SheetObjectTemplate'
+import type {PropTypeConfig} from '@unseenco/theatre-core/propTypes'
+import {pointableSetUtil} from '@unseenco/theatre-shared/utils/PointableSet'
 
 export const setDrafts__onlyMeantToBeCalledByTransaction = (
   drafts: undefined | Drafts,

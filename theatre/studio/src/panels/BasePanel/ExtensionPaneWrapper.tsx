@@ -1,6 +1,6 @@
-import type {$FixMe} from '@theatre/shared/utils/types'
-import type {PanelPosition} from '@theatre/studio/store/types'
-import type {PaneInstance} from '@theatre/studio/TheatreStudio'
+import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
+import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
+import type {PaneInstance} from '@unseenco/theatre-studio/TheatreStudio'
 import React, {useCallback, useLayoutEffect, useState} from 'react'
 import styled from 'styled-components'
 import {F2 as F2Impl, TitleBar} from './common'
@@ -9,9 +9,12 @@ import PanelDragZone from './PanelDragZone'
 import PanelWrapper from './PanelWrapper'
 import {ErrorBoundary} from 'react-error-boundary'
 import {IoClose} from 'react-icons/all'
-import getStudio from '@theatre/studio/getStudio'
-import {panelZIndexes} from '@theatre/studio/panels/BasePanel/common'
-import type {PaneInstanceId, UIPanelId} from '@theatre/shared/utils/ids'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {panelZIndexes} from '@unseenco/theatre-studio/panels/BasePanel/common'
+import type {
+  PaneInstanceId,
+  UIPanelId,
+} from '@unseenco/theatre-shared/utils/ids'
 
 const defaultPosition: PanelPosition = {
   edges: {

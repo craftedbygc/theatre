@@ -1,9 +1,9 @@
-import type {SequenceEditorTree_SheetObject} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
+import type {SequenceEditorTree_SheetObject} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/tree'
 import React from 'react'
 import AnyCompositeRow from './AnyCompositeRow'
 import {decideRowByPropType} from './PropWithChildrenRow'
-import {setCollapsedSheetItem} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/setCollapsedSheetObjectOrCompoundProp'
-import getStudio from '@theatre/studio/getStudio'
+import {setCollapsedSheetItem} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/setCollapsedSheetObjectOrCompoundProp'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 
 const LeftSheetObjectRow: React.VFC<{
   leaf: SequenceEditorTree_SheetObject

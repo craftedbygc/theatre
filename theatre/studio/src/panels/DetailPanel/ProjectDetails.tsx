@@ -1,14 +1,14 @@
-import type Project from '@theatre/core/projects/Project'
-import getStudio from '@theatre/studio/getStudio'
-import BasicPopover from '@theatre/studio/uiComponents/Popover/BasicPopover'
-import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import BasicPopover from '@unseenco/theatre-studio/uiComponents/Popover/BasicPopover'
+import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
 import React, {useCallback, useState} from 'react'
 import styled from 'styled-components'
-import DetailPanelButton from '@theatre/studio/uiComponents/DetailPanelButton'
+import DetailPanelButton from '@unseenco/theatre-studio/uiComponents/DetailPanelButton'
 import StateConflictRow from './ProjectDetails/StateConflictRow'
 import JSZip from 'jszip'
-import {notify} from '@theatre/studio/notify'
-import {getAllPossibleAssetIDs} from '@theatre/shared/utils/assets'
+import {notify} from '@unseenco/theatre-studio/notify'
+import {getAllPossibleAssetIDs} from '@unseenco/theatre-shared/utils/assets'
 
 const Container = styled.div``
 

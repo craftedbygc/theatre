@@ -3,9 +3,9 @@ module.exports = {
     'no-restricted-syntax': [
       'error',
       {
-        selector: `ImportDeclaration[importKind!='type'][source.value=/@theatre\\u002Fstudio/]`,
+        selector: `ImportDeclaration[importKind!='type'][source.value=/@unseenco\\u002Ftheatre-studio/]`,
         message:
-          '@theatre/core may not import @theatre/studio modules except via type imports.',
+          '@unseenco/theatre-core may not import @unseenco/theatre-studio modules except via type imports.',
       },
     ],
   },

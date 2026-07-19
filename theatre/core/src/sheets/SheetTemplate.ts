@@ -1,11 +1,11 @@
-import type Project from '@theatre/core/projects/Project'
-import SheetObjectTemplate from '@theatre/core/sheetObjects/SheetObjectTemplate'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import SheetObjectTemplate from '@unseenco/theatre-core/sheetObjects/SheetObjectTemplate'
 import type {
   SheetAddress,
   WithoutSheetInstance,
-} from '@theatre/shared/utils/addresses'
-import {Atom} from '@theatre/dataverse'
-import type {Pointer} from '@theatre/dataverse'
+} from '@unseenco/theatre-shared/utils/addresses'
+import {Atom} from '@unseenco/theatre-dataverse'
+import type {Pointer} from '@unseenco/theatre-dataverse'
 import Sheet from './Sheet'
 import type {ObjectNativeObject} from './Sheet'
 import type {
@@ -16,16 +16,14 @@ import type {
   ObjectAddressKey,
   SheetId,
   SheetInstanceId,
-} from '@theatre/shared/utils/ids'
-import type {StrictRecord} from '@theatre/shared/utils/types'
-import type {OutlineNamespaceConfig} from '@theatre/shared/utils/outlineNamespaces'
-import type {
-  SequenceVariantId,
-} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-shared/utils/ids'
+import type {StrictRecord} from '@unseenco/theatre-shared/utils/types'
+import type {OutlineNamespaceConfig} from '@unseenco/theatre-shared/utils/outlineNamespaces'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   validateSequenceVariantsOrThrow,
-} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-core/sequences/sequenceVariants'
 
 type SheetTemplateObjectTemplateMap = StrictRecord<
   ObjectAddressKey,

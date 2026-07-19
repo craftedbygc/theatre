@@ -1,4 +1,4 @@
-import type {Ticker} from '@theatre/dataverse'
+import type {Ticker} from '@unseenco/theatre-dataverse'
 import {privateAPI} from './privateAPIs'
 import type {IRafDriver, RafDriverPrivateAPI} from './rafDrivers'
 import {createRafDriver} from './rafDrivers'
@@ -60,7 +60,7 @@ export function getCoreTicker(): Ticker {
 /**
  * Sets the `rafDriver` that Theatre's core uses internally to tick forward.
  *
- * Call this **before** any other `@theatre/core` API that would trigger tick creation
+ * Call this **before** any other `@unseenco/theatre-core` API that would trigger tick creation
  * (e.g. `onChange`, `sequence.play`, `val`). Calling it after the core ticker has
  * already been initialised will throw.
  *
@@ -69,7 +69,7 @@ export function getCoreTicker(): Ticker {
  * `gsap`, `lenis`, or an XR session:
  *
  * ```ts
- * import { createRafDriver, setCoreRafDriver } from '@theatre/core'
+ * import { createRafDriver, setCoreRafDriver } from '@unseenco/theatre-core'
  *
  * const driver = createRafDriver({ name: 'MyRafDriver' })
  * setCoreRafDriver(driver)

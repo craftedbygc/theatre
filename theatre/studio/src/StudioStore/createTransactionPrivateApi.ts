@@ -1,25 +1,28 @@
-import type {Pointer} from '@theatre/dataverse'
-import {isSheetObject} from '@theatre/shared/instanceTypes'
-import type {$FixMe, $IntentionalAny} from '@theatre/shared/utils/types'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
+import type {
+  $FixMe,
+  $IntentionalAny,
+} from '@unseenco/theatre-shared/utils/types'
 import get from 'lodash-es/get'
 import type {ITransactionPrivateApi} from './StudioStore'
-import forEachPropDeep from '@theatre/shared/utils/forEachDeep'
-import getDeep from '@theatre/shared/utils/getDeep'
-import type {SequenceTrackId} from '@theatre/shared/utils/ids'
-import {getPointerParts} from '@theatre/dataverse'
+import forEachPropDeep from '@unseenco/theatre-shared/utils/forEachDeep'
+import getDeep from '@unseenco/theatre-shared/utils/getDeep'
+import type {SequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
+import {getPointerParts} from '@unseenco/theatre-dataverse'
 import type {
   PropTypeConfig,
   PropTypeConfig_AllSimples,
   PropTypeConfig_Compound,
-} from '@theatre/core/propTypes'
-import type {PathToProp} from '@theatre/shared/src/utils/addresses'
-import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
+} from '@unseenco/theatre-core/propTypes'
+import type {PathToProp} from '@unseenco/theatre-shared/src/utils/addresses'
+import {getPropConfigByPath} from '@unseenco/theatre-shared/propTypes/utils'
 import {isPlainObject} from 'lodash-es'
-import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
+import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
-} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 /**
  * Deep-clones a plain JS object or a `string | number | boolean`. In case of a plain
@@ -256,8 +259,7 @@ export default function createTransactionPrivateApi(
                 {
                   ...propAddress,
                   trackId,
-                  position: getStudioSequence(root.sheet)
-                    .positionSnappedToGrid,
+                  position: getStudioSequence(root.sheet).positionSnappedToGrid,
                   sequenceVariant: trackVariant,
                 },
               )

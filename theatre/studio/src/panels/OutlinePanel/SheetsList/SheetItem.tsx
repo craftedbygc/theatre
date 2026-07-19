@@ -1,14 +1,17 @@
-import type Project from '@theatre/core/projects/Project'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import getStudio from '@theatre/studio/getStudio'
-import {getOutlineSelection, getSheetOfSheetId} from '@theatre/studio/selectors'
-import {usePrism} from '@theatre/react'
-import {val} from '@theatre/dataverse'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {
+  getOutlineSelection,
+  getSheetOfSheetId,
+} from '@unseenco/theatre-studio/selectors'
+import {usePrism} from '@unseenco/theatre-react'
+import {val} from '@unseenco/theatre-dataverse'
 import React, {useCallback} from 'react'
 import styled from 'styled-components'
-import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
-import {VariantItem} from '@theatre/studio/panels/OutlinePanel/SheetsList/VariantItem'
-import {useCollapseStateInOutlinePanel} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import BaseItem from '@unseenco/theatre-studio/panels/OutlinePanel/BaseItem'
+import {VariantItem} from '@unseenco/theatre-studio/panels/OutlinePanel/SheetsList/VariantItem'
+import {useCollapseStateInOutlinePanel} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
 
 const Body = styled.div``
 

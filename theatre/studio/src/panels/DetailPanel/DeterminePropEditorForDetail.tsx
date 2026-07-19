@@ -1,13 +1,13 @@
 import React from 'react'
-import type {Pointer} from '@theatre/dataverse'
+import type {Pointer} from '@unseenco/theatre-dataverse'
 import type {
   PropTypeConfig,
   PropTypeConfig_AllSimples,
-} from '@theatre/core/propTypes'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import {simplePropEditorByPropType} from '@theatre/studio/propEditors/simpleEditors/simplePropEditorByPropType'
-import type {PropConfigForType} from '@theatre/studio/propEditors/utils/PropConfigForType'
-import type {ISimplePropEditorReactProps} from '@theatre/studio/propEditors/simpleEditors/ISimplePropEditorReactProps'
+} from '@unseenco/theatre-core/propTypes'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import {simplePropEditorByPropType} from '@unseenco/theatre-studio/propEditors/simpleEditors/simplePropEditorByPropType'
+import type {PropConfigForType} from '@unseenco/theatre-studio/propEditors/utils/PropConfigForType'
+import type {ISimplePropEditorReactProps} from '@unseenco/theatre-studio/propEditors/simpleEditors/ISimplePropEditorReactProps'
 import DetailCompoundPropEditor from './DeterminePropEditorForDetail/DetailCompoundPropEditor'
 import DetailSimplePropEditor from './DeterminePropEditorForDetail/DetailSimplePropEditor'
 

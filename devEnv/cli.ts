@@ -1,15 +1,16 @@
 import sade from 'sade'
 import {$, fs, path} from '@cspotcode/zx'
-import * as core from '@actions/core'
-import * as os from 'os'
 
-const root = path.join(__dirname, '..')
+if (process.platform === 'win32') {
+  $.shell = 'cmd.exe'
+  $.prefix = ''
+}
 
 const prog = sade('cli').describe('CLI for Theatre.js development')
 
 // better quote function from https://github.com/google/zx/pull/167
 $.quote = function quote(arg) {
-  if (/^[a-z0-9/_.-]+$/i.test(arg)) {
+  if (/^[a-z0-9@/_.-]+$/i.test(arg)) {
     return arg
   }
   return (
@@ -35,9 +36,9 @@ prog
   .action(async () => {
     const packages = [
       'theatre',
-      '@theatre/dataverse',
-      '@theatre/react',
-      '@theatre/browser-bundles',
+      '@unseenco/theatre-dataverse',
+      '@unseenco/theatre-react',
+      '@unseenco/theatre-browser-bundles',
     ]
 
     await Promise.all([
@@ -48,9 +49,9 @@ prog
 prog.command('build', 'Builds all the main packages').action(async () => {
   const packagesToBuild = [
     'theatre',
-    '@theatre/dataverse',
-    '@theatre/react',
-    '@theatre/browser-bundles',
+    '@unseenco/theatre-dataverse',
+    '@unseenco/theatre-react',
+    '@unseenco/theatre-browser-bundles',
   ]
   async function build() {
     await Promise.all([
@@ -76,17 +77,17 @@ prog
      **/
     const packagesToBuild = [
       'theatre',
-      '@theatre/dataverse',
-      '@theatre/react',
-      '@theatre/browser-bundles',
+      '@unseenco/theatre-dataverse',
+      '@unseenco/theatre-react',
+      '@unseenco/theatre-browser-bundles',
     ]
 
     const packagesToPublish = [
-      '@theatre/core',
-      '@theatre/studio',
-      '@theatre/dataverse',
-      '@theatre/react',
-      '@theatre/browser-bundles',
+      '@unseenco/theatre-core',
+      '@unseenco/theatre-studio',
+      '@unseenco/theatre-dataverse',
+      '@unseenco/theatre-react',
+      '@unseenco/theatre-browser-bundles',
     ]
 
     /**
@@ -265,182 +266,6 @@ prog
       }
       $.verbose = wasVerbose
     }
-  })
-
-prog
-  .command(
-    'prerelease ci',
-    "This script publishes the insider packages from the CI. You can't run it locally unless you have a a valid npm access token and you store its value in the `NPM_TOKEN` environmental variable.",
-  )
-  .action(async () => {
-    const packagesToPublish = [
-      '@theatre/core',
-      '@theatre/studio',
-      '@theatre/dataverse',
-      '@theatre/react',
-      '@theatre/browser-bundles',
-    ]
-
-    /**
-     * Receives a version number and returns it without the tags, if there are any
-     *
-     * @param version - Version number
-     * @returns Version number without the tags
-     *
-     * @example
-     * ```javascript
-     * const version_1 = '0.4.8-dev3-ec175817'
-     * const version_2 = '0.4.8'
-     *
-     * stripTag(version_1) === stripTag(version_2) === '0.4.8' // returns `true`
-     * ```
-     */
-    function stripTag(version: string) {
-      const regExp = /^[0-9]+\.[0-9]+\.[0-9]+/g
-      const matches = version.match(regExp)
-      if (!matches) {
-        throw new Error(`Version number not found in "${version}"`)
-      }
-
-      return matches[0]
-    }
-
-    /**
-     * Creates a version number like `0.4.8-insiders.ec175817`
-     *
-     * @param packageName - Name of the package
-     * @param commitHash - A commit hash
-     */
-    function getNewVersionName(_packageName: string, commitHash: string) {
-      const pathToPackageJson = path.resolve(__dirname, '../', './package.json')
-
-      const jsonData = JSON.parse(
-        fs.readFileSync(pathToPackageJson, {encoding: 'utf-8'}),
-      )
-      const strippedVersion = stripTag(jsonData.version)
-
-      return `${strippedVersion}-insiders.${commitHash}`
-    }
-
-    /**
-     * Assigns the latest version names ({@link getNewVersionName}) to the packages' `package.json`s
-     *
-     * @param workspacesListObjects - An Array of objects containing information about the workspaces
-     * @param latestCommitHash - Hash of the latest commit
-     * @returns - A record of `{[packageId]: assignedVersion}`
-     */
-    async function writeVersionsToPackageJSONs(
-      workspacesListObjects: {name: string; location: string}[],
-      latestCommitHash: string,
-    ): Promise<Record<string, string>> {
-      const assignedVersionByPackageName: Record<string, string> = {}
-      for (const workspaceData of workspacesListObjects) {
-        const pathToPackage = path.resolve(
-          __dirname,
-          '../',
-          workspaceData.location,
-          './package.json',
-        )
-
-        const original = JSON.parse(
-          fs.readFileSync(pathToPackage, {encoding: 'utf-8'}),
-        )
-
-        let {version, dependencies, peerDependencies, devDependencies} =
-          original
-        version = getNewVersionName(workspaceData.name, latestCommitHash)
-        assignedVersionByPackageName[workspaceData.name] = version
-        // Normally we don't have to override the package versions in dependencies because yarn would already convert
-        // all the "workspace:*" versions to a fixed version before publishing. However, packages like @theatre/studio
-        // have a peerDependency on @theatre/core set to "*" (meaning they would work with any version of @theatre/core).
-        // This is not the desired behavior in pre-release versions, so here, we'll fix those "*" versions to the set version.
-        for (const deps of [dependencies, peerDependencies, devDependencies]) {
-          if (!deps) continue
-          for (const wpObject of workspacesListObjects) {
-            if (deps[wpObject.name]) {
-              deps[wpObject.name] = getNewVersionName(
-                wpObject.name,
-                latestCommitHash,
-              )
-            }
-          }
-        }
-        const newJson = {
-          ...original,
-          version,
-          dependencies,
-          peerDependencies,
-          devDependencies,
-        }
-        fs.writeFileSync(
-          path.join(pathToPackage),
-          JSON.stringify(newJson, undefined, 2),
-          {encoding: 'utf-8'},
-        )
-        await $`prettier --write ${workspaceData.location + '/package.json'}`
-      }
-      return assignedVersionByPackageName
-    }
-
-    async function prerelease() {
-      // @ts-ignore ignore
-      process.env.THEATRE_IS_PUBLISHING = true
-      // In the CI `git log -1` points to a fake merge commit,
-      // so we have to use the value of a special GitHub context variable
-      // through the `GITHUB_SHA` environmental variable.
-
-      // The length of the abbreviated commit hash can change, that's why we
-      // need the length of the fake merge commit's abbreviated hash.
-      const fakeMergeCommitHashLength = (await $`git log -1 --pretty=format:%h`)
-        .stdout.length
-
-      if (!process.env.GITHUB_SHA)
-        throw new Error(
-          'expected `process.env.GITHUB_SHA` to be defined but it was not',
-        )
-
-      const latestCommitHash = process.env.GITHUB_SHA.slice(
-        0,
-        fakeMergeCommitHashLength,
-      )
-
-      const workspacesListString = await $`yarn workspaces list --json`
-      const workspacesListObjects = workspacesListString.stdout
-        .split(os.EOL)
-        // strip out empty lines
-        .filter(Boolean)
-        .map((x) => JSON.parse(x))
-
-      const assignedVersionByPackageName = await writeVersionsToPackageJSONs(
-        workspacesListObjects,
-        latestCommitHash,
-      )
-
-      await Promise.all(
-        packagesToPublish.map(async (workspaceName) => {
-          const npmTag = 'insiders'
-          if (process.env.GITHUB_ACTIONS) {
-            await $`yarn workspace ${workspaceName} npm publish --access public --tag ${npmTag}`
-          }
-        }),
-      )
-
-      if (process.env.GITHUB_ACTIONS) {
-        const data = packagesToPublish.map((packageName) => ({
-          packageName,
-          version: assignedVersionByPackageName[packageName],
-        }))
-
-        // set the output for github actions.
-        core.setOutput('data', JSON.stringify(data))
-      } else {
-        for (const packageName of packagesToPublish) {
-          await $`echo ${`Published ${packageName}@${assignedVersionByPackageName[packageName]}`}`
-        }
-      }
-    }
-
-    void prerelease()
   })
 
 prog

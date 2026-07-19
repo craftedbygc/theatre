@@ -1,4 +1,4 @@
-import * as core from '@theatre/core'
+import * as core from '@unseenco/theatre-core'
 
 // @ts-ignore
 window.Theatre = {

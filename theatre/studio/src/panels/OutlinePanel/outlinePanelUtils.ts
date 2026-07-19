@@ -1,14 +1,14 @@
-import type Project from '@theatre/core/projects/Project'
+import type Project from '@unseenco/theatre-core/projects/Project'
 import {useCallback} from 'react'
-import getStudio from '@theatre/studio/getStudio'
-import {useVal} from '@theatre/react'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {useVal} from '@unseenco/theatre-react'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {
   formatOutlineNamespacePathKey,
   getOutlineNamespaceItemKey,
-} from '@theatre/shared/utils/outlineNamespaces'
+} from '@unseenco/theatre-shared/utils/outlineNamespaces'
 
 export type NamespacedObjects = Map<
   string,
@@ -23,7 +23,7 @@ export {
   formatOutlineNamespacePathKey,
   getOutlineNamespaceItemKey,
   parseOutlineNamespacePath,
-} from '@theatre/shared/utils/outlineNamespaces'
+} from '@unseenco/theatre-shared/utils/outlineNamespaces'
 
 export function useCollapseStateInOutlinePanel(
   item:

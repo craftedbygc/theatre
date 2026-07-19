@@ -1,14 +1,17 @@
-import type {Prism} from '@theatre/dataverse'
-import {val} from '@theatre/dataverse'
-import {Atom} from '@theatre/dataverse'
-import {prism} from '@theatre/dataverse'
+import type {Prism} from '@unseenco/theatre-dataverse'
+import {val} from '@unseenco/theatre-dataverse'
+import {Atom} from '@unseenco/theatre-dataverse'
+import {prism} from '@unseenco/theatre-dataverse'
 import type {
   PropAddress,
   WithoutSheetInstance,
-} from '@theatre/shared/utils/addresses'
+} from '@unseenco/theatre-shared/utils/addresses'
 
-import pointerDeep from '@theatre/shared/utils/pointerDeep'
-import type {$IntentionalAny, VoidFn} from '@theatre/shared/utils/types'
+import pointerDeep from '@unseenco/theatre-shared/utils/pointerDeep'
+import type {
+  $IntentionalAny,
+  VoidFn,
+} from '@unseenco/theatre-shared/utils/types'
 import lodashSet from 'lodash-es/set'
 
 /** constant global manager */

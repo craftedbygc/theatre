@@ -1,29 +1,33 @@
-import {usePrism, useVal} from '@theatre/react'
-import getStudio from '@theatre/studio/getStudio'
+import {usePrism, useVal} from '@unseenco/theatre-react'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 import React from 'react'
 import styled from 'styled-components'
-import type {$IntentionalAny} from '@theatre/dataverse/dist/types'
-import useTooltip from '@theatre/studio/uiComponents/Popover/useTooltip'
-import ErrorTooltip from '@theatre/studio/uiComponents/Popover/ErrorTooltip'
-import BasicTooltip from '@theatre/studio/uiComponents/Popover/BasicTooltip'
-import MinimalTooltip from '@theatre/studio/uiComponents/Popover/MinimalTooltip'
-import {val} from '@theatre/dataverse'
+import type {$IntentionalAny} from '@unseenco/theatre-dataverse/dist/types'
+import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
+import ErrorTooltip from '@unseenco/theatre-studio/uiComponents/Popover/ErrorTooltip'
+import BasicTooltip from '@unseenco/theatre-studio/uiComponents/Popover/BasicTooltip'
+import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
+import {val} from '@unseenco/theatre-dataverse'
 import ExtensionToolbar from './ExtensionToolbar/ExtensionToolbar'
 import PinButton from './PinButton'
-import {Details, Outline, Bell} from '@theatre/studio/uiComponents/icons'
-import DoubleChevronLeft from '@theatre/studio/uiComponents/icons/DoubleChevronLeft'
-import DoubleChevronRight from '@theatre/studio/uiComponents/icons/DoubleChevronRight'
-import TimelineIcon from '@theatre/studio/uiComponents/icons/TimelineIcon'
-import RemoteEditorIcon from '@theatre/studio/uiComponents/icons/RemoteEditorIcon'
-import ToolbarIconButton from '@theatre/studio/uiComponents/toolbar/ToolbarIconButton'
+import {
+  Details,
+  Outline,
+  Bell,
+} from '@unseenco/theatre-studio/uiComponents/icons'
+import DoubleChevronLeft from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronLeft'
+import DoubleChevronRight from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronRight'
+import TimelineIcon from '@unseenco/theatre-studio/uiComponents/icons/TimelineIcon'
+import RemoteEditorIcon from '@unseenco/theatre-studio/uiComponents/icons/RemoteEditorIcon'
+import ToolbarIconButton from '@unseenco/theatre-studio/uiComponents/toolbar/ToolbarIconButton'
 import {
   useNotifications,
   useEmptyNotificationsTooltip,
-} from '@theatre/studio/notify'
+} from '@unseenco/theatre-studio/notify'
 import {
   disableVisibilityToggleKeyboardShortcut,
   enableVisibilityToggleKeyboardShortcut,
-} from '@theatre/studio/UIRoot/useKeyboardShortcuts'
+} from '@unseenco/theatre-studio/UIRoot/useKeyboardShortcuts'
 
 const Container = styled.div`
   height: 36px;

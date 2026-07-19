@@ -1,15 +1,15 @@
 import styled from 'styled-components'
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
-import {usePrism} from '@theatre/react'
-import type {BasicNumberInputNudgeFn} from '@theatre/studio/uiComponents/form/BasicNumberInput'
-import BasicNumberInput from '@theatre/studio/uiComponents/form/BasicNumberInput'
-import {propNameTextCSS} from '@theatre/studio/propEditors/utils/propNameTextCSS'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
+import {usePrism} from '@unseenco/theatre-react'
+import type {BasicNumberInputNudgeFn} from '@unseenco/theatre-studio/uiComponents/form/BasicNumberInput'
+import BasicNumberInput from '@unseenco/theatre-studio/uiComponents/form/BasicNumberInput'
+import {propNameTextCSS} from '@unseenco/theatre-studio/propEditors/utils/propNameTextCSS'
 import {useLayoutEffect, useMemo, useRef} from 'react'
 import React from 'react'
-import {val} from '@theatre/dataverse'
-import type {Pointer} from '@theatre/dataverse'
+import {val} from '@unseenco/theatre-dataverse'
+import type {Pointer} from '@unseenco/theatre-dataverse'
 import clamp from 'lodash-es/clamp'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const greaterThanOrEqualToZero = (v: number) => isFinite(v) && v >= 0
 

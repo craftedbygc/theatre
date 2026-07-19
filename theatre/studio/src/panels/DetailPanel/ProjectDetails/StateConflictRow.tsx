@@ -1,14 +1,14 @@
-import {useVal} from '@theatre/react'
-import getStudio from '@theatre/studio/getStudio'
+import {useVal} from '@unseenco/theatre-react'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 import React from 'react'
 import styled from 'styled-components'
-import {generateDiskStateRevision} from '@theatre/studio/StudioStore/generateDiskStateRevision'
-import type {ProjectEphemeralState} from '@theatre/core/projects/store/storeTypes'
-import useTooltip from '@theatre/studio/uiComponents/Popover/useTooltip'
-import BasicTooltip from '@theatre/studio/uiComponents/Popover/BasicTooltip'
-import type {$FixMe} from '@theatre/shared/utils/types'
-import DetailPanelButton from '@theatre/studio/uiComponents/DetailPanelButton'
-import type {ProjectId} from '@theatre/shared/utils/ids'
+import {generateDiskStateRevision} from '@unseenco/theatre-studio/StudioStore/generateDiskStateRevision'
+import type {ProjectEphemeralState} from '@unseenco/theatre-core/projects/store/storeTypes'
+import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
+import BasicTooltip from '@unseenco/theatre-studio/uiComponents/Popover/BasicTooltip'
+import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
+import DetailPanelButton from '@unseenco/theatre-studio/uiComponents/DetailPanelButton'
+import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 
 const Container = styled.div`
   padding: 8px 10px;

@@ -1,14 +1,17 @@
 /*
  * @jest-environment jsdom
  */
-import {setupTestSheet} from '@theatre/shared/testUtils'
+import {setupTestSheet} from '@unseenco/theatre-shared/testUtils'
 // eslint-disable-next-line no-restricted-syntax
-import getStudio from '@theatre/studio/getStudio'
-import {encodePathToProp} from '@theatre/shared/utils/addresses'
-import {asSequenceTrackId} from '@theatre/shared/utils/ids'
-import type {ObjectAddressKey, SequenceTrackId} from '@theatre/shared/utils/ids'
-import type {$IntentionalAny} from '@theatre/shared/utils/types'
-import {iterateOver, val} from '@theatre/dataverse'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {encodePathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import {asSequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
+import type {
+  ObjectAddressKey,
+  SequenceTrackId,
+} from '@unseenco/theatre-shared/utils/ids'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
+import {iterateOver, val} from '@unseenco/theatre-dataverse'
 
 describe(`SheetObjectTemplate`, () => {
   describe(`getArrayOfValidSequenceTracks()`, () => {

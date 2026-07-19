@@ -1,10 +1,13 @@
 import styled from 'styled-components'
-import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
+import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import React from 'react'
-import type {$FixMe, $IntentionalAny} from '@theatre/shared/utils/types'
-import useTooltip from '@theatre/studio/uiComponents/Popover/useTooltip'
+import type {
+  $FixMe,
+  $IntentionalAny,
+} from '@unseenco/theatre-shared/utils/types'
+import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
 import {mergeRefs} from 'react-merge-refs'
-import MinimalTooltip from '@theatre/studio/uiComponents/Popover/MinimalTooltip'
+import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
 import ToolbarSwitchSelectContainer from './ToolbarSwitchSelectContainer'
 
 export const Container = styled.button`

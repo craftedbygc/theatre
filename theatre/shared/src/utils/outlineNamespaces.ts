@@ -1,5 +1,5 @@
-import {validateAndSanitiseSlashedPathOrThrow} from '@theatre/shared/utils/slashedPaths'
-import type {SheetId} from '@theatre/shared/utils/ids'
+import {validateAndSanitiseSlashedPathOrThrow} from '@unseenco/theatre-shared/utils/slashedPaths'
+import type {SheetId} from '@unseenco/theatre-shared/utils/ids'
 
 export type OutlineNamespaceConfig = {
   defaultCollapsed?: boolean

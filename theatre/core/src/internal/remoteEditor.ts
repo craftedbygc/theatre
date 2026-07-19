@@ -3,7 +3,7 @@
  * contains the `editor` hash, e.g. `https://myapp.com/#editor`. Every other
  * window is a listener that mirrors whatever the editor window broadcasts.
  *
- * This convention is shared with `@theatre/studio`'s "Open remote editor
+ * This convention is shared with `@unseenco/theatre-studio`'s "Open remote editor
  * window" toolbar button, which opens a popup at the current URL with this
  * hash set.
  */

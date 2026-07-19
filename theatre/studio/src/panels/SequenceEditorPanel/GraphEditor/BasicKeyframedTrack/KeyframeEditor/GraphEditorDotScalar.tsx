@@ -1,26 +1,26 @@
-import getStudio from '@theatre/studio/getStudio'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import {val} from '@theatre/dataverse'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import {val} from '@unseenco/theatre-dataverse'
 import React, {useMemo, useRef, useState} from 'react'
 import styled from 'styled-components'
 import type KeyframeEditor from './KeyframeEditor'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
-import {useLockFrameStampPosition} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
-import {includeLockFrameStampAttrs} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
-import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import {useLockFrameStampPosition} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {includeLockFrameStampAttrs} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import {
   lockedCursorCssVarName,
   useCssCursorLock,
-} from '@theatre/studio/uiComponents/PointerEventsHandler'
-import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
-import {useKeyframeInlineEditorPopover} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/useSingleKeyframeInlineEditorPopover'
+} from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
+import DopeSnap from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
+import {useKeyframeInlineEditorPopover} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/useSingleKeyframeInlineEditorPopover'
 import usePresence, {
   PresenceFlag,
-} from '@theatre/studio/uiComponents/usePresence'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-studio/uiComponents/usePresence'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 export const dotSize = 6
 

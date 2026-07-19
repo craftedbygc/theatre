@@ -1,12 +1,12 @@
-import type {SequenceEditorPanelLayout} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
-import type {$FixMe} from '@theatre/shared/utils/types'
-import type {Pointer} from '@theatre/dataverse'
-import {prism, val} from '@theatre/dataverse'
+import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
+import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {prism, val} from '@unseenco/theatre-dataverse'
 import React, {useLayoutEffect, useMemo, useRef, useState} from 'react'
 import styled from 'styled-components'
 import createGrid from './createGrid'
-import getStudio from '@theatre/studio/getStudio'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: absolute;

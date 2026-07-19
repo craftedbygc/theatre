@@ -16,14 +16,14 @@
     "stripInternal": true,
     "declaration": true,
     "paths": {
-      "@theatre/core": ["./theatre/core/src/index.ts"],
-      "@theatre/studio": ["./theatre/studio/src/index.ts"],
-      "@theatre/studio/*": ["./theatre/studio/src/*"],
-      "@theatre/core/*": ["./theatre/core/src/*"],
-      "@theatre/shared/*": ["./theatre/shared/src/*"],
-      "@theatre/dataverse": ["./packages/dataverse/src/index.ts"],
-      "@theatre/react": ["./packages/react/src/index.ts"],
-      "@theatre/dataverse-experiments": [
+      "@unseenco/theatre-core": ["./theatre/core/src/index.ts"],
+      "@unseenco/theatre-studio": ["./theatre/studio/src/index.ts"],
+      "@unseenco/theatre-studio/*": ["./theatre/studio/src/*"],
+      "@unseenco/theatre-core/*": ["./theatre/core/src/*"],
+      "@unseenco/theatre-shared/*": ["./theatre/shared/src/*"],
+      "@unseenco/theatre-dataverse": ["./packages/dataverse/src/index.ts"],
+      "@unseenco/theatre-react": ["./packages/react/src/index.ts"],
+      "@unseenco/theatre-dataverse-experiments": [
         "./packages/dataverse-experiments/src/index.ts"
       ]
     },

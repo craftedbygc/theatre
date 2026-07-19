@@ -1,17 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import type {PropTypeConfig_AllSimples} from '@theatre/core/propTypes'
-import type {ISimplePropEditorReactProps} from '@theatre/studio/propEditors/simpleEditors/ISimplePropEditorReactProps'
-import {simplePropEditorByPropType} from '@theatre/studio/propEditors/simpleEditors/simplePropEditorByPropType'
+import type {PropTypeConfig_AllSimples} from '@unseenco/theatre-core/propTypes'
+import type {ISimplePropEditorReactProps} from '@unseenco/theatre-studio/propEditors/simpleEditors/ISimplePropEditorReactProps'
+import {simplePropEditorByPropType} from '@unseenco/theatre-studio/propEditors/simpleEditors/simplePropEditorByPropType'
 import type {
   EditingOptionsTree,
   PrimitivePropEditingOptions,
 } from './useSingleKeyframeInlineEditorPopover'
 import last from 'lodash-es/last'
 import {useTempTransactionEditingTools} from './useTempTransactionEditingTools'
-import {valueInProp} from '@theatre/shared/propTypes/utils'
-import {getStudioSequence, getStudioTrackSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+import {valueInProp} from '@unseenco/theatre-shared/propTypes/utils'
+import {
+  getStudioSequence,
+  getStudioTrackSequenceVariant,
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const SingleKeyframePropEditorContainer = styled.div`
   display: flex;

@@ -1,9 +1,9 @@
-import type {PropTypeConfig_File} from '@theatre/core/propTypes'
-import {Package, Trash} from '@theatre/studio/uiComponents/icons'
+import type {PropTypeConfig_File} from '@unseenco/theatre-core/propTypes'
+import {Package, Trash} from '@unseenco/theatre-studio/uiComponents/icons'
 import React, {useCallback, useEffect} from 'react'
 import styled, {css} from 'styled-components'
 import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
-import type {$FixMe} from '@theatre/shared/utils/types'
+import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
 
 const Container = styled.div<{empty: boolean}>`
   display: flex;

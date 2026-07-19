@@ -1,14 +1,14 @@
-import type {SheetObjectPropTypeConfig} from '@theatre/core/sheets/TheatreSheet'
+import type {SheetObjectPropTypeConfig} from '@unseenco/theatre-core/sheets/TheatreSheet'
 import type {
   $FixMe,
   SerializableMap,
   SerializableValue,
-} from '@theatre/shared/utils/types'
+} from '@unseenco/theatre-shared/utils/types'
 import type {
   PropTypeConfig,
   PropTypeConfig_Compound,
   PropTypeConfig_Enum,
-} from '@theatre/core/propTypes'
+} from '@unseenco/theatre-core/propTypes'
 
 const cachedDefaults = new WeakMap<PropTypeConfig, SerializableValue>()
 

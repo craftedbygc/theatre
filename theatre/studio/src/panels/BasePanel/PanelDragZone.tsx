@@ -1,12 +1,15 @@
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import type {$IntentionalAny, VoidFn} from '@theatre/shared/utils/types'
-import getStudio from '@theatre/studio/getStudio'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import type {
+  $IntentionalAny,
+  VoidFn,
+} from '@unseenco/theatre-shared/utils/types'
+import getStudio from '@unseenco/theatre-studio/getStudio'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
 import React, {useMemo, useRef} from 'react'
 import styled from 'styled-components'
 import {panelDimsToPanelPosition, usePanel} from './BasePanel'
-import {useCssCursorLock} from '@theatre/studio/uiComponents/PointerEventsHandler'
+import {useCssCursorLock} from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
 import {clamp} from 'lodash-es'
 import {minVisibleSize} from './common'
 

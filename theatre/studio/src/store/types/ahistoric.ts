@@ -1,9 +1,9 @@
-import type {ProjectState} from '@theatre/core/projects/store/storeTypes'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type {ProjectId, SheetId} from '@theatre/shared/utils/ids'
-import type {IRange, StrictRecord} from '@theatre/shared/utils/types'
-import type {PointableSet} from '@theatre/shared/utils/PointableSet'
-import type {StudioSheetItemKey} from '@theatre/shared/utils/ids'
+import type {ProjectState} from '@unseenco/theatre-core/projects/store/storeTypes'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {ProjectId, SheetId} from '@unseenco/theatre-shared/utils/ids'
+import type {IRange, StrictRecord} from '@unseenco/theatre-shared/utils/types'
+import type {PointableSet} from '@unseenco/theatre-shared/utils/PointableSet'
+import type {StudioSheetItemKey} from '@unseenco/theatre-shared/utils/ids'
 
 export type KeyframeWithPathToPropFromCommonRoot = {
   pathToProp: (string | number)[]

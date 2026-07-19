@@ -12,25 +12,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/core@npm:^1.10.0":
-  version: 1.10.0
-  resolution: "@actions/core@npm:1.10.0"
-  dependencies:
-    "@actions/http-client": ^2.0.1
-    uuid: ^8.3.2
-  checksum: 0a75621e007ab20d887434cdd165f0b9036f14c22252a2faed33543d8b9d04ec95d823e69ca636a25245574e4585d73e1e9e47a845339553c664f9f2c9614669
-  languageName: node
-  linkType: hard
-
-"@actions/http-client@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@actions/http-client@npm:2.0.1"
-  dependencies:
-    tunnel: ^0.0.6
-  checksum: 799ec3df91e28a9da91ce6592e94f8b8923ccf6cc21a2f72c7429be5af5273f1625335411adc2a1bb222d56c852d5767214dfa6fa32a6da7e81dba8290e08f17
-  languageName: node
-  linkType: hard
-
 "@ampproject/remapping@npm:^2.1.0":
   version: 2.1.2
   resolution: "@ampproject/remapping@npm:2.1.2"
@@ -3509,13 +3490,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esbuild/android-arm@npm:0.15.15":
-  version: 0.15.15
-  resolution: "@esbuild/android-arm@npm:0.15.15"
-  conditions: os=android & cpu=arm
-  languageName: node
-  linkType: hard
-
 "@esbuild/android-arm@npm:0.17.19":
   version: 0.17.19
   resolution: "@esbuild/android-arm@npm:0.17.19"
@@ -3708,13 +3682,6 @@ __metadata:
 "@esbuild/linux-loong64@npm:0.14.54":
   version: 0.14.54
   resolution: "@esbuild/linux-loong64@npm:0.14.54"
-  conditions: os=linux & cpu=loong64
-  languageName: node
-  linkType: hard
-
-"@esbuild/linux-loong64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "@esbuild/linux-loong64@npm:0.15.15"
   conditions: os=linux & cpu=loong64
   languageName: node
   linkType: hard
@@ -4034,10 +4001,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@examples/basic-dom@workspace:examples/basic-dom"
   dependencies:
-    "@theatre/core": "workspace:*"
-    "@theatre/studio": "workspace:*"
     "@types/react": ^17.0.19
     "@types/react-dom": ^17.0.9
+    "@unseenco/theatre-core": "workspace:*"
+    "@unseenco/theatre-studio": "workspace:*"
     parcel-bundler: ^1.12.5
     react: ^17.0.2
     react-dom: ^17.0.2
@@ -4052,8 +4019,8 @@ __metadata:
     "@testing-library/jest-dom": ^5.11.4
     "@testing-library/react": ^11.1.0
     "@testing-library/user-event": ^12.1.10
-    "@theatre/core": "workspace:*"
-    "@theatre/studio": "workspace:*"
+    "@unseenco/theatre-core": "workspace:*"
+    "@unseenco/theatre-studio": "workspace:*"
     react: ^17.0.2
     react-dom: ^17.0.2
     react-scripts: 4.0.3
@@ -5638,147 +5605,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@theatre/browser-bundles@workspace:packages/browser-bundles":
-  version: 0.0.0-use.local
-  resolution: "@theatre/browser-bundles@workspace:packages/browser-bundles"
-  dependencies:
-    esbuild: ^0.12.15
-    esbuild-register: ^2.5.0
-    npm-run-all: ^4.1.5
-    typescript: 5.1.6
-  peerDependencies:
-    "@theatre/core": "*"
-    "@theatre/studio": "*"
-  languageName: unknown
-  linkType: soft
-
-"@theatre/compat-tests@workspace:compat-tests":
-  version: 0.0.0-use.local
-  resolution: "@theatre/compat-tests@workspace:compat-tests"
-  dependencies:
-    "@cspotcode/zx": ^6.1.2
-    "@verdaccio/types": ^10.8.0
-    esbuild: ^0.18.18
-    esbuild-register: ^3.4.2
-    node-cleanup: ^2.1.2
-    playwright: ^1.29.1
-    prettier: ^2.6.2
-    verdaccio: ^5.26.1
-    verdaccio-auth-memory: ^10.2.2
-    verdaccio-memory: ^10.3.2
-  languageName: unknown
-  linkType: soft
-
-"@theatre/core-0.5.0@npm:@theatre/core@0.5.0":
-  version: 0.5.0
-  resolution: "@theatre/core@npm:0.5.0"
-  dependencies:
-    "@theatre/dataverse": 0.5.0
-  checksum: a2ea19d31f2574b5222f4dca5dc5f75c5a63f7d9b2ef27b185698b6617193bac6aaf2780215e32aad92bf208791703040a3f3c0cf51017f640a36d44d2dfab70
-  languageName: node
-  linkType: hard
-
-"@theatre/core@workspace:*, @theatre/core@workspace:theatre/core":
-  version: 0.0.0-use.local
-  resolution: "@theatre/core@workspace:theatre/core"
-  dependencies:
-    "@theatre/dataverse": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@theatre/dataverse-0.5.0@npm:@theatre/dataverse@0.5.0, @theatre/dataverse@npm:0.5.0":
-  version: 0.5.0
-  resolution: "@theatre/dataverse@npm:0.5.0"
-  dependencies:
-    lodash-es: ^4.17.21
-  checksum: a7dcd31539ecaaabb054f298f06340cf5e1958cacb97d36ae9ac92c36d43366ac0cb0a2e48502e4fd870947489f764179d7f99f4d6ca1f19920f360393c75781
-  languageName: node
-  linkType: hard
-
-"@theatre/dataverse-experiments@workspace:packages/dataverse-experiments":
-  version: 0.0.0-use.local
-  resolution: "@theatre/dataverse-experiments@workspace:packages/dataverse-experiments"
-  dependencies:
-    "@types/jest": ^26.0.23
-    "@types/lodash-es": ^4.17.4
-    "@types/node": ^15.6.2
-    "@types/react": ^17.0.9
-    lodash-es: ^4.17.21
-    typescript: 5.1.6
-  languageName: unknown
-  linkType: soft
-
-"@theatre/dataverse@workspace:*, @theatre/dataverse@workspace:packages/dataverse":
-  version: 0.0.0-use.local
-  resolution: "@theatre/dataverse@workspace:packages/dataverse"
-  dependencies:
-    "@microsoft/api-extractor": ^7.36.4
-    "@types/jest": ^26.0.23
-    "@types/lodash-es": ^4.17.4
-    "@types/node": ^15.6.2
-    esbuild: ^0.12.15
-    esbuild-register: ^2.5.0
-    lodash-es: ^4.17.21
-    npm-run-all: ^4.1.5
-    typedoc: ^0.24.8
-    typedoc-plugin-markdown: ^3.15.4
-    typescript: 5.1.6
-  languageName: unknown
-  linkType: soft
-
-"@theatre/react@workspace:*, @theatre/react@workspace:packages/react":
-  version: 0.0.0-use.local
-  resolution: "@theatre/react@workspace:packages/react"
-  dependencies:
-    "@microsoft/api-extractor": ^7.18.11
-    "@theatre/dataverse": "workspace:*"
-    "@types/jest": ^26.0.23
-    "@types/lodash-es": ^4.17.4
-    "@types/node": ^15.6.2
-    "@types/react": ^17.0.9
-    "@types/react-dom": ^17.0.6
-    esbuild: ^0.12.15
-    esbuild-register: ^2.5.0
-    lodash-es: ^4.17.21
-    npm-run-all: ^4.1.5
-    queue-microtask: ^1.2.3
-    typescript: 5.1.6
-  peerDependencies:
-    react: "*"
-    react-dom: "*"
-  languageName: unknown
-  linkType: soft
-
-"@theatre/shared@workspace:theatre/shared":
-  version: 0.0.0-use.local
-  resolution: "@theatre/shared@workspace:theatre/shared"
-  dependencies:
-    "@theatre/core": "workspace:*"
-    "@theatre/studio": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@theatre/studio-0.5.0@npm:@theatre/studio@0.5.0":
-  version: 0.5.0
-  resolution: "@theatre/studio@npm:0.5.0"
-  dependencies:
-    "@theatre/dataverse": 0.5.0
-  peerDependencies:
-    "@theatre/core": "*"
-  checksum: a7c11054df8094b375cdfaba93952bf14cfe5a51e9e789a248c45012d7680a10392062fd359d9353be469b2a4402dad3942f7e6a3797a04bc8dc651815e3318e
-  languageName: node
-  linkType: hard
-
-"@theatre/studio@workspace:*, @theatre/studio@workspace:theatre/studio":
-  version: 0.0.0-use.local
-  resolution: "@theatre/studio@workspace:theatre/studio"
-  dependencies:
-    "@theatre/dataverse": "workspace:*"
-  peerDependencies:
-    "@theatre/core": "*"
-  languageName: unknown
-  linkType: soft
-
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -5988,16 +5814,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^29.2.3":
-  version: 29.2.3
-  resolution: "@types/jest@npm:29.2.3"
-  dependencies:
-    expect: ^29.0.0
-    pretty-format: ^29.0.0
-  checksum: 55370906711b600a05b9e497c22aa74d80d8adcdbe4ac2f1bc9311f6f6ca0dd192862b6f38df6ac0d45e92396bcd796e377b1d8058c10bdfd584aeee580c3ce1
-  languageName: node
-  linkType: hard
-
 "@types/js-cookie@npm:^2.2.6":
   version: 2.2.6
   resolution: "@types/js-cookie@npm:2.2.6"
@@ -6050,15 +5866,6 @@ __metadata:
   dependencies:
     "@types/lodash": "*"
   checksum: acffe910e8cffe475b854d74f4372549ec700ac00d9ed885fd85ec34c3f9af1a262bf667000ea9126dc39a05a75f64593d8a5f312cfd7d90e91294d458be08a7
-  languageName: node
-  linkType: hard
-
-"@types/lodash-es@npm:^4.17.6":
-  version: 4.17.6
-  resolution: "@types/lodash-es@npm:4.17.6"
-  dependencies:
-    "@types/lodash": "*"
-  checksum: 9bd239dd525086e278821949ce12fbdd4f100a060fed9323fc7ad5661113e1641f28a7ebab617230ed3474680d8f4de705c1928b48252bb684be6ec9eed715db
   languageName: node
   linkType: hard
 
@@ -6136,13 +5943,6 @@ __metadata:
   version: 17.0.45
   resolution: "@types/node@npm:17.0.45"
   checksum: aa04366b9103b7d6cfd6b2ef64182e0eaa7d4462c3f817618486ea0422984c51fc69fd0d436eae6c9e696ddfdbec9ccaa27a917f7c2e8c75c5d57827fe3d95e8
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^18.11.9":
-  version: 18.11.9
-  resolution: "@types/node@npm:18.11.9"
-  checksum: cc0aae109e9b7adefc32eecb838d6fad931663bb06484b5e9cbbbf74865c721b03d16fd8d74ad90e31dbe093d956a7c2c306ba5429ba0c00f3f7505103d7a496
   languageName: node
   linkType: hard
 
@@ -6231,7 +6031,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.0.25, @types/react@npm:^18.2.18":
+"@types/react@npm:*, @types/react@npm:^18.2.18":
   version: 18.2.18
   resolution: "@types/react@npm:18.2.18"
   dependencies:
@@ -6730,6 +6530,118 @@ __metadata:
   checksum: fc3148c3284de3f42724736f312a4fd0c3c2029617ae2ea9a84cf6601d31f600ee6563f9288de162028ffffde85b58d92feaafbe75a2da863ff2c4e3a0b5ed8c
   languageName: node
   linkType: hard
+
+"@unseenco/theatre-browser-bundles@workspace:packages/browser-bundles":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-browser-bundles@workspace:packages/browser-bundles"
+  dependencies:
+    esbuild: ^0.12.15
+    esbuild-register: ^2.5.0
+    npm-run-all: ^4.1.5
+    typescript: 5.1.6
+  peerDependencies:
+    "@unseenco/theatre-core": "*"
+    "@unseenco/theatre-studio": "*"
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-compat-tests@workspace:compat-tests":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-compat-tests@workspace:compat-tests"
+  dependencies:
+    "@cspotcode/zx": ^6.1.2
+    "@verdaccio/types": ^10.8.0
+    esbuild: ^0.18.18
+    esbuild-register: ^3.4.2
+    node-cleanup: ^2.1.2
+    playwright: ^1.29.1
+    prettier: ^2.6.2
+    verdaccio: ^5.26.1
+    verdaccio-auth-memory: ^10.2.2
+    verdaccio-memory: ^10.3.2
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-core@workspace:*, @unseenco/theatre-core@workspace:theatre/core":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-core@workspace:theatre/core"
+  dependencies:
+    "@unseenco/theatre-dataverse": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-dataverse-experiments@workspace:packages/dataverse-experiments":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-dataverse-experiments@workspace:packages/dataverse-experiments"
+  dependencies:
+    "@types/jest": ^26.0.23
+    "@types/lodash-es": ^4.17.4
+    "@types/node": ^15.6.2
+    "@types/react": ^17.0.9
+    lodash-es: ^4.17.21
+    typescript: 5.1.6
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-dataverse@workspace:*, @unseenco/theatre-dataverse@workspace:packages/dataverse":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-dataverse@workspace:packages/dataverse"
+  dependencies:
+    "@microsoft/api-extractor": ^7.36.4
+    "@types/jest": ^26.0.23
+    "@types/lodash-es": ^4.17.4
+    "@types/node": ^15.6.2
+    esbuild: ^0.12.15
+    esbuild-register: ^2.5.0
+    lodash-es: ^4.17.21
+    npm-run-all: ^4.1.5
+    typedoc: ^0.24.8
+    typedoc-plugin-markdown: ^3.15.4
+    typescript: 5.1.6
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-react@workspace:*, @unseenco/theatre-react@workspace:packages/react":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-react@workspace:packages/react"
+  dependencies:
+    "@microsoft/api-extractor": ^7.18.11
+    "@types/jest": ^26.0.23
+    "@types/lodash-es": ^4.17.4
+    "@types/node": ^15.6.2
+    "@types/react": ^17.0.9
+    "@types/react-dom": ^17.0.6
+    "@unseenco/theatre-dataverse": "workspace:*"
+    esbuild: ^0.12.15
+    esbuild-register: ^2.5.0
+    lodash-es: ^4.17.21
+    npm-run-all: ^4.1.5
+    queue-microtask: ^1.2.3
+    typescript: 5.1.6
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-shared@workspace:theatre/shared":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-shared@workspace:theatre/shared"
+  dependencies:
+    "@unseenco/theatre-core": "workspace:*"
+    "@unseenco/theatre-studio": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@unseenco/theatre-studio@workspace:*, @unseenco/theatre-studio@workspace:theatre/studio":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-studio@workspace:theatre/studio"
+  dependencies:
+    "@unseenco/theatre-dataverse": "workspace:*"
+  peerDependencies:
+    "@unseenco/theatre-core": "*"
+  languageName: unknown
+  linkType: soft
 
 "@verdaccio/commons-api@npm:10.2.0":
   version: 10.2.0
@@ -11626,23 +11538,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-android-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-android-64@npm:0.15.15"
-  conditions: os=android & cpu=x64
-  languageName: node
-  linkType: hard
-
 "esbuild-android-arm64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-android-arm64@npm:0.14.54"
-  conditions: os=android & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"esbuild-android-arm64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-android-arm64@npm:0.15.15"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
@@ -11654,23 +11552,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-darwin-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-darwin-64@npm:0.15.15"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
 "esbuild-darwin-arm64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-darwin-arm64@npm:0.14.54"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"esbuild-darwin-arm64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-darwin-arm64@npm:0.15.15"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
@@ -11682,23 +11566,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-freebsd-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-freebsd-64@npm:0.15.15"
-  conditions: os=freebsd & cpu=x64
-  languageName: node
-  linkType: hard
-
 "esbuild-freebsd-arm64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-freebsd-arm64@npm:0.14.54"
-  conditions: os=freebsd & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"esbuild-freebsd-arm64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-freebsd-arm64@npm:0.15.15"
   conditions: os=freebsd & cpu=arm64
   languageName: node
   linkType: hard
@@ -11710,23 +11580,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-linux-32@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-32@npm:0.15.15"
-  conditions: os=linux & cpu=ia32
-  languageName: node
-  linkType: hard
-
 "esbuild-linux-64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-linux-64@npm:0.14.54"
-  conditions: os=linux & cpu=x64
-  languageName: node
-  linkType: hard
-
-"esbuild-linux-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-64@npm:0.15.15"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
@@ -11738,23 +11594,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-linux-arm64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-arm64@npm:0.15.15"
-  conditions: os=linux & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "esbuild-linux-arm@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-linux-arm@npm:0.14.54"
-  conditions: os=linux & cpu=arm
-  languageName: node
-  linkType: hard
-
-"esbuild-linux-arm@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-arm@npm:0.15.15"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
@@ -11766,23 +11608,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-linux-mips64le@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-mips64le@npm:0.15.15"
-  conditions: os=linux & cpu=mips64el
-  languageName: node
-  linkType: hard
-
 "esbuild-linux-ppc64le@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-linux-ppc64le@npm:0.14.54"
-  conditions: os=linux & cpu=ppc64
-  languageName: node
-  linkType: hard
-
-"esbuild-linux-ppc64le@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-ppc64le@npm:0.15.15"
   conditions: os=linux & cpu=ppc64
   languageName: node
   linkType: hard
@@ -11794,23 +11622,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-linux-riscv64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-riscv64@npm:0.15.15"
-  conditions: os=linux & cpu=riscv64
-  languageName: node
-  linkType: hard
-
 "esbuild-linux-s390x@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-linux-s390x@npm:0.14.54"
-  conditions: os=linux & cpu=s390x
-  languageName: node
-  linkType: hard
-
-"esbuild-linux-s390x@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-linux-s390x@npm:0.15.15"
   conditions: os=linux & cpu=s390x
   languageName: node
   linkType: hard
@@ -11822,23 +11636,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-netbsd-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-netbsd-64@npm:0.15.15"
-  conditions: os=netbsd & cpu=x64
-  languageName: node
-  linkType: hard
-
 "esbuild-openbsd-64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-openbsd-64@npm:0.14.54"
-  conditions: os=openbsd & cpu=x64
-  languageName: node
-  linkType: hard
-
-"esbuild-openbsd-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-openbsd-64@npm:0.15.15"
   conditions: os=openbsd & cpu=x64
   languageName: node
   linkType: hard
@@ -11850,17 +11650,6 @@ __metadata:
     esbuild: ^0.11.5
     jsonc-parser: ^3.0.0
   checksum: 6895d3b3fc89f67711a1185e932c56c0d818c31f8407e03dcc588048cf1faa7f4bd3c2b032d0f6e19b0245e968d8fdadae668a1d2f92a302a8df348521be72c8
-  languageName: node
-  linkType: hard
-
-"esbuild-register@npm:^3.4.1":
-  version: 3.4.1
-  resolution: "esbuild-register@npm:3.4.1"
-  dependencies:
-    debug: ^4.3.4
-  peerDependencies:
-    esbuild: ">=0.12 <1"
-  checksum: 02750477b7215101bd2ffa3eae5064026586afd9a5267e94f5b81722c85c8063794c06328e618b5a93d7b0db4138a092417cfc024471b8a3616d212d09e3d868
   languageName: node
   linkType: hard
 
@@ -11882,23 +11671,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-sunos-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-sunos-64@npm:0.15.15"
-  conditions: os=sunos & cpu=x64
-  languageName: node
-  linkType: hard
-
 "esbuild-windows-32@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-windows-32@npm:0.14.54"
-  conditions: os=win32 & cpu=ia32
-  languageName: node
-  linkType: hard
-
-"esbuild-windows-32@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-windows-32@npm:0.15.15"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
@@ -11910,23 +11685,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-windows-64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-windows-64@npm:0.15.15"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
 "esbuild-windows-arm64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-windows-arm64@npm:0.14.54"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"esbuild-windows-arm64@npm:0.15.15":
-  version: 0.15.15
-  resolution: "esbuild-windows-arm64@npm:0.15.15"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -12020,83 +11781,6 @@ __metadata:
   bin:
     esbuild: bin/esbuild
   checksum: 49e360b1185c797f5ca3a7f5f0a75121494d97ddf691f65ed1796e6257d318f928342a97f559bb8eced6a90cf604dd22db4a30e0dbbf15edd9dbf22459b639af
-  languageName: node
-  linkType: hard
-
-"esbuild@npm:^0.15.15":
-  version: 0.15.15
-  resolution: "esbuild@npm:0.15.15"
-  dependencies:
-    "@esbuild/android-arm": 0.15.15
-    "@esbuild/linux-loong64": 0.15.15
-    esbuild-android-64: 0.15.15
-    esbuild-android-arm64: 0.15.15
-    esbuild-darwin-64: 0.15.15
-    esbuild-darwin-arm64: 0.15.15
-    esbuild-freebsd-64: 0.15.15
-    esbuild-freebsd-arm64: 0.15.15
-    esbuild-linux-32: 0.15.15
-    esbuild-linux-64: 0.15.15
-    esbuild-linux-arm: 0.15.15
-    esbuild-linux-arm64: 0.15.15
-    esbuild-linux-mips64le: 0.15.15
-    esbuild-linux-ppc64le: 0.15.15
-    esbuild-linux-riscv64: 0.15.15
-    esbuild-linux-s390x: 0.15.15
-    esbuild-netbsd-64: 0.15.15
-    esbuild-openbsd-64: 0.15.15
-    esbuild-sunos-64: 0.15.15
-    esbuild-windows-32: 0.15.15
-    esbuild-windows-64: 0.15.15
-    esbuild-windows-arm64: 0.15.15
-  dependenciesMeta:
-    "@esbuild/android-arm":
-      optional: true
-    "@esbuild/linux-loong64":
-      optional: true
-    esbuild-android-64:
-      optional: true
-    esbuild-android-arm64:
-      optional: true
-    esbuild-darwin-64:
-      optional: true
-    esbuild-darwin-arm64:
-      optional: true
-    esbuild-freebsd-64:
-      optional: true
-    esbuild-freebsd-arm64:
-      optional: true
-    esbuild-linux-32:
-      optional: true
-    esbuild-linux-64:
-      optional: true
-    esbuild-linux-arm:
-      optional: true
-    esbuild-linux-arm64:
-      optional: true
-    esbuild-linux-mips64le:
-      optional: true
-    esbuild-linux-ppc64le:
-      optional: true
-    esbuild-linux-riscv64:
-      optional: true
-    esbuild-linux-s390x:
-      optional: true
-    esbuild-netbsd-64:
-      optional: true
-    esbuild-openbsd-64:
-      optional: true
-    esbuild-sunos-64:
-      optional: true
-    esbuild-windows-32:
-      optional: true
-    esbuild-windows-64:
-      optional: true
-    esbuild-windows-arm64:
-      optional: true
-  bin:
-    esbuild: bin/esbuild
-  checksum: 9a194a310ac7d6989d1fe7354901d531d3b0d4cc1897a85a7cb9f1ae0fe8d82eb59747e63c91f676bab7bed8d6a1f28f620d49f043e7bd6203f9afe34031f739
   languageName: node
   linkType: hard
 
@@ -13178,7 +12862,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expect@npm:^29.0.0, expect@npm:^29.3.1":
+"expect@npm:^29.3.1":
   version: 29.3.1
   resolution: "expect@npm:29.3.1"
   dependencies:
@@ -20410,10 +20094,6 @@ fsevents@^1.2.7:
   resolution: "playground@workspace:packages/playground"
   dependencies:
     "@playwright/test": ^1.36.2
-    "@theatre/core": "workspace:*"
-    "@theatre/dataverse": "workspace:*"
-    "@theatre/react": "workspace:*"
-    "@theatre/studio": "workspace:*"
     "@types/jest": ^26.0.23
     "@types/lodash-es": ^4.17.4
     "@types/node": ^15.6.2
@@ -20421,6 +20101,10 @@ fsevents@^1.2.7:
     "@types/react-dom": ^18.2.7
     "@types/styled-components": ^5.1.26
     "@types/three": ^0.155.0
+    "@unseenco/theatre-core": "workspace:*"
+    "@unseenco/theatre-dataverse": "workspace:*"
+    "@unseenco/theatre-react": "workspace:*"
+    "@unseenco/theatre-studio": "workspace:*"
     "@vitejs/plugin-react": ^4.0.0
     "@vitejs/plugin-react-swc": ^3.3.2
     fast-glob: ^3.3.0
@@ -21558,7 +21242,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:^29.0.0, pretty-format@npm:^29.3.1":
+"pretty-format@npm:^29.3.1":
   version: 29.3.1
   resolution: "pretty-format@npm:29.3.1"
   dependencies:
@@ -25049,7 +24733,6 @@ fsevents@^1.2.7:
   version: 0.0.0-use.local
   resolution: "theatre-monorepo@workspace:."
   dependencies:
-    "@actions/core": ^1.10.0
     "@cspotcode/zx": ^6.1.2
     "@microsoft/api-documenter": ^7.19.0
     "@microsoft/api-extractor": ^7.28.6
@@ -25089,9 +24772,6 @@ fsevents@^1.2.7:
     "@rollup/plugin-multi-entry": ^4.1.0
     "@rollup/plugin-replace": ^2.4.2
     "@rollup/plugin-typescript": ^8.2.5
-    "@theatre/core": "workspace:*"
-    "@theatre/dataverse": "workspace:*"
-    "@theatre/react": "workspace:*"
     "@types/fs-extra": ^9.0.11
     "@types/jest": ^26.0.23
     "@types/lodash": ^4.14.170
@@ -25107,6 +24787,9 @@ fsevents@^1.2.7:
     "@types/shallowequal": ^1.1.1
     "@types/styled-components": ^5.1.26
     "@types/uuid": ^8.3.0
+    "@unseenco/theatre-core": "workspace:*"
+    "@unseenco/theatre-dataverse": "workspace:*"
+    "@unseenco/theatre-react": "workspace:*"
     blob-compare: 1.1.0
     cross-env: ^7.0.3
     esbuild: ^0.18.17
@@ -25533,13 +25216,6 @@ fsevents@^1.2.7:
   dependencies:
     safe-buffer: ^5.0.1
   checksum: 05f6510358f8afc62a057b8b692f05d70c1782b70db86d6a1e0d5e28a32389e52fa6e7707b6c5ecccacc031462e4bc35af85ecfe4bbc341767917b7cf6965711
-  languageName: node
-  linkType: hard
-
-"tunnel@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "tunnel@npm:0.0.6"
-  checksum: c362948df9ad34b649b5585e54ce2838fa583aa3037091aaed66793c65b423a264e5229f0d7e9a95513a795ac2bd4cb72cda7e89a74313f182c1e9ae0b0994fa
   languageName: node
   linkType: hard
 

@@ -1,19 +1,19 @@
-import type Project from '@theatre/core/projects/Project'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import {encodePathToProp} from '@theatre/shared/utils/addresses'
-import type {SequenceAddress} from '@theatre/shared/utils/addresses'
-import didYouMean from '@theatre/shared/utils/didYouMean'
-import {InvalidArgumentError} from '@theatre/shared/utils/errors'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import {encodePathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import type {SequenceAddress} from '@unseenco/theatre-shared/utils/addresses'
+import didYouMean from '@unseenco/theatre-shared/utils/didYouMean'
+import {InvalidArgumentError} from '@unseenco/theatre-shared/utils/errors'
 import type {
   Prism,
   Pointer,
   Ticker,
   PointerToPrismProvider,
-} from '@theatre/dataverse'
-import {getPointerParts} from '@theatre/dataverse'
-import {Atom} from '@theatre/dataverse'
-import {pointer} from '@theatre/dataverse'
-import {prism, val} from '@theatre/dataverse'
+} from '@unseenco/theatre-dataverse'
+import {getPointerParts} from '@unseenco/theatre-dataverse'
+import {Atom} from '@unseenco/theatre-dataverse'
+import {pointer} from '@unseenco/theatre-dataverse'
+import {prism, val} from '@unseenco/theatre-dataverse'
 import {padStart} from 'lodash-es'
 import type {
   IPlaybackController,
@@ -21,17 +21,17 @@ import type {
 } from './playbackControllers/DefaultPlaybackController'
 import DefaultPlaybackController from './playbackControllers/DefaultPlaybackController'
 import TheatreSequence from './TheatreSequence'
-import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
-import type {ILogger} from '@theatre/shared/logger'
+import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {ILogger} from '@unseenco/theatre-shared/logger'
 import type {ISequence} from '..'
-import {notify} from '@theatre/shared/notify'
-import type {$IntentionalAny} from '@theatre/dataverse/src/types'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import {notify} from '@unseenco/theatre-shared/notify'
+import type {$IntentionalAny} from '@unseenco/theatre-dataverse/src/types'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   getSequenceStateFromSheet,
-} from '@theatre/core/sequences/sequenceVariants'
-import {isSheetObject} from '@theatre/shared/instanceTypes'
+} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import {isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
 
 export type IPlaybackRange = [from: number, to: number]
 
@@ -141,10 +141,8 @@ export default class Sequence implements PointerToPrismProvider {
     const sheetState = val(
       this._project.pointers.historic.sheetsById[this._sheet.address.sheetId],
     )
-    const trackP = getSequenceStateFromSheet(
-      sheetState,
-      this._sequenceVariant,
-    )?.tracksByObject[root.address.objectKey]
+    const trackP = getSequenceStateFromSheet(sheetState, this._sequenceVariant)
+      ?.tracksByObject[root.address.objectKey]
 
     if (!trackP) {
       return []

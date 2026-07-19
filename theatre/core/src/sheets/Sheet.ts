@@ -1,25 +1,28 @@
-import type Project from '@theatre/core/projects/Project'
-import Sequence from '@theatre/core/sequences/Sequence'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
+import type Project from '@unseenco/theatre-core/projects/Project'
+import Sequence from '@unseenco/theatre-core/sequences/Sequence'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import type {
   SheetObjectActionsConfig,
   SheetObjectPropTypeConfig,
-} from '@theatre/core/sheets/TheatreSheet'
-import TheatreSheet from '@theatre/core/sheets/TheatreSheet'
-import type {SheetAddress} from '@theatre/shared/utils/addresses'
-import {Atom, prism, val} from '@theatre/dataverse'
-import type {Prism} from '@theatre/dataverse'
+} from '@unseenco/theatre-core/sheets/TheatreSheet'
+import TheatreSheet from '@unseenco/theatre-core/sheets/TheatreSheet'
+import type {SheetAddress} from '@unseenco/theatre-shared/utils/addresses'
+import {Atom, prism, val} from '@unseenco/theatre-dataverse'
+import type {Prism} from '@unseenco/theatre-dataverse'
 import type SheetTemplate from './SheetTemplate'
-import type {ObjectAddressKey, SheetInstanceId} from '@theatre/shared/utils/ids'
-import type {StrictRecord} from '@theatre/shared/utils/types'
-import type {ILogger} from '@theatre/shared/logger'
+import type {
+  ObjectAddressKey,
+  SheetInstanceId,
+} from '@unseenco/theatre-shared/utils/ids'
+import type {StrictRecord} from '@unseenco/theatre-shared/utils/types'
+import type {ILogger} from '@unseenco/theatre-shared/logger'
 import {isInteger} from 'lodash-es'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   getSequenceStateFromSheet,
   validateSequenceVariantIdOrThrow,
-} from '@theatre/core/sequences/sequenceVariants'
+} from '@unseenco/theatre-core/sequences/sequenceVariants'
 
 type SheetObjectMap = StrictRecord<ObjectAddressKey, SheetObject>
 
@@ -116,8 +119,7 @@ export default class Sheet {
   }
 
   getSequence(variant?: SequenceVariantId): Sequence {
-    const variantId =
-      variant ?? val(this._activeSequenceVariant.pointer)
+    const variantId = variant ?? val(this._activeSequenceVariant.pointer)
     if (!this._sequences[variantId]) {
       const lengthD = prism(() => {
         const sheetState = val(

@@ -1,35 +1,35 @@
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
+import {getSequenceStateFromSheet} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
-} from '@theatre/studio/utils/activeSequenceVariant'
-import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
-import useDrag from '@theatre/studio/uiComponents/useDrag'
-import useKeyDown from '@theatre/studio/uiComponents/useKeyDown'
-import useValToAtom from '@theatre/studio/uiComponents/useValToAtom'
-import mutableSetDeep from '@theatre/shared/utils/mutableSetDeep'
-import useRefAndState from '@theatre/studio/utils/useRefAndState'
-import {usePrism} from '@theatre/react'
-import type {$IntentionalAny} from '@theatre/shared/utils/types'
-import type {Pointer} from '@theatre/dataverse'
-import {val} from '@theatre/dataverse'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
+import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import useKeyDown from '@unseenco/theatre-studio/uiComponents/useKeyDown'
+import useValToAtom from '@unseenco/theatre-studio/uiComponents/useValToAtom'
+import mutableSetDeep from '@unseenco/theatre-shared/utils/mutableSetDeep'
+import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import {usePrism} from '@unseenco/theatre-react'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
+import type {Pointer} from '@unseenco/theatre-dataverse'
+import {val} from '@unseenco/theatre-dataverse'
 import React, {useMemo, useRef} from 'react'
 import styled from 'styled-components'
 import type {
   DopeSheetSelection,
   SequenceEditorPanelLayout,
-} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
 import type {
   SequenceEditorTree_AllRowTypes,
   SequenceEditorTree_PropWithChildren,
   SequenceEditorTree_Sheet,
   SequenceEditorTree_SheetObject,
-} from '@theatre/studio/panels/SequenceEditorPanel/layout/tree'
-import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/tree'
+import DopeSnap from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
 import {collectAggregateKeyframesInPrism} from './collectAggregateKeyframes'
-import type {ILogger, IUtilLogger} from '@theatre/shared/logger'
-import {useLogger} from '@theatre/studio/uiComponents/useLogger'
+import type {ILogger, IUtilLogger} from '@unseenco/theatre-shared/logger'
+import {useLogger} from '@unseenco/theatre-studio/uiComponents/useLogger'
 
 const HITBOX_SIZE_PX = 5
 
@@ -254,10 +254,8 @@ namespace utils {
           trackId,
           activeVariant,
         ) ?? activeVariant
-      const trackData = getSequenceStateFromSheet(
-        sheetState,
-        trackVariant,
-      )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
+      const trackData = getSequenceStateFromSheet(sheetState, trackVariant)
+        ?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
 
       if (!trackData) return
 

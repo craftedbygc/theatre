@@ -1,4 +1,4 @@
-import type {Studio} from '@theatre/studio/Studio'
+import type {Studio} from '@unseenco/theatre-studio/Studio'
 import projectsSingleton from './projects/projectsSingleton'
 import {privateAPI} from './privateAPIs'
 import * as coreExports from './coreExports'
@@ -25,7 +25,9 @@ export default class CoreBundle {
 
   getBitsForStudio(studio: Studio, callback: (bits: CoreBits) => void) {
     if (this._studio) {
-      throw new Error(`@theatre/core is already attached to @theatre/studio`)
+      throw new Error(
+        `@unseenco/theatre-core is already attached to @unseenco/theatre-studio`,
+      )
     }
     this._studio = studio
     const bits: CoreBits = {

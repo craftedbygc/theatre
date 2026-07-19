@@ -2,23 +2,26 @@ import type {
   PropTypeConfig,
   PropTypeConfig_AllSimples,
   PropTypeConfig_Compound,
-} from '@theatre/core/propTypes'
-import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
-import type {IPropPathToTrackIdTree} from '@theatre/core/sheetObjects/SheetObjectTemplate'
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type {PathToProp} from '@theatre/shared/utils/addresses'
+} from '@unseenco/theatre-core/propTypes'
+import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
+import type {IPropPathToTrackIdTree} from '@unseenco/theatre-core/sheetObjects/SheetObjectTemplate'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
 import type {
   SequenceTrackId,
   StudioSheetItemKey,
-} from '@theatre/shared/utils/ids'
-import {createStudioSheetItemKey} from '@theatre/shared/utils/ids'
-import type {$FixMe, $IntentionalAny} from '@theatre/shared/utils/types'
-import {prism, val, pointerToPrism} from '@theatre/dataverse'
-import logger from '@theatre/shared/logger'
-import {titleBarHeight} from '@theatre/studio/panels/BasePanel/common'
-import type {Studio} from '@theatre/studio/Studio'
-import type {UnknownValidCompoundProps} from '@theatre/core/propTypes/internals'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+} from '@unseenco/theatre-shared/utils/ids'
+import {createStudioSheetItemKey} from '@unseenco/theatre-shared/utils/ids'
+import type {
+  $FixMe,
+  $IntentionalAny,
+} from '@unseenco/theatre-shared/utils/types'
+import {prism, val, pointerToPrism} from '@unseenco/theatre-dataverse'
+import logger from '@unseenco/theatre-shared/logger'
+import {titleBarHeight} from '@unseenco/theatre-studio/panels/BasePanel/common'
+import type {Studio} from '@unseenco/theatre-studio/Studio'
+import type {UnknownValidCompoundProps} from '@unseenco/theatre-core/propTypes/internals'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 /**
  * Base "view model" for each row with common

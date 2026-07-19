@@ -1,16 +1,16 @@
-import type Sheet from '@theatre/core/sheets/Sheet'
-import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
-import getStudio from '@theatre/studio/getStudio'
+import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
   setStudioActiveSequenceVariant,
-} from '@theatre/studio/utils/activeSequenceVariant'
-import {usePrism} from '@theatre/react'
+} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {usePrism} from '@unseenco/theatre-react'
 import React, {useCallback} from 'react'
 import styled from 'styled-components'
-import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
-import {useCollapseStateInOutlinePanel} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
-import ObjectsList from '@theatre/studio/panels/OutlinePanel/ObjectsList/ObjectsList'
+import BaseItem from '@unseenco/theatre-studio/panels/OutlinePanel/BaseItem'
+import {useCollapseStateInOutlinePanel} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import ObjectsList from '@unseenco/theatre-studio/panels/OutlinePanel/ObjectsList/ObjectsList'
 
 const Body = styled.div``
 
