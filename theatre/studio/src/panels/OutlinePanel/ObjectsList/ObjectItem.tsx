@@ -1,7 +1,10 @@
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
-import {setStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+import {
+  getStudioActiveSequenceVariant,
+  setStudioActiveSequenceVariant,
+} from '@theatre/studio/utils/activeSequenceVariant'
 import React from 'react'
 import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
 import {usePrism} from '@theatre/react'
@@ -24,16 +27,21 @@ export const ObjectItem: React.VFC<{
     })
   }
 
-  const selection = usePrism(() => getOutlineSelection(), [])
+  const selectionStatus = usePrism(() => {
+    const outlineSelection = getOutlineSelection()
+    const activeVariant = getStudioActiveSequenceVariant(sheetObject.sheet.address)
+
+    return outlineSelection.includes(sheetObject) && activeVariant === variant
+      ? 'selected'
+      : 'not-selected'
+  }, [sheetObject, variant])
 
   return (
     <BaseItem
       select={select}
       label={overrideLabel ?? sheetObject.address.objectKey}
       depth={depth}
-      selectionStatus={
-        selection.includes(sheetObject) ? 'selected' : 'not-selected'
-      }
+      selectionStatus={selectionStatus}
     />
   )
 }
