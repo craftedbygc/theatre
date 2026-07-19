@@ -6,6 +6,20 @@ import type {
   SheetState_Historic,
 } from '@theatre/core/projects/store/types/SheetState_Historic'
 import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
+// stateEditors mutates core historic sheet state, so it needs these runtime helpers.
+// eslint-disable-next-line no-restricted-syntax
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  blockInheritedSequencePropOnVariantInSheet,
+  copyObjectSequenceTracksToVariantInSheet,
+  copyPrimitivePropSequenceFromDefaultToVariantInSheet,
+  ensureSequenceStateInSheet,
+  ensureVariantStaticOverridesByObjectInSheet,
+  getSequenceStateFromSheet,
+  migrateSheetSequenceState,
+  unblockInheritedSequencePropOnVariantInSheet,
+} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import type {Drafts} from '@theatre/studio/StudioStore/StudioStore'
 import type {
   ProjectAddress,
@@ -19,6 +33,7 @@ import {encodePathToProp} from '@theatre/shared/utils/addresses'
 import type {
   StudioSheetItemKey,
   KeyframeId,
+  ObjectAddressKey,
   SequenceMarkerId,
   SequenceTrackId,
   UIPanelId,
@@ -126,9 +141,6 @@ namespace stateEditors {
                     type: 'Sheet',
                     ...item.template.address,
                   })
-                  stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.setSelectedInstanceId(
-                    item.address,
-                  )
                 } else if (isSheetTemplate(item)) {
                   newSelectionState.push({type: 'Sheet', ...item.address})
                 } else if (isSheetObject(item)) {
@@ -136,9 +148,6 @@ namespace stateEditors {
                     type: 'SheetObject',
                     ...item.template.address,
                   })
-                  stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.setSelectedInstanceId(
-                    item.sheet.address,
-                  )
                 } else if (isSheetObjectTemplate(item)) {
                   newSelectionState.push({type: 'SheetObject', ...item.address})
                 }
@@ -191,7 +200,6 @@ namespace stateEditors {
                 )
               if (!projectState.stateBySheetId[p.sheetId]) {
                 projectState.stateBySheetId[p.sheetId] = {
-                  selectedInstanceId: undefined,
                   sequenceEditor: {
                     selectedPropsByObject: {},
                   },
@@ -201,10 +209,67 @@ namespace stateEditors {
               return projectState.stateBySheetId[p.sheetId]!
             }
 
-            export function setSelectedInstanceId(p: SheetAddress) {
+            export function setActiveSequenceVariant(
+              p: WithoutSheetInstance<SheetAddress> & {
+                variant: SequenceVariantId
+              },
+            ) {
               stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId._ensure(
                 p,
-              ).selectedInstanceId = p.sheetInstanceId
+              ).activeSequenceVariant = p.variant
+            }
+
+            export function addVariantObjectOverride(
+              p: WithoutSheetInstance<SheetAddress> & {
+                variant: SequenceVariantId
+                objectKey: ObjectAddressKey
+              },
+            ) {
+              const coreSheetState =
+                stateEditors.coreByProject.historic.sheetsById._ensure(p)
+              coreSheetState.variantObjectOverrides ??= {}
+              coreSheetState.variantObjectOverrides[p.variant] ??= []
+              const list = coreSheetState.variantObjectOverrides[p.variant]!
+              if (!list.includes(p.objectKey)) {
+                list.push(p.objectKey)
+              }
+
+              stateEditors.coreByProject.historic.sheetsById.copyObjectSequenceTracksToVariant(
+                {
+                  projectId: p.projectId,
+                  sheetId: p.sheetId,
+                  objectKey: p.objectKey,
+                  sequenceVariant: p.variant,
+                },
+              )
+            }
+
+            export function removeVariantObjectOverride(
+              p: WithoutSheetInstance<SheetAddress> & {
+                variant: SequenceVariantId
+                objectKey: ObjectAddressKey
+              },
+            ) {
+              const coreSheetState =
+                stateEditors.coreByProject.historic.sheetsById._ensure(p)
+              const list = coreSheetState.variantObjectOverrides?.[p.variant]
+              if (!list) return
+
+              coreSheetState.variantObjectOverrides![p.variant] = list.filter(
+                (key) => key !== p.objectKey,
+              )
+
+              stateEditors.coreByProject.historic.sheetsById.clearObjectVariantState(
+                {
+                  projectId: p.projectId,
+                  sheetId: p.sheetId,
+                  objectKey: p.objectKey,
+                  sequenceVariant: p.variant,
+                },
+              )
+
+              delete stateBySheetId._ensure(p).sequenceEditor
+                .selectedPropsByObject[p.objectKey]
             }
 
             export namespace sequenceEditor {
@@ -637,9 +702,73 @@ namespace stateEditors {
           if (!sheetState) return
           delete sheetState.staticOverrides.byObject[p.objectKey]
 
-          const sequence = sheetState.sequence
-          if (!sequence) return
-          delete sequence.tracksByObject[p.objectKey]
+          if (sheetState.staticOverridesByVariant) {
+            for (const variantOverrides of Object.values(
+              sheetState.staticOverridesByVariant,
+            )) {
+              delete variantOverrides?.byObject[p.objectKey]
+            }
+          }
+
+          migrateSheetSequenceState(sheetState)
+          if (sheetState.sequencesById) {
+            for (const sequence of Object.values(sheetState.sequencesById)) {
+              if (!sequence) continue
+              delete sequence.tracksByObject[p.objectKey]
+            }
+          }
+          if (sheetState.sequence) {
+            delete sheetState.sequence.tracksByObject[p.objectKey]
+          }
+
+          if (sheetState.variantObjectOverrides) {
+            for (const variantId of Object.keys(
+              sheetState.variantObjectOverrides,
+            )) {
+              const list = sheetState.variantObjectOverrides[variantId]
+              if (!list) continue
+              sheetState.variantObjectOverrides[variantId] = list.filter(
+                (key) => key !== p.objectKey,
+              )
+            }
+          }
+        }
+
+        export function clearObjectVariantState(
+          p: WithoutSheetInstance<SheetObjectAddress> & {
+            sequenceVariant: SequenceVariantId
+          },
+        ) {
+          if (p.sequenceVariant === DEFAULT_SEQUENCE_VARIANT) return
+
+          const sheetState =
+            drafts().historic.coreByProject[p.projectId].sheetsById[p.sheetId]
+          if (!sheetState) return
+
+          delete sheetState.staticOverridesByVariant?.[p.sequenceVariant]
+            ?.byObject[p.objectKey]
+
+          migrateSheetSequenceState(sheetState)
+          const sequenceState = sheetState.sequencesById?.[p.sequenceVariant]
+          if (sequenceState) {
+            delete sequenceState.tracksByObject[p.objectKey]
+          }
+        }
+
+        export function copyObjectSequenceTracksToVariant(
+          p: WithoutSheetInstance<SheetObjectAddress> & {
+            sequenceVariant: SequenceVariantId
+          },
+        ) {
+          const sheetState =
+            drafts().historic.coreByProject[p.projectId].sheetsById[p.sheetId]
+          if (!sheetState) return
+
+          copyObjectSequenceTracksToVariantInSheet(
+            sheetState,
+            p.objectKey,
+            p.sequenceVariant,
+          )
         }
 
         export function forgetSheet(p: WithoutSheetInstance<SheetAddress>) {
@@ -654,21 +783,20 @@ namespace stateEditors {
 
         export namespace sequence {
           export function _ensure(
-            p: WithoutSheetInstance<SheetAddress>,
+            p: WithoutSheetInstance<SheetAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
           ): HistoricPositionalSequence {
             const s = stateEditors.coreByProject.historic.sheetsById._ensure(p)
-            s.sequence ??= {
-              subUnitsPerUnit: 30,
-              length: 10,
-              type: 'PositionalSequence',
-              tracksByObject: {},
-            }
-
-            return s.sequence!
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            return ensureSequenceStateInSheet(s, variantId)
           }
 
           export function setLength(
-            p: WithoutSheetInstance<SheetAddress> & {length: number},
+            p: WithoutSheetInstance<SheetAddress> & {
+              length: number
+              sequenceVariant?: SequenceVariantId
+            },
           ) {
             _ensure(p).length = clamp(
               parseFloat(p.length.toFixed(2)),
@@ -678,7 +806,9 @@ namespace stateEditors {
           }
 
           function _ensureTracksOfObject(
-            p: WithoutSheetInstance<SheetObjectAddress>,
+            p: WithoutSheetInstance<SheetObjectAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
           ) {
             const s =
               stateEditors.coreByProject.historic.sheetsById.sequence._ensure(
@@ -691,11 +821,24 @@ namespace stateEditors {
           }
 
           export function setPrimitivePropAsSequenced(
-            p: WithoutSheetInstance<PropAddress>,
+            p: WithoutSheetInstance<PropAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
             config: PropTypeConfig,
           ) {
-            const tracks = _ensureTracksOfObject(p)
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            const sheetState =
+              stateEditors.coreByProject.historic.sheetsById._ensure(p)
             const pathEncoded = encodePathToProp(p.pathToProp)
+
+            unblockInheritedSequencePropOnVariantInSheet(
+              sheetState,
+              variantId,
+              p.objectKey,
+              pathEncoded,
+            )
+
+            const tracks = _ensureTracksOfObject(p)
             const possibleTrackId = tracks.trackIdByPropPath[pathEncoded]
             if (typeof possibleTrackId === 'string') return
 
@@ -714,20 +857,79 @@ namespace stateEditors {
           export function setPrimitivePropAsStatic(
             p: WithoutSheetInstance<PropAddress> & {
               value: SerializablePrimitive
+              sequenceVariant?: SequenceVariantId
             },
           ) {
-            const tracks = _ensureTracksOfObject(p)
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            const sheetState =
+              stateEditors.coreByProject.historic.sheetsById._ensure(p)
             const encodedPropPath = encodePathToProp(p.pathToProp)
-            const trackId = tracks.trackIdByPropPath[encodedPropPath]
+            const tracks = _ensureTracksOfObject({
+              ...p,
+              sequenceVariant: variantId,
+            })
+            const variantTrackId = tracks.trackIdByPropPath[encodedPropPath]
 
-            if (typeof trackId !== 'string') return
+            if (typeof variantTrackId === 'string') {
+              delete tracks.trackIdByPropPath[encodedPropPath]
+              delete tracks.trackData[variantTrackId]
+            }
 
-            delete tracks.trackIdByPropPath[encodedPropPath]
-            delete tracks.trackData[trackId]
+            if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+              if (typeof variantTrackId !== 'string') return
+            } else {
+              const defaultTrackId = getSequenceStateFromSheet(
+                sheetState,
+                DEFAULT_SEQUENCE_VARIANT,
+              )?.tracksByObject[p.objectKey]?.trackIdByPropPath[encodedPropPath]
+
+              if (typeof defaultTrackId === 'string') {
+                blockInheritedSequencePropOnVariantInSheet(
+                  sheetState,
+                  variantId,
+                  p.objectKey,
+                  encodedPropPath,
+                )
+              } else if (typeof variantTrackId !== 'string') {
+                return
+              }
+            }
 
             stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-              p,
+              {...p, sequenceVariant: variantId},
             )
+          }
+
+          export function resetPrimitivePropOnVariant(
+            p: WithoutSheetInstance<PropAddress> & {
+              sequenceVariant?: SequenceVariantId
+            },
+          ) {
+            const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+            const sheetState =
+              stateEditors.coreByProject.historic.sheetsById._ensure(p)
+            const encodedPropPath = encodePathToProp(p.pathToProp)
+
+            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
+              {...p, sequenceVariant: variantId},
+            )
+
+            if (variantId !== DEFAULT_SEQUENCE_VARIANT) {
+              copyPrimitivePropSequenceFromDefaultToVariantInSheet(
+                sheetState,
+                p.objectKey,
+                variantId,
+                encodedPropPath,
+              )
+              return
+            }
+
+            const tracks = _ensureTracksOfObject(p)
+            const variantTrackId = tracks.trackIdByPropPath[encodedPropPath]
+            if (typeof variantTrackId === 'string') {
+              delete tracks.trackIdByPropPath[encodedPropPath]
+              delete tracks.trackData[variantTrackId]
+            }
           }
 
           export function setCompoundPropAsStatic(
@@ -788,6 +990,7 @@ namespace stateEditors {
               value: T
               snappingFunction: SnappingFunction
               type?: KeyframeType
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const position = p.snappingFunction(p.position)
@@ -835,6 +1038,7 @@ namespace stateEditors {
             p: WithoutSheetInstance<SheetObjectAddress> & {
               trackId: SequenceTrackId
               position: number
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -858,6 +1062,7 @@ namespace stateEditors {
               scale: number
               origin: number
               snappingFunction: SnappingFunction
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -966,6 +1171,7 @@ namespace stateEditors {
             p: WithoutSheetInstance<SheetObjectAddress> & {
               trackId: SequenceTrackId
               keyframeIds: KeyframeId[]
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -997,6 +1203,7 @@ namespace stateEditors {
               trackId: SequenceTrackId
               keyframes: Array<Keyframe>
               snappingFunction: SnappingFunction
+              sequenceVariant?: SequenceVariantId
             },
           ) {
             const track = _getTrack(p)
@@ -1042,10 +1249,18 @@ namespace stateEditors {
 
         export namespace staticOverrides {
           export namespace byObject {
-            function _ensure(p: WithoutSheetInstance<SheetObjectAddress>) {
-              const byObject =
+            function _ensure(
+              p: WithoutSheetInstance<SheetObjectAddress> & {
+                sequenceVariant?: SequenceVariantId
+              },
+            ) {
+              const sheetState =
                 stateEditors.coreByProject.historic.sheetsById._ensure(p)
-                  .staticOverrides.byObject
+              const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+              const byObject = ensureVariantStaticOverridesByObjectInSheet(
+                sheetState,
+                variantId,
+              )
               byObject[p.objectKey] ??= {}
               return byObject[p.objectKey]!
             }
@@ -1053,6 +1268,7 @@ namespace stateEditors {
             export function setValueOfCompoundProp(
               p: WithoutSheetInstance<PropAddress> & {
                 value: SerializableMap
+                sequenceVariant?: SequenceVariantId
               },
             ) {
               const existingOverrides = _ensure(p)
@@ -1062,6 +1278,7 @@ namespace stateEditors {
             export function setValueOfPrimitiveProp(
               p: WithoutSheetInstance<PropAddress> & {
                 value: SerializablePrimitive
+                sequenceVariant?: SequenceVariantId
               },
             ) {
               const existingOverrides = _ensure(p)
@@ -1069,11 +1286,27 @@ namespace stateEditors {
             }
 
             export function unsetValueOfPrimitiveProp(
-              p: WithoutSheetInstance<PropAddress>,
+              p: WithoutSheetInstance<PropAddress> & {
+                sequenceVariant?: SequenceVariantId
+              },
             ) {
-              const existingStaticOverrides =
+              const sheetState =
                 stateEditors.coreByProject.historic.sheetsById._ensure(p)
-                  .staticOverrides.byObject[p.objectKey]
+              const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+              const encodedPropPath = encodePathToProp(p.pathToProp)
+
+              unblockInheritedSequencePropOnVariantInSheet(
+                sheetState,
+                variantId,
+                p.objectKey,
+                encodedPropPath,
+              )
+
+              const byObject = ensureVariantStaticOverridesByObjectInSheet(
+                sheetState,
+                variantId,
+              )
+              const existingStaticOverrides = byObject[p.objectKey]
 
               if (!existingStaticOverrides) return
 

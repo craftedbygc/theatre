@@ -23,6 +23,8 @@ import TheatreSheetObject from './TheatreSheetObject'
 import type {Interpolator, PropTypeConfig} from '@theatre/core/propTypes'
 import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
 import type {ILogger, IUtilContext} from '@theatre/shared/logger'
+import {pointerToSequenceTrackData} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import {onChange} from '@theatre/core/coreExports'
 
 /**
@@ -108,10 +110,9 @@ export default class SheetObject implements PointerToPrismProvider {
          * recalculations are cheap.
          *
          * Question: What about object.initialValue which _could_ change on every frame, but isn't layerd on last?
-         * Answer: initialValue is seldom used (it's only used in `@theatre/r3f` as far as we know). So this won't
+         * Answer: initialValue is seldom used. So this won't
          * affect the majority of use cases. And in case it _is_ used, it's better for us to implement an alternative
-         * to `object.getValues()` that does not layer initialValue (and also skips defaultValue too). This is discussed
-         * in issue [P-208](https://linear.app/theatre/issue/P-208/use-overrides-rather-than-final-values-in-r3f).
+         * to `object.getValues()` that does not layer initialValue (and also skips defaultValue too).
          */
 
         /**
@@ -171,7 +172,8 @@ export default class SheetObject implements PointerToPrismProvider {
          * The fourth layer are the (historic) static values. Since these are (currently) commnon to all instances
          * of the same SheetObject, we can read it from the template.
          */
-        const statics = val(this.template.getStaticValues())
+        const activeVariant = val(this.sheet.effectiveActiveSequenceVariantD)
+        const statics = val(this.template.getStaticValues(activeVariant))
 
         // Similar to above, we need a separate but stable WeakMap to cache the result of merging the static values
         const withStaticsCache = prism.memo(
@@ -274,10 +276,12 @@ export default class SheetObject implements PointerToPrismProvider {
    */
   getSequencedValues(): Prism<Pointer<SheetObjectPropsValue>> {
     return prism(() => {
+      const activeVariant = val(this.sheet.effectiveActiveSequenceVariantD)
+
       const tracksToProcessD = prism.memo(
         'tracksToProcess',
-        () => this.template.getArrayOfValidSequenceTracks(),
-        [],
+        () => this.template.getArrayOfValidSequenceTracks(activeVariant),
+        [activeVariant],
       )
 
       const tracksToProcess = val(tracksToProcessD)
@@ -289,8 +293,8 @@ export default class SheetObject implements PointerToPrismProvider {
         () => {
           const untaps: Array<() => void> = []
 
-          for (const {trackId, pathToProp} of tracksToProcess) {
-            const pr = this._trackIdToPrism(trackId)
+          for (const {trackId, pathToProp, trackVariant} of tracksToProcess) {
+            const pr = this._trackIdToPrism(trackId, trackVariant)
             const propConfig = getPropConfigByPath(
               config,
               pathToProp,
@@ -353,12 +357,17 @@ export default class SheetObject implements PointerToPrismProvider {
 
   protected _trackIdToPrism(
     trackId: SequenceTrackId,
+    trackVariant: SequenceVariantId,
   ): Prism<InterpolationTriple | undefined> {
-    const trackP =
-      this.template.project.pointers.historic.sheetsById[this.address.sheetId]
-        .sequence.tracksByObject[this.address.objectKey].trackData[trackId]
+    const activeVariant = val(this.sheet.effectiveActiveSequenceVariantD)
+    const trackP = pointerToSequenceTrackData(
+      this.template.project.pointers.historic.sheetsById[this.address.sheetId],
+      trackVariant,
+      this.address.objectKey,
+      trackId,
+    )
 
-    const timeD = this.sheet.getSequence().positionPrism
+    const timeD = this.sheet.getSequence(activeVariant).positionPrism
 
     return interpolationTripleAtPosition(this._internalUtilCtx, trackP, timeD)
   }

@@ -3,18 +3,20 @@ import {
   formatOutlineNamespacePathKey,
   getOutlineNamespaceItemKey,
   parseOutlineNamespacePath,
-  type NamespacedObjects,
 } from './outlinePanelUtils'
+import type {NamespacedObjects} from './outlinePanelUtils'
 import type {SheetId} from '@theatre/shared/utils/ids'
 
 describe('outlinePanelUtils', () => {
   test('parseOutlineNamespacePath normalizes slashes', () => {
-    expect(
-      parseOutlineNamespacePath('Folder/Subfolder', 'test'),
-    ).toEqual(['Folder', 'Subfolder'])
-    expect(
-      parseOutlineNamespacePath('Folder / Subfolder', 'test'),
-    ).toEqual(['Folder', 'Subfolder'])
+    expect(parseOutlineNamespacePath('Folder/Subfolder', 'test')).toEqual([
+      'Folder',
+      'Subfolder',
+    ])
+    expect(parseOutlineNamespacePath('Folder / Subfolder', 'test')).toEqual([
+      'Folder',
+      'Subfolder',
+    ])
   })
 
   test('formatOutlineNamespacePathKey uses Theatre path format', () => {

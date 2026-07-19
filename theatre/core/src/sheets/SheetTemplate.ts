@@ -19,6 +19,13 @@ import type {
 } from '@theatre/shared/utils/ids'
 import type {StrictRecord} from '@theatre/shared/utils/types'
 import type {OutlineNamespaceConfig} from '@theatre/shared/utils/outlineNamespaces'
+import type {
+  SequenceVariantId,
+} from '@theatre/core/sequences/sequenceVariants'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  validateSequenceVariantsOrThrow,
+} from '@theatre/core/sequences/sequenceVariants'
 
 type SheetTemplateObjectTemplateMap = StrictRecord<
   ObjectAddressKey,
@@ -39,6 +46,8 @@ export default class SheetTemplate {
     string,
     OutlineNamespaceConfig
   > = {}
+
+  private _sequenceVariants: SequenceVariantId[] = [DEFAULT_SEQUENCE_VARIANT]
 
   constructor(readonly project: Project, sheetId: SheetId) {
     this.address = {...project.address, sheetId}
@@ -94,5 +103,16 @@ export default class SheetTemplate {
 
   getPendingOutlineNamespaces(): StrictRecord<string, OutlineNamespaceConfig> {
     return this._pendingOutlineNamespaces
+  }
+
+  getSequenceVariants(): SequenceVariantId[] {
+    return this._sequenceVariants
+  }
+
+  declareSequenceVariants(variants: SequenceVariantId[]): void {
+    this._sequenceVariants = validateSequenceVariantsOrThrow(
+      variants,
+      'sheet.declareSequenceVariants',
+    )
   }
 }

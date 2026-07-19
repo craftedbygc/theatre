@@ -13,6 +13,7 @@ import HorizontallyScrollableArea from '@theatre/studio/panels/SequenceEditorPan
 import PrimitivePropGraph from './PrimitivePropGraph'
 import FrameGrid from '@theatre/studio/panels/SequenceEditorPanel/FrameGrid/FrameGrid'
 import {transparentize} from 'polished'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 
 export const graphEditorColors = {
   '1': {iconColor: '#b98b08'},
@@ -64,7 +65,9 @@ const GraphEditor: React.FC<{
         const sheetObject = sheet.getObject(objectKey)
         if (!sheetObject) continue
         const validSequenceTracks = val(
-          sheetObject.template.getMapOfValidSequenceTracks_forStudio(),
+          sheetObject.template.getMapOfValidSequenceTracks_forStudio(
+            getStudioActiveSequenceVariant(sheetObject.sheet.address),
+          ),
         )
         for (const [encodedPathToProp, graphEditorColor] of Object.entries(
           props!,

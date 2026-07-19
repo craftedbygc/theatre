@@ -19,6 +19,7 @@ import type {
 } from '@theatre/core/propTypes/internals'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import type {ObjectAddressKey} from '@theatre/shared/utils/ids'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import {notify} from '@theatre/shared/notify'
 
 export type SheetObjectPropTypeConfig =
@@ -168,9 +169,39 @@ export interface ISheet {
   ): void
 
   /**
-   * The Sequence of this Sheet
+   * The Sequence of this Sheet (uses the currently active sequence variant)
    */
   readonly sequence: ISequence
+
+  /**
+   * Declares the sequence variants available on this sheet. Each variant has its own
+   * independent sequence data, allowing the same properties to be animated differently
+   * per variant (e.g. mobile vs desktop).
+   *
+   * The `"default"` variant is always required and is included automatically if omitted.
+   *
+   * @param variants - An array of variant names (each at least 3 characters long)
+   *
+   * @example
+   * ```ts
+   * const sheet = project.sheet('Scene')
+   * sheet.declareSequenceVariants(['default', 'mobile', 'desktop'])
+   * sheet.setActiveSequenceVariant('mobile')
+   * ```
+   */
+  declareSequenceVariants(variants: SequenceVariantId[]): void
+
+  /**
+   * Sets which sequence variant is currently active. The active variant determines
+   * which sequence's keyframes are used when computing prop values, and which sequence
+   * `sheet.sequence` refers to.
+   */
+  setActiveSequenceVariant(variant: SequenceVariantId): void
+
+  /**
+   * Returns the currently active sequence variant name.
+   */
+  getActiveSequenceVariant(): SequenceVariantId
 }
 
 const weakMapOfUnsanitizedProps = new WeakMap<
@@ -261,6 +292,18 @@ export default class TheatreSheet implements ISheet {
 
   get sequence(): TheatreSequence {
     return privateAPI(this).getSequence().publicApi
+  }
+
+  declareSequenceVariants(variants: SequenceVariantId[]): void {
+    privateAPI(this).template.declareSequenceVariants(variants)
+  }
+
+  setActiveSequenceVariant(variant: SequenceVariantId): void {
+    privateAPI(this).setActiveSequenceVariant(variant)
+  }
+
+  getActiveSequenceVariant(): SequenceVariantId {
+    return privateAPI(this).getActiveSequenceVariant()
   }
 
   get project(): IProject {

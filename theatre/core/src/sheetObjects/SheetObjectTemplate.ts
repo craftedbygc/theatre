@@ -8,6 +8,7 @@ import type {
 import {emptyArray} from '@theatre/shared/utils'
 import type {
   PathToProp,
+  PathToProp_Encoded,
   SheetObjectAddress,
   WithoutSheetInstance,
 } from '@theatre/shared/utils/addresses'
@@ -34,6 +35,14 @@ import {
 import getOrderingOfPropTypeConfig from './getOrderingOfPropTypeConfig'
 import type {SheetState_Historic} from '@theatre/core/projects/store/types/SheetState_Historic'
 import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  getEffectiveStaticOverrideForObject,
+  mergeSequenceTrackMaps,
+  valUnsequencedPropPathsForObject,
+  valTrackIdByPropPathForObject,
+} from '@theatre/core/sequences/sequenceVariants'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import {cloneDeep, unset} from 'lodash-es'
 
 function isObjectEmpty(obj: unknown): boolean {
@@ -166,11 +175,20 @@ export default class SheetObjectTemplate {
 
   /**
    * Returns values that are set statically (ie, not sequenced, and not defaults)
+   * for the given variant. Non-default variants inherit from the default variant.
    */
-  getStaticValues(): Prism<SerializableMap> {
-    return this._cache.get('getStaticValues', () =>
+  getStaticValues(
+    sequenceVariant: SequenceVariantId = DEFAULT_SEQUENCE_VARIANT,
+  ): Prism<SerializableMap> {
+    return this._cache.get(`getStaticValues:${sequenceVariant}`, () =>
       prism(() => {
-        const json = val(this.pointerToStaticOverrides) ?? {}
+        const sheetState = val(this.pointerToSheetState)
+        const json =
+          getEffectiveStaticOverrideForObject(
+            sheetState,
+            sequenceVariant,
+            this.address.objectKey,
+          ) ?? {}
 
         const config = val(this.configPointer)
         const deserialized = config.deserializeAndSanitize(json) || {}
@@ -200,66 +218,121 @@ export default class SheetObjectTemplate {
    *
    * Returns an array.
    */
-  getArrayOfValidSequenceTracks(): Prism<
-    Array<{pathToProp: PathToProp; trackId: SequenceTrackId}>
+  getArrayOfValidSequenceTracks(sequenceVariant: SequenceVariantId): Prism<
+    Array<{
+      pathToProp: PathToProp
+      trackId: SequenceTrackId
+      trackVariant: SequenceVariantId
+    }>
   > {
-    return this._cache.get('getArrayOfValidSequenceTracks', () =>
-      prism((): Array<{pathToProp: PathToProp; trackId: SequenceTrackId}> => {
-        const pointerToSheetState =
-          this.project.pointers.historic.sheetsById[this.address.sheetId]
+    return this._cache.get(
+      `getArrayOfValidSequenceTracks:${sequenceVariant}`,
+      () =>
+        prism(
+          (): Array<{
+            pathToProp: PathToProp
+            trackId: SequenceTrackId
+            trackVariant: SequenceVariantId
+          }> => {
+            const pointerToSheetState =
+              this.project.pointers.historic.sheetsById[this.address.sheetId]
 
-        const trackIdByPropPath = val(
-          pointerToSheetState.sequence.tracksByObject[this.address.objectKey]
-            .trackIdByPropPath,
-        )
+            // Re-subscribe when variant overrides change (copies/clears per-variant tracks).
+            val(pointerToSheetState.variantObjectOverrides)
 
-        if (!trackIdByPropPath) return emptyArray as $IntentionalAny
+            const defaultTrackIdByPropPath = valTrackIdByPropPathForObject(
+              pointerToSheetState,
+              DEFAULT_SEQUENCE_VARIANT,
+              this.address.objectKey,
+            )
 
-        const arrayOfIds: Array<{
-          pathToProp: PathToProp
-          trackId: SequenceTrackId
-        }> = []
+            const variantTrackIdByPropPath =
+              sequenceVariant === DEFAULT_SEQUENCE_VARIANT
+                ? undefined
+                : valTrackIdByPropPathForObject(
+                    pointerToSheetState,
+                    sequenceVariant,
+                    this.address.objectKey,
+                  )
 
-        if (!trackIdByPropPath) return emptyArray as $IntentionalAny
+            const mergedTrackMap = mergeSequenceTrackMaps(
+              defaultTrackIdByPropPath,
+              variantTrackIdByPropPath,
+              sequenceVariant,
+            )
 
-        const objectConfig = val(this.configPointer)
+            const unsequencedPropPaths =
+              sequenceVariant === DEFAULT_SEQUENCE_VARIANT
+                ? undefined
+                : valUnsequencedPropPathsForObject(
+                    pointerToSheetState,
+                    sequenceVariant,
+                    this.address.objectKey,
+                  )
+            const unsequencedPropPathSet = unsequencedPropPaths
+              ? new Set(unsequencedPropPaths)
+              : undefined
 
-        const _entries = Object.entries(trackIdByPropPath)
-        for (const [pathToPropInString, trackId] of _entries) {
-          const pathToProp = parsePathToProp(pathToPropInString)
-          if (!pathToProp) continue
+            if (Object.keys(mergedTrackMap).length === 0) {
+              return emptyArray as $IntentionalAny
+            }
 
-          const propConfig = getPropConfigByPath(objectConfig, pathToProp)
+            const arrayOfIds: Array<{
+              pathToProp: PathToProp
+              trackId: SequenceTrackId
+              trackVariant: SequenceVariantId
+            }> = []
 
-          const isSequencable = propConfig && isPropConfSequencable(propConfig)
+            const objectConfig = val(this.configPointer)
 
-          if (!isSequencable) continue
+            for (const [pathToPropInString, effectiveTrack] of Object.entries(
+              mergedTrackMap,
+            )) {
+              if (!effectiveTrack) continue
+              if (
+                unsequencedPropPathSet?.has(
+                  pathToPropInString as PathToProp_Encoded,
+                )
+              ) {
+                continue
+              }
+              const {trackId, trackVariant} = effectiveTrack
+              const pathToProp = parsePathToProp(pathToPropInString)
+              if (!pathToProp) continue
 
-          arrayOfIds.push({pathToProp, trackId: trackId!})
-        }
+              const propConfig = getPropConfigByPath(objectConfig, pathToProp)
 
-        const mapping = getOrderingOfPropTypeConfig(objectConfig)
+              const isSequencable =
+                propConfig && isPropConfSequencable(propConfig)
 
-        arrayOfIds.sort((a, b) => {
-          const pathToPropA = a.pathToProp
-          const pathToPropB = b.pathToProp
+              if (!isSequencable) continue
 
-          const indexA = mapping.get(JSON.stringify(pathToPropA))!
-          const indexB = mapping.get(JSON.stringify(pathToPropB))!
+              arrayOfIds.push({pathToProp, trackId, trackVariant})
+            }
 
-          if (indexA > indexB) {
-            return 1
-          }
+            const mapping = getOrderingOfPropTypeConfig(objectConfig)
 
-          return -1
-        })
+            arrayOfIds.sort((a, b) => {
+              const pathToPropA = a.pathToProp
+              const pathToPropB = b.pathToProp
 
-        if (arrayOfIds.length === 0) {
-          return emptyArray as $IntentionalAny
-        } else {
-          return arrayOfIds
-        }
-      }),
+              const indexA = mapping.get(JSON.stringify(pathToPropA))!
+              const indexB = mapping.get(JSON.stringify(pathToPropB))!
+
+              if (indexA > indexB) {
+                return 1
+              }
+
+              return -1
+            })
+
+            if (arrayOfIds.length === 0) {
+              return emptyArray as $IntentionalAny
+            } else {
+              return arrayOfIds
+            }
+          },
+        ),
     )
   }
 
@@ -271,56 +344,72 @@ export default class SheetObjectTemplate {
    *
    * Not available in core.
    */
-  getMapOfValidSequenceTracks_forStudio(): Prism<IPropPathToTrackIdTree> {
-    return this._cache.get('getMapOfValidSequenceTracks_forStudio', () =>
-      prism(() => {
-        const arr = val(this.getArrayOfValidSequenceTracks())
-        let map = {}
+  getMapOfValidSequenceTracks_forStudio(
+    sequenceVariant: SequenceVariantId,
+  ): Prism<IPropPathToTrackIdTree> {
+    return this._cache.get(
+      `getMapOfValidSequenceTracks_forStudio:${sequenceVariant}`,
+      () =>
+        prism(() => {
+          const arr = val(this.getArrayOfValidSequenceTracks(sequenceVariant))
+          let map = {}
 
-        for (const {pathToProp, trackId} of arr) {
-          set(map, pathToProp, trackId)
-        }
+          for (const {pathToProp, trackId} of arr) {
+            set(map, pathToProp, trackId)
+          }
 
-        return map
-      }),
+          return map
+        }),
     )
+  }
+
+  getSequenceVariantOwningTrack(
+    trackId: SequenceTrackId,
+    activeVariant: SequenceVariantId,
+  ): SequenceVariantId | undefined {
+    const tracks = this.getArrayOfValidSequenceTracks(activeVariant).getValue()
+    return tracks.find((t) => t.trackId === trackId)?.trackVariant
   }
 
   /**
    * @returns The static overrides that are not sequenced. Returns undefined if there are no static overrides,
    * or if all those static overrides are sequenced.
    */
-  getStaticButNotSequencedOverrides(): Prism<SerializableMap | undefined> {
-    return this._cache.get('getStaticButNotSequencedOverrides', () =>
-      prism(() => {
-        const staticOverrides = val(this.getStaticValues())
-        const arrayOfValidSequenceTracks = val(
-          this.getArrayOfValidSequenceTracks(),
-        )
+  getStaticButNotSequencedOverrides(
+    sequenceVariant: SequenceVariantId,
+  ): Prism<SerializableMap | undefined> {
+    return this._cache.get(
+      `getStaticButNotSequencedOverrides:${sequenceVariant}`,
+      () =>
+        prism(() => {
+          const staticOverrides = val(this.getStaticValues(sequenceVariant))
+          const arrayOfValidSequenceTracks = val(
+            this.getArrayOfValidSequenceTracks(sequenceVariant),
+          )
 
-        const staticButNotSequencedOverrides = cloneDeep(staticOverrides)
+          const staticButNotSequencedOverrides = cloneDeep(staticOverrides)
 
-        for (const {pathToProp} of arrayOfValidSequenceTracks) {
-          unset(staticButNotSequencedOverrides, pathToProp)
-          // also unset the parent if it's empty, and so on
-          let parentPath = pathToProp.slice(0, -1)
-          while (parentPath.length > 0) {
-            const parentValue = getDeep(
-              staticButNotSequencedOverrides,
-              parentPath,
-            )
-            if (!isObjectEmpty(parentValue)) break
-            unset(staticButNotSequencedOverrides, parentPath)
-            parentPath = parentPath.slice(0, -1)
+          for (const {pathToProp} of arrayOfValidSequenceTracks) {
+            unset(staticButNotSequencedOverrides, pathToProp)
+            // also unset the parent if it's empty, and so on
+            let parentPath = pathToProp.slice(0, -1)
+            while (parentPath.length > 0) {
+              const parentValue = getDeep(
+                staticButNotSequencedOverrides,
+                parentPath,
+              )
+              if (!isObjectEmpty(parentValue)) break
+              unset(staticButNotSequencedOverrides, parentPath)
+              parentPath = parentPath.slice(0, -1)
+            }
           }
-        }
 
-        if (isObjectEmpty(staticButNotSequencedOverrides)) {
-          return undefined
-        } else {
-          return staticButNotSequencedOverrides
-        }
-      }),
+          if (isObjectEmpty(staticButNotSequencedOverrides)) {
+            return undefined
+          } else {
+            return staticButNotSequencedOverrides
+          }
+        }),
     )
   }
 

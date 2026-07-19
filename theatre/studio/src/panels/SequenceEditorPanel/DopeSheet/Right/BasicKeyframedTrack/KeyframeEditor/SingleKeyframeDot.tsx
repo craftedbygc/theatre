@@ -27,6 +27,12 @@ import {useKeyframeInlineEditorPopover} from './useSingleKeyframeInlineEditorPop
 import usePresence, {
   PresenceFlag,
 } from '@theatre/studio/uiComponents/usePresence'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+  getStudioTrackSequenceVariant,
+} from '@theatre/studio/utils/activeSequenceVariant'
+import {valTracksByObjectForSheetVariant} from '@theatre/core/sequences/sequenceVariants'
 
 export const DOT_SIZE_PX = 6
 const DOT_HOVER_SIZE_PX = DOT_SIZE_PX + 2
@@ -210,6 +216,10 @@ function useSingleKeyframeContextMenu(
                     ...props.leaf.sheetObject.address,
                     keyframeIds: [props.keyframe.id],
                     trackId: props.leaf.trackId,
+                    sequenceVariant: getStudioTrackSequenceVariant(
+                      props.leaf.sheetObject,
+                      props.leaf.trackId,
+                    ),
                   },
                 )
               })
@@ -247,12 +257,18 @@ function useDragForSingleKeyframeDot(
       onDragStart(event) {
         const props = propsRef.current
 
-        const tracksByObject = val(
+        const sheetStatePointer =
           getStudio()!.atomP.historic.coreByProject[
             props.leaf.sheetObject.address.projectId
-          ].sheetsById[props.leaf.sheetObject.address.sheetId].sequence
-            .tracksByObject,
-        )!
+          ].sheetsById[props.leaf.sheetObject.address.sheetId]
+
+        const tracksByObject =
+          valTracksByObjectForSheetVariant(
+            sheetStatePointer,
+            getStudioActiveSequenceVariant(
+              props.leaf.sheetObject.sheet.address,
+            ),
+          ) ?? {}
 
         const snapPositions = collectKeyframeSnapPositions(
           tracksByObject,
@@ -335,9 +351,13 @@ function useDragForSingleKeyframeDot(
                   ...propsAtStartOfDrag.leaf.sheetObject.address,
                   trackId: propsAtStartOfDrag.leaf.trackId,
                   keyframes: [{...original, position: newPosition}],
-                  snappingFunction: val(
-                    propsAtStartOfDrag.layoutP.sheet,
-                  ).getSequence().closestGridPosition,
+                  snappingFunction: getStudioSequence(
+                    val(propsAtStartOfDrag.layoutP.sheet),
+                  ).closestGridPosition,
+                  sequenceVariant: getStudioTrackSequenceVariant(
+                    propsAtStartOfDrag.leaf.sheetObject,
+                    propsAtStartOfDrag.leaf.trackId,
+                  ),
                 },
               )
             })

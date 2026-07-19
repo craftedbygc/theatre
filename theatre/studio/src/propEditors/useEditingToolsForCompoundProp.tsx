@@ -27,6 +27,12 @@ import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
 import {getNearbyKeyframesOfTrack} from './getNearbyKeyframesOfTrack'
 import type {KeyframeWithTrack} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
 import {emptyObject} from '@theatre/shared/utils'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
+// eslint-disable-next-line no-restricted-syntax
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 
 interface CommonStuff {
   beingScrubbed: boolean
@@ -98,8 +104,10 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
       controlIndicators: <></>,
     }
 
+    const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
+
     const validSequencedTracks = val(
-      obj.template.getMapOfValidSequenceTracks_forStudio(),
+      obj.template.getMapOfValidSequenceTracks_forStudio(activeVariant),
     )
 
     const possibleSequenceTrackIds = getDeep(
@@ -113,7 +121,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
     const listOfDescendantTrackIds: SequenceTrackId[] = []
 
     const allStaticOverrides = val(
-      obj.template.getStaticButNotSequencedOverrides(),
+      obj.template.getStaticButNotSequencedOverrides(activeVariant),
     )
     const staticOverrides = getDeep(
       allStaticOverrides ?? emptyObject,
@@ -141,8 +149,20 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
       contextMenuItems.push({
         label: 'Reset all to default',
         callback: () => {
-          getStudio()!.transaction(({unset}) => {
-            unset(pointerToProp)
+          getStudio()!.transaction(({stateEditors}) => {
+            for (const {path: subPath, conf} of iteratePropType(
+              propConfig,
+              [],
+            )) {
+              if (isPropConfigComposite(conf)) continue
+              stateEditors.coreByProject.historic.sheetsById.sequence.resetPrimitivePropOnVariant(
+                {
+                  ...obj.address,
+                  pathToProp: [...pathToProp, ...subPath],
+                  sequenceVariant: activeVariant,
+                },
+              )
+            }
           })
         },
       })
@@ -168,6 +188,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
                 {
                   ...propAddress,
                   value: obj.getValueByPointer(pointerToSub as $IntentionalAny),
+                  sequenceVariant: activeVariant,
                 },
               )
             }
@@ -192,7 +213,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
               const propAddress = {...obj.address, pathToProp: path}
 
               stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
-                propAddress,
+                {...propAddress, sequenceVariant: activeVariant},
                 propConfig,
               )
             }
@@ -254,8 +275,9 @@ function ControlIndicators({
 }) {
   return usePrism(() => {
     const pathToProp = getPointerParts(pointerToProp).path
+    const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
 
-    const sequencePosition = val(obj.sheet.getSequence().positionPrism)
+    const sequencePosition = val(getStudioSequence(obj.sheet).positionPrism)
 
     /*
     2/10 perf concern:
@@ -265,13 +287,22 @@ function ControlIndicators({
     it's unlikely that this optimization would matter.
     */
     const nearbyKeyframesInEachTrack = listOfDescendantTrackIds
-      .map((trackId) => ({
-        trackId,
-        track: val(
-          obj.template.project.pointers.historic.sheetsById[obj.address.sheetId]
-            .sequence.tracksByObject[obj.address.objectKey].trackData[trackId],
-        ),
-      }))
+      .map((trackId) => {
+        const trackVariant =
+          obj.template.getSequenceVariantOwningTrack(trackId, activeVariant) ??
+          activeVariant
+        return {
+          trackId,
+          track: getSequenceStateFromSheet(
+            val(
+              obj.template.project.pointers.historic.sheetsById[
+                obj.address.sheetId
+              ],
+            ),
+            trackVariant,
+          )?.tracksByObject[obj.address.objectKey]?.trackData[trackId],
+        }
+      })
       .filter(({track}) => !!track)
       .map((s) => ({
         ...s,
@@ -365,7 +396,7 @@ function ControlIndicators({
                   closestPrev.kf.position,
                 ),
               jump: () => {
-                obj.sheet.getSequence().position = closestPrev.kf.position
+                getStudioSequence(obj.sheet).position = closestPrev.kf.position
               },
             }
           : undefined,
@@ -380,7 +411,7 @@ function ControlIndicators({
                   closestNext.kf.position,
                 ),
               jump: () => {
-                obj.sheet.getSequence().position = closestNext.kf.position
+                getStudioSequence(obj.sheet).position = closestNext.kf.position
               },
             }
           : undefined,

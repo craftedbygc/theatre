@@ -9,6 +9,7 @@ import React from 'react'
 import {val} from '@theatre/dataverse'
 import type {Pointer} from '@theatre/dataverse'
 import clamp from 'lodash-es/clamp'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const greaterThanOrEqualToZero = (v: number) => isFinite(v) && v >= 0
 
@@ -35,7 +36,7 @@ const PlayheadPositionPopover: React.FC<{
   onRequestClose: (reason: string) => void
 }> = ({layoutP, onRequestClose}) => {
   const sheet = val(layoutP.sheet)
-  const sequence = sheet.getSequence()
+  const sequence = getStudioSequence(sheet)
 
   const fns = useMemo(() => {
     let tempPosition: number | undefined
@@ -72,7 +73,7 @@ const PlayheadPositionPopover: React.FC<{
   }, [])
 
   return usePrism(() => {
-    const sequence = sheet.getSequence()
+    const sequence = getStudioSequence(sheet)
 
     const value = Number(val(sequence.pointer.position).toFixed(3))
 

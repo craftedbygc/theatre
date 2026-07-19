@@ -37,7 +37,7 @@ let lastDriverId = 0
  * `rafDriver`s allow you to control when and how often computations in Theatre tick forward. (raf stands for [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)).
  * The default `rafDriver` in Theatre creates a `raf` loop and ticks forward on each frame. You can create your own `rafDriver`, which enables the following use-cases:
  *
- * 1. When using Theatre.js alongside other animation libs (`@react-three/fiber`/`gsap`/`lenis`/`etc`), you'd want all animation libs to use a single `raf` loop to keep the libraries in sync and also to get better performance.
+ * 1. When using Theatre.js alongside other animation libs (`gsap`/`lenis`/`etc`), you'd want all animation libs to use a single `raf` loop to keep the libraries in sync and also to get better performance.
  * 2. In XR sessions, you'd want Theatre to tick forward using [`xr.requestAnimationFrame()`](https://developer.mozilla.org/en-US/docs/Web/API/XRSession/requestAnimationFrame).
  * 3. In some advanced cases, you'd just want to manually tick forward (many ticks per frame, or skipping many frames, etc). This is useful for recording an animation, rendering to a file, testing an animation, running benchmarks, etc.
  *

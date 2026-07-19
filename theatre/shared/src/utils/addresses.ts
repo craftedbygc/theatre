@@ -114,7 +114,8 @@ export interface PropAddress extends SheetObjectAddress {
 /**
  * Represents the address of a certain sequence of a sheet.
  *
- * Since currently sheets are single-sequence only, `sequenceName` is always `'default'` for now.
+ * Since sheets can have multiple sequence variants, `sequenceName` identifies
+ * which variant's sequence is being addressed.
  */
 export interface SequenceAddress extends SheetAddress {
   sequenceName: string

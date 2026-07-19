@@ -27,6 +27,7 @@ import BasePanel, {usePanel} from '@theatre/studio/panels/BasePanel/BasePanel'
 import PanelResizeHandle from '@theatre/studio/panels/BasePanel/PanelResizeHandle'
 import type {UIPanelId} from '@theatre/shared/utils/ids'
 import type {PanelPosition} from '@theatre/studio/store/types'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 
 const headerHeight = `32px`
 
@@ -161,6 +162,7 @@ const DetailPanelContent: React.FC<{}> = () => {
     const obj = selection.find(isSheetObject)
 
     if (obj) {
+      const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
       return (
         <Container
           data-testid="DetailPanel-Object"
@@ -177,14 +179,12 @@ const DetailPanelContent: React.FC<{}> = () => {
           <PanelResizeHandle which="Left" />
           <Header>
             <Title
-              title={`${obj.sheet.address.sheetId}: ${obj.sheet.address.sheetInstanceId} > ${obj.address.objectKey}`}
+              title={`${obj.sheet.address.sheetId}: ${activeVariant} > ${obj.address.objectKey}`}
             >
               <TitleBar_Piece>{obj.sheet.address.sheetId} </TitleBar_Piece>
 
               <TitleBar_Punctuation>{':'}&nbsp;</TitleBar_Punctuation>
-              <TitleBar_Piece>
-                {obj.sheet.address.sheetInstanceId}{' '}
-              </TitleBar_Piece>
+              <TitleBar_Piece>{activeVariant} </TitleBar_Piece>
 
               <TitleBar_Punctuation>&nbsp;&rarr;&nbsp;</TitleBar_Punctuation>
               <TitleBar_Piece>{obj.address.objectKey}</TitleBar_Piece>

@@ -21,6 +21,7 @@ import {
 import useContextMenu from '@theatre/studio/uiComponents/simpleContextMenu/useContextMenu'
 import {commonRootOfPathsToProps} from '@theatre/shared/utils/addresses'
 import type {KeyframeWithPathToPropFromCommonRoot} from '@theatre/studio/store/types'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const POPOVER_MARGIN_PX = 5
 const EasingPopoverWrapper = styled(BasicPopover)`
@@ -146,7 +147,7 @@ function useDragKeyframe(
         }
 
         const propsAtStartOfDrag = props
-        const sequence = val(propsAtStartOfDrag.layoutP.sheet).getSequence()
+        const sequence = getStudioSequence(val(propsAtStartOfDrag.layoutP.sheet))
 
         const toUnitSpace = val(
           propsAtStartOfDrag.layoutP.scaledSpace.toUnitSpace,

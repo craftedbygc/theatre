@@ -8,11 +8,18 @@ import type {
 import TheatreSheet from '@theatre/core/sheets/TheatreSheet'
 import type {SheetAddress} from '@theatre/shared/utils/addresses'
 import {Atom, prism, val} from '@theatre/dataverse'
+import type {Prism} from '@theatre/dataverse'
 import type SheetTemplate from './SheetTemplate'
 import type {ObjectAddressKey, SheetInstanceId} from '@theatre/shared/utils/ids'
 import type {StrictRecord} from '@theatre/shared/utils/types'
 import type {ILogger} from '@theatre/shared/logger'
 import {isInteger} from 'lodash-es'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  getSequenceStateFromSheet,
+  validateSequenceVariantIdOrThrow,
+} from '@theatre/core/sequences/sequenceVariants'
 
 type SheetObjectMap = StrictRecord<ObjectAddressKey, SheetObject>
 
@@ -27,7 +34,20 @@ export type ObjectNativeObject = unknown
 
 export default class Sheet {
   private readonly _objects: Atom<SheetObjectMap> = new Atom<SheetObjectMap>({})
-  private _sequence: undefined | Sequence
+  private readonly _sequences: Record<string, Sequence> = {}
+  private readonly _activeSequenceVariant = new Atom<SequenceVariantId>(
+    DEFAULT_SEQUENCE_VARIANT,
+  )
+  /**
+   * When Studio is open, it sets this to control which variant is used for
+   * value resolution (preview). User code can still update `_activeSequenceVariant`
+   * via `setActiveSequenceVariant()` without affecting the Studio preview.
+   */
+  private readonly _studioPreviewVariantOverride = new Atom<
+    SequenceVariantId | undefined
+  >(undefined)
+  readonly activeSequenceVariantP = this._activeSequenceVariant.pointer
+  readonly effectiveActiveSequenceVariantD: Prism<SequenceVariantId>
   readonly address: SheetAddress
   readonly publicApi: TheatreSheet
   readonly project: Project
@@ -48,6 +68,14 @@ export default class Sheet {
     }
 
     this.publicApi = new TheatreSheet(this)
+
+    this.effectiveActiveSequenceVariantD = prism(() => {
+      const studioOverride = val(this._studioPreviewVariantOverride.pointer)
+      if (studioOverride !== undefined) {
+        return studioOverride
+      }
+      return val(this._activeSequenceVariant.pointer)
+    })
   }
 
   /**
@@ -87,32 +115,84 @@ export default class Sheet {
     })
   }
 
-  getSequence(): Sequence {
-    if (!this._sequence) {
+  getSequence(variant?: SequenceVariantId): Sequence {
+    const variantId =
+      variant ?? val(this._activeSequenceVariant.pointer)
+    if (!this._sequences[variantId]) {
       const lengthD = prism(() => {
-        const unsanitized = val(
-          this.project.pointers.historic.sheetsById[this.address.sheetId]
-            .sequence.length,
+        const sheetState = val(
+          this.project.pointers.historic.sheetsById[this.address.sheetId],
         )
+        const unsanitized = getSequenceStateFromSheet(
+          sheetState,
+          variantId,
+        )?.length
         return sanitizeSequenceLength(unsanitized)
       })
 
       const subUnitsPerUnitD = prism(() => {
-        const unsanitized = val(
-          this.project.pointers.historic.sheetsById[this.address.sheetId]
-            .sequence.subUnitsPerUnit,
+        const sheetState = val(
+          this.project.pointers.historic.sheetsById[this.address.sheetId],
         )
+        const unsanitized = getSequenceStateFromSheet(
+          sheetState,
+          variantId,
+        )?.subUnitsPerUnit
         return sanitizeSequenceSubUnitsPerUnit(unsanitized)
       })
 
-      this._sequence = new Sequence(
+      this._sequences[variantId] = new Sequence(
         this.template.project,
         this,
         lengthD,
         subUnitsPerUnitD,
+        variantId,
       )
     }
-    return this._sequence
+    return this._sequences[variantId]!
+  }
+
+  getActiveSequenceVariant(): SequenceVariantId {
+    return this._activeSequenceVariant.get()
+  }
+
+  setActiveSequenceVariant(variant: SequenceVariantId): void {
+    const variantId = validateSequenceVariantIdOrThrow(
+      variant,
+      'sheet.setActiveSequenceVariant',
+    )
+    const registeredVariants = this.template.getSequenceVariants()
+    if (!registeredVariants.includes(variantId)) {
+      throw new Error(
+        `Variant "${variantId}" is not registered on this sheet. ` +
+          `Registered variants: ${registeredVariants.join(', ')}. ` +
+          `Register variants via sheet.declareSequenceVariants([...]).`,
+      )
+    }
+    this._activeSequenceVariant.set(variantId)
+  }
+
+  setStudioPreviewVariantOverride(
+    variant: SequenceVariantId | undefined,
+  ): void {
+    if (variant === undefined) {
+      this._studioPreviewVariantOverride.set(undefined)
+      return
+    }
+
+    const variantId = validateSequenceVariantIdOrThrow(
+      variant,
+      'sheet.setStudioPreviewVariantOverride',
+    )
+    const registeredVariants = this.template.getSequenceVariants()
+    if (!registeredVariants.includes(variantId)) {
+      throw new Error(
+        `Variant "${variantId}" is not registered on this sheet. ` +
+          `Registered variants: ${registeredVariants.join(', ')}. ` +
+          `Register variants via sheet.declareSequenceVariants([...]).`,
+      )
+    }
+    this._studioPreviewVariantOverride.set(variantId)
   }
 }
 

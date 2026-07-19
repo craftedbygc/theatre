@@ -19,6 +19,15 @@ import {debounce} from 'lodash-es'
 import type {DebouncedFunc} from 'lodash-es'
 import type {IRafDriver} from '@theatre/core/rafDrivers'
 import {onChange} from '@theatre/core/coreExports'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
+
+export type SheetObjectValuesChangeMeta = {
+  /**
+   * The sequence variant whose values are being applied.
+   * This reflects the sheet's active sequence variant.
+   */
+  variant: SequenceVariantId
+}
 
 export interface ISheetObject<
   Props extends UnknownShorthandCompoundProps = UnknownShorthandCompoundProps,
@@ -81,16 +90,17 @@ export interface ISheetObject<
    * const obj = sheet.object("Box", {position: {x: 0, y: 0}})
    * const div = document.getElementById("box")
    *
-   * const unsubscribe = obj.onValuesChange((newValues) => {
+   * const unsubscribe = obj.onValuesChange((newValues, {variant}) => {
    *   div.style.left = newValues.position.x + 'px'
    *   div.style.top = newValues.position.y + 'px'
+   *   console.log('Active variant:', variant)
    * })
    *
    * // you can call unsubscribe() to stop listening to changes
    * ```
    */
   onValuesChange(
-    fn: (values: this['value']) => void,
+    fn: (values: this['value'], meta: SheetObjectValuesChangeMeta) => void,
     rafDriver?: IRafDriver,
   ): VoidFn
 
@@ -163,11 +173,30 @@ export default class TheatreSheetObject<
     })
   }
 
+  private _valuesWithVariantPrism(): Prism<{
+    values: PropsValue<Props>
+    variant: SequenceVariantId
+  }> {
+    return this._cache.get('_valuesWithVariantPrism', () => {
+      const sheetObject = privateAPI(this)
+      return prism(() => {
+        return {
+          values: val(sheetObject.getValues().getValue()) as $FixMe,
+          variant: val(sheetObject.sheet.effectiveActiveSequenceVariantD),
+        }
+      })
+    })
+  }
+
   onValuesChange(
-    fn: (values: this['value']) => void,
+    fn: (values: this['value'], meta: SheetObjectValuesChangeMeta) => void,
     rafDriver?: IRafDriver,
   ): VoidFn {
-    return onChange(this._valuesPrism(), fn, rafDriver)
+    return onChange(
+      this._valuesWithVariantPrism(),
+      ({values, variant}) => fn(values, {variant}),
+      rafDriver,
+    )
   }
 
   // internal: Make the deviration keepHot if directly read

@@ -1,4 +1,9 @@
+import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
 import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
 import useDrag from '@theatre/studio/uiComponents/useDrag'
 import useKeyDown from '@theatre/studio/uiComponents/useKeyDown'
@@ -237,12 +242,24 @@ namespace utils {
     },
     primitiveProp(logger, layout, leaf, bounds, selectionByObjectKey) {
       const {sheetObject, trackId} = leaf
-      const trackData = val(
+      const sheetState = val(
         getStudio().atomP.historic.coreByProject[sheetObject.address.projectId]
-          .sheetsById[sheetObject.address.sheetId].sequence.tracksByObject[
-          sheetObject.address.objectKey
-        ].trackData[trackId],
-      )!
+          .sheetsById[sheetObject.address.sheetId],
+      )
+      const activeVariant = getStudioActiveSequenceVariant(
+        sheetObject.sheet.address,
+      )
+      const trackVariant =
+        sheetObject.template.getSequenceVariantOwningTrack(
+          trackId,
+          activeVariant,
+        ) ?? activeVariant
+      const trackData = getSequenceStateFromSheet(
+        sheetState,
+        trackVariant,
+      )?.tracksByObject[sheetObject.address.objectKey]?.trackData[trackId]
+
+      if (!trackData) return
 
       if (
         bounds.v[0] >
@@ -341,6 +358,7 @@ namespace utils {
     )
 
     const sheet = layout.tree.sheet
+    const activeVariant = getStudioActiveSequenceVariant(sheet.address)
     return {
       type: 'DopeSheetSelection',
       byObjectKey: selectionByObjectKey,
@@ -385,10 +403,11 @@ namespace utils {
                           scale: 1,
                           origin: 0,
                           snappingFunction:
-                            sheet.getSequence().closestGridPosition,
+                            getStudioSequence(sheet).closestGridPosition,
                           objectKey,
                           projectId: origin.projectId,
                           sheetId: origin.sheetId,
+                          sequenceVariant: activeVariant,
                         })
                       }
                     }
@@ -418,6 +437,7 @@ namespace utils {
                 objectKey,
                 trackId,
                 keyframeIds: Object.keys(byKeyframeId),
+                sequenceVariant: activeVariant,
               })
             }
           }

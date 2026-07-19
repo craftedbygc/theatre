@@ -1,18 +1,14 @@
 import type Project from '@theatre/core/projects/Project'
-
+import type Sheet from '@theatre/core/sheets/Sheet'
+import getStudio from '@theatre/studio/getStudio'
+import {getOutlineSelection, getSheetOfSheetId} from '@theatre/studio/selectors'
 import {usePrism} from '@theatre/react'
 import {val} from '@theatre/dataverse'
-import React from 'react'
+import React, {useCallback} from 'react'
 import styled from 'styled-components'
-import {SheetInstanceItem} from './SheetInstanceItem'
-
-const Head = styled.div`
-  display: flex;
-`
-
-const Container = styled.li<{isSelected: boolean}>`
-  color: ${(props) => (props.isSelected ? 'white' : 'hsl(1, 1%, 80%)')};
-`
+import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
+import {VariantItem} from '@theatre/studio/panels/OutlinePanel/SheetsList/VariantItem'
+import {useCollapseStateInOutlinePanel} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
 
 const Body = styled.div``
 
@@ -24,20 +20,57 @@ export const SheetItem: React.FC<{
   return usePrism(() => {
     const template = val(project.sheetTemplatesP[sheetId])
     if (!template) return <></>
-    const allInstances = val(template.instancesP)
+
+    const sheet = getSheetOfSheetId(project, sheetId)
+    if (!sheet) return <></>
+
+    return <SheetItemContent depth={depth} sheet={sheet} />
+  }, [depth, sheetId, project])
+}
+
+const SheetItemContent: React.FC<{
+  depth: number
+  sheet: Sheet
+}> = ({sheet, depth}) => {
+  const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel(sheet)
+
+  const setSelectedSheet = useCallback(() => {
+    getStudio()!.transaction(({stateEditors}) => {
+      stateEditors.studio.historic.panels.outline.selection.set([sheet])
+    })
+  }, [sheet])
+
+  return usePrism(() => {
+    const selection = getOutlineSelection()
 
     return (
-      <>
-        {Object.entries(allInstances).map(([_, inst]) => {
-          return (
-            <SheetInstanceItem
-              key={inst.address.sheetInstanceId}
-              sheet={inst}
-              depth={depth}
+      <BaseItem
+        depth={depth}
+        select={setSelectedSheet}
+        setIsCollapsed={setCollapsed}
+        collapsed={collapsed}
+        selectionStatus={
+          selection.some((s) => s === sheet)
+            ? 'selected'
+            : selection.some(
+                (s) => s.type === 'Theatre_SheetObject' && s.sheet === sheet,
+              )
+            ? 'descendant-is-selected'
+            : 'not-selected'
+        }
+        label={sheet.address.sheetId}
+      >
+        <Body>
+          {sheet.template.getSequenceVariants().map((variant) => (
+            <VariantItem
+              key={`variant-${sheet.address.sheetId}-${variant}`}
+              depth={depth + 1}
+              sheet={sheet}
+              variant={variant}
             />
-          )
-        })}
-      </>
+          ))}
+        </Body>
+      </BaseItem>
     )
-  }, [depth, sheetId, project])
+  }, [depth, collapsed, sheet, setSelectedSheet])
 }

@@ -21,7 +21,33 @@ export interface SheetState_Historic {
   staticOverrides: {
     byObject: StrictRecord<ObjectAddressKey, SerializableMap>
   }
+  /**
+   * Per-variant static overrides. The `default` variant uses `staticOverrides.byObject`
+   * for backward compatibility. Non-default variants store only their own overrides here
+   * and inherit from `staticOverrides.byObject` at read time.
+   */
+  staticOverridesByVariant?: StrictRecord<
+    string,
+    {
+      byObject: StrictRecord<ObjectAddressKey, SerializableMap>
+    }
+  >
+  /**
+   * @deprecated Use `sequencesById` instead. Kept for backward compatibility with
+   * project states saved before sequence variants were introduced.
+   */
   sequence?: HistoricPositionalSequence
+  /**
+   * Each variant has its own sequence data (tracks, length, etc.), allowing the same
+   * sheet properties to be animated differently per variant (e.g. mobile vs desktop).
+   */
+  sequencesById?: StrictRecord<string, HistoricPositionalSequence>
+  /**
+   * Sheet objects explicitly opted into a non-default sequence variant for editing
+   * variant-specific overrides in the outline. All objects inherit default static
+   * and sequence data on every variant unless overridden here.
+   */
+  variantObjectOverrides?: StrictRecord<string, ObjectAddressKey[]>
 }
 
 // Question: What is this? The timeline position of a sequence?
@@ -52,6 +78,12 @@ export type HistoricPositionalSequence = {
       // Explicitly, this does not include prop paths for compound props (those
       // are sequenced by sequenecing their simple descendant props)
       trackIdByPropPath: StrictRecord<PathToProp_Encoded, SequenceTrackId>
+
+      /**
+       * Props on this variant that should not inherit default-variant sequences.
+       * Used when a prop is made static while inheriting from the default variant.
+       */
+      unsequencedPropPaths?: PathToProp_Encoded[]
 
       /**
        * A flat record of SequenceTrackId to TrackData. It's better

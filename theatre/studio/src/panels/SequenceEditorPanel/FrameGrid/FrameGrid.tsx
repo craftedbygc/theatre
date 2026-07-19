@@ -6,6 +6,7 @@ import React, {useLayoutEffect, useMemo, useRef, useState} from 'react'
 import styled from 'styled-components'
 import createGrid from './createGrid'
 import getStudio from '@theatre/studio/getStudio'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: absolute;
@@ -64,7 +65,7 @@ const FrameGrid: React.FC<{
     canvas!.height = height * ratio!
 
     const untap = prism(() => {
-      const sequence = val(layoutP.sheet).getSequence()
+      const sequence = getStudioSequence(val(layoutP.sheet))
       return {
         ctx,
         clippedSpaceRange: val(layoutP.clippedSpace.range),

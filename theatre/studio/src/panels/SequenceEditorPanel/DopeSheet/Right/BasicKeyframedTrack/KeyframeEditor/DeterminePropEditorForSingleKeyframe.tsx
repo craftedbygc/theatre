@@ -11,6 +11,7 @@ import type {
 import last from 'lodash-es/last'
 import {useTempTransactionEditingTools} from './useTempTransactionEditingTools'
 import {valueInProp} from '@theatre/shared/propTypes/utils'
+import {getStudioSequence, getStudioTrackSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 
 const SingleKeyframePropEditorContainer = styled.div`
   display: flex;
@@ -152,7 +153,8 @@ function useEditingToolsForKeyframeEditorPopover(
       ...obj.address,
       trackId: props.trackId,
       keyframes: [newKeyframe],
-      snappingFunction: obj.sheet.getSequence().closestGridPosition,
+      snappingFunction: getStudioSequence(obj.sheet).closestGridPosition,
+      sequenceVariant: getStudioTrackSequenceVariant(obj, props.trackId),
     })
   }, obj)
 }

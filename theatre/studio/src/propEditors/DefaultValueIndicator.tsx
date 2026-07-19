@@ -10,6 +10,7 @@ import {
   isPropConfigComposite,
   iteratePropType,
 } from '@theatre/shared/propTypes/utils'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 
 const theme = {
   defaultState: {
@@ -50,7 +51,6 @@ const DefaultIcon = styled.div`
   height: 5px;
   border-radius: 1px;
   transform: rotate(45deg);
-  /* border: 1px solid currentColor; */
   background-color: currentColor;
 `
 
@@ -62,6 +62,26 @@ const FilledIcon = styled.div`
   transform: rotate(45deg);
 `
 
+function sequenceProp(obj: SheetObject, propConfig: PropTypeConfig, pathToProp: PathToProp) {
+  const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
+
+  getStudio()!.transaction(({stateEditors}) => {
+    for (const {path, conf} of iteratePropType(propConfig, pathToProp)) {
+      if (isPropConfigComposite(conf)) continue
+      const propAddress = {
+        ...obj.address,
+        pathToProp: path,
+        sequenceVariant: activeVariant,
+      }
+
+      stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
+        propAddress,
+        propConfig,
+      )
+    }
+  })
+}
+
 const DefaultOrStaticValueIndicator: React.FC<{
   hasStaticOverride: boolean
   pathToProp: PathToProp
@@ -69,23 +89,11 @@ const DefaultOrStaticValueIndicator: React.FC<{
   propConfig: PropTypeConfig
 }> = (props) => {
   const {hasStaticOverride, obj, propConfig, pathToProp} = props
-  const sequenceCb = () => {
-    getStudio()!.transaction(({stateEditors}) => {
-      for (const {path, conf} of iteratePropType(propConfig, pathToProp)) {
-        if (isPropConfigComposite(conf)) continue
-        const propAddress = {...obj.address, pathToProp: path}
 
-        stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
-          propAddress,
-          propConfig,
-        )
-      }
-    })
-  }
   return (
     <Container
       hasStaticOverride={hasStaticOverride}
-      onClick={sequenceCb}
+      onClick={() => sequenceProp(obj, propConfig, pathToProp)}
       title="Sequence this prop"
     >
       {hasStaticOverride ? (

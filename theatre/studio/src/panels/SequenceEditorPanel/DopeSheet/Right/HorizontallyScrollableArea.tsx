@@ -13,6 +13,7 @@ import {useCssCursorLock} from '@theatre/studio/uiComponents/PointerEventsHandle
 import type {IRange} from '@theatre/shared/utils/types'
 import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
 import {snapToAll, snapToNone} from './KeyframeSnapTarget'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: absolute;
@@ -109,7 +110,7 @@ function useDragPlayheadHandlers(
 
         const setIsSeeking = val(layoutP.seeker.setIsSeeking)
 
-        const sequence = val(layoutP.sheet).getSequence()
+        const sequence = getStudioSequence(val(layoutP.sheet))
 
         sequence.position = initialPositionInUnitSpace
 
@@ -185,7 +186,7 @@ function useHandlePanAndZoom(
 
         // Set maximum scroll points based on the sequence length.
         // This is to avoid zooming out to infinity.
-        const sequenceLength = val(layoutP.sheet).getSequence().length
+        const sequenceLength = getStudioSequence(val(layoutP.sheet)).length
         const maxEnd = sequenceLength + sequenceLength * 0.25
 
         val(layoutP.clippedSpace.setRange)(
@@ -198,7 +199,7 @@ function useHandlePanAndZoom(
         event.preventDefault()
         event.stopPropagation()
 
-        const sequenceLength = val(layoutP.sheet).getSequence().length
+        const sequenceLength = getStudioSequence(val(layoutP.sheet)).length
         const oldRange = val(layoutP.clippedSpace.range)
         const windowSize = oldRange.end - oldRange.start
         const speed = windowSize / sequenceLength

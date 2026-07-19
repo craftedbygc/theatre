@@ -7,7 +7,12 @@ import type {
   SequenceTrackId,
   SheetId,
 } from '@theatre/shared/utils/ids'
+import {
+  getSequenceStateFromSheet,
+  getSequenceVariantOwningTrackInSheetState,
+} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 import type {DopeSheetSelection} from '@theatre/studio/panels/SequenceEditorPanel/layout/layout'
 import type {Keyframe} from '@theatre/core/projects/store/types/SheetState_Historic'
 import {
@@ -59,11 +64,23 @@ export function selectedKeyframeConnections(
 
     let ckfs: Array<KeyframeConnectionWithAddress> = []
 
+    const sequenceVariant = getStudioActiveSequenceVariant({projectId, sheetId})
+    const sheetState = val(
+      getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId],
+    )
+
     for (const {objectKey, trackId} of flatSelectionTrackIds(selection)) {
-      const track = val(
-        getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId]
-          .sequence.tracksByObject[objectKey].trackData[trackId],
-      )
+      const trackVariant =
+        getSequenceVariantOwningTrackInSheetState(
+          sheetState,
+          objectKey,
+          trackId,
+          sequenceVariant,
+        ) ?? sequenceVariant
+      const track = getSequenceStateFromSheet(
+        sheetState,
+        trackVariant,
+      )?.tracksByObject[objectKey]?.trackData[trackId]
 
       if (track) {
         ckfs = ckfs.concat(
@@ -158,10 +175,21 @@ export function keyframesWithPaths({
   trackId: SequenceTrackId
   keyframeIds: KeyframeId[]
 }): KeyframeWithPathToPropFromCommonRoot[] | null {
-  const tracksByObject = val(
-    getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId]
-      .sequence.tracksByObject[objectKey],
+  const sequenceVariant = getStudioActiveSequenceVariant({projectId, sheetId})
+  const sheetState = val(
+    getStudio().atomP.historic.coreByProject[projectId].sheetsById[sheetId],
   )
+  const trackVariant =
+    getSequenceVariantOwningTrackInSheetState(
+      sheetState,
+      objectKey,
+      trackId,
+      sequenceVariant,
+    ) ?? sequenceVariant
+  const tracksByObject = getSequenceStateFromSheet(
+    sheetState,
+    trackVariant,
+  )?.tracksByObject[objectKey]
   const track = tracksByObject?.trackData[trackId]
 
   if (!track) return null

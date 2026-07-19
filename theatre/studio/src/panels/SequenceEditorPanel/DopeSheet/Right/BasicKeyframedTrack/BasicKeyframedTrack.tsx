@@ -18,6 +18,10 @@ import KeyframeSnapTarget, {
   snapPositionsStateD,
 } from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
 import {createStudioSheetItemKey} from '@theatre/shared/utils/ids'
+import {
+  getStudioSequence,
+  getStudioTrackSequenceVariant,
+} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: relative;
@@ -65,11 +69,11 @@ const BasicKeyframedTrack: React.VFC<BasicKeyframedTracksProps> = React.memo(
     const snapPositionsState = useVal(snapPositionsStateD)
 
     const snapPositions =
-      snapPositionsState.mode === 'snapToSome'
+      (snapPositionsState.mode === 'snapToSome'
         ? snapPositionsState.positions[leaf.sheetObject.address.objectKey]?.[
             leaf.trackId
           ]
-        : [] ?? []
+        : undefined) ?? []
 
     const snapToAllKeyframes = snapPositionsState.mode === 'snapToAll'
 
@@ -165,7 +169,7 @@ function pasteKeyframesContextMenuItem(
     enabled: keyframes.length > 0,
     callback: () => {
       const sheet = val(props.layoutP.sheet)
-      const sequence = sheet.getSequence()
+      const sequence = getStudioSequence(sheet)
 
       const firstPath = keyframes[0]?.pathToProp
       const singleTrackKeyframes = keyframes
@@ -188,6 +192,10 @@ function pasteKeyframesContextMenuItem(
               value: keyframe.value,
               snappingFunction: sequence.closestGridPosition,
               type: keyframe.type,
+              sequenceVariant: getStudioTrackSequenceVariant(
+                props.leaf.sheetObject,
+                props.leaf.trackId,
+              ),
             },
           )
         }

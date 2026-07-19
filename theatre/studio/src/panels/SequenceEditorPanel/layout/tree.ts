@@ -18,6 +18,7 @@ import logger from '@theatre/shared/logger'
 import {titleBarHeight} from '@theatre/studio/panels/BasePanel/common'
 import type {Studio} from '@theatre/studio/Studio'
 import type {UnknownValidCompoundProps} from '@theatre/core/propTypes/internals'
+import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
 
 /**
  * Base "view model" for each row with common
@@ -114,6 +115,8 @@ export const calculateSequenceEditorTree = (
     studio.atomP.ahistoric.projects.stateByProjectId[sheet.address.projectId]
       .stateBySheetId[sheet.address.sheetId].sequence.collapsableItems
 
+  const activeSequenceVariant = getStudioActiveSequenceVariant(sheet.address)
+
   const isCollapsedP =
     collapsableItemSetP.byId[createStudioSheetItemKey.forSheet()].isCollapsed
   const isCollapsed = pointerToPrism(isCollapsedP).getValue() ?? false
@@ -155,7 +158,9 @@ export const calculateSequenceEditorTree = (
     shouldRender: boolean,
   ) {
     const trackSetups = val(
-      sheetObject.template.getMapOfValidSequenceTracks_forStudio(),
+      sheetObject.template.getMapOfValidSequenceTracks_forStudio(
+        activeSequenceVariant,
+      ),
     )
     const objectConfig = val(sheetObject.template.configPointer)
 

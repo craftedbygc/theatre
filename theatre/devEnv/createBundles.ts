@@ -32,9 +32,6 @@ export async function createBundles(watch: boolean) {
          * - `ToolbarIconButton`
          * - `IStudio['extend']({globalToolbar: {component}})`
          *
-         * These are further exposed by \@theatre/r3f which provides `<Wrapper />`
-         * as an API.
-         *
          * It's probably possible to bundle our own react version and somehow share it
          * with the plugins, but that's not urgent atm.
          */

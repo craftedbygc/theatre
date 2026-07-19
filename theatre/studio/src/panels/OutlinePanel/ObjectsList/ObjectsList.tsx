@@ -8,11 +8,13 @@ import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
 import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
 import {
   ensureNamespacePath,
-  type NamespacedObjects,
   parseOutlineNamespacePath,
   useCollapseStateInOutlinePanel,
 } from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import type {NamespacedObjects} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
+import {isObjectOverriddenInVariant} from '@theatre/studio/utils/variantObjectOverrides'
 
 export const Li = styled.li<{isSelected: boolean}>`
   color: ${(props) => (props.isSelected ? 'white' : 'hsl(1, 1%, 80%)')};
@@ -21,12 +23,19 @@ export const Li = styled.li<{isSelected: boolean}>`
 const ObjectsList: React.FC<{
   depth: number
   sheet: Sheet
-}> = ({sheet, depth}) => {
+  variant: SequenceVariantId
+}> = ({sheet, depth, variant}) => {
   return usePrism(() => {
     const objectsMap = val(sheet.objectsP)
-    const objects = Object.values(objectsMap).filter(
-      (a): a is SheetObject => a != null,
-    )
+    const objects = Object.values(objectsMap)
+      .filter((a): a is SheetObject => a != null)
+      .filter((object) =>
+        isObjectOverriddenInVariant(
+          sheet.address,
+          variant,
+          object.address.objectKey,
+        ),
+      )
 
     const rootObject: NamespacedObjects = new Map()
     objects.forEach((object) => {
@@ -56,9 +65,10 @@ const ObjectsList: React.FC<{
         visualIndentation={depth}
         path={[]}
         sheet={sheet}
+        variant={variant}
       />
     )
-  }, [sheet, depth])
+  }, [sheet, depth, variant])
 }
 
 function NamespaceTree(props: {
@@ -66,6 +76,7 @@ function NamespaceTree(props: {
   visualIndentation: number
   path: string[]
   sheet: Sheet
+  variant: SequenceVariantId
 }) {
   return (
     <>
@@ -79,6 +90,7 @@ function NamespaceTree(props: {
             visualIndentation={props.visualIndentation}
             path={props.path}
             sheet={props.sheet}
+            variant={props.variant}
           />
         )
       })}
@@ -93,6 +105,7 @@ function Namespace(props: {
   visualIndentation: number
   path: string[]
   sheet: Sheet
+  variant: SequenceVariantId
 }) {
   const {nested, label, object, sheet} = props
   const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel({
@@ -109,16 +122,16 @@ function Namespace(props: {
       key={'namespaceTree(' + label + ')'}
       visualIndentation={props.visualIndentation + 1}
       sheet={sheet}
+      variant={props.variant}
     />
   )
   const sameNameElt = object && (
     <ObjectItem
       depth={props.visualIndentation}
-      // key is useful for navigating react dev component tree
       key={'objectPath(' + object.address.objectKey + ')'}
-      // object entries should not allow this to be undefined
       sheetObject={object}
       overrideLabel={label}
+      variant={props.variant}
     />
   )
 

@@ -21,6 +21,7 @@ import styled from 'styled-components'
 import FocusRangeStrip, {focusRangeStripTheme} from './FocusRangeStrip'
 import FocusRangeThumb from './FocusRangeThumb'
 import {minVisibleSize} from '@theatre/studio/panels/BasePanel/common'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div<{isShiftDown: boolean}>`
   position: absolute;
@@ -109,7 +110,7 @@ function usePanelDragZoneGestureHandlers(
           const clippedSpaceToUnitSpace = val(layoutP.clippedSpace.toUnitSpace)
           const scaledSpaceToUnitSpace = val(layoutP.scaledSpace.toUnitSpace)
           const sheet = val(layoutP.sheet)
-          const sequence = sheet.getSequence()
+          const sequence = getStudioSequence(sheet)
 
           const targetElement: HTMLElement = event.target as HTMLElement
           const rect = targetElement!.getBoundingClientRect()

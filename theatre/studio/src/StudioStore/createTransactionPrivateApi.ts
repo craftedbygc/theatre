@@ -16,6 +16,10 @@ import type {PathToProp} from '@theatre/shared/src/utils/addresses'
 import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
 import {isPlainObject} from 'lodash-es'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
 
 /**
  * Deep-clones a plain JS object or a `string | number | boolean`. In case of a plain
@@ -129,8 +133,11 @@ export default function createTransactionPrivateApi(
           const propAddress = {...root.address, pathToProp: path}
 
           if (isUndoable) {
+            const activeVariant = getStudioActiveSequenceVariant(
+              root.sheet.address,
+            )
             const sequenceTracksTree = root.template
-              .getMapOfValidSequenceTracks_forStudio()
+              .getMapOfValidSequenceTracks_forStudio(activeVariant)
               .getValue()
 
             const trackId = get(sequenceTracksTree, path) as $FixMe as
@@ -138,7 +145,12 @@ export default function createTransactionPrivateApi(
               | undefined
 
             if (typeof trackId === 'string') {
-              const seq = root.sheet.getSequence()
+              const trackVariant =
+                root.template.getSequenceVariantOwningTrack(
+                  trackId,
+                  activeVariant,
+                ) ?? activeVariant
+              const seq = getStudioSequence(root.sheet)
               seq.position = seq.closestGridPosition(seq.position)
               stateEditors.coreByProject.historic.sheetsById.sequence.setKeyframeAtPosition(
                 {
@@ -148,11 +160,16 @@ export default function createTransactionPrivateApi(
                   value: value as $FixMe,
                   snappingFunction: seq.closestGridPosition,
                   type: 'bezier',
+                  sequenceVariant: trackVariant,
                 },
               )
             } else {
               stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-                {...propAddress, value: value as $FixMe},
+                {
+                  ...propAddress,
+                  value: value as $FixMe,
+                  sequenceVariant: activeVariant,
+                },
               )
             }
           } else {
@@ -218,8 +235,11 @@ export default function createTransactionPrivateApi(
           const propAddress = {...root.address, pathToProp: path}
 
           if (isUndoable) {
+            const activeVariant = getStudioActiveSequenceVariant(
+              root.sheet.address,
+            )
             const sequenceTracksTree = root.template
-              .getMapOfValidSequenceTracks_forStudio()
+              .getMapOfValidSequenceTracks_forStudio(activeVariant)
               .getValue()
 
             const trackId = get(sequenceTracksTree, path) as $FixMe as
@@ -227,16 +247,23 @@ export default function createTransactionPrivateApi(
               | undefined
 
             if (typeof trackId === 'string') {
+              const trackVariant =
+                root.template.getSequenceVariantOwningTrack(
+                  trackId,
+                  activeVariant,
+                ) ?? activeVariant
               stateEditors.coreByProject.historic.sheetsById.sequence.unsetKeyframeAtPosition(
                 {
                   ...propAddress,
                   trackId,
-                  position: root.sheet.getSequence().positionSnappedToGrid,
+                  position: getStudioSequence(root.sheet)
+                    .positionSnappedToGrid,
+                  sequenceVariant: trackVariant,
                 },
               )
             } else if (propConfig !== undefined) {
               stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
-                propAddress,
+                {...propAddress, sequenceVariant: activeVariant},
               )
             }
           } else {

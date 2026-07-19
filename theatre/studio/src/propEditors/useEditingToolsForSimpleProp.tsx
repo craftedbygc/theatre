@@ -21,6 +21,15 @@ import {getNearbyKeyframesOfTrack} from './getNearbyKeyframesOfTrack'
 import type {NearbyKeyframesControls} from './NextPrevKeyframeCursors'
 import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
 import type {Asset, File as AssetFile} from '@theatre/shared/utils/assets'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
+// eslint-disable-next-line no-restricted-syntax
+import {
+  getSequenceStateFromSheet,
+  getVariantOwnStaticOverridesByObject,
+} from '@theatre/core/sequences/sequenceVariants'
 
 interface EditingToolsCommon<T> {
   value: T
@@ -148,19 +157,31 @@ function createPrism<T extends SerializablePrimitive>(
     const isSequencable = isPropConfSequencable(propConfig)
 
     if (isSequencable) {
+      const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
       const validSequencedTracks = val(
-        obj.template.getMapOfValidSequenceTracks_forStudio(),
+        obj.template.getMapOfValidSequenceTracks_forStudio(activeVariant),
       )
       const possibleSequenceTrackId = getDeep(validSequencedTracks, pathToProp)
 
       const isSequenced = typeof possibleSequenceTrackId === 'string'
 
       if (isSequenced) {
+        const sequenceTrackId = possibleSequenceTrackId as SequenceTrackId
+        const trackVariant =
+          obj.template.getSequenceVariantOwningTrack(
+            sequenceTrackId,
+            activeVariant,
+          ) ?? activeVariant
+
         contextMenuItems.push({
           label: 'Make static',
           callback: () => {
             getStudio()!.transaction(({stateEditors}) => {
-              const propAddress = {...obj.address, pathToProp}
+              const propAddress = {
+                ...obj.address,
+                pathToProp,
+                sequenceVariant: activeVariant,
+              }
               stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsStatic(
                 {
                   ...propAddress,
@@ -171,18 +192,21 @@ function createPrism<T extends SerializablePrimitive>(
           },
         })
 
-        const sequenceTrackId = possibleSequenceTrackId as SequenceTrackId
         const nearbyKeyframes = prism.sub(
           'lcr',
           (): NearbyKeyframes => {
-            const track = val(
+            const sheetState = val(
               obj.template.project.pointers.historic.sheetsById[
                 obj.address.sheetId
-              ].sequence.tracksByObject[obj.address.objectKey].trackData[
-                sequenceTrackId
               ],
             )
-            const sequencePosition = val(obj.sheet.getSequence().positionPrism)
+            const track = getSequenceStateFromSheet(sheetState, trackVariant)
+              ?.tracksByObject[obj.address.objectKey]?.trackData[
+              sequenceTrackId
+            ]
+            const sequencePosition = val(
+              getStudioSequence(obj.sheet).positionPrism,
+            )
             return getNearbyKeyframesOfTrack(
               obj,
               track && {
@@ -193,7 +217,7 @@ function createPrism<T extends SerializablePrimitive>(
               sequencePosition,
             )
           },
-          [sequenceTrackId],
+          [sequenceTrackId, activeVariant, trackVariant],
         )
 
         let shade: Shade
@@ -238,7 +262,7 @@ function createPrism<T extends SerializablePrimitive>(
                   itemKey: nearbyKeyframes.prev.itemKey,
                   position: nearbyKeyframes.prev.kf.position,
                   jump: () => {
-                    obj.sheet.getSequence().position =
+                    getStudioSequence(obj.sheet).position =
                       nearbyKeyframes.prev!.kf.position
                   },
                 }
@@ -249,7 +273,7 @@ function createPrism<T extends SerializablePrimitive>(
                   itemKey: nearbyKeyframes.next.itemKey,
                   position: nearbyKeyframes.next.kf.position,
                   jump: () => {
-                    obj.sheet.getSequence().position =
+                    getStudioSequence(obj.sheet).position =
                       nearbyKeyframes.next!.kf.position
                   },
                 }
@@ -272,16 +296,36 @@ function createPrism<T extends SerializablePrimitive>(
       }
     }
 
-    const allStaticOverrides = val(obj.template.getStaticValues())
+    const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
+    const allStaticOverrides = val(obj.template.getStaticValues(activeVariant))
 
     const staticOverride = getDeep(allStaticOverrides, pathToProp)
 
-    if (typeof staticOverride !== 'undefined') {
+    const ownStaticOverrides =
+      getVariantOwnStaticOverridesByObject(
+        val(
+          obj.template.project.pointers.historic.sheetsById[
+            obj.address.sheetId
+          ],
+        ),
+        activeVariant,
+      )?.[obj.address.objectKey] ?? {}
+
+    const hasOwnStaticOverride =
+      getDeep(ownStaticOverrides, pathToProp) !== undefined
+
+    if (hasOwnStaticOverride) {
       contextMenuItems.push({
         label: 'Reset to default',
         callback: () => {
-          getStudio()!.transaction(({unset: unset}) => {
-            unset(pointerToProp)
+          getStudio()!.transaction(({stateEditors}) => {
+            stateEditors.coreByProject.historic.sheetsById.sequence.resetPrimitivePropOnVariant(
+              {
+                ...obj.address,
+                pathToProp,
+                sequenceVariant: activeVariant,
+              },
+            )
           })
         },
       })
@@ -292,7 +336,11 @@ function createPrism<T extends SerializablePrimitive>(
         label: 'Sequence',
         callback: () => {
           getStudio()!.transaction(({stateEditors}) => {
-            const propAddress = {...obj.address, pathToProp}
+            const propAddress = {
+              ...obj.address,
+              pathToProp,
+              sequenceVariant: activeVariant,
+            }
 
             stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
               propAddress,
@@ -326,7 +374,7 @@ function createPrism<T extends SerializablePrimitive>(
       shade: 'Default',
       controlIndicators: (
         <DefaultOrStaticValueIndicator
-          hasStaticOverride={true}
+          hasStaticOverride={false}
           obj={obj}
           pathToProp={pathToProp}
           propConfig={propConfig}
@@ -358,7 +406,7 @@ function getPrism<T extends SerializablePrimitive>(
  * scrubbed. See how impl of {@link Scrub} manages
  * `state.flagsTransaction` to keep a list of these touched paths
  * for the UI to be able to recognize. (e.g. to highlight the
- * item in r3f as you change its scale).
+ * item in the scene as you change its scale).
  */
 export function useEditingToolsForSimplePropInDetailsPanel<
   T extends SerializablePrimitive,

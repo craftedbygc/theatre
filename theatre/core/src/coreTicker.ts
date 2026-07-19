@@ -66,7 +66,7 @@ export function getCoreTicker(): Ticker {
  *
  * This is the recommended way to drive Theatre from your own
  * `requestAnimationFrame` loop — for example when integrating with
- * `@react-three/fiber`, `gsap`, `lenis`, or an XR session:
+ * `gsap`, `lenis`, or an XR session:
  *
  * ```ts
  * import { createRafDriver, setCoreRafDriver } from '@theatre/core'
