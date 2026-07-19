@@ -19,6 +19,7 @@ import {GoChevronLeft, GoChevronRight} from 'react-icons/all'
 import LengthEditorPopover from './LengthEditorPopover'
 import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
 import BasicPopover from '@theatre/studio/uiComponents/Popover/BasicPopover'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const coverWidth = 1000
 
@@ -154,7 +155,7 @@ const LengthIndicator: React.FC<IProps> = ({layoutP}) => {
     const sheet = val(layoutP.sheet)
     const height = val(layoutP.rightDims.height)
 
-    const sequence = sheet.getSequence()
+    const sequence = getStudioSequence(sheet)
     const sequenceLength = sequence.length
     const startInUnitSpace = sequenceLength
 
@@ -230,7 +231,7 @@ function useDragBulge(
 
         const propsAtStartOfDrag = propsRef.current
         const sheet = val(propsRef.current.layoutP.sheet)
-        const initialLength = sheet.getSequence().length
+        const initialLength = getStudioSequence(sheet).length
 
         const toUnitSpace = val(
           propsAtStartOfDrag.layoutP.scaledSpace.toUnitSpace,

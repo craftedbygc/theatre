@@ -1,6 +1,9 @@
 import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
 import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
 import useDrag from '@theatre/studio/uiComponents/useDrag'
 import useKeyDown from '@theatre/studio/uiComponents/useKeyDown'
@@ -400,7 +403,7 @@ namespace utils {
                           scale: 1,
                           origin: 0,
                           snappingFunction:
-                            sheet.getSequence().closestGridPosition,
+                            getStudioSequence(sheet).closestGridPosition,
                           objectKey,
                           projectId: origin.projectId,
                           sheetId: origin.sheetId,

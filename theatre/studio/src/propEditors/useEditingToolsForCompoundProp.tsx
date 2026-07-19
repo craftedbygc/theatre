@@ -27,7 +27,10 @@ import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
 import {getNearbyKeyframesOfTrack} from './getNearbyKeyframesOfTrack'
 import type {KeyframeWithTrack} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/collectAggregateKeyframes'
 import {emptyObject} from '@theatre/shared/utils'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
 import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
 
 interface CommonStuff {
@@ -262,7 +265,7 @@ function ControlIndicators({
     const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
 
     const sequencePosition = val(
-      obj.sheet.getSequence(activeVariant).positionPrism,
+      getStudioSequence(obj.sheet).positionPrism,
     )
 
     /*
@@ -382,7 +385,7 @@ function ControlIndicators({
                   closestPrev.kf.position,
                 ),
               jump: () => {
-                obj.sheet.getSequence().position = closestPrev.kf.position
+                getStudioSequence(obj.sheet).position = closestPrev.kf.position
               },
             }
           : undefined,
@@ -397,7 +400,7 @@ function ControlIndicators({
                   closestNext.kf.position,
                 ),
               jump: () => {
-                obj.sheet.getSequence().position = closestNext.kf.position
+                getStudioSequence(obj.sheet).position = closestNext.kf.position
               },
             }
           : undefined,

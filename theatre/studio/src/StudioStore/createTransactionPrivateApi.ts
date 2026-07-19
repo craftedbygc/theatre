@@ -16,7 +16,10 @@ import type {PathToProp} from '@theatre/shared/src/utils/addresses'
 import {getPropConfigByPath} from '@theatre/shared/propTypes/utils'
 import {isPlainObject} from 'lodash-es'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
-import {getStudioActiveSequenceVariant} from '@theatre/studio/utils/activeSequenceVariant'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
 
 /**
  * Deep-clones a plain JS object or a `string | number | boolean`. In case of a plain
@@ -147,7 +150,7 @@ export default function createTransactionPrivateApi(
                   trackId,
                   activeVariant,
                 ) ?? activeVariant
-              const seq = root.sheet.getSequence(activeVariant)
+              const seq = getStudioSequence(root.sheet)
               seq.position = seq.closestGridPosition(seq.position)
               stateEditors.coreByProject.historic.sheetsById.sequence.setKeyframeAtPosition(
                 {
@@ -249,7 +252,7 @@ export default function createTransactionPrivateApi(
                 {
                   ...propAddress,
                   trackId,
-                  position: root.sheet.getSequence(activeVariant)
+                  position: getStudioSequence(root.sheet)
                     .positionSnappedToGrid,
                   sequenceVariant: trackVariant,
                 },

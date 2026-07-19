@@ -20,6 +20,7 @@ import {useKeyframeInlineEditorPopover} from '@theatre/studio/panels/SequenceEdi
 import usePresence, {
   PresenceFlag,
 } from '@theatre/studio/uiComponents/usePresence'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 export const dotSize = 6
 
@@ -232,9 +233,9 @@ function useDragKeyframe(options: {
                   ...propsAtStartOfDrag.sheetObject.address,
                   trackId: propsAtStartOfDrag.trackId,
                   keyframes: updatedKeyframes,
-                  snappingFunction: val(
-                    propsAtStartOfDrag.layoutP.sheet,
-                  ).getSequence().closestGridPosition,
+                  snappingFunction: getStudioSequence(
+                    val(propsAtStartOfDrag.layoutP.sheet),
+                  ).closestGridPosition,
                 },
               )
             })

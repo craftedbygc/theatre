@@ -7,6 +7,7 @@ import React, {useLayoutEffect, useRef, useState} from 'react'
 import styled from 'styled-components'
 import createGrid from './createGrid'
 import getStudio from '@theatre/studio/getStudio'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: absolute;
@@ -75,7 +76,7 @@ const StampsGrid: React.FC<{
     if (!fullSecondStampsContainer) return
 
     return prism(() => {
-      const sequence = val(layoutP.sheet).getSequence()
+      const sequence = getStudioSequence(val(layoutP.sheet))
       return {
         fullSecondStampsContainer,
         clippedSpaceRange: val(layoutP.clippedSpace.range),

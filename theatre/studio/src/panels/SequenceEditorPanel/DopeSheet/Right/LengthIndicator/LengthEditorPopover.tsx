@@ -8,6 +8,7 @@ import type {BasicNumberInputNudgeFn} from '@theatre/studio/uiComponents/form/Ba
 import BasicNumberInput from '@theatre/studio/uiComponents/form/BasicNumberInput'
 import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
 import {propNameTextCSS} from '@theatre/studio/propEditors/utils/propNameTextCSS'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const greaterThanZero = (v: number) => isFinite(v) && v > 0
 
@@ -78,7 +79,7 @@ const LengthEditorPopover: React.FC<{
   }, [])
 
   return usePrism(() => {
-    const sequence = sheet.getSequence()
+    const sequence = getStudioSequence(sheet)
     const sequenceLength = sequence.length
 
     return (

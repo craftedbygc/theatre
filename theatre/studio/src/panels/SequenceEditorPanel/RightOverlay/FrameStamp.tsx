@@ -11,6 +11,7 @@ import {
   FrameStampPositionType,
   useFrameStampPositionD,
 } from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: absolute;
@@ -49,7 +50,7 @@ const FrameStamp: React.FC<{
   const [posInUnitSpace, posType] = useVal(useFrameStampPositionD())
   const unitSpaceToClippedSpace = useVal(layoutP.clippedSpace.fromUnitSpace)
   const {sequence, formatter, clippedSpaceWidth} = usePrism(() => {
-    const sequence = val(layoutP.sheet).getSequence()
+    const sequence = getStudioSequence(val(layoutP.sheet))
     const clippedSpaceWidth = val(layoutP.clippedSpace.width)
     return {sequence, formatter: sequence.positionFormatter, clippedSpaceWidth}
   }, [layoutP])

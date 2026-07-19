@@ -27,6 +27,7 @@ import {useKeyframeInlineEditorPopover} from './useSingleKeyframeInlineEditorPop
 import usePresence, {
   PresenceFlag,
 } from '@theatre/studio/uiComponents/usePresence'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 export const DOT_SIZE_PX = 6
 const DOT_HOVER_SIZE_PX = DOT_SIZE_PX + 2
@@ -335,9 +336,9 @@ function useDragForSingleKeyframeDot(
                   ...propsAtStartOfDrag.leaf.sheetObject.address,
                   trackId: propsAtStartOfDrag.leaf.trackId,
                   keyframes: [{...original, position: newPosition}],
-                  snappingFunction: val(
-                    propsAtStartOfDrag.layoutP.sheet,
-                  ).getSequence().closestGridPosition,
+                  snappingFunction: getStudioSequence(
+                    val(propsAtStartOfDrag.layoutP.sheet),
+                  ).closestGridPosition,
                 },
               )
             })

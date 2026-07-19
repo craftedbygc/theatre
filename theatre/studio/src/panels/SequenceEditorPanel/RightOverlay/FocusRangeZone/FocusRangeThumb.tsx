@@ -23,6 +23,7 @@ import {
 } from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 import {focusRangeStripTheme, RangeStrip} from './FocusRangeStrip'
 import DopeSnap from '@theatre/studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const TheDiv = styled.div<{enabled: boolean; type: 'start' | 'end'}>`
   position: absolute;
@@ -166,7 +167,7 @@ const FocusRangeThumb: React.FC<{
         let range: IRange
 
         const sheet = val(layoutP.sheet)
-        const sequence = sheet.getSequence()
+        const sequence = getStudioSequence(sheet)
         const defaultRange = {start: 0, end: sequence.length}
         let existingRange = existingRangeD.getValue() || {
           range: defaultRange,
@@ -208,13 +209,13 @@ const FocusRangeThumb: React.FC<{
               // Prevent the start thumb from going over the length of the sequence
               newPosition = Math.min(
                 Math.max(newPosition, range['start'] + minFocusRangeStripWidth),
-                sheet.getSequence().length,
+                getStudioSequence(sheet).length,
               )
             }
 
-            const newPositionInFrame = sheet
-              .getSequence()
-              .closestGridPosition(newPosition)
+            const newPositionInFrame = getStudioSequence(sheet).closestGridPosition(
+              newPosition,
+            )
 
             if (tempTransaction !== undefined) {
               tempTransaction.discard()

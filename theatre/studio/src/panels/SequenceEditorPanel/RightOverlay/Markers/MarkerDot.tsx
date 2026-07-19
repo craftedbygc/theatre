@@ -29,6 +29,7 @@ import {
 import usePopover from '@theatre/studio/uiComponents/Popover/usePopover'
 import BasicPopover from '@theatre/studio/uiComponents/Popover/BasicPopover'
 import MarkerEditorPopover from './MarkerEditorPopover'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const MARKER_SIZE_W_PX = 12
 const MARKER_SIZE_H_PX = 12
@@ -271,7 +272,7 @@ function useDragMarker(
                 {
                   sheetAddress: val(props.layoutP.sheet.address),
                   markers: [{...original, position: newPosition}],
-                  snappingFunction: val(props.layoutP.sheet).getSequence()
+                  snappingFunction: getStudioSequence(val(props.layoutP.sheet))
                     .closestGridPosition,
                 },
               )

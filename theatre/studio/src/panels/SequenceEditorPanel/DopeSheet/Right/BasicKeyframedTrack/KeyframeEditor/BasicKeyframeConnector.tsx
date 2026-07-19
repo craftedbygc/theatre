@@ -22,6 +22,7 @@ import {copyableKeyframesFromSelection} from '@theatre/studio/panels/SequenceEdi
 import {selectedKeyframeConnections} from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/selections'
 
 import styled from 'styled-components'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const POPOVER_MARGIN = 5
 
@@ -175,7 +176,7 @@ function useDragKeyframe(
         }
 
         const propsAtStartOfDrag = props
-        const sequence = val(propsAtStartOfDrag.layoutP.sheet).getSequence()
+        const sequence = getStudioSequence(val(propsAtStartOfDrag.layoutP.sheet))
 
         const toUnitSpace = val(
           propsAtStartOfDrag.layoutP.scaledSpace.toUnitSpace,

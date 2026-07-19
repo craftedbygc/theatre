@@ -18,6 +18,7 @@ import KeyframeSnapTarget, {
   snapPositionsStateD,
 } from '@theatre/studio/panels/SequenceEditorPanel/DopeSheet/Right/KeyframeSnapTarget'
 import {createStudioSheetItemKey} from '@theatre/shared/utils/ids'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   position: relative;
@@ -165,7 +166,7 @@ function pasteKeyframesContextMenuItem(
     enabled: keyframes.length > 0,
     callback: () => {
       const sheet = val(props.layoutP.sheet)
-      const sequence = sheet.getSequence()
+      const sequence = getStudioSequence(sheet)
 
       const firstPath = keyframes[0]?.pathToProp
       const singleTrackKeyframes = keyframes

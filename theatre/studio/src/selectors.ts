@@ -9,6 +9,7 @@ import type {SheetId} from '@theatre/shared/utils/ids'
 import {uniq} from 'lodash-es'
 import getStudio from './getStudio'
 import type {OutlineSelectable, OutlineSelection} from './store/types'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 export const getOutlineSelection = (): OutlineSelection => {
   const projects = val(getStudio().projectsP)
@@ -86,5 +87,5 @@ export function getSelectedSequence(): undefined | Sequence {
   const sheet = selectedSheets[0]
   if (!sheet) return
 
-  return sheet.getSequence()
+  return getStudioSequence(sheet)
 }

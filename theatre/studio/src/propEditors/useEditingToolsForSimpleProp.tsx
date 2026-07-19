@@ -23,6 +23,7 @@ import NextPrevKeyframeCursors from './NextPrevKeyframeCursors'
 import type {Asset, File as AssetFile} from '@theatre/shared/utils/assets'
 import {
   getStudioActiveSequenceVariant,
+  getStudioSequence,
   setStudioActiveSequenceVariant,
 } from '@theatre/studio/utils/activeSequenceVariant'
 import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
@@ -202,7 +203,7 @@ function createPrism<T extends SerializablePrimitive>(
               trackVariant,
             )?.tracksByObject[obj.address.objectKey]?.trackData[sequenceTrackId]
             const sequencePosition = val(
-              obj.sheet.getSequence(activeVariant).positionPrism,
+              getStudioSequence(obj.sheet).positionPrism,
             )
             return getNearbyKeyframesOfTrack(
               obj,
@@ -259,7 +260,7 @@ function createPrism<T extends SerializablePrimitive>(
                   itemKey: nearbyKeyframes.prev.itemKey,
                   position: nearbyKeyframes.prev.kf.position,
                   jump: () => {
-                    obj.sheet.getSequence().position =
+                    getStudioSequence(obj.sheet).position =
                       nearbyKeyframes.prev!.kf.position
                   },
                 }
@@ -270,7 +271,7 @@ function createPrism<T extends SerializablePrimitive>(
                   itemKey: nearbyKeyframes.next.itemKey,
                   position: nearbyKeyframes.next.kf.position,
                   jump: () => {
-                    obj.sheet.getSequence().position =
+                    getStudioSequence(obj.sheet).position =
                       nearbyKeyframes.next!.kf.position
                   },
                 }

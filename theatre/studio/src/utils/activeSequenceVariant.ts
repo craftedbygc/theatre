@@ -1,13 +1,24 @@
-import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
+import type Sequence from '@theatre/core/sequences/Sequence'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   type SequenceVariantId,
 } from '@theatre/core/sequences/sequenceVariants'
+import type Sheet from '@theatre/core/sheets/Sheet'
 import getStudio from '@theatre/studio/getStudio'
-import {val} from '@theatre/dataverse'
-import type Project from '@theatre/core/projects/Project'
-import type {SheetId} from '@theatre/shared/utils/ids'
 import type {IStateEditors} from '@theatre/studio/store/stateEditors'
+import type Project from '@theatre/core/projects/Project'
+import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
+import type {SheetId} from '@theatre/shared/utils/ids'
+import {val} from '@theatre/dataverse'
+
+/**
+ * Returns the sequence for the variant currently being edited in Studio.
+ * Unlike `sheet.getSequence()` (which defaults to the runtime active variant),
+ * this always uses the studio's active sequence variant.
+ */
+export function getStudioSequence(sheet: Sheet): Sequence {
+  return sheet.getSequence(getStudioActiveSequenceVariant(sheet.address))
+}
 
 export function getStudioActiveSequenceVariant(
   p: WithoutSheetInstance<SheetAddress>,

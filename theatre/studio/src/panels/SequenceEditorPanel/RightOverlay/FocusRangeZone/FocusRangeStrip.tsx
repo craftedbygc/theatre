@@ -13,6 +13,7 @@ import useRefAndState from '@theatre/studio/utils/useRefAndState'
 import React, {useMemo} from 'react'
 import styled from 'styled-components'
 import {useLockFrameStampPosition} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 export const focusRangeStripTheme = {
   enabled: {
@@ -191,7 +192,7 @@ const FocusRangeStrip: React.FC<{
         const startPosBeforeDrag = existingRange.range.start
         const endPosBeforeDrag = existingRange.range.end
         let dragHappened = false
-        const sequence = val(layoutP.sheet).getSequence()
+        const sequence = getStudioSequence(val(layoutP.sheet))
 
         return {
           onDrag(dx) {

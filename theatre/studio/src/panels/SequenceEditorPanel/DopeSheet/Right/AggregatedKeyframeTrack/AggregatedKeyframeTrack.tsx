@@ -37,6 +37,7 @@ import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariant
 import getStudio from '@theatre/studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
+  getStudioSequence,
   pointerToActiveSheetSequence,
 } from '@theatre/studio/utils/activeSequenceVariant'
 import type {SheetObjectAddress} from '@theatre/shared/utils/addresses'
@@ -325,7 +326,7 @@ function pasteKeyframesContextMenuItem(
     enabled: keyframes.length > 0,
     callback: () => {
       const sheet = val(props.layoutP.sheet)
-      const sequence = sheet.getSequence()
+      const sequence = getStudioSequence(sheet)
 
       if (props.viewModel.type === 'sheet') {
         pasteKeyframesSheet(props.viewModel, keyframes, sequence)
@@ -727,9 +728,9 @@ function useDragForAggregateKeyframeDot(
                     ...keyframe.track.sheetObject.address,
                     trackId: keyframe.track.id,
                     keyframes: [{...original, position: newPosition}],
-                    snappingFunction: val(
-                      propsAtStartOfDrag.layoutP.sheet,
-                    ).getSequence().closestGridPosition,
+                    snappingFunction: getStudioSequence(
+                      val(propsAtStartOfDrag.layoutP.sheet),
+                    ).closestGridPosition,
                     sequenceVariant,
                   },
                 )

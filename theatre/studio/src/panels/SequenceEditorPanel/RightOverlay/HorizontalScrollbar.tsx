@@ -11,6 +11,7 @@ import {zIndexes} from '@theatre/studio/panels/SequenceEditorPanel/SequenceEdito
 import {includeLockFrameStampAttrs} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 import {pointerEventsAutoInNormalMode} from '@theatre/studio/css'
 import useDrag from '@theatre/studio/uiComponents/useDrag'
+import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   --threadHeight: 6px;
@@ -123,14 +124,14 @@ const HorizontalScrollbar: React.FC<{
 }> = ({layoutP}) => {
   const unitPosToHumanReadablePos = useCallback((n: number) => n.toFixed(2), [])
 
-  // const dd = usePrism(() => val(layoutP.sheet).getSequence().positionFormatter.formatForPlayhead, [layoutP])
+  // const dd = usePrism(() => getStudioSequence(val(layoutP.sheet)).positionFormatter.formatForPlayhead, [layoutP])
 
   const relevantValuesD = useMemo(
     () =>
       prism(() => {
         const rightWidth = val(layoutP.rightDims.width) - 25
         const clippedSpaceRange = val(layoutP.clippedSpace.range)
-        const sequenceLength = val(layoutP.sheet).getSequence().length
+        const sequenceLength = getStudioSequence(val(layoutP.sheet)).length
 
         const assumedLengthOfSequence = Math.max(
           clippedSpaceRange.end,
