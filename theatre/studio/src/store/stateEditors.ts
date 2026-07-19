@@ -232,10 +232,11 @@ namespace stateEditors {
                 objectKey: ObjectAddressKey
               },
             ) {
-              const sheetState = stateBySheetId._ensure(p)
-              sheetState.variantObjectOverrides ??= {}
-              sheetState.variantObjectOverrides[p.variant] ??= []
-              const list = sheetState.variantObjectOverrides[p.variant]!
+              const coreSheetState =
+                stateEditors.coreByProject.historic.sheetsById._ensure(p)
+              coreSheetState.variantObjectOverrides ??= {}
+              coreSheetState.variantObjectOverrides[p.variant] ??= []
+              const list = coreSheetState.variantObjectOverrides[p.variant]!
               if (!list.includes(p.objectKey)) {
                 list.push(p.objectKey)
               }
@@ -256,11 +257,12 @@ namespace stateEditors {
                 objectKey: ObjectAddressKey
               },
             ) {
-              const sheetState = stateBySheetId._ensure(p)
-              const list = sheetState.variantObjectOverrides?.[p.variant]
+              const coreSheetState =
+                stateEditors.coreByProject.historic.sheetsById._ensure(p)
+              const list = coreSheetState.variantObjectOverrides?.[p.variant]
               if (!list) return
 
-              sheetState.variantObjectOverrides![p.variant] = list.filter(
+              coreSheetState.variantObjectOverrides![p.variant] = list.filter(
                 (key) => key !== p.objectKey,
               )
 
@@ -724,6 +726,18 @@ namespace stateEditors {
           }
           if (sheetState.sequence) {
             delete sheetState.sequence.tracksByObject[p.objectKey]
+          }
+
+          if (sheetState.variantObjectOverrides) {
+            for (const variantId of Object.keys(
+              sheetState.variantObjectOverrides,
+            )) {
+              const list = sheetState.variantObjectOverrides[variantId]
+              if (!list) continue
+              sheetState.variantObjectOverrides[variantId] = list.filter(
+                (key) => key !== p.objectKey,
+              )
+            }
           }
         }
 

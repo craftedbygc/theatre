@@ -100,11 +100,6 @@ export type StudioHistoricStateProjectSheet = {
   selectedInstanceId: undefined | SheetInstanceId
   /** The sequence variant currently being edited in the studio UI */
   activeSequenceVariant?: SequenceVariantId
-  /**
-   * Sheet objects explicitly opted-in to appear under a non-default variant
-   * folder in the outline panel.
-   */
-  variantObjectOverrides?: StrictRecord<SequenceVariantId, ObjectAddressKey[]>
   sequenceEditor: {
     markerSet?: PointableSet<
       SequenceMarkerId,

@@ -83,6 +83,13 @@ export function getEffectiveStaticOverrideForObject(
   variantId: SequenceVariantId,
   objectKey: ObjectAddressKey,
 ): SerializableMap | undefined {
+  if (
+    variantId !== DEFAULT_SEQUENCE_VARIANT &&
+    !isObjectAssignedToSequenceVariant(sheetState, variantId, objectKey)
+  ) {
+    return undefined
+  }
+
   const defaultOverrides =
     getDefaultStaticOverridesByObject(sheetState)?.[objectKey]
 
@@ -98,6 +105,18 @@ export function getEffectiveStaticOverrideForObject(
   if (!defaultOverrides) return variantOverrides
 
   return merge(cloneDeep(defaultOverrides), cloneDeep(variantOverrides))
+}
+
+export function isObjectAssignedToSequenceVariant(
+  sheetState: SheetState_Historic | undefined,
+  variantId: SequenceVariantId,
+  objectKey: ObjectAddressKey,
+): boolean {
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) return true
+
+  return (
+    sheetState?.variantObjectOverrides?.[variantId]?.includes(objectKey) ?? false
+  )
 }
 
 export function ensureVariantStaticOverridesByObjectInSheet(

@@ -42,6 +42,11 @@ export interface SheetState_Historic {
    * sheet properties to be animated differently per variant (e.g. mobile vs desktop).
    */
   sequencesById?: StrictRecord<string, HistoricPositionalSequence>
+  /**
+   * Sheet objects explicitly opted into a non-default sequence variant. Only these
+   * objects inherit default static/sequence data on that variant.
+   */
+  variantObjectOverrides?: StrictRecord<string, ObjectAddressKey[]>
 }
 
 // Question: What is this? The timeline position of a sequence?

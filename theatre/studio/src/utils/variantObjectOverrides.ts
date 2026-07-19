@@ -1,4 +1,7 @@
-import {DEFAULT_SEQUENCE_VARIANT} from '@theatre/core/sequences/sequenceVariants'
+import {
+  DEFAULT_SEQUENCE_VARIANT,
+  isObjectAssignedToSequenceVariant,
+} from '@theatre/core/sequences/sequenceVariants'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
 import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
@@ -13,8 +16,8 @@ export function getVariantObjectOverrides(
   if (!studio) return undefined
 
   return val(
-    studio.atomP.historic.projects.stateByProjectId[p.projectId]
-      .stateBySheetId[p.sheetId].variantObjectOverrides,
+    studio.atomP.historic.coreByProject[p.projectId].sheetsById[p.sheetId]
+      .variantObjectOverrides,
   )
 }
 
@@ -35,9 +38,14 @@ export function isObjectOverriddenInVariant(
   variant: SequenceVariantId,
   objectKey: ObjectAddressKey,
 ): boolean {
-  if (variant === DEFAULT_SEQUENCE_VARIANT) {
-    return true
+  const studio = getStudio()
+  if (!studio) {
+    return variant === DEFAULT_SEQUENCE_VARIANT
   }
 
-  return getOverriddenObjectKeysForVariant(p, variant).includes(objectKey)
+  const sheetState = val(
+    studio.atomP.historic.coreByProject[p.projectId].sheetsById[p.sheetId],
+  )
+
+  return isObjectAssignedToSequenceVariant(sheetState, variant, objectKey)
 }

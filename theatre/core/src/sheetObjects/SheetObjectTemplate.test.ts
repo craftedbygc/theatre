@@ -131,6 +131,9 @@ describe(`SheetObjectTemplate`, () => {
             tracksByObject: {},
           },
         },
+        variantObjectOverrides: {
+          mobile: ['obj' as ObjectAddressKey],
+        },
       })
 
       sheet.publicApi.declareSequenceVariants(['default', 'mobile'])
@@ -205,6 +208,54 @@ describe(`SheetObjectTemplate`, () => {
       })
     })
 
+    it('clears variant sequence after removing object override', async () => {
+      const {obj, sheet} = await setupTestSheet({
+        staticOverrides: {byObject: {}},
+        sequencesById: {
+          default: {
+            type: 'PositionalSequence',
+            subUnitsPerUnit: 30,
+            length: 10,
+            tracksByObject: {
+              ['obj' as ObjectAddressKey]: {
+                trackIdByPropPath: {
+                  [encodePathToProp(['position', 'x'])]: asSequenceTrackId('x'),
+                },
+                trackData: {
+                  ['x' as SequenceTrackId]: {
+                    type: 'BasicKeyframedTrack',
+                    keyframes: [],
+                  } as $IntentionalAny,
+                },
+              },
+            },
+          },
+        },
+        variantObjectOverrides: {
+          mobile: ['obj' as ObjectAddressKey],
+        },
+      })
+
+      sheet.publicApi.declareSequenceVariants(['default', 'mobile'])
+
+      getStudio()!.transaction(({stateEditors}) => {
+        stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.removeVariantObjectOverride(
+          {
+            projectId: sheet.address.projectId,
+            sheetId: sheet.address.sheetId,
+            variant: 'mobile',
+            objectKey: 'obj' as ObjectAddressKey,
+          },
+        )
+      })
+
+      const mobileTracks = obj.template
+        .getArrayOfValidSequenceTracks('mobile')
+        .getValue()
+
+      expect(mobileTracks).toHaveLength(0)
+    })
+
     it('inherits default variant static overrides on other variants unless overridden', async () => {
       const {obj} = await setupTestSheet({
         staticOverrides: {
@@ -222,6 +273,9 @@ describe(`SheetObjectTemplate`, () => {
               },
             },
           },
+        },
+        variantObjectOverrides: {
+          mobile: ['obj' as ObjectAddressKey],
         },
       })
 

@@ -37,6 +37,7 @@ import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   getEffectiveStaticOverrideForObject,
+  isObjectAssignedToSequenceVariant,
   mergeSequenceTrackMaps,
   valTrackIdByPropPathForObject,
   type SequenceVariantId,
@@ -235,6 +236,19 @@ export default class SheetObjectTemplate {
       }> => {
         const pointerToSheetState =
           this.project.pointers.historic.sheetsById[this.address.sheetId]
+
+        val(pointerToSheetState.variantObjectOverrides)
+
+        const sheetState = val(pointerToSheetState)
+        if (
+          !isObjectAssignedToSequenceVariant(
+            sheetState,
+            sequenceVariant,
+            this.address.objectKey,
+          )
+        ) {
+          return emptyArray as $IntentionalAny
+        }
 
         const defaultTrackIdByPropPath = valTrackIdByPropPathForObject(
           pointerToSheetState,
