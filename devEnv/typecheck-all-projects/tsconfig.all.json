@@ -11,7 +11,6 @@
     {"path": "../../packages/playground"},
     {"path": "../../packages/benchmarks"},
     {"path": "../../packages/react"},
-    {"path": "../../packages/remote"},
     {"path": "../../examples/basic-dom"},
     {"path": "../../compat-tests"},
     {"path": "../../devEnv"}
