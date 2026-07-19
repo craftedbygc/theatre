@@ -253,6 +253,18 @@ namespace stateEditors {
               sheetState.variantObjectOverrides![p.variant] = list.filter(
                 (key) => key !== p.objectKey,
               )
+
+              stateEditors.coreByProject.historic.sheetsById.clearObjectVariantState(
+                {
+                  projectId: p.projectId,
+                  sheetId: p.sheetId,
+                  objectKey: p.objectKey,
+                  sequenceVariant: p.variant,
+                },
+              )
+
+              delete stateBySheetId._ensure(p).sequenceEditor
+                .selectedPropsByObject[p.objectKey]
             }
 
             export namespace sequenceEditor {
@@ -702,6 +714,28 @@ namespace stateEditors {
           }
           if (sheetState.sequence) {
             delete sheetState.sequence.tracksByObject[p.objectKey]
+          }
+        }
+
+        export function clearObjectVariantState(
+          p: WithoutSheetInstance<SheetObjectAddress> & {
+            sequenceVariant: SequenceVariantId
+          },
+        ) {
+          if (p.sequenceVariant === DEFAULT_SEQUENCE_VARIANT) return
+
+          const sheetState =
+            drafts().historic.coreByProject[p.projectId].sheetsById[p.sheetId]
+          if (!sheetState) return
+
+          delete sheetState.staticOverridesByVariant?.[p.sequenceVariant]
+            ?.byObject[p.objectKey]
+
+          migrateSheetSequenceState(sheetState)
+          const sequenceState =
+            sheetState.sequencesById?.[p.sequenceVariant]
+          if (sequenceState) {
+            delete sequenceState.tracksByObject[p.objectKey]
           }
         }
 
