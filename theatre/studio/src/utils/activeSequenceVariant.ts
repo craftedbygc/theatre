@@ -106,6 +106,9 @@ export function setStudioActiveSequenceVariant(
 /**
  * Returns a pointer to the active sequence variant's historic state for a sheet.
  * Use inside reactive contexts (prisms) where the active variant may change.
+ *
+ * Note: for `tracksByObject` reads, prefer {@link valTracksByObjectForSheetVariant}
+ * which also handles the legacy `sequence` field.
  */
 export function pointerToActiveSheetSequence(
   project: Project,

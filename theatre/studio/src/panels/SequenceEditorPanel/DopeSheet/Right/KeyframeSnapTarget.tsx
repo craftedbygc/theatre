@@ -105,7 +105,7 @@ export function collectKeyframeSnapPositions(
   ) => boolean,
 ): KeyframeSnapPositions {
   return Object.fromEntries(
-    Object.entries(tracksByObject).map(
+    Object.entries(tracksByObject ?? {}).map(
       ([objectKey, trackDataAndTrackIdByPropPath]) => [
         objectKey,
         Object.fromEntries(

@@ -157,6 +157,54 @@ export function getSequenceStateFromSheet(
 }
 
 /**
+ * Reactive read of `tracksByObject` for a sequence variant.
+ * Prefer this over `val(sheetStatePointer.sequence.tracksByObject)` inside prisms
+ * so edits to `sequencesById` invalidate dependents.
+ */
+export function valTracksByObjectForSheetVariant(
+  sheetStatePointer: Pointer<SheetState_Historic | undefined>,
+  variantId: SequenceVariantId,
+): HistoricPositionalSequence['tracksByObject'] | undefined {
+  const sequenceFromMap = val(sheetStatePointer.sequencesById[variantId])
+  if (sequenceFromMap !== undefined) {
+    return val(sheetStatePointer.sequencesById[variantId].tracksByObject)
+  }
+
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+    return val(sheetStatePointer.sequence?.tracksByObject)
+  }
+
+  return undefined
+}
+
+/**
+ * Reactive read of `trackIdByPropPath` for one object on a sequence variant.
+ */
+export function valTrackIdByPropPathForObject(
+  sheetStatePointer: Pointer<SheetState_Historic | undefined>,
+  variantId: SequenceVariantId,
+  objectKey: ObjectAddressKey,
+):
+  | StrictRecord<PathToProp_Encoded, SequenceTrackId>
+  | undefined {
+  const sequenceFromMap = val(sheetStatePointer.sequencesById[variantId])
+  if (sequenceFromMap !== undefined) {
+    return val(
+      sheetStatePointer.sequencesById[variantId].tracksByObject[objectKey]
+        ?.trackIdByPropPath,
+    )
+  }
+
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+    return val(
+      sheetStatePointer.sequence?.tracksByObject[objectKey]?.trackIdByPropPath,
+    )
+  }
+
+  return undefined
+}
+
+/**
  * Returns which variant owns a given track for an object, checking the active
  * variant first and then falling back to default.
  */

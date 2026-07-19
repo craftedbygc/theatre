@@ -33,7 +33,7 @@ import type {CommitOrDiscard} from '@theatre/studio/StudioStore/StudioStore'
 import useDrag from '@theatre/studio/uiComponents/useDrag'
 import {useLockFrameStampPositionRef} from '@theatre/studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 import {useCssCursorLock} from '@theatre/studio/uiComponents/PointerEventsHandler'
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
+import {valTracksByObjectForSheetVariant} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
 import {
   getStudioActiveSequenceVariant,
@@ -634,15 +634,15 @@ function useDragForAggregateKeyframeDot(
             ? props.viewModel.sheet.address
             : props.viewModel.sheetObject.address
 
-        const sheetState = val(
+        const sheetStatePointer =
           getStudio()!.atomP.historic.coreByProject[address.projectId]
-            .sheetsById[address.sheetId],
-        )
+            .sheetsById[address.sheetId]
         const sequenceVariant = getStudioActiveSequenceVariant(address)
-        const tracksByObject = getSequenceStateFromSheet(
-          sheetState,
-          sequenceVariant,
-        )!.tracksByObject
+        const tracksByObject =
+          valTracksByObjectForSheetVariant(
+            sheetStatePointer,
+            sequenceVariant,
+          ) ?? {}
 
         // Calculate all the valid snap positions in the sequence editor,
         // excluding the child keyframes of this aggregate, and any selection it is part of.

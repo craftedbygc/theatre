@@ -27,7 +27,11 @@ import {useKeyframeInlineEditorPopover} from './useSingleKeyframeInlineEditorPop
 import usePresence, {
   PresenceFlag,
 } from '@theatre/studio/uiComponents/usePresence'
-import {getStudioSequence} from '@theatre/studio/utils/activeSequenceVariant'
+import {
+  getStudioActiveSequenceVariant,
+  getStudioSequence,
+} from '@theatre/studio/utils/activeSequenceVariant'
+import {valTracksByObjectForSheetVariant} from '@theatre/core/sequences/sequenceVariants'
 
 export const DOT_SIZE_PX = 6
 const DOT_HOVER_SIZE_PX = DOT_SIZE_PX + 2
@@ -248,12 +252,18 @@ function useDragForSingleKeyframeDot(
       onDragStart(event) {
         const props = propsRef.current
 
-        const tracksByObject = val(
+        const sheetStatePointer =
           getStudio()!.atomP.historic.coreByProject[
             props.leaf.sheetObject.address.projectId
-          ].sheetsById[props.leaf.sheetObject.address.sheetId].sequence
-            .tracksByObject,
-        )!
+          ].sheetsById[props.leaf.sheetObject.address.sheetId]
+
+        const tracksByObject =
+          valTracksByObjectForSheetVariant(
+            sheetStatePointer,
+            getStudioActiveSequenceVariant(
+              props.leaf.sheetObject.sheet.address,
+            ),
+          ) ?? {}
 
         const snapPositions = collectKeyframeSnapPositions(
           tracksByObject,

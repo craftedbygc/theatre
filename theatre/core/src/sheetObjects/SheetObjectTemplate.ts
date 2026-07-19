@@ -37,8 +37,8 @@ import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   getEffectiveStaticOverrideForObject,
-  getSequenceStateFromSheet,
   mergeSequenceTrackMaps,
+  valTrackIdByPropPathForObject,
   type SequenceVariantId,
 } from '@theatre/core/sequences/sequenceVariants'
 import {cloneDeep, unset} from 'lodash-es'
@@ -236,18 +236,20 @@ export default class SheetObjectTemplate {
         const pointerToSheetState =
           this.project.pointers.historic.sheetsById[this.address.sheetId]
 
-        const sheetState = val(pointerToSheetState)
-
-        const defaultTrackIdByPropPath = getSequenceStateFromSheet(
-          sheetState,
+        const defaultTrackIdByPropPath = valTrackIdByPropPathForObject(
+          pointerToSheetState,
           DEFAULT_SEQUENCE_VARIANT,
-        )?.tracksByObject[this.address.objectKey]?.trackIdByPropPath
+          this.address.objectKey,
+        )
 
         const variantTrackIdByPropPath =
           sequenceVariant === DEFAULT_SEQUENCE_VARIANT
             ? undefined
-            : getSequenceStateFromSheet(sheetState, sequenceVariant)
-                ?.tracksByObject[this.address.objectKey]?.trackIdByPropPath
+            : valTrackIdByPropPathForObject(
+                pointerToSheetState,
+                sequenceVariant,
+                this.address.objectKey,
+              )
 
         const mergedTrackMap = mergeSequenceTrackMaps(
           defaultTrackIdByPropPath,
