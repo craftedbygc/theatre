@@ -11,7 +11,6 @@
   "scripts": {
     "cli": "node -r esbuild-register devEnv/cli.ts",
     "playground": "yarn workspace playground run serve",
-    "benchmarks": "yarn workspace benchmarks run serve",
     "test:e2e": "yarn workspace playground run test",
     "test:e2e:ci": "yarn workspace playground run test:ci",
     "typecheck": "yarn run build:ts",

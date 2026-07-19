@@ -38,7 +38,7 @@ Published packages → source location:
 - `@theatre/react` → `packages/react/`
 - `@theatre/browser-bundles` → `packages/browser-bundles/`
 
-Non-published: `packages/playground` (dev harness + e2e), `packages/benchmarks`, `packages/saaz`, `packages/dataverse-experiments`, `packages/utils`, `packages/app`, `theatre/shared`, `theatre/devEnv`, `compat-tests`.
+Non-published: `packages/playground` (dev harness + e2e), `packages/saaz`, `packages/dataverse-experiments`, `packages/utils`, `packages/app`, `theatre/shared`, `theatre/devEnv`, `compat-tests`.
 
 TypeScript path aliases (`tsconfig.base.json`) map `@theatre/*` directly to `src/index.ts` of each package — imports resolve to source, not `dist`. Jest uses the same aliases (see `devEnv/getAliasesFromTsConfig.ts`). Don't add relative cross-package imports; use the `@theatre/*` aliases.
 
