@@ -7,6 +7,7 @@ import getStudio from '@theatre/studio/getStudio'
 import {val} from '@theatre/dataverse'
 import type Project from '@theatre/core/projects/Project'
 import type {SheetId} from '@theatre/shared/utils/ids'
+import type {IStateEditors} from '@theatre/studio/store/stateEditors'
 
 export function getStudioActiveSequenceVariant(
   p: WithoutSheetInstance<SheetAddress>,
@@ -25,12 +26,19 @@ export function getStudioActiveSequenceVariant(
 export function setStudioActiveSequenceVariant(
   p: WithoutSheetInstance<SheetAddress>,
   variant: SequenceVariantId,
+  stateEditors?: IStateEditors,
 ): void {
-  getStudio()!.transaction(({stateEditors}) => {
-    stateEditors.studio.historic.projects.stateByProjectId.stateBySheetId.setActiveSequenceVariant(
+  const apply = (editors: IStateEditors) => {
+    editors.studio.historic.projects.stateByProjectId.stateBySheetId.setActiveSequenceVariant(
       {...p, variant},
     )
-  })
+  }
+
+  if (stateEditors) {
+    apply(stateEditors)
+  } else {
+    getStudio()!.transaction(({stateEditors: editors}) => apply(editors))
+  }
 }
 
 /**

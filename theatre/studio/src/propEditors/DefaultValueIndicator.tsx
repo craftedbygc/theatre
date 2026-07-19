@@ -82,6 +82,7 @@ function sequencePropOnVariant(
     setStudioActiveSequenceVariant(
       {projectId: obj.address.projectId, sheetId: obj.address.sheetId},
       variant,
+      stateEditors,
     )
     for (const {path, conf} of iteratePropType(propConfig, pathToProp)) {
       if (isPropConfigComposite(conf)) continue

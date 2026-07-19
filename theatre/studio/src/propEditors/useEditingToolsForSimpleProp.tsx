@@ -332,7 +332,11 @@ function createPrism<T extends SerializablePrimitive>(
               label: `Sequence (${variant})`,
               callback: () => {
                 getStudio()!.transaction(({stateEditors}) => {
-                  setStudioActiveSequenceVariant(obj.sheet.address, variant)
+                  setStudioActiveSequenceVariant(
+                    obj.sheet.address,
+                    variant,
+                    stateEditors,
+                  )
                   const propAddress = {
                     ...obj.address,
                     pathToProp,
