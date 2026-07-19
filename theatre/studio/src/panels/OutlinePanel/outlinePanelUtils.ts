@@ -4,6 +4,7 @@ import getStudio from '@theatre/studio/getStudio'
 import {useVal} from '@theatre/react'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import type SheetObject from '@theatre/core/sheetObjects/SheetObject'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import {
   formatOutlineNamespacePathKey,
   getOutlineNamespaceItemKey,
@@ -25,7 +26,19 @@ export {
 } from '@theatre/shared/utils/outlineNamespaces'
 
 export function useCollapseStateInOutlinePanel(
-  item: Project | Sheet | {type: 'namespace'; sheet: Sheet; path: string[]},
+  item:
+    | Project
+    | Sheet
+    | {
+        type: 'namespace'
+        sheet: Sheet
+        path: string[]
+      }
+    | {
+        type: 'variant'
+        sheet: Sheet
+        variant: SequenceVariantId
+      },
 ): {
   collapsed: boolean
   setCollapsed: (collapsed: boolean) => void
@@ -33,6 +46,8 @@ export function useCollapseStateInOutlinePanel(
   const itemKey =
     item.type === 'namespace'
       ? getOutlineNamespaceItemKey(item.sheet.address.sheetId, item.path)
+      : item.type === 'variant'
+      ? `variant:${item.sheet.address.sheetId}:${item.sheet.address.sheetInstanceId}:${item.variant}`
       : item.type === 'Theatre_Project'
       ? 'project'
       : item.type === 'Theatre_Sheet'
@@ -40,7 +55,7 @@ export function useCollapseStateInOutlinePanel(
       : 'unknown'
 
   const projectId =
-    item.type === 'namespace'
+    item.type === 'namespace' || item.type === 'variant'
       ? item.sheet.address.projectId
       : item.address.projectId
 

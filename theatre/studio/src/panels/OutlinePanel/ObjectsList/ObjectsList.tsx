@@ -12,6 +12,7 @@ import {
   parseOutlineNamespacePath,
   useCollapseStateInOutlinePanel,
 } from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
+import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
 import getStudio from '@theatre/studio/getStudio'
 
 export const Li = styled.li<{isSelected: boolean}>`
@@ -21,7 +22,8 @@ export const Li = styled.li<{isSelected: boolean}>`
 const ObjectsList: React.FC<{
   depth: number
   sheet: Sheet
-}> = ({sheet, depth}) => {
+  variant: SequenceVariantId
+}> = ({sheet, depth, variant}) => {
   return usePrism(() => {
     const objectsMap = val(sheet.objectsP)
     const objects = Object.values(objectsMap).filter(
@@ -56,9 +58,10 @@ const ObjectsList: React.FC<{
         visualIndentation={depth}
         path={[]}
         sheet={sheet}
+        variant={variant}
       />
     )
-  }, [sheet, depth])
+  }, [sheet, depth, variant])
 }
 
 function NamespaceTree(props: {
@@ -66,6 +69,7 @@ function NamespaceTree(props: {
   visualIndentation: number
   path: string[]
   sheet: Sheet
+  variant: SequenceVariantId
 }) {
   return (
     <>
@@ -79,6 +83,7 @@ function NamespaceTree(props: {
             visualIndentation={props.visualIndentation}
             path={props.path}
             sheet={props.sheet}
+            variant={props.variant}
           />
         )
       })}
@@ -93,6 +98,7 @@ function Namespace(props: {
   visualIndentation: number
   path: string[]
   sheet: Sheet
+  variant: SequenceVariantId
 }) {
   const {nested, label, object, sheet} = props
   const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel({
@@ -109,16 +115,16 @@ function Namespace(props: {
       key={'namespaceTree(' + label + ')'}
       visualIndentation={props.visualIndentation + 1}
       sheet={sheet}
+      variant={props.variant}
     />
   )
   const sameNameElt = object && (
     <ObjectItem
       depth={props.visualIndentation}
-      // key is useful for navigating react dev component tree
       key={'objectPath(' + object.address.objectKey + ')'}
-      // object entries should not allow this to be undefined
       sheetObject={object}
       overrideLabel={label}
+      variant={props.variant}
     />
   )
 

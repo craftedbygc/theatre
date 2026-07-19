@@ -5,6 +5,7 @@ import React, {useCallback} from 'react'
 import styled from 'styled-components'
 import ObjectsList from '@theatre/studio/panels/OutlinePanel/ObjectsList/ObjectsList'
 import BaseItem from '@theatre/studio/panels/OutlinePanel/BaseItem'
+import {VariantItem} from '@theatre/studio/panels/OutlinePanel/SheetsList/VariantItem'
 import type Sheet from '@theatre/core/sheets/Sheet'
 import {useCollapseStateInOutlinePanel} from '@theatre/studio/panels/OutlinePanel/outlinePanelUtils'
 
@@ -55,11 +56,14 @@ export const SheetInstanceItem: React.FC<{
         }
       >
         <Body>
-          <ObjectsList
-            depth={depth + 1}
-            sheet={sheet}
-            key={'objectList' + sheet.address.sheetInstanceId}
-          />
+          {sheet.template.getSequenceVariants().map((variant) => (
+            <VariantItem
+              key={`variant-${sheet.address.sheetInstanceId}-${variant}`}
+              depth={depth + 1}
+              sheet={sheet}
+              variant={variant}
+            />
+          ))}
         </Body>
       </BaseItem>
     )

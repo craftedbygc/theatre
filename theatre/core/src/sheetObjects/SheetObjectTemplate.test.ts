@@ -145,5 +145,32 @@ describe(`SheetObjectTemplate`, () => {
         trackVariant: 'default',
       })
     })
+
+    it('inherits default variant static overrides on other variants unless overridden', async () => {
+      const {obj} = await setupTestSheet({
+        staticOverrides: {
+          byObject: {
+            ['obj' as ObjectAddressKey]: {
+              position: {x: 5},
+            },
+          },
+        },
+        staticOverridesByVariant: {
+          mobile: {
+            byObject: {
+              ['obj' as ObjectAddressKey]: {
+                position: {x: 10},
+              },
+            },
+          },
+        },
+      })
+
+      const defaultStatics = obj.template.getStaticValues('default').getValue()
+      const mobileStatics = obj.template.getStaticValues('mobile').getValue()
+
+      expect(defaultStatics).toMatchObject({position: {x: 5}})
+      expect(mobileStatics).toMatchObject({position: {x: 10}})
+    })
   })
 })

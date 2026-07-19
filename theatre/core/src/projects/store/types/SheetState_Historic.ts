@@ -22,6 +22,17 @@ export interface SheetState_Historic {
     byObject: StrictRecord<ObjectAddressKey, SerializableMap>
   }
   /**
+   * Per-variant static overrides. The `default` variant uses `staticOverrides.byObject`
+   * for backward compatibility. Non-default variants store only their own overrides here
+   * and inherit from `staticOverrides.byObject` at read time.
+   */
+  staticOverridesByVariant?: StrictRecord<
+    string,
+    {
+      byObject: StrictRecord<ObjectAddressKey, SerializableMap>
+    }
+  >
+  /**
    * @deprecated Use `sequencesById` instead. Kept for backward compatibility with
    * project states saved before sequence variants were introduced.
    */

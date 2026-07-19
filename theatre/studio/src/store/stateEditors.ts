@@ -9,6 +9,7 @@ import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 import {
   DEFAULT_SEQUENCE_VARIANT,
   ensureSequenceStateInSheet,
+  ensureVariantStaticOverridesByObjectInSheet,
   migrateSheetSequenceState,
 } from '@theatre/core/sequences/sequenceVariants'
 import type {SequenceVariantId} from '@theatre/core/sequences/sequenceVariants'
@@ -653,6 +654,14 @@ namespace stateEditors {
           if (!sheetState) return
           delete sheetState.staticOverrides.byObject[p.objectKey]
 
+          if (sheetState.staticOverridesByVariant) {
+            for (const variantOverrides of Object.values(
+              sheetState.staticOverridesByVariant,
+            )) {
+              delete variantOverrides?.byObject[p.objectKey]
+            }
+          }
+
           migrateSheetSequenceState(sheetState)
           if (sheetState.sequencesById) {
             for (const sequence of Object.values(sheetState.sequencesById)) {
@@ -1074,10 +1083,18 @@ namespace stateEditors {
 
         export namespace staticOverrides {
           export namespace byObject {
-            function _ensure(p: WithoutSheetInstance<SheetObjectAddress>) {
-              const byObject =
+            function _ensure(
+              p: WithoutSheetInstance<SheetObjectAddress> & {
+                sequenceVariant?: SequenceVariantId
+              },
+            ) {
+              const sheetState =
                 stateEditors.coreByProject.historic.sheetsById._ensure(p)
-                  .staticOverrides.byObject
+              const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+              const byObject = ensureVariantStaticOverridesByObjectInSheet(
+                sheetState,
+                variantId,
+              )
               byObject[p.objectKey] ??= {}
               return byObject[p.objectKey]!
             }
@@ -1085,6 +1102,7 @@ namespace stateEditors {
             export function setValueOfCompoundProp(
               p: WithoutSheetInstance<PropAddress> & {
                 value: SerializableMap
+                sequenceVariant?: SequenceVariantId
               },
             ) {
               const existingOverrides = _ensure(p)
@@ -1094,6 +1112,7 @@ namespace stateEditors {
             export function setValueOfPrimitiveProp(
               p: WithoutSheetInstance<PropAddress> & {
                 value: SerializablePrimitive
+                sequenceVariant?: SequenceVariantId
               },
             ) {
               const existingOverrides = _ensure(p)
@@ -1101,11 +1120,18 @@ namespace stateEditors {
             }
 
             export function unsetValueOfPrimitiveProp(
-              p: WithoutSheetInstance<PropAddress>,
+              p: WithoutSheetInstance<PropAddress> & {
+                sequenceVariant?: SequenceVariantId
+              },
             ) {
-              const existingStaticOverrides =
+              const sheetState =
                 stateEditors.coreByProject.historic.sheetsById._ensure(p)
-                  .staticOverrides.byObject[p.objectKey]
+              const variantId = p.sequenceVariant ?? DEFAULT_SEQUENCE_VARIANT
+              const byObject = ensureVariantStaticOverridesByObjectInSheet(
+                sheetState,
+                variantId,
+              )
+              const existingStaticOverrides = byObject[p.objectKey]
 
               if (!existingStaticOverrides) return
 

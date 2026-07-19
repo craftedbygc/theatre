@@ -26,12 +26,15 @@ export const getOutlineSelection = (): OutlineSelection => {
     }
     const sheetInstance = getSelectedInstanceOfSheetId(project, s.sheetId)
     if (!sheetInstance) return
-    if (s.type === 'Sheet') {
+    if (s.type === 'Sheet' || s.type === 'SheetVariant') {
       return sheetInstance
     }
-    const obj = val(sheetInstance.objectsP[s.objectKey])
-    if (!obj) return
-    return obj
+    if (s.type === 'SheetObject') {
+      const obj = val(sheetInstance.objectsP[s.objectKey])
+      if (!obj) return
+      return obj
+    }
+    return
   })
 
   return uniq(

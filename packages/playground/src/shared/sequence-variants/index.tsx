@@ -69,11 +69,12 @@ const SequenceVariantsDemo: React.FC = () => {
     >
       <h1 style={{marginTop: 0}}>Sequence Variants</h1>
       <p>
-        This sheet has three sequence variants: <code>default</code>,{' '}
-        <code>mobile</code>, and <code>desktop</code>. Props sequenced on{' '}
-        <code>default</code> animate on all variants unless you add a
-        variant-specific override (right-click the sequence diamond). Resize
-        below {MOBILE_BREAKPOINT}px to switch to <code>mobile</code>.
+        This sheet has three variants: <code>default</code>, <code>mobile</code>
+        , and <code>desktop</code>. Select a variant folder in the outline panel
+        to edit static and sequenced props for that variant. Values on{' '}
+        <code>default</code> are inherited by other variants unless overridden.
+        Resize below {MOBILE_BREAKPOINT}px to switch the runtime variant to{' '}
+        <code>mobile</code>.
       </p>
       <p>
         Window width: <strong>{windowWidth}px</strong> — Active runtime variant:{' '}

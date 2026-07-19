@@ -24,10 +24,11 @@ import type {Asset, File as AssetFile} from '@theatre/shared/utils/assets'
 import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
-  setStudioActiveSequenceVariant,
 } from '@theatre/studio/utils/activeSequenceVariant'
-import {getSequenceStateFromSheet} from '@theatre/core/sequences/sequenceVariants'
-import {encodePathToProp} from '@theatre/shared/utils/addresses'
+import {
+  getSequenceStateFromSheet,
+  getVariantOwnStaticOverridesByObject,
+} from '@theatre/core/sequences/sequenceVariants'
 
 interface EditingToolsCommon<T> {
   value: T
@@ -294,11 +295,23 @@ function createPrism<T extends SerializablePrimitive>(
       }
     }
 
-    const allStaticOverrides = val(obj.template.getStaticValues())
+    const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
+    const allStaticOverrides = val(obj.template.getStaticValues(activeVariant))
 
     const staticOverride = getDeep(allStaticOverrides, pathToProp)
 
-    if (typeof staticOverride !== 'undefined') {
+    const ownStaticOverrides =
+      getVariantOwnStaticOverridesByObject(
+        val(
+          obj.template.project.pointers.historic.sheetsById[obj.address.sheetId],
+        ),
+        activeVariant,
+      )?.[obj.address.objectKey] ?? {}
+
+    const hasOwnStaticOverride =
+      getDeep(ownStaticOverrides, pathToProp) !== undefined
+
+    if (hasOwnStaticOverride) {
       contextMenuItems.push({
         label: 'Reset to default',
         callback: () => {
@@ -310,68 +323,23 @@ function createPrism<T extends SerializablePrimitive>(
     }
 
     if (isSequencable) {
-      const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
-      const variants = obj.sheet.template.getSequenceVariants()
-      const hasMultipleVariants = variants.length > 1
+      contextMenuItems.push({
+        label: 'Sequence',
+        callback: () => {
+          getStudio()!.transaction(({stateEditors}) => {
+            const propAddress = {
+              ...obj.address,
+              pathToProp,
+              sequenceVariant: activeVariant,
+            }
 
-      if (hasMultipleVariants) {
-        for (const variant of variants) {
-          const sheetState = val(
-            obj.template.project.pointers.historic.sheetsById[
-              obj.address.sheetId
-            ],
-          )
-          const encodedPath = encodePathToProp(pathToProp)
-          const isSequencedOnVariant =
-            typeof getSequenceStateFromSheet(sheetState, variant)
-              ?.tracksByObject[obj.address.objectKey]?.trackIdByPropPath[
-              encodedPath
-            ] === 'string'
-
-          if (!isSequencedOnVariant) {
-            contextMenuItems.push({
-              label: `Sequence (${variant})`,
-              callback: () => {
-                getStudio()!.transaction(({stateEditors}) => {
-                  setStudioActiveSequenceVariant(
-                    obj.sheet.address,
-                    variant,
-                    stateEditors,
-                  )
-                  const propAddress = {
-                    ...obj.address,
-                    pathToProp,
-                    sequenceVariant: variant,
-                  }
-
-                  stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
-                    propAddress,
-                    propConfig,
-                  )
-                })
-              },
-            })
-          }
-        }
-      } else {
-        contextMenuItems.push({
-          label: 'Sequence',
-          callback: () => {
-            getStudio()!.transaction(({stateEditors}) => {
-              const propAddress = {
-                ...obj.address,
-                pathToProp,
-                sequenceVariant: activeVariant,
-              }
-
-              stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
-                propAddress,
-                propConfig,
-              )
-            })
-          },
-        })
-      }
+            stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
+              propAddress,
+              propConfig,
+            )
+          })
+        },
+      })
     }
 
     if (typeof staticOverride !== 'undefined') {
@@ -397,7 +365,7 @@ function createPrism<T extends SerializablePrimitive>(
       shade: 'Default',
       controlIndicators: (
         <DefaultOrStaticValueIndicator
-          hasStaticOverride={true}
+          hasStaticOverride={false}
           obj={obj}
           pathToProp={pathToProp}
           propConfig={propConfig}

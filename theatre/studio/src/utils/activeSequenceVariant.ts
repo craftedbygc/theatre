@@ -4,9 +4,9 @@ import {
   type SequenceVariantId,
 } from '@theatre/core/sequences/sequenceVariants'
 import type Sheet from '@theatre/core/sheets/Sheet'
+import type Project from '@theatre/core/projects/Project'
 import getStudio from '@theatre/studio/getStudio'
 import type {IStateEditors} from '@theatre/studio/store/stateEditors'
-import type Project from '@theatre/core/projects/Project'
 import type {WithoutSheetInstance, SheetAddress} from '@theatre/shared/utils/addresses'
 import type {SheetId} from '@theatre/shared/utils/ids'
 import {val} from '@theatre/dataverse'
@@ -50,6 +50,26 @@ export function setStudioActiveSequenceVariant(
   } else {
     getStudio()!.transaction(({stateEditors: editors}) => apply(editors))
   }
+
+  const studio = getStudio()
+  if (!studio) return
+
+  const project = val(studio.projectsP)[p.projectId]
+  if (!project) return
+
+  const projectStateP =
+    studio.atomP.historic.projects.stateByProjectId[p.projectId]
+  const instanceId = val(
+    projectStateP.stateBySheetId[p.sheetId as SheetId].selectedInstanceId,
+  )
+  const template = val(project.sheetTemplatesP[p.sheetId])
+  if (!template) return
+
+  const sheet = instanceId
+    ? val(template.instancesP[instanceId])
+    : val(template.instancesP)[Object.keys(val(template.instancesP))[0]]
+
+  sheet?.setActiveSequenceVariant(variant)
 }
 
 /**

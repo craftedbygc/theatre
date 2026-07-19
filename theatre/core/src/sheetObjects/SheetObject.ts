@@ -176,7 +176,8 @@ export default class SheetObject implements PointerToPrismProvider {
          * The fourth layer are the (historic) static values. Since these are (currently) commnon to all instances
          * of the same SheetObject, we can read it from the template.
          */
-        const statics = val(this.template.getStaticValues())
+        const activeVariant = val(this.sheet.activeSequenceVariantP)
+        const statics = val(this.template.getStaticValues(activeVariant))
 
         // Similar to above, we need a separate but stable WeakMap to cache the result of merging the static values
         const withStaticsCache = prism.memo(

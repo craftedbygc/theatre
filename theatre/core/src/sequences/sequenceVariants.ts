@@ -9,7 +9,8 @@ import {val} from '@theatre/dataverse'
 import type {SequenceTrackId, ObjectAddressKey} from '@theatre/shared/utils/ids'
 import {InvalidArgumentError} from '@theatre/shared/utils/errors'
 import userReadableTypeOfValue from '@theatre/shared/utils/userReadableTypeOfValue'
-import type {StrictRecord} from '@theatre/shared/utils/types'
+import type {SerializableMap, StrictRecord} from '@theatre/shared/utils/types'
+import {cloneDeep, merge} from 'lodash-es'
 
 export const DEFAULT_SEQUENCE_VARIANT = 'default' as const
 
@@ -54,6 +55,63 @@ export function mergeSequenceTrackMaps(
   }
 
   return merged
+}
+
+export type StaticOverridesByObject = StrictRecord<
+  ObjectAddressKey,
+  SerializableMap
+>
+
+export function getDefaultStaticOverridesByObject(
+  sheetState: SheetState_Historic | undefined,
+): StaticOverridesByObject | undefined {
+  return sheetState?.staticOverrides?.byObject
+}
+
+export function getVariantOwnStaticOverridesByObject(
+  sheetState: SheetState_Historic | undefined,
+  variantId: SequenceVariantId,
+): StaticOverridesByObject | undefined {
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+    return getDefaultStaticOverridesByObject(sheetState)
+  }
+  return sheetState?.staticOverridesByVariant?.[variantId]?.byObject
+}
+
+export function getEffectiveStaticOverrideForObject(
+  sheetState: SheetState_Historic | undefined,
+  variantId: SequenceVariantId,
+  objectKey: ObjectAddressKey,
+): SerializableMap | undefined {
+  const defaultOverrides =
+    getDefaultStaticOverridesByObject(sheetState)?.[objectKey]
+
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+    return defaultOverrides
+  }
+
+  const variantOverrides =
+    sheetState?.staticOverridesByVariant?.[variantId]?.byObject?.[objectKey]
+
+  if (!defaultOverrides && !variantOverrides) return undefined
+  if (!variantOverrides) return defaultOverrides
+  if (!defaultOverrides) return variantOverrides
+
+  return merge(cloneDeep(defaultOverrides), cloneDeep(variantOverrides))
+}
+
+export function ensureVariantStaticOverridesByObjectInSheet(
+  sheetState: SheetState_Historic,
+  variantId: SequenceVariantId,
+): StaticOverridesByObject {
+  if (variantId === DEFAULT_SEQUENCE_VARIANT) {
+    sheetState.staticOverrides ??= {byObject: {}}
+    return sheetState.staticOverrides.byObject
+  }
+
+  sheetState.staticOverridesByVariant ??= {}
+  sheetState.staticOverridesByVariant[variantId] ??= {byObject: {}}
+  return sheetState.staticOverridesByVariant[variantId]!.byObject
 }
 
 const defaultEmptySequence = (): HistoricPositionalSequence => ({

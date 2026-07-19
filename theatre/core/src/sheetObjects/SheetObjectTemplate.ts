@@ -36,6 +36,7 @@ import type {SheetState_Historic} from '@theatre/core/projects/store/types/Sheet
 import type {SheetAhistoricState} from '@theatre/core/projects/store/storeTypes'
 import {
   DEFAULT_SEQUENCE_VARIANT,
+  getEffectiveStaticOverrideForObject,
   getSequenceStateFromSheet,
   mergeSequenceTrackMaps,
   type SequenceVariantId,
@@ -172,11 +173,20 @@ export default class SheetObjectTemplate {
 
   /**
    * Returns values that are set statically (ie, not sequenced, and not defaults)
+   * for the given variant. Non-default variants inherit from the default variant.
    */
-  getStaticValues(): Prism<SerializableMap> {
-    return this._cache.get('getStaticValues', () =>
+  getStaticValues(
+    sequenceVariant: SequenceVariantId = DEFAULT_SEQUENCE_VARIANT,
+  ): Prism<SerializableMap> {
+    return this._cache.get(`getStaticValues:${sequenceVariant}`, () =>
       prism(() => {
-        const json = val(this.pointerToStaticOverrides) ?? {}
+        const sheetState = val(this.pointerToSheetState)
+        const json =
+          getEffectiveStaticOverrideForObject(
+            sheetState,
+            sequenceVariant,
+            this.address.objectKey,
+          ) ?? {}
 
         const config = val(this.configPointer)
         const deserialized = config.deserializeAndSanitize(json) || {}
@@ -345,7 +355,9 @@ export default class SheetObjectTemplate {
       `getStaticButNotSequencedOverrides:${sequenceVariant}`,
       () =>
       prism(() => {
-        const staticOverrides = val(this.getStaticValues())
+        const staticOverrides = val(
+          this.getStaticValues(sequenceVariant),
+        )
         const arrayOfValidSequenceTracks = val(
           this.getArrayOfValidSequenceTracks(sequenceVariant),
         )

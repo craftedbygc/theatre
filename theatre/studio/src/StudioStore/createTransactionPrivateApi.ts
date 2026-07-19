@@ -165,7 +165,11 @@ export default function createTransactionPrivateApi(
               )
             } else {
               stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-                {...propAddress, value: value as $FixMe},
+                {
+                  ...propAddress,
+                  value: value as $FixMe,
+                  sequenceVariant: activeVariant,
+                },
               )
             }
           } else {
@@ -259,7 +263,7 @@ export default function createTransactionPrivateApi(
               )
             } else if (propConfig !== undefined) {
               stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
-                propAddress,
+                {...propAddress, sequenceVariant: activeVariant},
               )
             }
           } else {

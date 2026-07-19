@@ -62,6 +62,9 @@ export type PanelId = keyof Panels
 export type OutlineSelectionState =
   | ({type: 'Project'} & ProjectAddress)
   | ({type: 'Sheet'} & WithoutSheetInstance<SheetAddress>)
+  | ({type: 'SheetVariant'} & WithoutSheetInstance<SheetAddress> & {
+      variant: SequenceVariantId
+    })
   | ({type: 'SheetObject'} & WithoutSheetInstance<SheetObjectAddress>)
 
 export type OutlineSelectable = Project | Sheet | SheetObject
