@@ -28,6 +28,49 @@ $.quote = function quote(arg) {
   )
 }
 
+const packagesToPublish = [
+  '@unseenco/theatre-core',
+  '@unseenco/theatre-studio',
+  '@unseenco/theatre-dataverse',
+  '@unseenco/theatre-react',
+  '@unseenco/theatre-browser-bundles',
+]
+
+const packageDirByName: Record<string, string> = {
+  '@unseenco/theatre-core': 'theatre/core',
+  '@unseenco/theatre-studio': 'theatre/studio',
+  '@unseenco/theatre-dataverse': 'packages/dataverse',
+  '@unseenco/theatre-react': 'packages/react',
+  '@unseenco/theatre-browser-bundles': 'packages/browser-bundles',
+}
+
+/**
+ * Publishes a workspace package to npm.
+ *
+ * Uses `yarn pack` so workspace:* deps are rewritten to real versions in the
+ * tarball, then `npm publish` so credentials from `npm login` (or NODE_AUTH_TOKEN
+ * in CI) are used. Plain `yarn npm publish` requires separate Yarn auth config.
+ */
+async function publishPackageToNpm(packageName: string, npmTag: string) {
+  const repoRoot = path.join(__dirname, '..')
+  const packageDir = path.join(repoRoot, packageDirByName[packageName])
+  const tarballName = '.publish-tarball.tgz'
+  const tarballPath = path.join(packageDir, tarballName)
+
+  const prevCwd = process.cwd()
+
+  try {
+    await $`yarn workspace ${packageName} pack --out ${tarballName}`
+    // Use a relative tarball path from the package dir so zx doesn't bash-quote
+    // Windows absolute paths when running under cmd.exe.
+    process.chdir(packageDir)
+    await $`npm publish ${tarballName} --access public --tag ${npmTag}`
+  } finally {
+    process.chdir(prevCwd)
+    await fs.remove(tarballPath)
+  }
+}
+
 prog
   .command(
     'build clean',
@@ -233,8 +276,7 @@ prog
         console.log(
           `Publishing ${packageName} from ${packageDirByName[packageName]}`,
         )
-        // Use yarn's npm publish so workspace:* deps are rewritten to real versions.
-        await $`yarn workspace ${packageName} npm publish --access public --tag ${npmTag}`
+        await publishPackageToNpm(packageName, npmTag)
       }
     }
 
@@ -284,22 +326,6 @@ prog
   )
   .option('--tag <tag>', 'npm dist-tag', 'latest')
   .action(async (opts) => {
-    const packagesToPublish = [
-      '@unseenco/theatre-core',
-      '@unseenco/theatre-studio',
-      '@unseenco/theatre-dataverse',
-      '@unseenco/theatre-react',
-      '@unseenco/theatre-browser-bundles',
-    ]
-
-    const packageDirByName: Record<string, string> = {
-      '@unseenco/theatre-core': 'theatre/core',
-      '@unseenco/theatre-studio': 'theatre/studio',
-      '@unseenco/theatre-dataverse': 'packages/dataverse',
-      '@unseenco/theatre-react': 'packages/react',
-      '@unseenco/theatre-browser-bundles': 'packages/browser-bundles',
-    }
-
     // @ts-ignore ignore
     process.env.THEATRE_IS_PUBLISHING = true
 
@@ -309,8 +335,7 @@ prog
       console.log(
         `Publishing ${packageName} from ${packageDirByName[packageName]}`,
       )
-      // Use yarn's npm publish so workspace:* deps are rewritten to real versions.
-      await $`yarn workspace ${packageName} npm publish --access public --tag ${npmTag}`
+      await publishPackageToNpm(packageName, npmTag)
     }
   })
 
