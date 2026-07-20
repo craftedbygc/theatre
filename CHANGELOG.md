@@ -1,5 +1,27 @@
 # Theatre.js changelog
 
+## 0.1.0
+
+Initial release of the [Unseen Studio fork](https://github.com/craftedbygc/theatre). Packages are published under the `@unseenco` npm scope.
+
+* New features
+  * **Sheet sequence variants** — sheets can declare multiple sequence variants (e.g. `default`, `mobile`, `desktop`) via `sheet.declareSequenceVariants()`. Each variant has independent sequence data, so the same properties can be animated differently per variant without duplicating sheets. Runtime: `sheet.setActiveSequenceVariant()` switches which variant drives prop values; `onValuesChange` now receives a second argument `{variant}`. Studio: variant folders in the outline panel, per-variant static props, opt-in variant objects via context menu.
+  * **Built-in remote editor sync** — cross-window editing is baked into `@unseenco/theatre-core` with no opt-in API. When a remote editor window is open (`#editor` in the URL hash), sheet object values, selection, and sequence position mirror automatically over `BroadcastChannel`. Studio adds an "Open remote editor window" button to the global toolbar; the main window's Studio UI hides while the remote editor is open and restores when it closes. Project state is pushed to other windows on disconnect.
+  * **Custom core RAF driver** — exported `setCoreRafDriver()` so the core ticker can be driven from an external animation loop.
+  * **Collapsed outline folders** — `sheet.declareOutlineNamespace(path, {collapsed})` declares a folder ahead of time (even when empty) and sets its default collapsed state; `sheet.setOutlineNamespaceCollapsed(path, collapsed)` forces a folder collapsed/expanded on load.
+  * **Resizable details panel** — the detail panel can be resized by dragging its edge.
+  * **Toggle timeline** — a toolbar button pins/unpins the sequence editor (timeline) panel.
+  * **Non-undoable transactions** — `studio.transaction(fn, {undoable: false})` persists changes without recording them in undo history.
+
+* Breaking changes
+  * Package scope renamed from `@theatre/*` to `@unseenco/theatre-*` (e.g. `@unseenco/theatre-core`, `@unseenco/theatre-studio`).
+  * Removed `@theatre/r3f`, `@theatre/remote`, `@theatre/theatric`, and the `benchmarks` workspace package.
+  * Removed Studio update-checking UI and logic.
+
+
+
+## Previous Theatre Versions
+
 ## 0.4.5
 
 * New features
