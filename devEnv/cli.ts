@@ -1,5 +1,5 @@
 import sade from 'sade'
-import {$, cd, fs, path} from '@cspotcode/zx'
+import {$, fs, path} from '@cspotcode/zx'
 
 if (process.platform === 'win32') {
   $.shell = 'cmd.exe'
@@ -229,16 +229,13 @@ prog
       // }
 
       console.log('Publishing to npm')
-      const repoRoot = path.join(__dirname, '..')
       for (const packageName of packagesToPublish) {
-        const packageDir = path.join(repoRoot, packageDirByName[packageName])
         console.log(
           `Publishing ${packageName} from ${packageDirByName[packageName]}`,
         )
-        cd(packageDir)
-        await $`npm publish --access public --tag ${npmTag}`
+        // Use yarn's npm publish so workspace:* deps are rewritten to real versions.
+        await $`yarn workspace ${packageName} npm publish --access public --tag ${npmTag}`
       }
-      cd(repoRoot)
     }
 
     void release()
@@ -307,17 +304,14 @@ prog
     process.env.THEATRE_IS_PUBLISHING = true
 
     const npmTag = opts.tag ?? 'latest'
-    const repoRoot = path.join(__dirname, '..')
 
     for (const packageName of packagesToPublish) {
-      const packageDir = path.join(repoRoot, packageDirByName[packageName])
       console.log(
         `Publishing ${packageName} from ${packageDirByName[packageName]}`,
       )
-      cd(packageDir)
-      await $`npm publish --access public --tag ${npmTag}`
+      // Use yarn's npm publish so workspace:* deps are rewritten to real versions.
+      await $`yarn workspace ${packageName} npm publish --access public --tag ${npmTag}`
     }
-    cd(repoRoot)
   })
 
 prog
