@@ -2,6 +2,8 @@
 
 A fork of [Theatre.js](https://github.com/theatre-js/theatre), maintained internally by Unseen Studio.
 
+See [CHANGELOG.md](./CHANGELOG.md) for what's changed.
+
 Theatre.js is a motion-design library for the web: you define animations in code and refine them in a visual editor (Studio). This fork publishes under the `@unseenco` npm scope (e.g. `@unseenco/theatre-core`, `@unseenco/theatre-studio`).
 
 For the original project, docs, and community, see [theatrejs.com](https://www.theatrejs.com).
