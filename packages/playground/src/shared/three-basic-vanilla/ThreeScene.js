@@ -21,27 +21,8 @@ export function createThreeScene(project) {
   const canvas = document.getElementById('canvas')
   const sheet = project.sheet('Sphere')
 
-  /** @type {import('@unseenco/theatre-core').ISheetObject | undefined} */
-  let sheetObj
   /** @type {Mesh | undefined} */
   let mesh
-
-  /**
-   * @param {string} key
-   * @param {Record<string, unknown>} props
-   */
-  function animate(key, props) {
-    if (sheetObj === undefined) {
-      sheetObj = sheet.object(key, props)
-    } else {
-      sheetObj = sheet.object(
-        key,
-        {...props, ...sheetObj.value},
-        {reconfigure: true},
-      )
-    }
-    return sheetObj
-  }
 
   function animateMaterial() {
     if (mesh === undefined) return
@@ -84,7 +65,7 @@ export function createThreeScene(project) {
       }
     }
 
-    animate('Material', {material: keys}).onValuesChange((values) => {
+    sheet.object('Material', {material: keys}).onValuesChange((values) => {
       const {material} = values
       for (const key in material) {
         if (key === 'uniforms') {
@@ -113,41 +94,43 @@ export function createThreeScene(project) {
 
   function animateTransform() {
     if (mesh === undefined) return
-    animate('Transform', {
-      transform: {
-        position: {
-          x: mesh.position.x,
-          y: mesh.position.y,
-          z: mesh.position.z,
+    sheet
+      .object('Transform', {
+        transform: {
+          position: {
+            x: mesh.position.x,
+            y: mesh.position.y,
+            z: mesh.position.z,
+          },
+          rotation: {
+            x: mesh.rotation.x,
+            y: mesh.rotation.y,
+            z: mesh.rotation.z,
+          },
+          scale: {
+            x: mesh.scale.x,
+            y: mesh.scale.y,
+            z: mesh.scale.z,
+          },
+          visible: mesh.visible,
         },
-        rotation: {
-          x: mesh.rotation.x,
-          y: mesh.rotation.y,
-          z: mesh.rotation.z,
-        },
-        scale: {
-          x: mesh.scale.x,
-          y: mesh.scale.y,
-          z: mesh.scale.z,
-        },
-        visible: mesh.visible,
-      },
-    }).onValuesChange((values) => {
-      if (mesh === undefined) return
-      const {transform} = values
-      mesh.position.set(
-        transform.position.x,
-        transform.position.y,
-        transform.position.z,
-      )
-      mesh.rotation.set(
-        transform.rotation.x,
-        transform.rotation.y,
-        transform.rotation.z,
-      )
-      mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z)
-      mesh.visible = transform.visible
-    })
+      })
+      .onValuesChange((values) => {
+        if (mesh === undefined) return
+        const {transform} = values
+        mesh.position.set(
+          transform.position.x,
+          transform.position.y,
+          transform.position.z,
+        )
+        mesh.rotation.set(
+          transform.rotation.x,
+          transform.rotation.y,
+          transform.rotation.z,
+        )
+        mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z)
+        mesh.visible = transform.visible
+      })
   }
 
   const width = window.innerWidth
@@ -160,6 +143,7 @@ export function createThreeScene(project) {
   renderer.setSize(width, height)
 
   const scene = new Scene()
+  scene.background = new Color(0xcccccc)
   const camera = new PerspectiveCamera(60, width / height)
   camera.position.z = 10
 
@@ -176,10 +160,6 @@ export function createThreeScene(project) {
   }
   render()
 
-  document
-    .getElementById('animate-material')
-    .addEventListener('click', animateMaterial)
-  document
-    .getElementById('animate-transform')
-    .addEventListener('click', animateTransform)
+  animateMaterial()
+  animateTransform()
 }
