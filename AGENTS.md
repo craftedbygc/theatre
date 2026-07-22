@@ -34,6 +34,7 @@ Yarn workspaces: `packages/*`, `examples/*`, `theatre`, `compat-tests`. Lerna is
 Published packages → source location:
 - `@unseenco/theatre-core` → `theatre/core/` — runtime animation library (Apache-2.0, ships in user bundles)
 - `@unseenco/theatre-studio` → `theatre/studio/` — visual editor (AGPL-3.0, dev-time only)
+- `@unseenco/theatre-threejs` → `packages/threejs/` — Three.js Studio devtools extension (AGPL-3.0, dev-time only). When developing this package, read `packages/threejs/AGENTS.md`.
 - `@unseenco/theatre-dataverse` → `packages/dataverse/` — reactive dataflow
 - `@unseenco/theatre-react` → `packages/react/`
 - `@unseenco/theatre-browser-bundles` → `packages/browser-bundles/`

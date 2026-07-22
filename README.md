@@ -14,6 +14,7 @@ For the original project, docs, and community, see [theatrejs.com](https://www.t
 | --- | --- |
 | `@unseenco/theatre-core` | Runtime animation library (ships in production bundles) |
 | `@unseenco/theatre-studio` | Visual editor (dev-time only) |
+| `@unseenco/theatre-threejs` | Three.js Studio devtools extension — orbit camera and scene inspection (dev-time only) |
 | `@unseenco/theatre-dataverse` | Reactive dataflow library used internally |
 | `@unseenco/theatre-react` | React bindings |
 | `@unseenco/theatre-browser-bundles` | Pre-built browser bundles |
@@ -44,5 +45,6 @@ This fork inherits the upstream licenses:
 
 - `@unseenco/theatre-core` and most packages: **Apache-2.0**
 - `@unseenco/theatre-studio`: **AGPL-3.0** (editor only; not included in production bundles)
+- `@unseenco/theatre-threejs`: **AGPL-3.0** (Studio extension only; not included in production bundles)
 
 Original copyright notices are preserved in each package's `LICENSE` file.
