@@ -10,6 +10,7 @@
     {"path": "../../packages/dataverse"},
     {"path": "../../packages/playground"},
     {"path": "../../packages/react"},
+    {"path": "../../packages/threejs"},
     {"path": "../../examples/basic-dom"},
     {"path": "../../compat-tests"},
     {"path": "../../devEnv"}

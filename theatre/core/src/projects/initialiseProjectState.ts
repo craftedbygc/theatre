@@ -31,7 +31,7 @@ export default async function initialiseProjectState(
       loadingState: {type: 'loading'},
     }
 
-    drafts.ahistoric.coreByProject[projectId] = {
+    drafts.ahistoric.coreByProject[projectId] ??= {
       ahistoricStuff: '',
     }
 

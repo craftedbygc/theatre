@@ -34,6 +34,7 @@ const packagesToPublish = [
   '@unseenco/theatre-dataverse',
   '@unseenco/theatre-react',
   '@unseenco/theatre-browser-bundles',
+  '@unseenco/theatre-threejs',
 ]
 
 const packageDirByName: Record<string, string> = {
@@ -42,6 +43,7 @@ const packageDirByName: Record<string, string> = {
   '@unseenco/theatre-dataverse': 'packages/dataverse',
   '@unseenco/theatre-react': 'packages/react',
   '@unseenco/theatre-browser-bundles': 'packages/browser-bundles',
+  '@unseenco/theatre-threejs': 'packages/threejs',
 }
 
 /**
@@ -82,6 +84,7 @@ prog
       '@unseenco/theatre-dataverse',
       '@unseenco/theatre-react',
       '@unseenco/theatre-browser-bundles',
+      '@unseenco/theatre-threejs',
     ]
 
     await Promise.all([
@@ -123,6 +126,7 @@ prog
       '@unseenco/theatre-dataverse',
       '@unseenco/theatre-react',
       '@unseenco/theatre-browser-bundles',
+      '@unseenco/theatre-threejs',
     ]
 
     const packagesToPublish = [
@@ -131,6 +135,7 @@ prog
       '@unseenco/theatre-dataverse',
       '@unseenco/theatre-react',
       '@unseenco/theatre-browser-bundles',
+      '@unseenco/theatre-threejs',
     ]
 
     const packageDirByName: Record<string, string> = {
@@ -152,6 +157,7 @@ prog
       'packages/dataverse',
       'packages/react',
       'packages/browser-bundles',
+      'packages/threejs',
     ]
 
     // our packages will check for this env variable to make sure their

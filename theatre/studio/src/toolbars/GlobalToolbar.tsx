@@ -24,10 +24,7 @@ import {
   useNotifications,
   useEmptyNotificationsTooltip,
 } from '@unseenco/theatre-studio/notify'
-import {
-  disableVisibilityToggleKeyboardShortcut,
-  enableVisibilityToggleKeyboardShortcut,
-} from '@unseenco/theatre-studio/UIRoot/useKeyboardShortcuts'
+import {openRemoteEditorWindow} from '@unseenco/theatre-studio/remoteEditor'
 
 const Container = styled.div`
   height: 36px;
@@ -77,39 +74,6 @@ const GroupDivider = styled.div`
   background: #373b40;
   opacity: 0.4;
 `
-
-let remoteEditorWindow: Window | null = null
-
-const openRemoteEditorWindow = () => {
-  if (remoteEditorWindow && !remoteEditorWindow.closed) {
-    remoteEditorWindow.focus()
-    return
-  }
-
-  const url = new URL(window.location.href)
-  url.hash = 'editor'
-  // Note: no noopener/noreferrer, since we need the returned reference to
-  // detect when the popup closes. This is a same-origin popup of the app's
-  // own URL, not a third-party link, so the tabnabbing risk doesn't apply.
-  remoteEditorWindow = window.open(
-    url.toString(),
-    'theatre-remote-editor',
-    'popup=1,width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes',
-  )
-  if (!remoteEditorWindow) return // popup blocked by the browser
-
-  getStudio().ui.hide()
-  disableVisibilityToggleKeyboardShortcut()
-
-  const pollForClose = window.setInterval(() => {
-    if (!remoteEditorWindow || remoteEditorWindow.closed) {
-      window.clearInterval(pollForClose)
-      remoteEditorWindow = null
-      enableVisibilityToggleKeyboardShortcut()
-      getStudio().ui.restore()
-    }
-  }, 500)
-}
 
 const GlobalToolbar: React.FC = () => {
   const conflicts = usePrism(() => {

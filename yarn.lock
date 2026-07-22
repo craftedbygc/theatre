@@ -6650,6 +6650,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@unseenco/theatre-threejs@workspace:*, @unseenco/theatre-threejs@workspace:packages/threejs":
+  version: 0.0.0-use.local
+  resolution: "@unseenco/theatre-threejs@workspace:packages/threejs"
+  dependencies:
+    "@microsoft/api-extractor": ^7.18.11
+    "@types/node": ^15.6.2
+    "@types/three": ^0.185.1
+    "@unseenco/theatre-studio": "workspace:*"
+    esbuild: ^0.12.15
+    esbuild-register: ^2.5.0
+    npm-run-all: ^4.1.5
+    three: ^0.185.1
+    typescript: 5.1.6
+  peerDependencies:
+    "@unseenco/theatre-studio": "*"
+    three: ">=0.150.0"
+  languageName: unknown
+  linkType: soft
+
 "@verdaccio/commons-api@npm:10.2.0":
   version: 10.2.0
   resolution: "@verdaccio/commons-api@npm:10.2.0"
@@ -20105,6 +20124,7 @@ fsevents@^1.2.7:
     "@unseenco/theatre-dataverse": "workspace:*"
     "@unseenco/theatre-react": "workspace:*"
     "@unseenco/theatre-studio": "workspace:*"
+    "@unseenco/theatre-threejs": "workspace:*"
     "@vitejs/plugin-react": ^4.0.0
     "@vitejs/plugin-react-swc": ^3.3.2
     fast-glob: ^3.3.0

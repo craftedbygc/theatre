@@ -15,6 +15,7 @@ import type Project from '@unseenco/theatre-core/projects/Project'
 import type {CoreBits} from '@unseenco/theatre-core/CoreBundle'
 import SimpleCache from '@unseenco/theatre-shared/utils/SimpleCache'
 import type {IProject, ISheet} from '@unseenco/theatre-core'
+import {isRemoteEditorWindow} from './remoteEditor'
 import PaneManager from './PaneManager'
 import type * as _coreExports from '@unseenco/theatre-core/coreExports'
 import type {OnDiskState} from '@unseenco/theatre-core/projects/store/storeTypes'
@@ -193,6 +194,13 @@ export class Studio {
     } catch (e) {
       this._initializedDeferred.reject(e)
       return
+    }
+
+    // The main window hides Studio UI when opening a remote editor popup, and
+    // that visibility state is persisted to localStorage. The remote editor
+    // window loads the same persistence key, so force Studio visible here.
+    if (isRemoteEditorWindow()) {
+      this.ui.restore()
     }
 
     syncAllStudioPreviewVariants(this)

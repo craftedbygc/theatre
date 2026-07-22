@@ -1,4 +1,5 @@
 import getStudio from '@unseenco/theatre-studio/getStudio'
+import {isRemoteEditorWindow} from '@unseenco/theatre-studio/remoteEditor'
 import {usePrism, useVal} from '@unseenco/theatre-react'
 import {val} from '@unseenco/theatre-dataverse'
 import React, {useEffect} from 'react'
@@ -66,7 +67,7 @@ export default function UIRoot(props: {
 
   const visiblityState = useVal(studio.atomP.ahistoric.visibilityState)
   useEffect(() => {
-    if (visiblityState === 'everythingIsHidden') {
+    if (!isRemoteEditorWindow() && visiblityState === 'everythingIsHidden') {
       console.warn(
         `Theatre.js Studio is hidden. Use the keyboard shortcut 'alt + \\' to restore the studio, or call studio.ui.restore().`,
       )
@@ -76,6 +77,8 @@ export default function UIRoot(props: {
 
   const inside = usePrism(() => {
     const visiblityState = val(studio.atomP.ahistoric.visibilityState)
+    const isStudioHidden =
+      !isRemoteEditorWindow() && visiblityState === 'everythingIsHidden'
 
     const initialised = val(studio.atomP.ephemeral.initialised)
 
@@ -94,11 +97,7 @@ export default function UIRoot(props: {
               >
                 <>
                   <MakeRootHostContainStatic />
-                  <Container
-                    className={
-                      visiblityState === 'everythingIsHidden' ? 'invisible' : ''
-                    }
-                  >
+                  <Container className={isStudioHidden ? 'invisible' : ''}>
                     <PortalLayer ref={portalLayerRef} />
                     <GlobalToolbar />
                     <PanelsRoot />

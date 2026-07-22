@@ -82,6 +82,10 @@ if (typeof window !== 'undefined') {
   }
 }
 
+export {
+  isRemoteEditorOpen,
+  onRemoteEditorOpenChange,
+} from '@unseenco/theatre-studio/remoteEditor'
 export type {IScrub} from '@unseenco/theatre-studio/Scrub'
 export type {
   IStudio,
