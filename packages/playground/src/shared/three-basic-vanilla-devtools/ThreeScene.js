@@ -1,6 +1,8 @@
 import {types} from '@unseenco/theatre-core'
 import {
+  BoxGeometry,
   Color,
+  CylinderGeometry,
   DirectionalLight,
   Mesh,
   MeshPhongMaterial,
@@ -17,122 +19,8 @@ import {
 /**
  * @param {import('@unseenco/theatre-core').IProject} project
  */
-export function createThreeScene(project) {
+export function createThreeScenes(project) {
   const canvas = document.getElementById('canvas')
-  const sheet = project.sheet('Sphere')
-
-  /** @type {Mesh | undefined} */
-  let mesh
-
-  function animateMaterial() {
-    if (mesh === undefined) return
-    const keys = {}
-    for (const i in mesh.material) {
-      const value = mesh.material[i]
-      if (typeof value === 'number') {
-        keys[i] = value
-      } else if (value instanceof Vector2) {
-        keys[i] = {x: value.x, y: value.y}
-      } else if (value instanceof Vector3) {
-        keys[i] = {x: value.x, y: value.y, z: value.z}
-      } else if (value instanceof Color) {
-        keys[i] = types.rgba({
-          r: value.r * 255,
-          g: value.g * 255,
-          b: value.b * 255,
-          a: 1,
-        })
-      }
-    }
-
-    if (
-      mesh.material instanceof ShaderMaterial ||
-      mesh.material instanceof RawShaderMaterial
-    ) {
-      const uniforms = mesh.material.uniforms
-      keys.uniforms = {}
-      for (const i in uniforms) {
-        const uniform = uniforms[i].value
-        if (typeof uniform === 'number') {
-          keys.uniforms[i] = uniform
-        } else if (uniform instanceof Vector2) {
-          keys.uniforms[i] = {x: uniform.x, y: uniform.y}
-        } else if (uniform instanceof Vector3) {
-          keys.uniforms[i] = {x: uniform.x, y: uniform.y, z: uniform.z}
-        } else if (uniform instanceof Color) {
-          keys.uniforms[i] = {r: uniform.r, g: uniform.g, b: uniform.b}
-        }
-      }
-    }
-
-    sheet.object('Material', {material: keys}).onValuesChange((values) => {
-      const {material} = values
-      for (const key in material) {
-        if (key === 'uniforms') {
-          const uniforms = material[key]
-          for (const uniKey in uniforms) {
-            const uniform = uniforms[uniKey]
-            if (typeof uniform === 'number') {
-              mesh.material.uniforms[uniKey].value = uniform
-            } else {
-              mesh.material.uniforms[uniKey].value.copy(uniform)
-            }
-          }
-        } else {
-          const value = material[key]
-          if (typeof value === 'number') {
-            mesh.material[key] = value
-          } else if (value.r !== undefined) {
-            mesh.material[key].copy(value)
-          } else if (value.x !== undefined) {
-            mesh.material[key].copy(value)
-          }
-        }
-      }
-    })
-  }
-
-  function animateTransform() {
-    if (mesh === undefined) return
-    sheet
-      .object('Transform', {
-        transform: {
-          position: {
-            x: mesh.position.x,
-            y: mesh.position.y,
-            z: mesh.position.z,
-          },
-          rotation: {
-            x: mesh.rotation.x,
-            y: mesh.rotation.y,
-            z: mesh.rotation.z,
-          },
-          scale: {
-            x: mesh.scale.x,
-            y: mesh.scale.y,
-            z: mesh.scale.z,
-          },
-          visible: mesh.visible,
-        },
-      })
-      .onValuesChange((values) => {
-        if (mesh === undefined) return
-        const {transform} = values
-        mesh.position.set(
-          transform.position.x,
-          transform.position.y,
-          transform.position.z,
-        )
-        mesh.rotation.set(
-          transform.rotation.x,
-          transform.rotation.y,
-          transform.rotation.z,
-        )
-        mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z)
-        mesh.visible = transform.visible
-      })
-  }
-
   const width = window.innerWidth
   const height = window.innerHeight
   const renderer = new WebGLRenderer({
@@ -142,7 +30,148 @@ export function createThreeScene(project) {
   renderer.setPixelRatio(devicePixelRatio)
   renderer.setSize(width, height)
 
+  const spheresScene = createSpheresScene(
+    project.sheet('Sphere'),
+    width,
+    height,
+  )
+  const cubeScene = createCubeScene(project.sheet('Cube'), width, height)
+  const cylinderScene = createCylinderScene(
+    project.sheet('Cylinder'),
+    width,
+    height,
+  )
+
+  return {
+    renderer,
+    scenes: [
+      {scene: spheresScene.scene, camera: spheresScene.camera},
+      {scene: cubeScene.scene, camera: cubeScene.camera},
+      {scene: cylinderScene.scene, camera: cylinderScene.camera},
+    ],
+  }
+}
+
+/**
+ * @param {import('@unseenco/theatre-core').ISheet} sheet
+ * @param {Mesh} mesh
+ */
+function bindMaterialSheet(sheet, mesh) {
+  const keys = {}
+  for (const i in mesh.material) {
+    const value = mesh.material[i]
+    if (typeof value === 'number') {
+      keys[i] = value
+    } else if (value instanceof Vector2) {
+      keys[i] = {x: value.x, y: value.y}
+    } else if (value instanceof Vector3) {
+      keys[i] = {x: value.x, y: value.y, z: value.z}
+    } else if (value instanceof Color) {
+      keys[i] = types.rgba({
+        r: value.r * 255,
+        g: value.g * 255,
+        b: value.b * 255,
+        a: 1,
+      })
+    }
+  }
+
+  if (
+    mesh.material instanceof ShaderMaterial ||
+    mesh.material instanceof RawShaderMaterial
+  ) {
+    const uniforms = mesh.material.uniforms
+    keys.uniforms = {}
+    for (const i in uniforms) {
+      const uniform = uniforms[i].value
+      if (typeof uniform === 'number') {
+        keys.uniforms[i] = uniform
+      } else if (uniform instanceof Vector2) {
+        keys.uniforms[i] = {x: uniform.x, y: uniform.y}
+      } else if (uniform instanceof Vector3) {
+        keys.uniforms[i] = {x: uniform.x, y: uniform.y, z: uniform.z}
+      } else if (uniform instanceof Color) {
+        keys.uniforms[i] = {r: uniform.r, g: uniform.g, b: uniform.b}
+      }
+    }
+  }
+
+  sheet.object('Material', {material: keys}).onValuesChange((values) => {
+    const {material} = values
+    for (const key in material) {
+      if (key === 'uniforms') {
+        const uniforms = material[key]
+        for (const uniKey in uniforms) {
+          const uniform = uniforms[uniKey]
+          if (typeof uniform === 'number') {
+            mesh.material.uniforms[uniKey].value = uniform
+          } else {
+            mesh.material.uniforms[uniKey].value.copy(uniform)
+          }
+        }
+      } else {
+        const value = material[key]
+        if (typeof value === 'number') {
+          mesh.material[key] = value
+        } else if (value.r !== undefined) {
+          mesh.material[key].copy(value)
+        } else if (value.x !== undefined) {
+          mesh.material[key].copy(value)
+        }
+      }
+    }
+  })
+}
+
+/**
+ * @param {import('@unseenco/theatre-core').ISheet} sheet
+ * @param {Mesh} mesh
+ */
+function bindTransformSheet(sheet, mesh) {
+  sheet
+    .object('Transform', {
+      transform: {
+        position: {
+          x: mesh.position.x,
+          y: mesh.position.y,
+          z: mesh.position.z,
+        },
+        rotation: {
+          x: mesh.rotation.x,
+          y: mesh.rotation.y,
+          z: mesh.rotation.z,
+        },
+        scale: {
+          x: mesh.scale.x,
+          y: mesh.scale.y,
+          z: mesh.scale.z,
+        },
+        visible: mesh.visible,
+      },
+    })
+    .onValuesChange((values) => {
+      const {transform} = values
+      mesh.position.set(
+        transform.position.x,
+        transform.position.y,
+        transform.position.z,
+      )
+      mesh.rotation.set(
+        transform.rotation.x,
+        transform.rotation.y,
+        transform.rotation.z,
+      )
+      mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z)
+      mesh.visible = transform.visible
+    })
+}
+
+/**
+ * @param {import('@unseenco/theatre-core').ISheet} sheet
+ */
+function createSpheresScene(sheet, width, height) {
   const scene = new Scene()
+  scene.name = 'Spheres'
   scene.background = new Color(0xcccccc)
   const camera = new PerspectiveCamera(60, width / height, 0.1, 500)
 
@@ -171,7 +200,7 @@ export function createThreeScene(project) {
     scene.add(sphere)
   }
 
-  mesh = new Mesh(
+  const mesh = new Mesh(
     new SphereGeometry(3),
     new MeshPhongMaterial({color: 0xffffff}),
   )
@@ -179,8 +208,62 @@ export function createThreeScene(project) {
 
   camera.position.set(0, 0, 45)
 
-  animateMaterial()
-  animateTransform()
+  bindMaterialSheet(sheet, mesh)
+  bindTransformSheet(sheet, mesh)
 
-  return {scene, renderer, camera}
+  return {scene, camera}
+}
+
+/**
+ * @param {import('@unseenco/theatre-core').ISheet} sheet
+ */
+function createCubeScene(sheet, width, height) {
+  const scene = new Scene()
+  scene.name = 'Cube'
+  scene.background = new Color(0x2a4d69)
+
+  const camera = new PerspectiveCamera(60, width / height, 0.1, 500)
+  camera.position.set(0, 2, 8)
+
+  const light = new DirectionalLight(0xffffff, 1.2)
+  light.position.set(4, 8, 6)
+  scene.add(light)
+
+  const cube = new Mesh(
+    new BoxGeometry(3, 3, 3),
+    new MeshPhongMaterial({color: 0xe8a838}),
+  )
+  scene.add(cube)
+
+  bindMaterialSheet(sheet, cube)
+  bindTransformSheet(sheet, cube)
+
+  return {scene, camera}
+}
+
+/**
+ * @param {import('@unseenco/theatre-core').ISheet} sheet
+ */
+function createCylinderScene(sheet, width, height) {
+  const scene = new Scene()
+  scene.name = 'Cylinder'
+  scene.background = new Color(0x3d2c4d)
+
+  const camera = new PerspectiveCamera(60, width / height, 0.1, 500)
+  camera.position.set(0, 3, 10)
+
+  const light = new DirectionalLight(0xffffff, 1.2)
+  light.position.set(-3, 6, 5)
+  scene.add(light)
+
+  const cylinder = new Mesh(
+    new CylinderGeometry(1.5, 1.5, 5, 32),
+    new MeshPhongMaterial({color: 0x6eceda}),
+  )
+  scene.add(cylinder)
+
+  bindMaterialSheet(sheet, cylinder)
+  bindTransformSheet(sheet, cylinder)
+
+  return {scene, camera}
 }

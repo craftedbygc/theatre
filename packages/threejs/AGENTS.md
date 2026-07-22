@@ -9,7 +9,8 @@ A **Studio extension** (dev-time only, AGPL-3.0) that adds Three.js scene inspec
 The main entry point is `buildExtension()`, which returns:
 
 - `extension` — pass to `studio.extend()`
-- `getCamera()` — active camera for `renderer.render(scene, camera)` (scene camera or internal OrbitControls camera)
+- `getCamera()` — active camera for `renderer.render(scene, camera)` (active scene camera or internal OrbitControls camera)
+- `onSceneSwitch(callback)` — subscribe to scene changes from the toolbar flyout; callback receives `(name, scene)` with the original `Scene` reference from init
 - `update()` — call each frame when orbit mode is active
 - `dispose()` — tear down listeners and controls
 
@@ -43,24 +44,35 @@ The playground demo lives at `packages/playground/src/shared/three-basic-vanilla
 import studio from '@unseenco/theatre-studio'
 import {buildExtension} from '@unseenco/theatre-threejs'
 
-const devtools = buildExtension({renderer, camera: sceneCamera, studio})
+let activeScene = scene
+
+const devtools = buildExtension({
+  renderer,
+  scenes: [{scene, camera: sceneCamera}],
+  studio,
+})
+devtools.onSceneSwitch((_name, scene) => {
+  activeScene = scene
+})
 studio.extend(devtools.extension)
 
 function loop() {
   requestAnimationFrame(loop)
   devtools.update()
-  renderer.render(scene, devtools.getCamera())
+  renderer.render(activeScene, devtools.getCamera())
 }
 ```
 
-`buildExtension` needs the **scene camera** and **renderer** from the user's app. It cannot discover them automatically because `studio.extend()` only accepts a static extension config object.
+`buildExtension` needs the **renderer** and at least one **scene/camera pair** from the user's app. Scene switching in the render loop is user-driven via `onSceneSwitch` — the extension does not call `renderer.render()` itself. It cannot discover scenes automatically because `studio.extend()` only accepts a static extension config object.
 
 ## Persistence
 
-Devtools state is stored on a **Studio project sheet** (`studio.getStudioProject().sheet('Extension: theatre-threejs')`), object key `Devtools`:
+Devtools state is stored on a **Studio project sheet** (`studio.getStudioProject().sheet('Extension: theatre-threejs')`), one object per scene (`Devtools: <scene name>`):
 
 - `orbitEnabled` — scene vs orbit camera
 - `position` / `target` — orbit camera pose
+
+A shared object `Devtools: ActiveScene` stores `activeSceneName` so scene switches sync between the main window and the remote editor popup. Each scene keeps its own orbit/camera devtools state.
 
 Rules:
 
@@ -90,7 +102,7 @@ Studio UI visibility: the main window calls `studio.ui.hide()` when opening remo
 
 ## Toolbar
 
-The extension registers a global toolbar **Switch** (not Icon) for scene/orbit camera. Switch `value` must stay in sync with local `mode`.
+The extension registers a global toolbar **Flyout** (when multiple scenes are configured) for scene switching and a **Switch** for scene/orbit camera. Switch `value` must stay in sync with local `mode`.
 
 ## Build / lint quirks
 

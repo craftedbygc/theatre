@@ -7,7 +7,12 @@
 export {buildExtension} from './buildExtension'
 export {EXTENSION_ID} from './constants'
 
-export type {ThreejsDevtools, ThreejsDevtoolsConfig} from './buildExtension'
+export type {
+  SceneConfig,
+  SceneSwitchCallback,
+  ThreejsDevtools,
+  ThreejsDevtoolsConfig,
+} from './buildExtension'
 
 export type {DevtoolsState, StudioLike} from './persistence'
 

@@ -9,6 +9,10 @@ export type DevtoolsState = {
   target: {x: number; y: number; z: number}
 }
 
+export type ActiveSceneState = {
+  activeSceneName: string
+}
+
 export interface StudioTransactionAPI {
   set(pointer: unknown, value: unknown): void
 }
@@ -19,7 +23,7 @@ export interface StudioLike {
       object(
         objectKey: string,
         props: Record<string, unknown>,
-      ): DevtoolsStateObject
+      ): DevtoolsStateObject & ActiveSceneStateObject
     }
   }
   transaction(
@@ -45,28 +49,75 @@ export interface DevtoolsStateObject {
   onValuesChange(fn: (values: DevtoolsState) => void): () => void
 }
 
-export const DEVTOOLS_OBJECT_KEY = 'Devtools'
+export interface ActiveSceneStateObject {
+  readonly props: {
+    activeSceneName: unknown
+  }
+  onValuesChange(fn: (values: ActiveSceneState) => void): () => void
+}
+
+export const ACTIVE_SCENE_OBJECT_KEY = 'Devtools: ActiveScene'
+
+export function getDevtoolsObjectKey(sceneName: string): string {
+  return `Devtools: ${sceneName}`
+}
 
 export function createDevtoolsStateObject(
   studio: StudioLike,
-  orbitCamera: PerspectiveCamera,
-  controls: OrbitControls,
-  orbitEnabled: boolean,
+  objectKey: string,
+  initialState: DevtoolsState,
 ): DevtoolsStateObject {
   const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID)
-  return sheet.object(DEVTOOLS_OBJECT_KEY, {
-    orbitEnabled: types.boolean(orbitEnabled),
+  return sheet.object(objectKey, {
+    orbitEnabled: types.boolean(initialState.orbitEnabled),
     position: types.compound({
-      x: orbitCamera.position.x,
-      y: orbitCamera.position.y,
-      z: orbitCamera.position.z,
+      x: initialState.position.x,
+      y: initialState.position.y,
+      z: initialState.position.z,
     }),
     target: types.compound({
-      x: controls.target.x,
-      y: controls.target.y,
-      z: controls.target.z,
+      x: initialState.target.x,
+      y: initialState.target.y,
+      z: initialState.target.z,
     }),
   })
+}
+
+export function createInitialDevtoolsStateFromCamera(camera: {
+  position: {x: number; y: number; z: number}
+}): DevtoolsState {
+  return {
+    orbitEnabled: false,
+    position: {
+      x: camera.position.x,
+      y: camera.position.y,
+      z: camera.position.z,
+    },
+    target: {x: 0, y: 0, z: 0},
+  }
+}
+
+export function createActiveSceneStateObject(
+  studio: StudioLike,
+  initialSceneName: string,
+): ActiveSceneStateObject {
+  const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID)
+  return sheet.object(ACTIVE_SCENE_OBJECT_KEY, {
+    activeSceneName: types.string(initialSceneName),
+  })
+}
+
+export function persistActiveSceneName(
+  studio: StudioLike,
+  stateObj: ActiveSceneStateObject,
+  sceneName: string,
+): void {
+  studio.transaction(
+    ({set}) => {
+      set(stateObj.props.activeSceneName, sceneName)
+    },
+    {undoable: false},
+  )
 }
 
 export function persistCameraProps(
