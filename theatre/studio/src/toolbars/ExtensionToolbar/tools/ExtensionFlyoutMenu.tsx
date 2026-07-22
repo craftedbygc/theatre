@@ -10,8 +10,13 @@ import BaseMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/Co
 import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 
-const Container = styled.div`
+const FlyoutTriggerButton = styled(ToolbarIconButton)`
   ${pointerEventsAutoInNormalMode};
+  min-width: 32px;
+  width: auto;
+  padding: 0 8px;
+  font-size: 11px;
+
   & > svg {
     width: 1em;
     height: 1em;
@@ -64,17 +69,17 @@ const ExtensionFlyoutMenu: React.FC<{
   )
 
   return (
-    <Container>
+    <>
       {popover.node}
-      <ToolbarIconButton
+      <FlyoutTriggerButton
         ref={triggerRef as $IntentionalAny}
         onClick={(e) => {
           popover.open(e, triggerRef.current!)
         }}
       >
         {config.label}
-      </ToolbarIconButton>
-    </Container>
+      </FlyoutTriggerButton>
+    </>
   )
 }
 

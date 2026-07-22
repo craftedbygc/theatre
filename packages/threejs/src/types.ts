@@ -22,7 +22,21 @@ export type ToolConfigSwitch = {
   options: ToolConfigOption[]
 }
 
-export type ToolConfig = ToolConfigIcon | ToolConfigSwitch
+export type ToolconfigFlyoutMenuItem = {
+  label: string
+  onClick?: () => void
+}
+
+export type ToolConfigFlyoutMenu = {
+  type: 'Flyout'
+  label: string
+  items: ToolconfigFlyoutMenuItem[]
+}
+
+export type ToolConfig =
+  | ToolConfigIcon
+  | ToolConfigSwitch
+  | ToolConfigFlyoutMenu
 
 export type ToolsetConfig = Array<ToolConfig>
 
