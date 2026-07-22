@@ -22,6 +22,18 @@ devtools.onSceneSwitch((_name, scene) => {
 
 studio.extend(devtools.extension)
 
+function onWindowResize() {
+  const width = window.innerWidth
+  const height = window.innerHeight
+  renderer.setSize(width, height)
+  for (const {camera} of scenes) {
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+  }
+}
+
+window.addEventListener('resize', onWindowResize)
+
 function render() {
   requestAnimationFrame(render)
   devtools.update()
