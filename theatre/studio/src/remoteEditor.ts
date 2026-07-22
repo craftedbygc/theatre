@@ -60,10 +60,16 @@ export function openRemoteEditorWindow(): void {
   // Note: no noopener/noreferrer, since we need the returned reference to
   // detect when the popup closes. This is a same-origin popup of the app's
   // own URL, not a third-party link, so the tabnabbing risk doesn't apply.
+  const width = Math.round(window.outerWidth * 0.9)
+  const height = Math.round(window.outerHeight * 0.9)
+  const openerLeft = window.screenX ?? window.screenLeft ?? 0
+  const openerTop = window.screenY ?? window.screenTop ?? 0
+  const left = Math.round(openerLeft + (window.outerWidth - width) / 2)
+  const top = Math.round(openerTop + (window.outerHeight - height) / 2)
   remoteEditorWindow = window.open(
     url.toString(),
     'theatre-remote-editor',
-    'popup=1,width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes',
+    `popup=1,width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`,
   )
   if (!remoteEditorWindow) return // popup blocked by the browser
 
