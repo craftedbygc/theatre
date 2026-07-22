@@ -3,6 +3,8 @@ import {
   formatOutlineNamespacePathKey,
   getOutlineNamespaceItemKey,
   parseOutlineNamespacePath,
+  shouldShowSequenceVariantsInOutline,
+  STUDIO_PROJECT_ID,
 } from './outlinePanelUtils'
 import type {NamespacedObjects} from './outlinePanelUtils'
 import type {SheetId} from '@unseenco/theatre-shared/utils/ids'
@@ -32,6 +34,18 @@ describe('outlinePanelUtils', () => {
         'Subfolder',
       ]),
     ).toBe('namespace:Main Sheet:Folder/Subfolder')
+  })
+
+  test('shouldShowSequenceVariantsInOutline hides variants for Studio project sheets', () => {
+    const studioSheet = {
+      address: {projectId: STUDIO_PROJECT_ID, sheetId: 'Extension: foo'},
+    } as Parameters<typeof shouldShowSequenceVariantsInOutline>[0]
+    const mainSheet = {
+      address: {projectId: 'My Project', sheetId: 'Scene'},
+    } as Parameters<typeof shouldShowSequenceVariantsInOutline>[0]
+
+    expect(shouldShowSequenceVariantsInOutline(studioSheet)).toBe(false)
+    expect(shouldShowSequenceVariantsInOutline(mainSheet)).toBe(true)
   })
 
   test('ensureNamespacePath creates empty declared folders', () => {

@@ -28,6 +28,7 @@ import {getAllPossibleAssetIDs} from '@unseenco/theatre-shared/utils/assets'
 import {notify} from './notify'
 import type {RafDriverPrivateAPI} from '@unseenco/theatre-core/rafDrivers'
 import {syncAllStudioPreviewVariants} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {STUDIO_PROJECT_ID} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
 
 const DEFAULT_PERSISTENCE_KEY = 'theatre-0.4'
 
@@ -361,7 +362,9 @@ export class Studio {
   }
 
   getStudioProject(core: CoreExports): IProject {
-    return this._cache.get('getStudioProject', () => core.getProject('Studio'))
+    return this._cache.get('getStudioProject', () =>
+      core.getProject(STUDIO_PROJECT_ID),
+    )
   }
 
   getExtensionSheet(extensionId: string, core: CoreExports): ISheet {

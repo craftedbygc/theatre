@@ -3,6 +3,7 @@ import {useCallback} from 'react'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import {useVal} from '@unseenco/theatre-react'
 import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
+import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {
@@ -24,6 +25,13 @@ export {
   getOutlineNamespaceItemKey,
   parseOutlineNamespacePath,
 } from '@unseenco/theatre-shared/utils/outlineNamespaces'
+
+/** Internal project used by Studio extensions via `studio.getStudioProject()`. */
+export const STUDIO_PROJECT_ID = 'Studio' as ProjectId
+
+export function shouldShowSequenceVariantsInOutline(sheet: Sheet): boolean {
+  return sheet.address.projectId !== STUDIO_PROJECT_ID
+}
 
 export function useCollapseStateInOutlinePanel(
   item:

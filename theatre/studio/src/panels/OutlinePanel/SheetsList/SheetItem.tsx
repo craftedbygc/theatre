@@ -10,8 +10,13 @@ import {val} from '@unseenco/theatre-dataverse'
 import React, {useCallback} from 'react'
 import styled from 'styled-components'
 import BaseItem from '@unseenco/theatre-studio/panels/OutlinePanel/BaseItem'
+import ObjectsList from '@unseenco/theatre-studio/panels/OutlinePanel/ObjectsList/ObjectsList'
 import {VariantItem} from '@unseenco/theatre-studio/panels/OutlinePanel/SheetsList/VariantItem'
-import {useCollapseStateInOutlinePanel} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import {
+  shouldShowSequenceVariantsInOutline,
+  useCollapseStateInOutlinePanel,
+} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import {DEFAULT_SEQUENCE_VARIANT} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
 
 const Body = styled.div``
 
@@ -64,14 +69,25 @@ const SheetItemContent: React.FC<{
         label={sheet.address.sheetId}
       >
         <Body>
-          {sheet.template.getSequenceVariants().map((variant) => (
-            <VariantItem
-              key={`variant-${sheet.address.sheetId}-${variant}`}
+          {shouldShowSequenceVariantsInOutline(sheet) ? (
+            sheet.template
+              .getSequenceVariants()
+              .map((variant) => (
+                <VariantItem
+                  key={`variant-${sheet.address.sheetId}-${variant}`}
+                  depth={depth + 1}
+                  sheet={sheet}
+                  variant={variant}
+                />
+              ))
+          ) : (
+            <ObjectsList
               depth={depth + 1}
               sheet={sheet}
-              variant={variant}
+              variant={DEFAULT_SEQUENCE_VARIANT}
+              key={`objects-${sheet.address.sheetId}`}
             />
-          ))}
+          )}
         </Body>
       </BaseItem>
     )
