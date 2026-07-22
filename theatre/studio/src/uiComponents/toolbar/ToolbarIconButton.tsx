@@ -42,9 +42,19 @@ export const Container = styled.button`
     background: rgba(82, 88, 96, 0.8);
   }
 
+  /* Matches PinButton pinned state / OutlinePanel/BaseItem .selected */
   &.selected {
     color: rgba(255, 255, 255, 0.8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(30, 88, 102, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    &:hover {
+      background: rgba(30, 88, 102, 0.85);
+    }
+
+    &:active {
+      background: rgba(30, 88, 102, 0.95);
+    }
   }
 
   // Don't blur if in a button group, because it already blurs. We need to blur
