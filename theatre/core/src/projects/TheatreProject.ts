@@ -16,6 +16,13 @@ import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 /**
  * A project's config object (currently the only point of configuration is the project's state)
  */
+export type ISheetOptions = {
+  /**
+   * Whether the sheet appears in the Studio outline panel. Defaults to `true`.
+   */
+  visible?: boolean
+}
+
 export type IProjectConfig = {
   /**
    * The state of the project, as [exported](https://www.theatrejs.com/docs/latest/manual/projects#state) by the studio.
@@ -67,12 +74,14 @@ export interface IProject {
   /**
    * Creates a Sheet under the project
    * @param sheetId - Sheets are identified by their `sheetId`, which must be a string longer than 3 characters
-   * @param instanceId - Optionally provide an `instanceId` if you want to create multiple instances of the same Sheet
+   * @param instanceIdOrOpts - Optionally provide an `instanceId` if you want to create multiple instances of the same Sheet, or pass `{ visible: false }` to hide the sheet from the Studio outline panel
+   * @param opts - Optionally provide `{ visible: false }` to hide the sheet from the Studio outline panel
    * @returns The newly created Sheet
    *
    * **Docs: https://www.theatrejs.com/docs/latest/manual/sheets**
    */
-  sheet(sheetId: string, instanceId?: string): ISheet
+  sheet(sheetId: string, instanceIdOrOpts?: string | ISheetOptions): ISheet
+  sheet(sheetId: string, instanceId: string, opts?: ISheetOptions): ISheet
 
   /**
    * Returns the URL for an asset.
@@ -121,11 +130,25 @@ export default class TheatreProject implements IProject {
       : undefined
   }
 
-  sheet(sheetId: string, instanceId: string = 'default'): ISheet {
+  sheet(
+    sheetId: string,
+    instanceIdOrOpts: string | ISheetOptions = 'default',
+    opts?: ISheetOptions,
+  ): ISheet {
     const sanitizedPath = validateAndSanitiseSlashedPathOrThrow(
       sheetId,
       'project.sheet',
     )
+
+    let instanceId: string = 'default'
+    let sheetOpts: ISheetOptions | undefined
+
+    if (typeof instanceIdOrOpts === 'string') {
+      instanceId = instanceIdOrOpts
+      sheetOpts = opts
+    } else {
+      sheetOpts = instanceIdOrOpts
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       validateInstanceId(
@@ -138,6 +161,7 @@ export default class TheatreProject implements IProject {
     return privateAPI(this).getOrCreateSheet(
       sanitizedPath as SheetId,
       instanceId as SheetInstanceId,
+      sheetOpts,
     ).publicApi
   }
 }

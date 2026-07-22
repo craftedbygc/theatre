@@ -90,6 +90,7 @@ export default class Sheet {
     nativeObject: ObjectNativeObject,
     config: SheetObjectPropTypeConfig,
     actions: SheetObjectActionsConfig = {},
+    visibleInOutline?: boolean,
   ): SheetObject {
     const objTemplate = this.template.getObjectTemplate(
       objectKey,
@@ -97,6 +98,10 @@ export default class Sheet {
       config,
       actions,
     )
+
+    if (visibleInOutline !== undefined) {
+      objTemplate.setVisibleInOutline(visibleInOutline)
+    }
 
     const object = objTemplate.createInstance(this, nativeObject, config)
 

@@ -46,6 +46,7 @@ export default class SheetTemplate {
   > = {}
 
   private _sequenceVariants: SequenceVariantId[] = [DEFAULT_SEQUENCE_VARIANT]
+  private _visibleInOutline = true
 
   constructor(readonly project: Project, sheetId: SheetId) {
     this.address = {...project.address, sheetId}
@@ -112,5 +113,13 @@ export default class SheetTemplate {
       variants,
       'sheet.declareSequenceVariants',
     )
+  }
+
+  setVisibleInOutline(visible: boolean): void {
+    this._visibleInOutline = visible
+  }
+
+  isVisibleInOutline(): boolean {
+    return this._visibleInOutline
   }
 }

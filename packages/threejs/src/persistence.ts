@@ -19,10 +19,14 @@ export interface StudioTransactionAPI {
 
 export interface StudioLike {
   getStudioProject(): {
-    sheet(sheetId: string): {
+    sheet(
+      sheetId: string,
+      opts?: {visible?: boolean},
+    ): {
       object(
         objectKey: string,
         props: Record<string, unknown>,
+        opts?: {visible?: boolean},
       ): DevtoolsStateObject & ActiveSceneStateObject
     }
   }
@@ -67,20 +71,26 @@ export function createDevtoolsStateObject(
   objectKey: string,
   initialState: DevtoolsState,
 ): DevtoolsStateObject {
-  const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID)
-  return sheet.object(objectKey, {
-    orbitEnabled: types.boolean(initialState.orbitEnabled),
-    position: types.compound({
-      x: initialState.position.x,
-      y: initialState.position.y,
-      z: initialState.position.z,
-    }),
-    target: types.compound({
-      x: initialState.target.x,
-      y: initialState.target.y,
-      z: initialState.target.z,
-    }),
+  const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID, {
+    visible: false,
   })
+  return sheet.object(
+    objectKey,
+    {
+      orbitEnabled: types.boolean(initialState.orbitEnabled),
+      position: types.compound({
+        x: initialState.position.x,
+        y: initialState.position.y,
+        z: initialState.position.z,
+      }),
+      target: types.compound({
+        x: initialState.target.x,
+        y: initialState.target.y,
+        z: initialState.target.z,
+      }),
+    },
+    {visible: false},
+  )
 }
 
 export function createInitialDevtoolsStateFromCamera(camera: {
@@ -101,10 +111,16 @@ export function createActiveSceneStateObject(
   studio: StudioLike,
   initialSceneName: string,
 ): ActiveSceneStateObject {
-  const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID)
-  return sheet.object(ACTIVE_SCENE_OBJECT_KEY, {
-    activeSceneName: types.string(initialSceneName),
+  const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID, {
+    visible: false,
   })
+  return sheet.object(
+    ACTIVE_SCENE_OBJECT_KEY,
+    {
+      activeSceneName: types.string(initialSceneName),
+    },
+    {visible: false},
+  )
 }
 
 export function persistActiveSceneName(

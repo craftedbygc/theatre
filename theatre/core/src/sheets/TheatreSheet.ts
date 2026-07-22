@@ -32,6 +32,15 @@ export type SheetObjectAction = (object: ISheetObject) => void
 
 export type SheetObjectActionsConfig = Record<string, SheetObjectAction>
 
+export type ISheetObjectOptions = {
+  reconfigure?: boolean
+  /**
+   * Whether the object appears in the Studio outline panel. Defaults to `true`.
+   */
+  visible?: boolean
+  __actions__THIS_API_IS_UNSTABLE_AND_WILL_CHANGE_IN_THE_NEXT_VERSION?: SheetObjectActionsConfig
+}
+
 export interface ISheet {
   /**
    * All sheets have `sheet.type === 'Theatre_Sheet_PublicAPI'`
@@ -55,7 +64,7 @@ export interface ISheet {
    *
    * @param key - Each object is identified by a key, which is a non-empty string
    * @param props - The props of the object. See examples
-   * @param options - (Optional) Provide `{reconfigure: true}` to reconfigure an existing object, or `{actions: { ... }}` to add custom buttons to the UI. Read the example below for details.
+   * @param options - (Optional) Provide `{reconfigure: true}` to reconfigure an existing object, `{visible: false}` to hide it from the Studio outline panel, or `{actions: { ... }}` to add custom buttons to the UI. Read the example below for details.
    *
    * @returns An Object
    *
@@ -101,10 +110,7 @@ export interface ISheet {
   object<Props extends UnknownShorthandCompoundProps>(
     key: string,
     props: Props,
-    options?: {
-      reconfigure?: boolean
-      __actions__THIS_API_IS_UNSTABLE_AND_WILL_CHANGE_IN_THE_NEXT_VERSION?: SheetObjectActionsConfig
-    },
+    options?: ISheetObjectOptions,
   ): ISheetObject<Props>
 
   /**
@@ -223,10 +229,7 @@ export default class TheatreSheet implements ISheet {
   object<Props extends UnknownShorthandCompoundProps>(
     key: string,
     config: Props,
-    opts?: {
-      reconfigure?: boolean
-      __actions__THIS_API_IS_UNSTABLE_AND_WILL_CHANGE_IN_THE_NEXT_VERSION?: SheetObjectActionsConfig
-    },
+    opts?: ISheetObjectOptions,
   ): ISheetObject<Props> {
     const internal = privateAPI(this)
     const sanitizedPath = validateAndSanitiseSlashedPathOrThrow(
@@ -274,6 +277,10 @@ export default class TheatreSheet implements ISheet {
         existingObject.template._temp_setActions(actions)
       }
 
+      if (opts?.visible !== undefined) {
+        existingObject.template.setVisibleInOutline(opts.visible)
+      }
+
       return existingObject.publicApi as $IntentionalAny
     } else {
       const sanitizedConfig = compound(config)
@@ -282,6 +289,7 @@ export default class TheatreSheet implements ISheet {
         nativeObject,
         sanitizedConfig,
         actions,
+        opts?.visible,
       )
       if (process.env.NODE_ENV !== 'production') {
         weakMapOfUnsanitizedProps.set(object as $FixMe, config)

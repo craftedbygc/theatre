@@ -5,10 +5,14 @@
  */
 
 export * from './coreExports'
-export type {IProject, IProjectConfig} from './projects/TheatreProject'
+export type {
+  IProject,
+  IProjectConfig,
+  ISheetOptions,
+} from './projects/TheatreProject'
 export type {ISequence} from './sequences/TheatreSequence'
 export type {ISheetObject} from './sheetObjects/TheatreSheetObject'
-export type {ISheet} from './sheets/TheatreSheet'
+export type {ISheet, ISheetObjectOptions} from './sheets/TheatreSheet'
 export type {UnknownShorthandCompoundProps} from './propTypes'
 import * as globalVariableNames from '@unseenco/theatre-shared/globalVariableNames'
 import type StudioBundle from '@unseenco/theatre-studio/StudioBundle'

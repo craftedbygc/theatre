@@ -33,6 +33,14 @@ export function shouldShowSequenceVariantsInOutline(sheet: Sheet): boolean {
   return sheet.address.projectId !== STUDIO_PROJECT_ID
 }
 
+export function isSheetVisibleInOutline(sheet: Sheet): boolean {
+  return sheet.template.isVisibleInOutline()
+}
+
+export function isSheetObjectVisibleInOutline(object: SheetObject): boolean {
+  return object.template.isVisibleInOutline()
+}
+
 export function useCollapseStateInOutlinePanel(
   item:
     | Project

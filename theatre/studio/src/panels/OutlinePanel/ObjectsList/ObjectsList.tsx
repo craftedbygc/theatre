@@ -8,6 +8,7 @@ import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import BaseItem from '@unseenco/theatre-studio/panels/OutlinePanel/BaseItem'
 import {
   ensureNamespacePath,
+  isSheetObjectVisibleInOutline,
   parseOutlineNamespacePath,
   useCollapseStateInOutlinePanel,
 } from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
@@ -29,6 +30,7 @@ const ObjectsList: React.FC<{
     const objectsMap = val(sheet.objectsP)
     const objects = Object.values(objectsMap)
       .filter((a): a is SheetObject => a != null)
+      .filter((object) => isSheetObjectVisibleInOutline(object))
       .filter((object) =>
         isObjectOverriddenInVariant(
           sheet.address,

@@ -253,12 +253,17 @@ export default class Project {
   getOrCreateSheet(
     sheetId: SheetId,
     instanceId: SheetInstanceId = 'default' as SheetInstanceId,
+    opts?: {visible?: boolean},
   ): Sheet {
     let template = this._sheetTemplates.get()[sheetId]
 
     if (!template) {
       template = new SheetTemplate(this, sheetId)
       this._sheetTemplates.reduce((s) => ({...s, [sheetId]: template}))
+    }
+
+    if (opts?.visible !== undefined) {
+      template.setVisibleInOutline(opts.visible)
     }
 
     const sheet = template.getInstance(instanceId)

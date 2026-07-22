@@ -2,6 +2,8 @@ import {
   ensureNamespacePath,
   formatOutlineNamespacePathKey,
   getOutlineNamespaceItemKey,
+  isSheetObjectVisibleInOutline,
+  isSheetVisibleInOutline,
   parseOutlineNamespacePath,
   shouldShowSequenceVariantsInOutline,
   STUDIO_PROJECT_ID,
@@ -68,5 +70,29 @@ describe('outlinePanelUtils', () => {
     expect(root.get('Props')?.nested?.get('Furniture')?.nested).toEqual(
       new Map(),
     )
+  })
+
+  test('isSheetVisibleInOutline respects sheet template visibility', () => {
+    const visibleSheet = {
+      template: {isVisibleInOutline: () => true},
+    } as Parameters<typeof isSheetVisibleInOutline>[0]
+    const hiddenSheet = {
+      template: {isVisibleInOutline: () => false},
+    } as Parameters<typeof isSheetVisibleInOutline>[0]
+
+    expect(isSheetVisibleInOutline(visibleSheet)).toBe(true)
+    expect(isSheetVisibleInOutline(hiddenSheet)).toBe(false)
+  })
+
+  test('isSheetObjectVisibleInOutline respects object template visibility', () => {
+    const visibleObject = {
+      template: {isVisibleInOutline: () => true},
+    } as Parameters<typeof isSheetObjectVisibleInOutline>[0]
+    const hiddenObject = {
+      template: {isVisibleInOutline: () => false},
+    } as Parameters<typeof isSheetObjectVisibleInOutline>[0]
+
+    expect(isSheetObjectVisibleInOutline(visibleObject)).toBe(true)
+    expect(isSheetObjectVisibleInOutline(hiddenObject)).toBe(false)
   })
 })

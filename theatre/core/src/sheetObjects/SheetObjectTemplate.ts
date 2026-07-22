@@ -96,6 +96,7 @@ export default class SheetObjectTemplate {
   readonly pointerToAhistoricStaticOverrides: Pointer<
     SerializableMap<SerializablePrimitive> | undefined
   >
+  private _visibleInOutline = true
 
   get staticConfig() {
     return this._config.get()
@@ -162,6 +163,14 @@ export default class SheetObjectTemplate {
    */
   _temp_setActions(actions: SheetObjectActionsConfig) {
     this._temp_actions_atom.set(actions)
+  }
+
+  setVisibleInOutline(visible: boolean): void {
+    this._visibleInOutline = visible
+  }
+
+  isVisibleInOutline(): boolean {
+    return this._visibleInOutline
   }
 
   /**
