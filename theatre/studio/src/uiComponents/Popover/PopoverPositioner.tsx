@@ -18,7 +18,7 @@ export type AbsolutePlacementBoxConstraints = {
   maxY?: number
 }
 
-const TooltipWrapper: React.FC<{
+const PopoverPositioner: React.FC<{
   target: HTMLElement | SVGElement | Element
   onClickOutside?: (e: MouseEvent) => void
   children: () => React.ReactElement
@@ -150,4 +150,4 @@ const TooltipWrapper: React.FC<{
   )
 }
 
-export default TooltipWrapper
+export default PopoverPositioner

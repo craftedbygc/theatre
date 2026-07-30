@@ -6,7 +6,7 @@ import {useVal} from '@unseenco/theatre-react'
 import ExtensionPaneWrapper from '@unseenco/theatre-studio/panels/BasePanel/ExtensionPaneWrapper'
 import SequenceEditorPanel from '@unseenco/theatre-studio/panels/SequenceEditorPanel/SequenceEditorPanel'
 
-const PanelsRoot: React.VFC = () => {
+const PanelsRoot: React.FC = () => {
   const panes = useVal(getStudio().paneManager.allPanesD)
   const pinSequenceEditor = useVal(
     getStudio().atomP.ahistoric.pinSequenceEditor,

@@ -17,6 +17,7 @@ import {
   useCollapseStateInOutlinePanel,
 } from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
 import {DEFAULT_SEQUENCE_VARIANT} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
+import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 
 const Body = styled.div``
 
@@ -42,6 +43,13 @@ const SheetItemContent: React.FC<{
 }> = ({sheet, depth}) => {
   const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel(sheet)
 
+  const {targetRef} = useChordial<HTMLDivElement>(() => {
+    return {
+      title: `Sheet: ${sheet.address.sheetId}`,
+      items: [],
+    }
+  })
+
   const setSelectedSheet = useCallback(() => {
     getStudio()!.transaction(({stateEditors}) => {
       stateEditors.studio.historic.panels.outline.selection.set([sheet])
@@ -57,6 +65,7 @@ const SheetItemContent: React.FC<{
         select={setSelectedSheet}
         setIsCollapsed={setCollapsed}
         collapsed={collapsed}
+        headerRef={targetRef}
         selectionStatus={
           selection.some((s) => s === sheet)
             ? 'selected'

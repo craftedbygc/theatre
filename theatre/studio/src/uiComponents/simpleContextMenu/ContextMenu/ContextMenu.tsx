@@ -9,7 +9,7 @@ import {height as itemHeight} from './Item'
 import {PortalContext} from 'reakit'
 import useOnKeyDown from '@unseenco/theatre-studio/uiComponents/useOnKeyDown'
 import BaseMenu from './BaseMenu'
-import type {$IntentionalAny} from '@theatre/utils/types'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 
 /**
  * How far from the menu should the pointer travel to auto close the menu

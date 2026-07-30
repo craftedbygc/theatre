@@ -30,6 +30,8 @@ import {val} from '@unseenco/theatre-dataverse'
 import {HiOutlineChevronRight} from 'react-icons/all'
 import memoizeFn from '@unseenco/theatre-shared/utils/memoizeFn'
 import {collapsedMap} from './collapsedMap'
+import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import {mergeRefs} from 'react-merge-refs'
 
 const Container = styled.div`
   --step: 10px;
@@ -173,7 +175,8 @@ function DetailCompoundPropEditor<
   propConfig,
   visualIndentation,
 }: ICompoundPropDetailEditorProps<TPropTypeConfig>) {
-  const propName = propConfig.label ?? last(getPointerParts(pointerToProp).path)
+  const propName =
+    propConfig.label ?? (last(getPointerParts(pointerToProp).path) as string)
 
   const allSubs = Object.entries(propConfig.props)
   const compositeSubs = allSubs.filter(([_, conf]) =>
@@ -192,7 +195,7 @@ function DetailCompoundPropEditor<
     propConfig,
   )
 
-  const label = propName || 'Props'
+  const label: string = propName || 'Props'
 
   const [contextMenu] = useContextMenu(propNameContainer, {
     menuItems: tools.contextMenuItems,
@@ -229,6 +232,13 @@ function DetailCompoundPropEditor<
     return box ? val(box.pointer) : isVector
   }, [box])
 
+  const {targetRef} = useChordial(() => {
+    const title = ['obj', 'props', ...getPointerParts(pointerToProp).path].join(
+      '.',
+    )
+    return {title, items: []}
+  })
+
   return (
     <Container>
       {contextMenu}
@@ -241,7 +251,7 @@ function DetailCompoundPropEditor<
 
           <PropName
             isHighlighted={isPropHighlightedD}
-            ref={propNameContainerRef}
+            ref={mergeRefs([propNameContainerRef, targetRef])}
           >
             <span>{label}</span>
           </PropName>

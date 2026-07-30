@@ -5060,6 +5060,72 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-spring/animated@npm:~9.7.5":
+  version: 9.7.5
+  resolution: "@react-spring/animated@npm:9.7.5"
+  dependencies:
+    "@react-spring/shared": ~9.7.5
+    "@react-spring/types": ~9.7.5
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: e28662a659933ceab30849dd6574f7c06554a76996bad03fabdbc145cef2a3242495695cfec5b9c9cac049ff72d2917dfd61304c2d17ff899cbdefb09f53bbeb
+  languageName: node
+  linkType: hard
+
+"@react-spring/core@npm:~9.7.5":
+  version: 9.7.5
+  resolution: "@react-spring/core@npm:9.7.5"
+  dependencies:
+    "@react-spring/animated": ~9.7.5
+    "@react-spring/shared": ~9.7.5
+    "@react-spring/types": ~9.7.5
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 60c0151547073edf35e0de0e066983096aefff7a5ecf83bf54c7a9a9807220c4212f0ccdf353ef63131652667105ba70cd7188dc31de32aab30e3cc095663a38
+  languageName: node
+  linkType: hard
+
+"@react-spring/rafz@npm:~9.7.5":
+  version: 9.7.5
+  resolution: "@react-spring/rafz@npm:9.7.5"
+  checksum: adbffdf25942a66802363f979f07e04c81abf19b49c55e62336220450f393d57ebe1c906694485d6d89e85a13fd223da3bdea22a955307eaecefaf59ea7ec7f9
+  languageName: node
+  linkType: hard
+
+"@react-spring/shared@npm:~9.7.5":
+  version: 9.7.5
+  resolution: "@react-spring/shared@npm:9.7.5"
+  dependencies:
+    "@react-spring/rafz": ~9.7.5
+    "@react-spring/types": ~9.7.5
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 374ee7bece09895b1102c68acd0d47cf0d6f6201f77956aeac5eba7a3ee3190f509172990febfdde1bd91f79dabbaa42d3adc31c221511746575b23dadda038d
+  languageName: node
+  linkType: hard
+
+"@react-spring/types@npm:~9.7.5":
+  version: 9.7.5
+  resolution: "@react-spring/types@npm:9.7.5"
+  checksum: f9d2dea0ea6afb6d81dc0275cf2554b20d7eef8bafac99fc0de5b728f1ad5a5c02438932dc70a360686b34166124b13900788ece09af3cee96ce585ba168480e
+  languageName: node
+  linkType: hard
+
+"@react-spring/web@npm:^9.7.3":
+  version: 9.7.5
+  resolution: "@react-spring/web@npm:9.7.5"
+  dependencies:
+    "@react-spring/animated": ~9.7.5
+    "@react-spring/core": ~9.7.5
+    "@react-spring/shared": ~9.7.5
+    "@react-spring/types": ~9.7.5
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 4da57c7d2bf4cf76cedd1c57986ba85e839aaec45e247f75b7d12d777f6054fe77446e95a18080db5e714b0a5386a07e617c36592506554abfd2c301c50e66cc
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-alias@npm:^3.1.5":
   version: 3.1.5
   resolution: "@rollup/plugin-alias@npm:3.1.5"
@@ -6657,6 +6723,7 @@ __metadata:
     "@microsoft/api-extractor": ^7.18.11
     "@types/node": ^15.6.2
     "@types/three": ^0.185.1
+    "@unseenco/theatre-core": "workspace:*"
     "@unseenco/theatre-studio": "workspace:*"
     esbuild: ^0.12.15
     esbuild-register: ^2.5.0
@@ -6664,6 +6731,7 @@ __metadata:
     three: ^0.185.1
     typescript: 5.1.6
   peerDependencies:
+    "@unseenco/theatre-core": "*"
     "@unseenco/theatre-studio": "*"
     three: ">=0.150.0"
   languageName: unknown
@@ -24788,6 +24856,7 @@ fsevents@^1.2.7:
   resolution: "theatre@workspace:theatre"
   dependencies:
     "@microsoft/api-extractor": ^7.18.11
+    "@react-spring/web": ^9.7.3
     "@rollup/plugin-alias": ^3.1.5
     "@rollup/plugin-multi-entry": ^4.1.0
     "@rollup/plugin-replace": ^2.4.2

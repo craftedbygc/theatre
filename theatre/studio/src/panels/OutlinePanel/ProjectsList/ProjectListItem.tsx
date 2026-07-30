@@ -8,6 +8,7 @@ import {getOutlineSelection} from '@unseenco/theatre-studio/selectors'
 import {val} from '@unseenco/theatre-dataverse'
 import styled from 'styled-components'
 import {useCollapseStateInOutlinePanel} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 
 const ConflictNotice = styled.div`
   color: #ff6363;
@@ -41,12 +42,20 @@ const ProjectListItem: React.FC<{
 
   const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel(project)
 
+  const {targetRef} = useChordial<HTMLDivElement>(() => {
+    return {
+      title: `Project: ${project.address.projectId}`,
+      items: [],
+    }
+  })
+
   return (
     <BaseItem
       depth={depth}
       label={project.address.projectId}
       setIsCollapsed={setCollapsed}
       collapsed={collapsed}
+      headerRef={targetRef}
       labelDecoration={
         hasConflict ? <ConflictNotice>Has Conflicts</ConflictNotice> : null
       }

@@ -160,7 +160,6 @@ const DetailPanelContent: React.FC<{}> = () => {
       top: '52px',
       width: dims.width + 'px',
     }
-
     const obj = selection.find(isSheetObject)
 
     if (obj) {

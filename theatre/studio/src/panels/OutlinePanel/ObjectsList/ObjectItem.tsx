@@ -15,6 +15,8 @@ import {getOutlineSelection} from '@unseenco/theatre-studio/selectors'
 import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
 import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpleContextMenu/useContextMenu'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
+import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import {mergeRefs} from 'react-merge-refs'
 
 export const ObjectItem: React.VFC<{
   sheetObject: SheetObject
@@ -111,6 +113,13 @@ export const ObjectItem: React.VFC<{
     disabled: contextMenuItems.length === 0,
   })
 
+  const {targetRef} = useChordial(() => {
+    return {
+      title: `Object: ${sheetObject.address.objectKey}`,
+      items: [],
+    }
+  })
+
   return (
     <>
       {contextMenu}
@@ -119,7 +128,7 @@ export const ObjectItem: React.VFC<{
         label={overrideLabel ?? sheetObject.address.objectKey}
         depth={depth}
         selectionStatus={selectionStatus}
-        headerRef={headerRef}
+        headerRef={mergeRefs([headerRef, targetRef])}
       />
     </>
   )
