@@ -31,6 +31,7 @@ import {generateSequenceMarkerId} from '@unseenco/theatre-shared/utils/ids'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 import {mergeRefs} from 'react-merge-refs'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
 
 const Container = styled.div<{isVisible: boolean}>`
   --thumbColor: #00e0ff;
@@ -80,7 +81,7 @@ const Thumb = styled.div`
 
   ${pointerEventsAutoInNormalMode};
 
-  ${Container}.seeking > & {
+  ${Container}.seeking > &, ${Container}.popoverOpen > & {
     pointer-events: none !important;
   }
 
@@ -210,6 +211,11 @@ const Playhead: React.FC<{layoutP: Pointer<SequenceEditorPanelLayout>}> = ({
         sequence.closestGridPosition(posInUnitSpace),
       ),
       menuTitle: 'Playhead',
+      invoke: (e) => {
+        if (e?.type === 'MouseEvent') {
+          popover.open(e.event, thumbRef.current!)
+        }
+      },
       items: [
         {
           type: 'normal',
@@ -234,19 +240,6 @@ const Playhead: React.FC<{layoutP: Pointer<SequenceEditorPanelLayout>}> = ({
           },
         },
       ],
-      focus: {
-        type: 'Popover',
-        node: (
-          <BasicPopover>
-            <PlayheadPositionPopover
-              layoutP={layoutP}
-              onRequestClose={() => {
-                // todo close popover
-              }}
-            />
-          </BasicPopover>
-        ),
-      },
       drag: {
         debugName: 'RightOverlay/Playhead',
         onDragStart() {
@@ -284,14 +277,29 @@ const Playhead: React.FC<{layoutP: Pointer<SequenceEditorPanelLayout>}> = ({
 
   useLockFrameStampPosition(useVal(layoutP.seeker.isSeeking) || isDragging, -1)
 
+  const popover = usePopover({debugName: 'Playhead'}, () => {
+    return (
+      <BasicPopover>
+        <PlayheadPositionPopover
+          layoutP={layoutP}
+          onRequestClose={popover.close}
+        />
+      </BasicPopover>
+    )
+  })
+
+  c.useDisableTooltip(popover.isOpen)
+
   return (
     <>
+      {popover.node}
+
       <Container
         isVisible={isVisible}
         style={{transform: `translate3d(${posInClippedSpace}px, 0, 0)`}}
         className={`${isSeeking && 'seeking'} ${
-          isPlayheadAttachedToFocusRange && 'playheadattachedtofocusrange'
-        }`}
+          popover.isOpen && 'popoverOpen'
+        } ${isPlayheadAttachedToFocusRange && 'playheadattachedtofocusrange'}`}
         {...includeLockFrameStampAttrs('hide')}
       >
         <Thumb

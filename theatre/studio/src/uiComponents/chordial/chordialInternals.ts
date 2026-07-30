@@ -1,8 +1,6 @@
 import {Atom} from '@unseenco/theatre-dataverse'
-import type {
-  $IntentionalAny,
-  VoidFn,
-} from '@unseenco/theatre-shared/utils/types'
+import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
+import {useEffect} from 'react'
 import type {ElementType, MutableRefObject} from 'react'
 import type {DragOpts} from '@unseenco/theatre-studio/uiComponents/useDrag'
 import type React from 'react'
@@ -13,12 +11,12 @@ export type ChordialOpts = {
   // shown as the top item in the menu
   menuTitle?: string | React.ReactNode
   items: Array<ContextMenuItem>
-  focus?:
-    | {
-        type: 'callback'
-        callback: (e: MouseEvent) => VoidFn
-      }
-    | {type: 'Popover'; node: React.ReactNode}
+  invoke?: (
+    e:
+      | {type: 'MouseEvent'; event: MouseEvent}
+      | {type: 'KeyboardEvent'; event: KeyboardEvent}
+      | undefined,
+  ) => void
   drag?: DragOpts
 }
 
@@ -37,9 +35,10 @@ export type ChodrialElement = {
   id: string
   returnValue: {
     targetRef: MutableRefObject<$IntentionalAny>
+    useDisableTooltip: (disable: boolean) => void
   }
   target: HTMLElement | null | undefined
-  atom: Atom<{optsFn: ChordialOptsFn}>
+  atom: Atom<{optsFn: ChordialOptsFn; tooltipDisabled: boolean}>
 }
 
 export type MaybeChodrialEl = ChodrialElement | undefined
@@ -48,11 +47,18 @@ let lastId = 0
 
 export function createChordialElement(optsFn: ChordialOptsFn): ChodrialElement {
   const id = (lastId++).toString()
+  const atom = new Atom({optsFn, tooltipDisabled: false})
   const chordialRef: ChodrialElement = {
     id,
     target: null,
-    atom: new Atom({optsFn}),
+    atom,
     returnValue: {
+      useDisableTooltip: (disable: boolean) => {
+        useEffect(() => {
+          atom.setByPointer((p) => p.tooltipDisabled, disable)
+          return () => atom.setByPointer((p) => p.tooltipDisabled, false)
+        }, [disable])
+      },
       targetRef: {
         get current() {
           return chordialRef.target
