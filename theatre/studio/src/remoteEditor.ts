@@ -60,8 +60,8 @@ export function openRemoteEditorWindow(): void {
   // Note: no noopener/noreferrer, since we need the returned reference to
   // detect when the popup closes. This is a same-origin popup of the app's
   // own URL, not a third-party link, so the tabnabbing risk doesn't apply.
-  const width = Math.round(window.outerWidth * 0.9)
-  const height = Math.round(window.outerHeight * 0.9)
+  const width = Math.round(window.outerWidth * 0.6)
+  const height = Math.round(window.outerHeight * 0.6)
   const openerLeft = window.screenX ?? window.screenLeft ?? 0
   const openerTop = window.screenY ?? window.screenTop ?? 0
   const left = Math.round(openerLeft + (window.outerWidth - width) / 2)
