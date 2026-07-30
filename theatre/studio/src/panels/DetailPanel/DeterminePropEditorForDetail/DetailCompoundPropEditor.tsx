@@ -32,8 +32,8 @@ import memoizeFn from '@unseenco/theatre-shared/utils/memoizeFn'
 import {collapsedMap} from './collapsedMap'
 
 const Container = styled.div`
-  --step: 15px;
-  --left-pad: 10px;
+  --step: 10px;
+  --left-pad: 5px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 40%;
 `
