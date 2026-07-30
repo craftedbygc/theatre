@@ -45,7 +45,7 @@ export const TooltipOverlay: React.FC<{}> = () => {
   const transitions = useTransition(data, {
     from: {
       opacity: 0.5,
-      transform: `translateY(-10px) perspective(200px) scale(0.95) rotateX(-90deg) `,
+      transform: `translateY(0px) perspective(200px) scale(0.95) rotateX(-45deg) `,
     },
     enter: {
       opacity: 1,
@@ -59,7 +59,7 @@ export const TooltipOverlay: React.FC<{}> = () => {
     config: (item, index, phase) => (key) => {
       return {
         // velocity: phase === 'leave' ? 0.5 : 6,
-        duration: phase === 'leave' ? 66 : 33 * 4,
+        duration: phase === 'leave' ? 33 * 3 : 33 * 4,
         easing: easings.easeOutCubic,
       }
     },
@@ -73,7 +73,6 @@ export const TooltipOverlay: React.FC<{}> = () => {
           style={{opacity: 0}}
         >
           <Title>{title}</Title>
-          <IconContainer>{theIcon}</IconContainer>
         </Container>
       )}
 
@@ -88,29 +87,12 @@ export const TooltipOverlay: React.FC<{}> = () => {
             }}
           >
             <Title>{item.title}</Title>
-            <IconContainer>{theIcon}</IconContainer>
           </Container>
         )
       })}
     </>
   )
 }
-
-const theIcon = (
-  <svg
-    stroke="currentColor"
-    fill="currentColor"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    height="0.8em"
-    width="0.8em"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="m4 4 7.07 17 2.51-7.39L21 11.07z"></path>
-  </svg>
-)
 
 const Container = styled(animated.div)`
   display: flex;
@@ -148,17 +130,4 @@ const Container = styled(animated.div)`
 
 const Title = styled.div`
   text-wrap: nowrap;
-`
-
-const IconContainer = styled.div`
-  background: #59595938;
-  border-radius: 4px;
-  border: 0.5px solid #ffffff1a;
-  color: white;
-  padding: 4px;
-  font-size: 10px;
-  /* margin: 0; */
-  margin-left: 12px;
-  box-shadow: black 0px 2px 8px -4px;
-  flex-wrap: nowrap;
 `
