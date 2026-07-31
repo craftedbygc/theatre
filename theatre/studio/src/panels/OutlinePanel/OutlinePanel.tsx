@@ -1,5 +1,5 @@
 import React, {useEffect, useLayoutEffect} from 'react'
-import styled from 'styled-components'
+import styled, {css} from 'styled-components'
 import {panelZIndexes} from '@unseenco/theatre-studio/panels/BasePanel/common'
 import ProjectsList from './ProjectsList/ProjectsList'
 import {useVal} from '@unseenco/theatre-react'
@@ -7,19 +7,32 @@ import getStudio from '@unseenco/theatre-studio/getStudio'
 import useHotspot from '@unseenco/theatre-studio/uiComponents/useHotspot'
 import {Atom, prism, val} from '@unseenco/theatre-dataverse'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
+import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
+import DockResizeHandle from '@unseenco/theatre-studio/UIRoot/DockResizeHandle'
 
 const headerHeight = `44px`
 
-const Container = styled.div<{pin: boolean}>`
-  ${pointerEventsAutoInNormalMode};
-  background-color: transparent;
+const floatingStyles = css`
   position: absolute;
   left: 8px;
-  z-index: ${panelZIndexes.outlinePanel};
-
   top: calc(${headerHeight} + 8px);
   height: fit-content;
   max-height: calc(100% - ${headerHeight});
+`
+
+const dockedStyles = css`
+  position: relative;
+  left: auto;
+  top: auto;
+  height: 100%;
+  max-height: none;
+`
+
+const Container = styled.div<{pin: boolean; $docked: boolean}>`
+  ${pointerEventsAutoInNormalMode};
+  background-color: transparent;
+  z-index: ${panelZIndexes.outlinePanel};
+
   overflow-y: scroll;
   overflow-x: hidden;
   padding: 0;
@@ -31,11 +44,24 @@ const Container = styled.div<{pin: boolean}>`
 
   scrollbar-width: none;
 
+  ${({$docked}) => ($docked ? dockedStyles : floatingStyles)};
+
   display: ${({pin}) => (pin ? 'block' : 'none')};
 
-  &:hover {
-    display: block;
-  }
+  ${({$docked, pin}) =>
+    !$docked &&
+    css`
+      &:hover {
+        display: block;
+      }
+    `};
+
+  ${({$docked, pin}) =>
+    $docked &&
+    !pin &&
+    css`
+      display: none !important;
+    `};
 
   // Create a small buffer on the bottom to aid selecting the bottom item in a long, scrolling list
   &::after {
@@ -47,12 +73,14 @@ const Container = styled.div<{pin: boolean}>`
 
 const OutlinePanel: React.FC<{}> = () => {
   const pin = useVal(getStudio().atomP.ahistoric.pinOutline) ?? true
+  const {isDocked} = useLayoutMode()
   const show = useVal(shouldShowOutlineD)
-  const active = useHotspot('left')
+  const active = useHotspot('left', {disabled: isDocked})
 
   useLayoutEffect(() => {
+    if (isDocked) return
     isOutlinePanelHotspotActiveB.set(active)
-  }, [active])
+  }, [active, isDocked])
 
   // cleanup
   useEffect(() => {
@@ -64,14 +92,16 @@ const OutlinePanel: React.FC<{}> = () => {
 
   return (
     <Container
-      pin={pin || show}
+      pin={isDocked ? pin : pin || show}
+      $docked={isDocked}
       onMouseEnter={() => {
-        isOutlinePanelHoveredB.set(true)
+        if (!isDocked) isOutlinePanelHoveredB.set(true)
       }}
       onMouseLeave={() => {
-        isOutlinePanelHoveredB.set(false)
+        if (!isDocked) isOutlinePanelHoveredB.set(false)
       }}
     >
+      {isDocked && pin && <DockResizeHandle edge="outlineRight" />}
       <ProjectsList />
     </Container>
   )

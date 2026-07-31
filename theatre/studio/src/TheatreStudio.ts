@@ -196,6 +196,13 @@ export type PaneInstance<ClassName extends string> = {
   definition: PaneClassDefinition
 }
 
+export type IDockedViewport = {
+  top: number
+  left: number
+  width: number
+  height: number
+}
+
 export interface IStudioUI {
   /**
    * Temporarily hides the studio
@@ -209,6 +216,30 @@ export interface IStudioUI {
    * Makes the studio visible again.
    */
   restore(): void
+
+  /**
+   * Whether the studio UI is in docked layout mode.
+   */
+  readonly isDocked: boolean
+
+  /**
+   * The inner viewport rectangle when docked and visible.
+   * `null` when floating or when the studio is hidden.
+   */
+  readonly dockedViewport: IDockedViewport | null
+
+  /**
+   * Listen for docked layout mode changes. Called immediately with the
+   * current value.
+   */
+  onDockedToggle(listener: (docked: boolean) => void): VoidFn
+
+  /**
+   * Listen for inner viewport size/position changes while docked. Called
+   * immediately with the current viewport if docked. Called with `null` when
+   * the viewport is released (e.g. studio hidden while docked).
+   */
+  onDockedResize(listener: (viewport: IDockedViewport | null) => void): VoidFn
 
   renderToolset(toolsetId: string, htmlNode: HTMLElement): () => void
 }
@@ -500,6 +531,22 @@ export default class TheatreStudio implements IStudio {
 
     restore() {
       getStudio().ui.restore()
+    },
+
+    get isDocked(): boolean {
+      return getStudio().ui.isDocked
+    },
+
+    get dockedViewport() {
+      return getStudio().ui.dockedViewport
+    },
+
+    onDockedToggle(listener: (docked: boolean) => void) {
+      return getStudio().ui.onDockedToggle(listener)
+    },
+
+    onDockedResize(listener: (viewport: IDockedViewport | null) => void) {
+      return getStudio().ui.onDockedResize(listener)
     },
 
     renderToolset(toolsetId: string, htmlNode: HTMLElement) {

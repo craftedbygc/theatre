@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react'
 import {types} from '@unseenco/theatre-core'
 import type {ISheetObject, IProject} from '@unseenco/theatre-core'
+import {bindDockedThreeViewport} from '../utils/bindDockedThreeViewport'
 import {
   Color,
   DirectionalLight,
@@ -199,14 +200,22 @@ export default function ThreeScene(props: ThreeSceneProps) {
       renderer.render(scene, camera)
     }
     render()
+
+    const unbindDockedViewport = bindDockedThreeViewport({
+      canvas: canvasRef.current!,
+      renderer,
+      cameras: camera,
+    })
+
     return () => {
+      unbindDockedViewport()
       cancelAnimationFrame(raf)
       renderer.dispose()
     }
   }, [])
 
   return (
-    <div style={{overflow: 'hidden'}}>
+    <div style={{overflow: 'hidden', width: '100%', height: '100%'}}>
       <canvas ref={canvasRef} />
       <div
         style={{

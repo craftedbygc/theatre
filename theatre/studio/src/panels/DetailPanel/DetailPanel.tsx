@@ -7,7 +7,7 @@ import React, {
   useLayoutEffect,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, {css} from 'styled-components'
 import {isProject, isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
 import {
   panelZIndexes,
@@ -30,6 +30,8 @@ import PanelResizeHandle from '@unseenco/theatre-studio/panels/BasePanel/PanelRe
 import type {UIPanelId} from '@unseenco/theatre-shared/utils/ids'
 import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
 import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
+import DockResizeHandle from '@unseenco/theatre-studio/UIRoot/DockResizeHandle'
 
 const headerHeight = `32px`
 
@@ -68,25 +70,41 @@ const defaultPosition: PanelPosition = {
 
 const minDims = {width: 280, height: 200}
 
-const Container = styled.div<{pin: boolean}>`
+const Container = styled.div<{pin: boolean; $docked: boolean}>`
   ${pointerEventsAutoInNormalMode};
-  background-color: rgba(40, 43, 47, 0.8);
-  position: absolute;
-  height: fit-content;
+  background-color: ${({$docked}) =>
+    $docked ? 'transparent' : 'rgba(40, 43, 47, 0.8)'};
+  position: ${({$docked}) => ($docked ? 'relative' : 'absolute')};
+  height: ${({$docked}) => ($docked ? '100%' : 'fit-content')};
   z-index: ${panelZIndexes.propsPanel};
 
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(14px);
-  border-radius: 2px;
+  box-shadow: ${({$docked}) =>
+    $docked
+      ? 'none'
+      : '0 1px 1px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15)'};
+  backdrop-filter: ${({$docked}) => ($docked ? 'none' : 'blur(14px)')};
+  border-radius: ${({$docked}) => ($docked ? '0' : '2px')};
 
   display: ${({pin}) => (pin ? 'block' : 'none')};
 
-  &:hover {
-    display: block;
-  }
+  ${({$docked}) =>
+    !$docked &&
+    css`
+      &:hover {
+        display: block;
+      }
+    `};
+
+  ${({$docked, pin}) =>
+    $docked &&
+    !pin &&
+    css`
+      display: none !important;
+    `};
 
   @supports not (backdrop-filter: blur()) {
-    background: rgba(40, 43, 47, 0.95);
+    background: ${({$docked}) =>
+      $docked ? 'transparent' : 'rgba(40, 43, 47, 0.95)'};
   }
 `
 
@@ -108,9 +126,10 @@ const Header = styled.div`
   align-items: center;
 `
 
-const Body = styled.div`
+const Body = styled.div<{$docked: boolean}>`
   ${pointerEventsAutoInNormalMode};
-  max-height: calc(100vh - 100px);
+  max-height: ${({$docked}) => ($docked ? 'none' : 'calc(100vh - 100px)')};
+  height: ${({$docked}) => ($docked ? 'calc(100% - 32px)' : 'auto')};
   overflow-y: scroll;
   &::-webkit-scrollbar {
     display: none;
@@ -130,13 +149,15 @@ export const contextMenuShownContext = createContext<
 
 const DetailPanelContent: React.FC<{}> = () => {
   const {dims} = usePanel()
+  const {isDocked, detailsWidth, viewportHeight} = useLayoutMode()
   const pin = useVal(getStudio().atomP.ahistoric.pinDetails) !== false
 
-  const hotspotActive = useHotspot('right')
+  const hotspotActive = useHotspot('right', {disabled: isDocked})
 
   useLayoutEffect(() => {
+    if (isDocked) return
     isDetailPanelHotspotActiveB.set(hotspotActive)
-  }, [hotspotActive])
+  }, [hotspotActive, isDocked])
 
   // cleanup
   useEffect(() => {
@@ -148,18 +169,30 @@ const DetailPanelContent: React.FC<{}> = () => {
 
   const [isContextMenuShown] = useContext(contextMenuShownContext)
 
-  const showDetailsPanel = pin || hotspotActive || isContextMenuShown
+  const showDetailsPanel = isDocked
+    ? pin
+    : pin || hotspotActive || isContextMenuShown
 
   const [containerElt, setContainerElt] = useState<null | HTMLDivElement>(null)
   usePresenceListenersOnRootElement(containerElt)
 
+  const panelWidth = isDocked ? detailsWidth : dims.width
+  const containerStyle = isDocked
+    ? {width: '100%', height: '100%'}
+    : {
+        right: '12px',
+        top: '52px',
+        width: panelWidth + 'px',
+      }
+
+  const resizeHandle = isDocked ? (
+    <DockResizeHandle edge="detailsLeft" />
+  ) : (
+    <PanelResizeHandle which="Left" />
+  )
+
   return usePrism(() => {
     const selection = getOutlineSelection()
-    const containerStyle = {
-      right: '12px',
-      top: '52px',
-      width: dims.width + 'px',
-    }
     const obj = selection.find(isSheetObject)
 
     if (obj) {
@@ -168,16 +201,17 @@ const DetailPanelContent: React.FC<{}> = () => {
         <Container
           data-testid="DetailPanel-Object"
           pin={showDetailsPanel}
+          $docked={isDocked}
           ref={setContainerElt}
           style={containerStyle}
           onMouseEnter={() => {
-            isDetailPanelHoveredB.set(true)
+            if (!isDocked) isDetailPanelHoveredB.set(true)
           }}
           onMouseLeave={() => {
-            isDetailPanelHoveredB.set(false)
+            if (!isDocked) isDetailPanelHoveredB.set(false)
           }}
         >
-          <PanelResizeHandle which="Left" />
+          {resizeHandle}
           <Header>
             <Title
               title={`${obj.sheet.address.sheetId}: ${activeVariant} > ${obj.address.objectKey}`}
@@ -191,7 +225,7 @@ const DetailPanelContent: React.FC<{}> = () => {
               <TitleBar_Piece>{obj.address.objectKey}</TitleBar_Piece>
             </Title>
           </Header>
-          <Body>
+          <Body $docked={isDocked}>
             <ObjectDetails objects={[obj]} />
           </Body>
         </Container>
@@ -200,14 +234,18 @@ const DetailPanelContent: React.FC<{}> = () => {
     const project = selection.find(isProject)
     if (project) {
       return (
-        <Container pin={showDetailsPanel} style={containerStyle}>
-          <PanelResizeHandle which="Left" />
+        <Container
+          pin={showDetailsPanel}
+          $docked={isDocked}
+          style={containerStyle}
+        >
+          {resizeHandle}
           <Header>
             <Title title={`${project.address.projectId}`}>
               <TitleBar_Piece>{project.address.projectId} </TitleBar_Piece>
             </Title>
           </Header>
-          <Body>
+          <Body $docked={isDocked}>
             <ProjectDetails projects={[project]} />
           </Body>
         </Container>
@@ -217,23 +255,41 @@ const DetailPanelContent: React.FC<{}> = () => {
     return (
       <Container
         pin={showDetailsPanel}
+        $docked={isDocked}
         style={containerStyle}
         onMouseEnter={() => {
-          isDetailPanelHoveredB.set(true)
+          if (!isDocked) isDetailPanelHoveredB.set(true)
         }}
         onMouseLeave={() => {
-          isDetailPanelHoveredB.set(false)
+          if (!isDocked) isDetailPanelHoveredB.set(false)
         }}
       >
-        <PanelResizeHandle which="Left" />
+        {resizeHandle}
         <EmptyState />
       </Container>
     )
-  }, [showDetailsPanel, dims])
+  }, [
+    showDetailsPanel,
+    dims,
+    isDocked,
+    detailsWidth,
+    viewportHeight,
+    containerElt,
+  ])
 }
 
 export default () => {
   const lockSet = useLockSet()
+  const {isDocked, detailsWidth, viewportHeight} = useLayoutMode()
+
+  const overrideDims = isDocked
+    ? {
+        width: detailsWidth,
+        height: viewportHeight,
+        left: 0,
+        top: 0,
+      }
+    : undefined
 
   return (
     <contextMenuShownContext.Provider value={lockSet}>
@@ -241,6 +297,7 @@ export default () => {
         panelId={'detailPanel' as UIPanelId}
         defaultPosition={defaultPosition}
         minDims={minDims}
+        overrideDims={overrideDims}
       >
         <DetailPanelContent />
       </BasePanel>

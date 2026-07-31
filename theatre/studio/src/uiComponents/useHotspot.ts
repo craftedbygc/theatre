@@ -1,9 +1,18 @@
 import {useEffect, useState} from 'react'
 
-export default function useHotspot(spot: 'left' | 'right') {
+export default function useHotspot(
+  spot: 'left' | 'right',
+  opts?: {disabled?: boolean},
+) {
   const [active, setActive] = useState(false)
+  const disabled = opts?.disabled ?? false
 
   useEffect(() => {
+    if (disabled) {
+      setActive(false)
+      return
+    }
+
     const hoverListener = (e: MouseEvent) => {
       const threshold = active ? 200 : 50
 
@@ -34,7 +43,7 @@ export default function useHotspot(spot: 'left' | 'right') {
       document.removeEventListener('mousemove', hoverListener)
       document.removeEventListener('mouseleave', leaveListener)
     }
-  }, [active])
+  }, [active, disabled, spot])
 
   return active
 }

@@ -3,12 +3,18 @@ import type Sequence from '@unseenco/theatre-core/sequences/Sequence'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
 import {val} from '@unseenco/theatre-dataverse'
-import {isSheet, isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
+import {
+  isProject,
+  isSheet,
+  isSheetObject,
+} from '@unseenco/theatre-shared/instanceTypes'
 import type {SheetInstanceId} from '@unseenco/theatre-shared/utils/ids'
 import {uniq} from 'lodash-es'
 import getStudio from './getStudio'
 import type {OutlineSelectable, OutlineSelection} from './store/types'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {STUDIO_PROJECT_ID} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 
 export const getOutlineSelection = (): OutlineSelection => {
   const projects = val(getStudio().projectsP)
@@ -49,6 +55,70 @@ export const getSheetOfSheetId = (
   if (!template) return undefined
 
   return template.getInstance('default' as SheetInstanceId)
+}
+
+function getFirstSheetInProject(project: Project): Sheet | undefined {
+  for (const sheetId of getRegisteredSheetIds(project)) {
+    const sheet = getSheetOfSheetId(project, sheetId)
+    if (sheet) return sheet
+  }
+  return undefined
+}
+
+function getDefaultProjectForSequenceEditor(): Project | undefined {
+  const projects = val(getStudio().projectsP)
+  const projectIds = Object.keys(projects) as ProjectId[]
+
+  for (const projectId of projectIds) {
+    if (projectId === STUDIO_PROJECT_ID) continue
+    const project = projects[projectId]
+    if (project) return project
+  }
+
+  for (const projectId of projectIds) {
+    const project = projects[projectId]
+    if (project) return project
+  }
+
+  return undefined
+}
+
+/**
+ * Resolves which sheet the sequence editor should display.
+ *
+ * When `fallbackToProjectSheet` is true and the outline selection does not
+ * resolve to a single sheet, the first registered sheet in the selected
+ * project is used. If nothing is selected, the first sheet in the first
+ * user project is used.
+ */
+export function resolveSequenceEditorSheet(options?: {
+  fallbackToProjectSheet?: boolean
+}): Sheet | undefined {
+  const selection = getOutlineSelection()
+
+  const selectedSheets = uniq(
+    selection
+      .filter((s): s is SheetObject | Sheet => isSheet(s) || isSheetObject(s))
+      .map((s) => (isSheetObject(s) ? s.sheet : s)),
+  )
+  const selectedTemplates = uniq(selectedSheets.map((s) => s.template))
+
+  if (selectedTemplates.length === 1) {
+    return selectedSheets[0]
+  }
+
+  if (!options?.fallbackToProjectSheet) {
+    return undefined
+  }
+
+  const project =
+    selection.find(isProject) ??
+    selectedSheets[0]?.project ??
+    getDefaultProjectForSequenceEditor()
+
+  if (!project) return undefined
+
+  return getFirstSheetInProject(project)
 }
 
 /**

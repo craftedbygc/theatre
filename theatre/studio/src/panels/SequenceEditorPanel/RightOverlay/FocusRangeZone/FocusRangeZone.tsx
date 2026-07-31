@@ -22,21 +22,24 @@ import FocusRangeStrip, {focusRangeStripTheme} from './FocusRangeStrip'
 import FocusRangeThumb from './FocusRangeThumb'
 import {minVisibleSize} from '@unseenco/theatre-studio/panels/BasePanel/common'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
 
-const Container = styled.div<{isShiftDown: boolean}>`
+const Container = styled.div<{isShiftDown: boolean; $isDocked: boolean}>`
   position: absolute;
   height: ${() => topStripHeight}px;
   left: 0;
   right: 0;
   box-sizing: border-box;
   /* Use the "grab" cursor if the shift key is up, which is the one used on the top strip of the sequence editor */
-  cursor: ${(props) => (props.isShiftDown ? 'ew-resize' : 'move')};
+  cursor: ${(props) =>
+    props.isShiftDown ? 'ew-resize' : props.$isDocked ? 'default' : 'move'};
 `
 
 const FocusRangeZone: React.FC<{
   layoutP: Pointer<SequenceEditorPanelLayout>
 }> = ({layoutP}) => {
   const [containerRef, containerNode] = useRefAndState<HTMLElement | null>(null)
+  const {isDocked} = useLayoutMode()
 
   const panelStuff = usePanel()
   const panelStuffRef = useRef(panelStuff)
@@ -57,24 +60,26 @@ const FocusRangeZone: React.FC<{
 
   useDrag(
     containerNode,
-    usePanelDragZoneGestureHandlers(layoutP, panelStuffRef),
+    usePanelDragZoneGestureHandlers(layoutP, panelStuffRef, isDocked),
   )
 
   const isShiftDown = useKeyDown('Shift')
   const isPointerHovering = useHoverWithoutDescendants(containerNode)
 
   useEffect(() => {
+    if (isDocked) return
     if (!isShiftDown && isPointerHovering) {
       const unlock = panelStuffRef.current.addBoundsHighlightLock()
       return unlock
     }
-  }, [!isShiftDown && isPointerHovering])
+  }, [isDocked, isShiftDown, isPointerHovering])
 
   return usePrism(() => {
     return (
       <Container
         ref={containerRef as $IntentionalAny}
         isShiftDown={isShiftDown}
+        $isDocked={isDocked}
       >
         <FocusRangeStrip layoutP={layoutP} />
         <FocusRangeThumb thumbType="start" layoutP={layoutP} />
@@ -89,6 +94,7 @@ export default FocusRangeZone
 function usePanelDragZoneGestureHandlers(
   layoutP: Pointer<SequenceEditorPanelLayout>,
   panelStuffRef: React.MutableRefObject<ReturnType<typeof usePanel>>,
+  isDocked: boolean,
 ) {
   const [mode, setMode] = useState<'none' | 'creating' | 'moving-panel'>('none')
 
@@ -231,6 +237,10 @@ function usePanelDragZoneGestureHandlers(
     return {
       debugName: 'FocusRangeZone',
       onDragStart(event) {
+        if (isDocked && !event.shiftKey) {
+          return false
+        }
+
         const [_mode, currentGestureHandlers] = event.shiftKey
           ? [
               'creating' as 'creating',
@@ -256,5 +266,5 @@ function usePanelDragZoneGestureHandlers(
         }
       },
     }
-  }, [layoutP, panelStuffRef])
+  }, [layoutP, panelStuffRef, isDocked])
 }

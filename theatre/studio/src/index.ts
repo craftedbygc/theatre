@@ -93,6 +93,7 @@ export type {
   PaneInstance,
   PaneClassDefinition,
   IStudioUI,
+  IDockedViewport,
   _StudioInitializeOpts,
   ToolsetConfig,
   ToolConfig,

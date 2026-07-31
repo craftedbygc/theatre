@@ -111,6 +111,19 @@ namespace stateEditors {
           h.panelPositions[p.panelId] = p.position
         }
       }
+      export function setDockedMode(dockedMode: boolean) {
+        drafts().historic.dockedMode = dockedMode
+      }
+      export namespace dockedLayout {
+        export function setSize(p: {
+          key: 'outlineWidth' | 'detailsWidth' | 'sequencerHeight'
+          value: number
+        }) {
+          const h = drafts().historic
+          h.dockedLayout ??= {}
+          h.dockedLayout[p.key] = p.value
+        }
+      }
       export namespace panels {
         export function _ensure() {
           drafts().historic.panels ??= {}

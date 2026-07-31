@@ -1,4 +1,5 @@
 import {types} from '@unseenco/theatre-core'
+import {bindDockedThreeViewport} from '../utils/bindDockedThreeViewport'
 import {
   Color,
   DirectionalLight,
@@ -159,6 +160,12 @@ export function createThreeScene(project) {
     renderer.render(scene, camera)
   }
   render()
+
+  bindDockedThreeViewport({
+    canvas,
+    renderer,
+    cameras: camera,
+  })
 
   animateMaterial()
   animateTransform()

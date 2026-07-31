@@ -1,5 +1,12 @@
 import type {Studio} from '@unseenco/theatre-studio/Studio'
 import {val} from '@unseenco/theatre-dataverse'
+import type {IDockedViewport} from './dockedViewport'
+import {
+  getDockedViewport,
+  onDockedResize,
+  onDockedToggle,
+} from './dockedViewport'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 
 const NonSSRBitsClass =
   typeof window !== 'undefined'
@@ -51,6 +58,37 @@ export default class UI {
     return (
       val(this.studio.atomP.ahistoric.visibilityState) === 'everythingIsHidden'
     )
+  }
+
+  /**
+   * Whether the studio is in docked layout mode.
+   */
+  get isDocked(): boolean {
+    return val(getStudio().atomP.historic.dockedMode) ?? false
+  }
+
+  /**
+   * The inner viewport rectangle when docked layout mode is active and the
+   * studio is visible. `null` when floating or when the studio is hidden.
+   */
+  get dockedViewport(): IDockedViewport | null {
+    return getDockedViewport()
+  }
+
+  /**
+   * Listen for changes to docked layout mode. Called immediately with the
+   * current value.
+   */
+  onDockedToggle(listener: (docked: boolean) => void) {
+    return onDockedToggle(listener)
+  }
+
+  /**
+   * Listen for changes to the inner viewport size/position while docked.
+   * Called immediately with the current viewport if docked.
+   */
+  onDockedResize(listener: (viewport: IDockedViewport | null) => void) {
+    return onDockedResize(listener)
   }
 
   renderToolset(toolsetId: string, htmlNode: HTMLElement) {

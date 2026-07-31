@@ -5,16 +5,24 @@ import getStudio from '@unseenco/theatre-studio/getStudio'
 import type {ToolsetConfig} from '@unseenco/theatre-studio/TheatreStudio'
 import React, {useLayoutEffect, useMemo} from 'react'
 
-import styled from 'styled-components'
+import styled, {css} from 'styled-components'
 import Toolset from './Toolset'
+import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
+import {DOCKED_TOOLBAR_BUTTON_SIZE} from '@unseenco/theatre-studio/UIRoot/dockedLayoutConstants'
 
-const Container = styled.div`
-  height: 36px;
-  /* pointer-events: none; */
-
+const Container = styled.div<{$docked: boolean}>`
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+  height: 36px;
+
+  ${({$docked}) =>
+    $docked &&
+    css`
+      align-items: center;
+      height: auto;
+      min-height: ${DOCKED_TOOLBAR_BUTTON_SIZE}px;
+    `};
 `
 
 const GroupDivider = styled.div`
@@ -51,6 +59,7 @@ export const ExtensionToolbar: React.FC<{
   toolbarId: string
   showLeftDivider?: boolean
 }> = ({toolbarId, showLeftDivider}) => {
+  const {isDocked} = useLayoutMode()
   const groups: Array<React.ReactNode> = []
   const extensionsById = useVal(getStudio().atomP.ephemeral.extensions.byId)
 
@@ -71,7 +80,10 @@ export const ExtensionToolbar: React.FC<{
   if (groups.length === 0) return null
 
   return (
-    <Container data-testid={`theatre-extensionToolbar-${toolbarId}`}>
+    <Container
+      $docked={isDocked}
+      data-testid={`theatre-extensionToolbar-${toolbarId}`}
+    >
       {showLeftDivider ? <GroupDivider></GroupDivider> : undefined}
       {groups}
     </Container>

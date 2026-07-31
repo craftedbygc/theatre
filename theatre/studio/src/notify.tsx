@@ -13,6 +13,7 @@ import getStudio from './getStudio'
 import {marked} from 'marked'
 import useTooltip from './uiComponents/Popover/useTooltip'
 import MinimalTooltip from './uiComponents/Popover/MinimalTooltip'
+import {useLayoutMode} from './UIRoot/LayoutModeContext'
 
 /**
  * Creates a string key unique to a notification with a certain title and message.
@@ -304,17 +305,23 @@ const Button = styled.button<{danger?: boolean}>`
   }
 `
 
-const NotifierContainer = styled.div`
+const NotifierContainer = styled.div<{
+  $docked: boolean
+  $toolbarHeight: number
+}>`
   z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 8px;
   position: fixed;
-  right: 92px;
-  top: 50px;
+  right: ${({$docked}) => ($docked ? '16px' : '92px')};
+  top: ${({$docked, $toolbarHeight}) =>
+    $docked ? `${$toolbarHeight + 8}px` : '50px'};
   width: 500px;
-  height: 85vh;
-  min-height: 400px;
+  height: ${({$docked}) => ($docked ? 'auto' : '85vh')};
+  max-height: ${({$docked, $toolbarHeight}) =>
+    $docked ? `calc(100vh - ${$toolbarHeight + 16}px)` : 'none'};
+  min-height: ${({$docked}) => ($docked ? '0' : '400px')};
 `
 
 const NotificationScroller = styled.div`
@@ -363,12 +370,13 @@ export const useEmptyNotificationsTooltip = () => {
 export const Notifier = () => {
   const {toasts, handlers} = useToaster()
   const {startPause, endPause} = handlers
+  const {isDocked, toolbarHeight} = useLayoutMode()
 
   const pinNotifications =
     useVal(getStudio().atomP.ahistoric.pinNotifications) ?? false
 
   return (
-    <NotifierContainer>
+    <NotifierContainer $docked={isDocked} $toolbarHeight={toolbarHeight}>
       {!pinNotifications
         ? null
         : toasts.length > 0 && (

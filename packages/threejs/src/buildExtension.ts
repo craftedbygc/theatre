@@ -354,11 +354,29 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   }
 
   const onResize = () => {
-    const nextWidth = window.innerWidth
-    const nextHeight = window.innerHeight
-    orbitCamera.aspect = nextWidth / nextHeight
+    if (studio.ui.isDocked && studio.ui.dockedViewport !== null) return
+    syncOrbitCameraAspect(window.innerWidth, window.innerHeight)
+  }
+
+  let lastOrbitWidth = 0
+  let lastOrbitHeight = 0
+
+  const syncOrbitCameraAspect = (width: number, height: number) => {
+    if (width <= 0 || height <= 0) return
+    if (width === lastOrbitWidth && height === lastOrbitHeight) return
+    lastOrbitWidth = width
+    lastOrbitHeight = height
+    orbitCamera.aspect = width / height
     orbitCamera.updateProjectionMatrix()
   }
+
+  const unsubDockedResize = studio.ui.onDockedResize((viewport) => {
+    if (viewport === null) {
+      syncOrbitCameraAspect(window.innerWidth, window.innerHeight)
+      return
+    }
+    syncOrbitCameraAspect(viewport.width, viewport.height)
+  })
 
   window.addEventListener('resize', onResize)
   controls.addEventListener('end', updateTheatreCameraProps)
@@ -398,6 +416,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       }
       unsubscribeFromActiveScene()
       unsubscribeFromRemoteEditor()
+      unsubDockedResize()
       window.removeEventListener('resize', onResize)
       controls.removeEventListener('end', updateTheatreCameraProps)
       controls.dispose()

@@ -115,10 +115,23 @@ export type StudioHistoricStateProject = {
   stateBySheetId: StrictRecord<SheetId, StudioHistoricStateProjectSheet>
 }
 
+export type DockedLayoutSizes = {
+  outlineWidth?: number
+  detailsWidth?: number
+  sequencerHeight?: number
+}
+
 export type StudioHistoricState = {
   projects: {
     stateByProjectId: StrictRecord<ProjectId, StudioHistoricStateProject>
   }
+
+  /**
+   * When true, studio panels are arranged in a fixed dock layout around a
+   * center viewport instead of floating over the page.
+   */
+  dockedMode?: boolean
+  dockedLayout?: DockedLayoutSizes
 
   /** Panels can contain panes */
   panels?: Panels

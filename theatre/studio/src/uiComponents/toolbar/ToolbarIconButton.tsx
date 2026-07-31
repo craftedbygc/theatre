@@ -31,6 +31,7 @@ export const Container = styled.button`
 
   svg {
     display: block;
+    pointer-events: none;
   }
 
   &:hover {

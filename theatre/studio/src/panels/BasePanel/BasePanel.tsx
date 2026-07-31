@@ -10,6 +10,7 @@ import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
 import useLockSet from '@unseenco/theatre-studio/uiComponents/useLockSet'
 import React, {useContext} from 'react'
 import useWindowSize from 'react-use/esm/useWindowSize'
+import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
 
 type PanelStuff = {
   panelId: UIPanelId
@@ -71,12 +72,43 @@ const BasePanel: React.FC<{
   panelId: UIPanelId
   defaultPosition: PanelPosition
   minDims: {width: number; height: number}
+  overrideDims?: PanelStuff['dims']
   children: React.ReactNode
-}> = ({panelId, children, defaultPosition, minDims}) => {
+}> = ({panelId, children, defaultPosition, minDims, overrideDims}) => {
   const windowSize = useWindowSize(800, 200)
   const [boundsHighlighted, addBoundsHighlightLock] = useLockSet()
+  const {isDocked, viewportInsets} = useLayoutMode()
+
+  const clampDimsToViewport = (
+    dims: PanelStuff['dims'],
+  ): PanelStuff['dims'] => {
+    if (!isDocked) return dims
+
+    const minLeft = viewportInsets.left
+    const minTop = viewportInsets.top
+    const maxRight = windowSize.width - viewportInsets.right
+    const maxBottom = windowSize.height - viewportInsets.bottom
+
+    const left = Math.max(dims.left, minLeft)
+    const top = Math.max(dims.top, minTop)
+    const width = Math.min(dims.width, maxRight - left)
+    const height = Math.min(dims.height, maxBottom - top)
+
+    return {left, top, width, height}
+  }
 
   const {stuff} = usePrism(() => {
+    if (overrideDims) {
+      const stuff: PanelStuff = {
+        dims: overrideDims,
+        panelId,
+        minDims,
+        boundsHighlighted,
+        addBoundsHighlightLock,
+      }
+      return {stuff}
+    }
+
     const {edges} =
       val(getStudio()!.atomP.historic.panelPositions[panelId]) ??
       defaultPosition
@@ -115,13 +147,14 @@ const BasePanel: React.FC<{
     // memo-ing dims so its ref can be used as a cache key
     const dims = prism.memo(
       'dims',
-      () => ({
-        width,
-        left,
-        top,
-        height,
-      }),
-      [width, left, top, height],
+      () =>
+        clampDimsToViewport({
+          width,
+          left,
+          top,
+          height,
+        }),
+      [width, left, top, height, isDocked, viewportInsets],
     )
 
     const stuff: PanelStuff = {
@@ -132,7 +165,15 @@ const BasePanel: React.FC<{
       addBoundsHighlightLock,
     }
     return {stuff}
-  }, [panelId, windowSize, boundsHighlighted, addBoundsHighlightLock])
+  }, [
+    panelId,
+    windowSize,
+    boundsHighlighted,
+    addBoundsHighlightLock,
+    overrideDims,
+    isDocked,
+    viewportInsets,
+  ])
 
   return <PanelContext.Provider value={stuff}>{children}</PanelContext.Provider>
 }

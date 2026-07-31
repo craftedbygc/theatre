@@ -19,11 +19,17 @@ const PanelWrapper = React.forwardRef(
     props: React.DetailedHTMLProps<
       React.HTMLAttributes<HTMLDivElement>,
       HTMLDivElement
-    >,
+    > & {docked?: boolean; showResizers?: boolean},
     ref,
   ) => {
     const stuff = usePanel()
-    const {style, children, ...otherProps} = props
+    const {
+      style,
+      children,
+      docked = false,
+      showResizers = true,
+      ...otherProps
+    } = props
 
     return (
       // @ts-ignore
@@ -31,15 +37,26 @@ const PanelWrapper = React.forwardRef(
         // @ts-ignore
         ref={ref}
         {...otherProps}
-        style={{
-          width: stuff.dims.width + 'px',
-          height: stuff.dims.height + 'px',
-          top: stuff.dims.top + 'px',
-          left: stuff.dims.left + 'px',
-          ...(style ?? {}),
-        }}
+        style={
+          docked
+            ? {
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                top: 0,
+                left: 0,
+                ...(style ?? {}),
+              }
+            : {
+                width: stuff.dims.width + 'px',
+                height: stuff.dims.height + 'px',
+                top: stuff.dims.top + 'px',
+                left: stuff.dims.left + 'px',
+                ...(style ?? {}),
+              }
+        }
       >
-        <PanelResizers />
+        {showResizers && <PanelResizers />}
         {children}
       </Container>
     )

@@ -1,12 +1,11 @@
 import {usePrism, useVal} from '@unseenco/theatre-react'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import React from 'react'
-import styled from 'styled-components'
+import styled, {css} from 'styled-components'
 import type {$IntentionalAny} from '@unseenco/theatre-dataverse/dist/types'
 import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
 import ErrorTooltip from '@unseenco/theatre-studio/uiComponents/Popover/ErrorTooltip'
 import BasicTooltip from '@unseenco/theatre-studio/uiComponents/Popover/BasicTooltip'
-import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
 import {val} from '@unseenco/theatre-dataverse'
 import ExtensionToolbar from './ExtensionToolbar/ExtensionToolbar'
 import PinButton from './PinButton'
@@ -19,20 +18,40 @@ import DoubleChevronLeft from '@unseenco/theatre-studio/uiComponents/icons/Doubl
 import DoubleChevronRight from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronRight'
 import TimelineIcon from '@unseenco/theatre-studio/uiComponents/icons/TimelineIcon'
 import RemoteEditorIcon from '@unseenco/theatre-studio/uiComponents/icons/RemoteEditorIcon'
+import DockLayout from '@unseenco/theatre-studio/uiComponents/icons/DockLayout'
 import ToolbarIconButton from '@unseenco/theatre-studio/uiComponents/toolbar/ToolbarIconButton'
 import {
   useNotifications,
   useEmptyNotificationsTooltip,
 } from '@unseenco/theatre-studio/notify'
 import {openRemoteEditorWindow} from '@unseenco/theatre-studio/remoteEditor'
+import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
+import {
+  DOCKED_TOOLBAR_BUTTON_SIZE,
+  DOCKED_TOOLBAR_PADDING_X,
+  DOCKED_TOOLBAR_PADDING_Y,
+} from '@unseenco/theatre-studio/UIRoot/dockedLayoutConstants'
 
-const Container = styled.div`
-  height: 36px;
+const Container = styled.div<{$docked: boolean}>`
   pointer-events: none;
-
   display: flex;
   justify-content: space-between;
-  padding: 12px;
+
+  ${({$docked}) =>
+    $docked
+      ? css`
+          align-items: center;
+          width: 100%;
+          box-sizing: border-box;
+          flex: 1;
+          min-height: ${DOCKED_TOOLBAR_BUTTON_SIZE +
+          DOCKED_TOOLBAR_PADDING_Y * 2}px;
+          padding: ${DOCKED_TOOLBAR_PADDING_Y}px ${DOCKED_TOOLBAR_PADDING_X}px;
+        `
+      : css`
+          height: 36px;
+          padding: 12px;
+        `};
 `
 
 const NumberOfConflictsIndicator = styled.div`
@@ -107,18 +126,16 @@ const GlobalToolbar: React.FC = () => {
   const detailsPinned = useVal(getStudio().atomP.ahistoric.pinDetails) ?? true
   const sequenceEditorPinned =
     useVal(getStudio().atomP.ahistoric.pinSequenceEditor) ?? true
+  const dockedMode = useVal(getStudio().atomP.historic.dockedMode) ?? false
+  const {isDocked} = useLayoutMode()
 
-  const [timelineTooltip, timelineTriggerRef] = useTooltip(
-    {enterDelay: 200},
-    () => <MinimalTooltip>Toggle Timeline</MinimalTooltip>,
-  )
   const {hasNotifications} = useNotifications()
 
   const [notificationsTooltip, notificationsTriggerRef] =
     useEmptyNotificationsTooltip()
 
   return (
-    <Container>
+    <Container $docked={isDocked}>
       <SubContainer>
         {triggerTooltip}
         <PinButton
@@ -141,9 +158,8 @@ const GlobalToolbar: React.FC = () => {
             {conflicts.length}
           </NumberOfConflictsIndicator>
         ) : null}
-        {timelineTooltip}
         <PinButton
-          ref={timelineTriggerRef as $IntentionalAny}
+          title="Toggle Timeline"
           onClick={() => {
             getStudio().transaction(({stateEditors, drafts}) => {
               stateEditors.studio.ahistoric.setPinSequenceEditor(
@@ -156,6 +172,20 @@ const GlobalToolbar: React.FC = () => {
           unpinHintIcon={<TimelineIcon />}
           pinned={sequenceEditorPinned}
         />
+        <ToolbarIconButton
+          data-testid="DockedLayout-ToggleButton"
+          className={dockedMode ? 'selected' : ''}
+          onClick={() => {
+            getStudio().transaction(({stateEditors, drafts}) => {
+              stateEditors.studio.historic.setDockedMode(
+                !(drafts.historic.dockedMode ?? false),
+              )
+            })
+          }}
+          title={dockedMode ? 'Float panels' : 'Dock panels'}
+        >
+          <DockLayout />
+        </ToolbarIconButton>
         {window.location.hash !== '#editor' && (
           <ToolbarIconButton
             onClick={openRemoteEditorWindow}

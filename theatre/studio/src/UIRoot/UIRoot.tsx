@@ -5,7 +5,9 @@ import {val} from '@unseenco/theatre-dataverse'
 import React, {useEffect} from 'react'
 import styled, {createGlobalStyle} from 'styled-components'
 import PanelsRoot from './PanelsRoot'
+import DockedPanelsRoot from './DockedPanelsRoot'
 import GlobalToolbar from '@unseenco/theatre-studio/toolbars/GlobalToolbar'
+import {LayoutModeProvider} from './LayoutModeContext'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import {PortalContext} from 'reakit'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
@@ -83,6 +85,7 @@ export default function UIRoot(props: {
       !isRemoteEditorWindow() && visiblityState === 'everythingIsHidden'
 
     const initialised = val(studio.atomP.ephemeral.initialised)
+    const dockedMode = val(studio.atomP.historic.dockedMode) ?? false
 
     return !initialised ? null : (
       <ProvideLogger logger={logger}>
@@ -104,9 +107,17 @@ export default function UIRoot(props: {
               >
                 <PortalLayer ref={portalLayerRef} />
                 <ChordialOverlay />
-                <GlobalToolbar />
-                <PanelsRoot />
-                <Notifier />
+                <LayoutModeProvider>
+                  {dockedMode ? (
+                    <DockedPanelsRoot />
+                  ) : (
+                    <>
+                      <GlobalToolbar />
+                      <PanelsRoot />
+                    </>
+                  )}
+                  <Notifier />
+                </LayoutModeProvider>
               </Container>
             </>
           </ProvideStyles>

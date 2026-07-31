@@ -34,6 +34,25 @@ export interface StudioLike {
     fn: (api: StudioTransactionAPI) => void,
     opts?: {undoable?: boolean},
   ): void
+  ui: {
+    readonly isDocked: boolean
+    readonly dockedViewport: {
+      top: number
+      left: number
+      width: number
+      height: number
+    } | null
+    onDockedResize(
+      listener: (
+        viewport: {
+          top: number
+          left: number
+          width: number
+          height: number
+        } | null,
+      ) => void,
+    ): () => void
+  }
 }
 
 export interface DevtoolsStateObject {

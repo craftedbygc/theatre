@@ -1,6 +1,7 @@
 import studio from '@unseenco/theatre-studio'
 import {getProject} from '@unseenco/theatre-core'
 import {buildExtension} from '@unseenco/theatre-threejs'
+import {bindDockedThreeViewport} from '../utils/bindDockedThreeViewport'
 import {createThreeScenes} from './ThreeScene.js'
 
 studio.initialize()
@@ -22,17 +23,11 @@ devtools.onSceneSwitch((_name, scene) => {
 
 studio.extend(devtools.extension)
 
-function onWindowResize() {
-  const width = window.innerWidth
-  const height = window.innerHeight
-  renderer.setSize(width, height)
-  for (const {camera} of scenes) {
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-  }
-}
-
-window.addEventListener('resize', onWindowResize)
+bindDockedThreeViewport({
+  canvas: document.getElementById('canvas'),
+  renderer,
+  cameras: scenes.map(({camera}) => camera),
+})
 
 function render() {
   requestAnimationFrame(render)
