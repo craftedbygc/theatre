@@ -42,7 +42,7 @@ const ProjectListItem: React.FC<{
 
   const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel(project)
 
-  const {targetRef} = useChordial<HTMLDivElement>(() => {
+  const {targetRef} = useChordial(() => {
     return {
       title: `Project: ${project.address.projectId}`,
       items: [],

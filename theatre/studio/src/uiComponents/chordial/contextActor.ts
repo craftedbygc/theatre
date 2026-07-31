@@ -47,6 +47,6 @@ export const contextActor = basicFSM<
   }
 
   idle()
-})({name: 'contextActor'})
+})()
 
 export const contextStatus = prism(() => val(contextActor.pointer))

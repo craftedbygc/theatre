@@ -107,7 +107,7 @@ export const tooltipActor = basicFSM<
   }
 
   idle()
-})({name: 'tooltipActor'})
+})()
 
 const isTooltipBlocked = prism(() => {
   const isContextMenuOpen = !!val(contextActor.pointer)

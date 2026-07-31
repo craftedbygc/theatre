@@ -8,4 +8,4 @@ export const mousedownActor = basicFSM<[isDown: boolean], boolean>((t) => {
   }
 
   toggle(false)
-})({name: 'mouseDownActor'})
+})()

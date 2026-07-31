@@ -7,7 +7,7 @@ let currentViewport: IDockedViewport | null = null
 let lastReportedDocked = false
 
 const toggleListeners = new Set<(docked: boolean) => void>()
-const resizeListeners = new Set<(viewport: IDockedViewport) => void>()
+const resizeListeners = new Set<(viewport: IDockedViewport | null) => void>()
 
 function isSameViewport(
   a: IDockedViewport | null,

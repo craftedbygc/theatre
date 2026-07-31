@@ -255,4 +255,4 @@ export const gestureActor = basicFSM<
   }
 
   idle()
-})({name: 'gestureActor'})
+})()

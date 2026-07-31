@@ -43,7 +43,7 @@ const SheetItemContent: React.FC<{
 }> = ({sheet, depth}) => {
   const {collapsed, setCollapsed} = useCollapseStateInOutlinePanel(sheet)
 
-  const {targetRef} = useChordial<HTMLDivElement>(() => {
+  const {targetRef} = useChordial(() => {
     return {
       title: `Sheet: ${sheet.address.sheetId}`,
       items: [],

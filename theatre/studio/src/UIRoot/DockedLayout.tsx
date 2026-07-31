@@ -25,7 +25,11 @@ const Grid = styled.div.attrs<{
     gridTemplateRows: `auto 1fr ${$sequencerHeight}px`,
     gridTemplateColumns: `${$outlineWidth}px 1fr ${$detailsWidth}px`,
   },
-}))`
+}))<{
+  $outlineWidth: number
+  $detailsWidth: number
+  $sequencerHeight: number
+}>`
   position: fixed;
   inset: 0;
   display: grid;
