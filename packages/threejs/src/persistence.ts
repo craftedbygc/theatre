@@ -5,6 +5,7 @@ import {DEVTOOLS_SHEET_ID} from './constants'
 
 export type DevtoolsState = {
   orbitEnabled: boolean
+  cameraHelperEnabled: boolean
   position: {x: number; y: number; z: number}
   target: {x: number; y: number; z: number}
 }
@@ -58,6 +59,7 @@ export interface StudioLike {
 export interface DevtoolsStateObject {
   readonly props: {
     orbitEnabled: unknown
+    cameraHelperEnabled: unknown
     position: {
       x: unknown
       y: unknown
@@ -97,6 +99,7 @@ export function createDevtoolsStateObject(
     objectKey,
     {
       orbitEnabled: types.boolean(initialState.orbitEnabled),
+      cameraHelperEnabled: types.boolean(initialState.cameraHelperEnabled),
       position: types.compound({
         x: initialState.position.x,
         y: initialState.position.y,
@@ -117,6 +120,7 @@ export function createInitialDevtoolsStateFromCamera(camera: {
 }): DevtoolsState {
   return {
     orbitEnabled: false,
+    cameraHelperEnabled: true,
     position: {
       x: camera.position.x,
       y: camera.position.y,
@@ -182,6 +186,19 @@ export function persistOrbitEnabled(
   studio.transaction(
     ({set}) => {
       set(stateObj.props.orbitEnabled, orbitEnabled)
+    },
+    {undoable: false},
+  )
+}
+
+export function persistCameraHelperEnabled(
+  studio: StudioLike,
+  stateObj: DevtoolsStateObject,
+  cameraHelperEnabled: boolean,
+): void {
+  studio.transaction(
+    ({set}) => {
+      set(stateObj.props.cameraHelperEnabled, cameraHelperEnabled)
     },
     {undoable: false},
   )

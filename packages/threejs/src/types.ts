@@ -7,6 +7,7 @@ export type ToolConfigIcon = {
   svgSource: string
   title: string
   onClick: () => void
+  selected?: boolean
 }
 
 export type ToolConfigOption = {

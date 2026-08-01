@@ -120,6 +120,10 @@ export type ToolConfigIcon = {
   svgSource: string
   title: string
   onClick: () => void
+  /**
+   * When true, the button is rendered in its selected/active style.
+   */
+  selected?: boolean
 }
 
 export type ToolConfigOption = {

@@ -4,17 +4,18 @@ import {
   isRemoteEditorOpen,
   onRemoteEditorOpenChange,
 } from '@unseenco/theatre-studio/remoteEditor'
-import {PerspectiveCamera} from 'three'
+import {PerspectiveCamera, CameraHelper} from 'three'
 import type {Camera, Scene, WebGLRenderer} from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {EXTENSION_ID} from './constants'
-import {cameraIcon, orbitIcon} from './icons'
+import {cameraHelperIcon, cameraIcon, orbitIcon} from './icons'
 import {
   createActiveSceneStateObject,
   createDevtoolsStateObject,
   createInitialDevtoolsStateFromCamera,
   getDevtoolsObjectKey,
   persistActiveSceneName,
+  persistCameraHelperEnabled,
   persistCameraProps,
   persistOrbitEnabled,
 } from './persistence'
@@ -95,6 +96,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
 
   let activeSceneIndex = 0
   let mode: CameraMode = 'scene'
+  let cameraHelperEnabled = false
   let setToolbar: ((config: ToolsetConfig) => void) | null = null
   let pendingOrbitEnabled: boolean | undefined
   let hasRemoteEditorUserToggledOrbit = false
@@ -123,6 +125,29 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   const controls = new OrbitControls(orbitCamera, renderer.domElement)
   controls.enabled = false
   controls.target.set(0, 0, 0)
+
+  const cameraHelpers = normalizedScenes.map((entry) => {
+    const helper = new CameraHelper(entry.camera)
+    helper.visible = false
+    entry.scene.add(helper)
+    return helper
+  })
+
+  const updateCameraHelperVisibility = () => {
+    cameraHelpers.forEach((helper, index) => {
+      helper.visible =
+        mode === 'orbit' && cameraHelperEnabled && index === activeSceneIndex
+    })
+  }
+
+  const updateActiveCameraHelper = () => {
+    const helper = cameraHelpers[activeSceneIndex]
+    if (!helper?.visible) return
+
+    const sceneCamera = getActiveSceneCamera()
+    sceneCamera.updateMatrixWorld(true)
+    helper.update()
+  }
 
   const sceneStateObjects: DevtoolsStateObject[] = normalizedScenes.map(
     (entry) =>
@@ -160,6 +185,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     }
 
     syncOrbitCameraFromSceneCamera(getActiveSceneCamera())
+    cameraHelperEnabled = true
     setOrbitModeLocal(false)
   }
 
@@ -177,6 +203,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     } else if (isRemoteEditorOpen() || modeBeforeRemoteEditor !== undefined) {
       // Main window while the remote editor is open: switch the rendered scene
       // without changing local camera mode or orbit pose.
+      updateCameraHelperVisibility()
     } else {
       applyActiveSceneDevtoolsState()
     }
@@ -241,12 +268,36 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       ],
     })
 
+    if (mode === 'orbit') {
+      toolbarConfig.push({
+        type: 'Icon',
+        svgSource: cameraHelperIcon,
+        title: cameraHelperEnabled
+          ? 'Hide scene camera helper'
+          : 'Show scene camera helper',
+        selected: cameraHelperEnabled,
+        onClick: () => {
+          setCameraHelperEnabled(!cameraHelperEnabled)
+        },
+      })
+    }
+
     setToolbar(toolbarConfig)
+  }
+
+  const setCameraHelperEnabled = (enabled: boolean) => {
+    cameraHelperEnabled = enabled
+    updateCameraHelperVisibility()
+    updateToolbarConfig()
+    if (shouldPersistDevtoolsState()) {
+      persistCameraHelperEnabled(studio, getActiveStateObj(), enabled)
+    }
   }
 
   const setOrbitModeLocal = (enabled: boolean) => {
     mode = enabled ? 'orbit' : 'scene'
     controls.enabled = enabled
+    updateCameraHelperVisibility()
     updateToolbarConfig()
   }
 
@@ -277,6 +328,11 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       setOrbitModeLocal(values.orbitEnabled)
     }
 
+    if (values.cameraHelperEnabled !== cameraHelperEnabled) {
+      cameraHelperEnabled = values.cameraHelperEnabled
+      updateCameraHelperVisibility()
+    }
+
     applyCameraProps(values)
     updateToolbarConfig()
   }
@@ -284,10 +340,14 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   const applyRemoteEditorState = (values: DevtoolsState) => {
     applyCameraProps(values)
     setOrbitModeLocal(true)
+    cameraHelperEnabled = true
+    updateCameraHelperVisibility()
   }
 
   if (isRemoteEditorWindow()) {
     setOrbitModeLocal(true)
+    cameraHelperEnabled = true
+    updateCameraHelperVisibility()
   }
 
   const unsubscribeFromState = sceneStateObjects.map((stateObj, index) =>
@@ -342,7 +402,11 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     } else if (shouldPersistDevtoolsState()) {
       pendingOrbitEnabled = enabled
     }
+    const enteringOrbit = enabled && mode !== 'orbit'
     setOrbitModeLocal(enabled)
+    if (enteringOrbit) {
+      setCameraHelperEnabled(true)
+    }
     if (shouldPersistDevtoolsState()) {
       persistOrbitEnabled(studio, getActiveStateObj(), enabled)
     }
@@ -402,6 +466,9 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     update() {
       if (mode === 'orbit') {
         controls.update()
+        if (cameraHelperEnabled) {
+          updateActiveCameraHelper()
+        }
       }
     },
     onSceneSwitch(callback) {
@@ -420,6 +487,11 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       window.removeEventListener('resize', onResize)
       controls.removeEventListener('end', updateTheatreCameraProps)
       controls.dispose()
+      for (let index = 0; index < cameraHelpers.length; index++) {
+        const helper = cameraHelpers[index]
+        normalizedScenes[index].scene.remove(helper)
+        helper.dispose()
+      }
       sceneSwitchListeners.clear()
     },
   }

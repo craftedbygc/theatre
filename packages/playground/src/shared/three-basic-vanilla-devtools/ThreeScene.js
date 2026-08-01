@@ -125,6 +125,44 @@ function bindMaterialSheet(sheet, mesh) {
 
 /**
  * @param {import('@unseenco/theatre-core').ISheet} sheet
+ * @param {import('three').PerspectiveCamera} camera
+ */
+function bindCameraTransformSheet(sheet, camera) {
+  sheet
+    .object('Camera', {
+      transform: {
+        position: {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z,
+        },
+        rotation: {
+          x: camera.rotation.x,
+          y: camera.rotation.y,
+          z: camera.rotation.z,
+        },
+      },
+      fov: camera.fov,
+    })
+    .onValuesChange((values) => {
+      const {transform} = values
+      camera.position.set(
+        transform.position.x,
+        transform.position.y,
+        transform.position.z,
+      )
+      camera.rotation.set(
+        transform.rotation.x,
+        transform.rotation.y,
+        transform.rotation.z,
+      )
+      camera.fov = values.fov
+      camera.updateProjectionMatrix()
+    })
+}
+
+/**
+ * @param {import('@unseenco/theatre-core').ISheet} sheet
  * @param {Mesh} mesh
  */
 function bindTransformSheet(sheet, mesh) {
@@ -208,6 +246,7 @@ function createSpheresScene(sheet, width, height) {
 
   camera.position.set(0, 0, 45)
 
+  bindCameraTransformSheet(sheet, camera)
   bindMaterialSheet(sheet, mesh)
   bindTransformSheet(sheet, mesh)
 
@@ -235,6 +274,7 @@ function createCubeScene(sheet, width, height) {
   )
   scene.add(cube)
 
+  bindCameraTransformSheet(sheet, camera)
   bindMaterialSheet(sheet, cube)
   bindTransformSheet(sheet, cube)
 
@@ -262,6 +302,7 @@ function createCylinderScene(sheet, width, height) {
   )
   scene.add(cylinder)
 
+  bindCameraTransformSheet(sheet, camera)
   bindMaterialSheet(sheet, cylinder)
   bindTransformSheet(sheet, cylinder)
 

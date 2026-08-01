@@ -22,6 +22,7 @@ const IconButton: React.FC<{
       onClick={config.onClick}
       data-testid={testId}
       title={config.title}
+      className={config.selected ? 'selected' : undefined}
       dangerouslySetInnerHTML={{__html: config['svgSource'] ?? ''}}
     />
   )
