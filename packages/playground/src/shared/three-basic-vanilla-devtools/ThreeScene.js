@@ -1,9 +1,11 @@
 import {types} from '@unseenco/theatre-core'
 import {
   BoxGeometry,
+  CatmullRomCurve3,
   Color,
   CylinderGeometry,
   DirectionalLight,
+  Group,
   Mesh,
   MeshPhongMaterial,
   PerspectiveCamera,
@@ -205,6 +207,29 @@ function bindTransformSheet(sheet, mesh) {
 }
 
 /**
+ * @param {Scene} scene
+ */
+function addInvisibleCameraPath(scene) {
+  const points = []
+  for (let index = 0; index <= 24; index++) {
+    const t = index / 24
+    points.push(
+      new Vector3(
+        Math.sin(t * Math.PI * 2) * 18,
+        Math.sin(t * Math.PI * 5) * 4 + 2,
+        -30 + t * 60,
+      ),
+    )
+  }
+
+  const path = new CatmullRomCurve3(points)
+  const pathRoot = new Group()
+  pathRoot.name = 'CameraPath'
+  pathRoot.userData.path = path
+  scene.add(pathRoot)
+}
+
+/**
  * @param {import('@unseenco/theatre-core').ISheet} sheet
  */
 function createSpheresScene(sheet, width, height) {
@@ -243,6 +268,8 @@ function createSpheresScene(sheet, width, height) {
     new MeshPhongMaterial({color: 0xffffff}),
   )
   scene.add(mesh)
+
+  addInvisibleCameraPath(scene)
 
   camera.position.set(0, 0, 45)
 

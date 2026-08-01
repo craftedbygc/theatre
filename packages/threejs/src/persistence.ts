@@ -6,6 +6,7 @@ import {DEVTOOLS_SHEET_ID} from './constants'
 export type DevtoolsState = {
   orbitEnabled: boolean
   cameraHelperEnabled: boolean
+  linesHelperEnabled: boolean
   position: {x: number; y: number; z: number}
   target: {x: number; y: number; z: number}
 }
@@ -60,6 +61,7 @@ export interface DevtoolsStateObject {
   readonly props: {
     orbitEnabled: unknown
     cameraHelperEnabled: unknown
+    linesHelperEnabled: unknown
     position: {
       x: unknown
       y: unknown
@@ -100,6 +102,7 @@ export function createDevtoolsStateObject(
     {
       orbitEnabled: types.boolean(initialState.orbitEnabled),
       cameraHelperEnabled: types.boolean(initialState.cameraHelperEnabled),
+      linesHelperEnabled: types.boolean(initialState.linesHelperEnabled),
       position: types.compound({
         x: initialState.position.x,
         y: initialState.position.y,
@@ -121,6 +124,7 @@ export function createInitialDevtoolsStateFromCamera(camera: {
   return {
     orbitEnabled: false,
     cameraHelperEnabled: true,
+    linesHelperEnabled: false,
     position: {
       x: camera.position.x,
       y: camera.position.y,
@@ -199,6 +203,19 @@ export function persistCameraHelperEnabled(
   studio.transaction(
     ({set}) => {
       set(stateObj.props.cameraHelperEnabled, cameraHelperEnabled)
+    },
+    {undoable: false},
+  )
+}
+
+export function persistLinesHelperEnabled(
+  studio: StudioLike,
+  stateObj: DevtoolsStateObject,
+  linesHelperEnabled: boolean,
+): void {
+  studio.transaction(
+    ({set}) => {
+      set(stateObj.props.linesHelperEnabled, linesHelperEnabled)
     },
     {undoable: false},
   )

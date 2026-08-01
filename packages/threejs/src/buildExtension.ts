@@ -8,7 +8,8 @@ import {PerspectiveCamera, CameraHelper} from 'three'
 import type {Camera, Scene, WebGLRenderer} from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {EXTENSION_ID} from './constants'
-import {cameraHelperIcon, cameraIcon, orbitIcon} from './icons'
+import {cameraHelperIcon, cameraIcon, linesHelperIcon, orbitIcon} from './icons'
+import {SceneLineHelperManager} from './lineHelpers'
 import {
   createActiveSceneStateObject,
   createDevtoolsStateObject,
@@ -17,6 +18,7 @@ import {
   persistActiveSceneName,
   persistCameraHelperEnabled,
   persistCameraProps,
+  persistLinesHelperEnabled,
   persistOrbitEnabled,
 } from './persistence'
 import type {
@@ -97,6 +99,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   let activeSceneIndex = 0
   let mode: CameraMode = 'scene'
   let cameraHelperEnabled = false
+  let linesHelperEnabled = false
   let setToolbar: ((config: ToolsetConfig) => void) | null = null
   let pendingOrbitEnabled: boolean | undefined
   let hasRemoteEditorUserToggledOrbit = false
@@ -147,6 +150,23 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     const sceneCamera = getActiveSceneCamera()
     sceneCamera.updateMatrixWorld(true)
     helper.update()
+  }
+
+  const lineHelperManagers = normalizedScenes.map(
+    (entry) => new SceneLineHelperManager(entry.scene),
+  )
+
+  const updateLinesHelperVisibility = () => {
+    lineHelperManagers.forEach((manager, index) => {
+      manager.setVisible(
+        mode === 'orbit' && linesHelperEnabled && index === activeSceneIndex,
+      )
+    })
+  }
+
+  const rebuildActiveSceneLineHelpers = () => {
+    lineHelperManagers[activeSceneIndex].rebuild()
+    updateLinesHelperVisibility()
   }
 
   const sceneStateObjects: DevtoolsStateObject[] = normalizedScenes.map(
@@ -204,10 +224,12 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       // Main window while the remote editor is open: switch the rendered scene
       // without changing local camera mode or orbit pose.
       updateCameraHelperVisibility()
+      updateLinesHelperVisibility()
     } else {
       applyActiveSceneDevtoolsState()
     }
 
+    rebuildActiveSceneLineHelpers()
     notifySceneSwitch()
   }
 
@@ -280,9 +302,32 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
           setCameraHelperEnabled(!cameraHelperEnabled)
         },
       })
+
+      toolbarConfig.push({
+        type: 'Icon',
+        svgSource: linesHelperIcon,
+        title: linesHelperEnabled ? 'Hide scene lines' : 'Show scene lines',
+        selected: linesHelperEnabled,
+        onClick: () => {
+          setLinesHelperEnabled(!linesHelperEnabled)
+        },
+      })
     }
 
     setToolbar(toolbarConfig)
+  }
+
+  const setLinesHelperEnabled = (enabled: boolean) => {
+    linesHelperEnabled = enabled
+    if (enabled) {
+      rebuildActiveSceneLineHelpers()
+    } else {
+      updateLinesHelperVisibility()
+    }
+    updateToolbarConfig()
+    if (shouldPersistDevtoolsState()) {
+      persistLinesHelperEnabled(studio, getActiveStateObj(), enabled)
+    }
   }
 
   const setCameraHelperEnabled = (enabled: boolean) => {
@@ -298,6 +343,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     mode = enabled ? 'orbit' : 'scene'
     controls.enabled = enabled
     updateCameraHelperVisibility()
+    updateLinesHelperVisibility()
     updateToolbarConfig()
   }
 
@@ -331,6 +377,15 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     if (values.cameraHelperEnabled !== cameraHelperEnabled) {
       cameraHelperEnabled = values.cameraHelperEnabled
       updateCameraHelperVisibility()
+    }
+
+    if (values.linesHelperEnabled !== linesHelperEnabled) {
+      linesHelperEnabled = values.linesHelperEnabled
+      if (linesHelperEnabled) {
+        rebuildActiveSceneLineHelpers()
+      } else {
+        updateLinesHelperVisibility()
+      }
     }
 
     applyCameraProps(values)
@@ -491,6 +546,9 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
         const helper = cameraHelpers[index]
         normalizedScenes[index].scene.remove(helper)
         helper.dispose()
+      }
+      for (const manager of lineHelperManagers) {
+        manager.dispose()
       }
       sceneSwitchListeners.clear()
     },
