@@ -11,6 +11,7 @@ export {
   mergeExcludeInput,
   resetTheatreThreejsConfig,
 } from './config'
+export {parseUniformGui} from './parseUniformGui'
 export {EXTENSION_ID} from './constants'
 
 export type {AutoAddObjectOptions} from './autoAddObject'
@@ -21,6 +22,12 @@ export type {
   ExcludeInput,
   TheatreThreejsConfig,
 } from './config'
+
+export type {
+  ParsedUniformGuiOptions,
+  UniformGuiOptions,
+  UniformWithGui,
+} from './parseUniformGui'
 
 export type {
   SceneConfig,

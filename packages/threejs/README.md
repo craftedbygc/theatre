@@ -70,6 +70,48 @@ When used together with `buildExtension`, selection is synced bidirectionally in
 - Click a registered mesh in the viewport to select it in the Theatre outline
 - Select an object in the outline to show a `BoxHelper` around the matching mesh
 
+### Shader uniform `gui` options
+
+For `ShaderMaterial` / `RawShaderMaterial`, `autoAddObject` reads optional `gui` metadata on each uniform and maps it to Theatre number prop options:
+
+| Uniform `gui` | Theatre `types.number()` option |
+| --- | --- |
+| `min` / `max` | `range: [min, max]` |
+| `step` | `nudgeMultiplier` |
+
+```js
+import {ShaderMaterial, Color} from 'three'
+import {autoAddObject} from '@unseenco/theatre-threejs'
+
+const material = new ShaderMaterial({
+  uniforms: {
+    uColor: {value: new Color(1, 0.4, 0.2)},
+    uOpacity: {
+      value: 0.85,
+      gui: {min: 0, max: 1, step: 0.01},
+    },
+    uTime: {value: 0}, // often excluded via configureTheatreThreejs when driven by your render loop
+  },
+  // vertexShader / fragmentShader ...
+})
+
+autoAddObject(new Mesh(geometry, material), sheet)
+```
+
+For `Vector2` / `Vector3` uniforms, set per-component `gui` options:
+
+```js
+uOffset: {
+  value: new Vector2(0, 0),
+  gui: {
+    x: {min: -1, max: 1, step: 0.01},
+    y: {min: -1, max: 1, step: 0.01},
+  },
+}
+```
+
+If `gui` is omitted, number uniforms default to `nudgeMultiplier: 0.01` with no range.
+
 ## Persistence
 
 Scene names are taken from the optional `name` property, then from `scene.name` on the Three.js `Scene` instance, then default to `"Scene"` (with numeric suffixes when needed).

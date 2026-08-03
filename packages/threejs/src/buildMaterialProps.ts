@@ -19,6 +19,8 @@ import {
 } from 'three'
 import type {Blending, Side, Texture, Material} from 'three'
 import {applyTheatreRgbaToColor, colorToTheatreRgba} from './colorUtils'
+import {numberTypeOptionsFromUniformGui} from './parseUniformGui'
+import type {UniformWithGui} from './parseUniformGui'
 
 const MATERIAL_NUMBER_PROPS = [
   'alphaTest',
@@ -422,7 +424,7 @@ function buildUniformsConfig(
   for (const key in uniforms) {
     if (!shouldTrackProp(key, exclude, include)) continue
 
-    const uniform = uniforms[key]
+    const uniform = uniforms[key] as UniformWithGui
     const value = uniform?.value
     if (isUnsupportedUniformValue(value)) continue
 
@@ -434,8 +436,14 @@ function buildUniformsConfig(
     if (value instanceof Vector2) {
       config[key] = types.compound(
         {
-          x: types.number(value.x, {nudgeMultiplier: 0.01}),
-          y: types.number(value.y, {nudgeMultiplier: 0.01}),
+          x: types.number(value.x, {
+            label: 'x',
+            ...numberTypeOptionsFromUniformGui(uniform, 'x'),
+          }),
+          y: types.number(value.y, {
+            label: 'y',
+            ...numberTypeOptionsFromUniformGui(uniform, 'y'),
+          }),
         },
         {label: key},
       )
@@ -445,9 +453,18 @@ function buildUniformsConfig(
     if (value instanceof Vector3) {
       config[key] = types.compound(
         {
-          x: types.number(value.x, {nudgeMultiplier: 0.01}),
-          y: types.number(value.y, {nudgeMultiplier: 0.01}),
-          z: types.number(value.z, {nudgeMultiplier: 0.01}),
+          x: types.number(value.x, {
+            label: 'x',
+            ...numberTypeOptionsFromUniformGui(uniform, 'x'),
+          }),
+          y: types.number(value.y, {
+            label: 'y',
+            ...numberTypeOptionsFromUniformGui(uniform, 'y'),
+          }),
+          z: types.number(value.z, {
+            label: 'z',
+            ...numberTypeOptionsFromUniformGui(uniform, 'z'),
+          }),
         },
         {label: key},
       )
@@ -455,7 +472,10 @@ function buildUniformsConfig(
     }
 
     if (typeof value === 'number') {
-      config[key] = types.number(value, {label: key, nudgeMultiplier: 0.01})
+      config[key] = types.number(value, {
+        label: key,
+        ...numberTypeOptionsFromUniformGui(uniform),
+      })
       continue
     }
 
