@@ -1,4 +1,4 @@
-import {types} from '@unseenco/theatre-core'
+import {autoAddObject} from '@unseenco/theatre-threejs'
 import {
   BoxGeometry,
   CatmullRomCurve3,
@@ -9,11 +9,9 @@ import {
   Mesh,
   MeshPhongMaterial,
   PerspectiveCamera,
-  RawShaderMaterial,
   Scene,
   ShaderMaterial,
   SphereGeometry,
-  Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three'
@@ -51,78 +49,8 @@ export function createThreeScenes(project) {
       {scene: cubeScene.scene, camera: cubeScene.camera},
       {scene: cylinderScene.scene, camera: cylinderScene.camera},
     ],
+    onFrame: spheresScene.onFrame,
   }
-}
-
-/**
- * @param {import('@unseenco/theatre-core').ISheet} sheet
- * @param {Mesh} mesh
- */
-function bindMaterialSheet(sheet, mesh) {
-  const keys = {}
-  for (const i in mesh.material) {
-    const value = mesh.material[i]
-    if (typeof value === 'number') {
-      keys[i] = value
-    } else if (value instanceof Vector2) {
-      keys[i] = {x: value.x, y: value.y}
-    } else if (value instanceof Vector3) {
-      keys[i] = {x: value.x, y: value.y, z: value.z}
-    } else if (value instanceof Color) {
-      keys[i] = types.rgba({
-        r: value.r * 255,
-        g: value.g * 255,
-        b: value.b * 255,
-        a: 1,
-      })
-    }
-  }
-
-  if (
-    mesh.material instanceof ShaderMaterial ||
-    mesh.material instanceof RawShaderMaterial
-  ) {
-    const uniforms = mesh.material.uniforms
-    keys.uniforms = {}
-    for (const i in uniforms) {
-      const uniform = uniforms[i].value
-      if (typeof uniform === 'number') {
-        keys.uniforms[i] = uniform
-      } else if (uniform instanceof Vector2) {
-        keys.uniforms[i] = {x: uniform.x, y: uniform.y}
-      } else if (uniform instanceof Vector3) {
-        keys.uniforms[i] = {x: uniform.x, y: uniform.y, z: uniform.z}
-      } else if (uniform instanceof Color) {
-        keys.uniforms[i] = {r: uniform.r, g: uniform.g, b: uniform.b}
-      }
-    }
-  }
-
-  sheet.object('Material', {material: keys}).onValuesChange((values) => {
-    const {material} = values
-    for (const key in material) {
-      if (key === 'uniforms') {
-        const uniforms = material[key]
-        for (const uniKey in uniforms) {
-          const uniform = uniforms[uniKey]
-          if (typeof uniform === 'number') {
-            mesh.material.uniforms[uniKey].value = uniform
-          } else {
-            mesh.material.uniforms[uniKey].value.copy(uniform)
-          }
-        }
-      } else {
-        const value = material[key]
-        if (typeof value === 'number') {
-          mesh.material[key] = value
-        } else if (value.r !== undefined) {
-          mesh.material[key].copy(value)
-        } else if (value.x !== undefined) {
-          mesh.material[key].copy(value)
-        }
-      }
-    }
-  })
 }
 
 /**
@@ -164,49 +92,6 @@ function bindCameraTransformSheet(sheet, camera) {
 }
 
 /**
- * @param {import('@unseenco/theatre-core').ISheet} sheet
- * @param {Mesh} mesh
- */
-function bindTransformSheet(sheet, mesh) {
-  sheet
-    .object('Transform', {
-      transform: {
-        position: {
-          x: mesh.position.x,
-          y: mesh.position.y,
-          z: mesh.position.z,
-        },
-        rotation: {
-          x: mesh.rotation.x,
-          y: mesh.rotation.y,
-          z: mesh.rotation.z,
-        },
-        scale: {
-          x: mesh.scale.x,
-          y: mesh.scale.y,
-          z: mesh.scale.z,
-        },
-        visible: mesh.visible,
-      },
-    })
-    .onValuesChange((values) => {
-      const {transform} = values
-      mesh.position.set(
-        transform.position.x,
-        transform.position.y,
-        transform.position.z,
-      )
-      mesh.rotation.set(
-        transform.rotation.x,
-        transform.rotation.y,
-        transform.rotation.z,
-      )
-      mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z)
-      mesh.visible = transform.visible
-    })
-}
-
-/**
  * @param {Scene} scene
  */
 function addInvisibleCameraPath(scene) {
@@ -238,6 +123,12 @@ function createSpheresScene(sheet, width, height) {
   scene.background = new Color(0xcccccc)
   const camera = new PerspectiveCamera(60, width / height, 0.1, 500)
 
+  const group = new Group()
+  group.name = 'Spheres Group'
+  scene.add(group)
+
+  autoAddObject(group, sheet)
+
   const light = new DirectionalLight()
   light.position.set(1, 5, 4)
   scene.add(light)
@@ -260,24 +151,66 @@ function createSpheresScene(sheet, width, height) {
     })
     const sphere = new Mesh(sphereGeometry, material)
     sphere.position.set(position.x, position.y, position.z)
+    sphere.name = `Sphere ${index + 1}`
     scene.add(sphere)
+
+    if (index < 3) {
+      autoAddObject(sphere, sheet)
+    }
   }
 
   const mesh = new Mesh(
     new SphereGeometry(3),
     new MeshPhongMaterial({color: 0xffffff}),
   )
+  mesh.name = 'Hero Sphere'
   scene.add(mesh)
+
+  const shaderMaterial = new ShaderMaterial({
+    uniforms: {
+      uColor: {value: new Color(0xff6644)},
+      uOpacity: {value: 0.85},
+      uTime: {value: 0},
+    },
+    vertexShader: /* glsl */ `
+      varying vec3 vNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      uniform float uOpacity;
+      uniform float uTime;
+      varying vec3 vNormal;
+      void main() {
+        float pulse = 0.65 + 0.35 * sin(uTime * 2.0);
+        float lighting = 0.35 + 0.65 * max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0);
+        gl_FragColor = vec4(uColor * lighting, uOpacity * pulse);
+      }
+    `,
+    transparent: true,
+  })
+
+  const shaderCube = new Mesh(new BoxGeometry(4, 4, 4), shaderMaterial)
+  shaderCube.name = 'Shader Cube'
+  shaderCube.position.set(12, 0, 0)
+  scene.add(shaderCube)
 
   addInvisibleCameraPath(scene)
 
   camera.position.set(0, 0, 45)
 
   bindCameraTransformSheet(sheet, camera)
-  bindMaterialSheet(sheet, mesh)
-  bindTransformSheet(sheet, mesh)
+  autoAddObject(mesh, sheet, {objectKey: 'Hero Sphere'})
+  autoAddObject(shaderCube, sheet, {exclude: ['uTime']})
 
-  return {scene, camera}
+  const onFrame = (elapsedTime) => {
+    shaderMaterial.uniforms.uTime.value = elapsedTime
+  }
+
+  return {scene, camera, onFrame}
 }
 
 /**
@@ -299,11 +232,11 @@ function createCubeScene(sheet, width, height) {
     new BoxGeometry(3, 3, 3),
     new MeshPhongMaterial({color: 0xe8a838}),
   )
+  cube.name = 'Cube'
   scene.add(cube)
 
   bindCameraTransformSheet(sheet, camera)
-  bindMaterialSheet(sheet, cube)
-  bindTransformSheet(sheet, cube)
+  autoAddObject(cube, sheet)
 
   return {scene, camera}
 }
@@ -327,11 +260,11 @@ function createCylinderScene(sheet, width, height) {
     new CylinderGeometry(1.5, 1.5, 5, 32),
     new MeshPhongMaterial({color: 0x6eceda}),
   )
+  cylinder.name = 'Cylinder'
   scene.add(cylinder)
 
   bindCameraTransformSheet(sheet, camera)
-  bindMaterialSheet(sheet, cylinder)
-  bindTransformSheet(sheet, cylinder)
+  autoAddObject(cylinder, sheet)
 
   return {scene, camera}
 }

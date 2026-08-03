@@ -26,6 +26,8 @@ import type {
   DevtoolsStateObject,
   StudioLike,
 } from './persistence'
+import {setupSelectionSync} from './selectionSync'
+import type {SelectionSync} from './selectionSync'
 
 export {EXTENSION_ID} from './constants'
 
@@ -105,6 +107,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   let hasRemoteEditorUserToggledOrbit = false
   let modeBeforeRemoteEditor: CameraMode | undefined
   const sceneSwitchListeners = new Set<SceneSwitchCallback>()
+  let selectionSync: SelectionSync | undefined
 
   const getActiveScene = () => normalizedScenes[activeSceneIndex]
   const getActiveSceneCamera = () => getActiveScene().camera
@@ -345,6 +348,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     updateCameraHelperVisibility()
     updateLinesHelperVisibility()
     updateToolbarConfig()
+    selectionSync?.refresh()
   }
 
   const shouldApplyOrbitModeFromState = (orbitEnabled: boolean) => {
@@ -500,6 +504,14 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   window.addEventListener('resize', onResize)
   controls.addEventListener('end', updateTheatreCameraProps)
 
+  selectionSync = setupSelectionSync({
+    studio,
+    renderer,
+    getActiveScene: () => getActiveScene().scene,
+    getCamera: () => (mode === 'orbit' ? orbitCamera : getActiveSceneCamera()),
+    isOrbitMode: () => mode === 'orbit',
+  })
+
   const extension: TheatreExtension = {
     id: EXTENSION_ID,
     toolbars: {
@@ -525,6 +537,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
           updateActiveCameraHelper()
         }
       }
+      selectionSync?.update()
     },
     onSceneSwitch(callback) {
       sceneSwitchListeners.add(callback)
@@ -550,6 +563,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       for (const manager of lineHelperManagers) {
         manager.dispose()
       }
+      selectionSync?.dispose()
       sceneSwitchListeners.clear()
     },
   }

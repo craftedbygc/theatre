@@ -6,9 +6,12 @@ Three.js devtools extension for [Theatre.js Studio](https://www.theatrejs.com/).
 
 ```js
 import studio from '@unseenco/theatre-studio'
-import {buildExtension} from '@unseenco/theatre-threejs'
+import {autoAddObject, buildExtension} from '@unseenco/theatre-threejs'
 
 let activeScene = scene1
+
+// Register Three.js objects on Theatre sheets
+autoAddObject(mesh, sheet)
 
 const devtools = buildExtension({
   renderer,
@@ -33,6 +36,27 @@ function loop() {
 ```
 
 The extension adds a toolbar flyout to switch between scenes (when more than one is configured) and a toggle between your scene camera and an OrbitControls dev camera.
+
+## autoAddObject
+
+Automatically adds a Three.js `Object3D` to a Theatre sheet, parsing transform data (position, rotation, scale, visible) and material properties (colors, scalars, vectors, shader uniforms). Texture/map properties are not supported yet.
+
+```js
+import {autoAddObject} from '@unseenco/theatre-threejs'
+
+const sheetObject = autoAddObject(mesh, sheet, {
+  objectKey: 'My Mesh',
+  exclude: ['scale'],
+  include: ['color', 'metalness', 'roughness'],
+})
+```
+
+When used together with `buildExtension`, selection is synced bidirectionally in orbit mode:
+
+- Click a registered mesh in the viewport to select it in the Theatre outline
+- Select an object in the outline to show a `BoxHelper` around the matching mesh
+
+## Persistence
 
 Scene names are taken from the optional `name` property, then from `scene.name` on the Three.js `Scene` instance, then default to `"Scene"` (with numeric suffixes when needed).
 

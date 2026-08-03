@@ -1,4 +1,5 @@
 import {types} from '@unseenco/theatre-core'
+import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
 import type {PerspectiveCamera} from 'three'
 import type {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {DEVTOOLS_SHEET_ID} from './constants'
@@ -55,6 +56,11 @@ export interface StudioLike {
       ) => void,
     ): () => void
   }
+  setSelection(selection: Array<ISheetObject | ISheet>): void
+  onSelectionChange(
+    fn: (selection: Array<ISheetObject | ISheet>) => void,
+  ): () => void
+  readonly selection: Array<ISheetObject | ISheet>
 }
 
 export interface DevtoolsStateObject {

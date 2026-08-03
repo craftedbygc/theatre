@@ -4,9 +4,14 @@ Agent-facing notes for developing this package. See the repo root `AGENTS.md` fo
 
 ## What this package is
 
-A **Studio extension** (dev-time only, AGPL-3.0) that adds Three.js scene inspection tools. It is not a runtime animation library — consumers still use `@unseenco/theatre-core` for that.
+A **Studio extension** (dev-time only, AGPL-3.0) that adds Three.js scene inspection tools. It also exports `autoAddObject()`, a runtime helper that binds Three.js objects to Theatre sheets. Consumers still use `@unseenco/theatre-core` for animation; `autoAddObject` automates the manual `sheet.object()` + `onValuesChange` wiring.
 
-The main entry point is `buildExtension()`, which returns:
+The main entry points are:
+
+- `buildExtension()` — Studio devtools (cameras, orbit controls, selection sync)
+- `autoAddObject()` — register a Three.js `Object3D` on a Theatre sheet with auto-parsed transforms and material props
+
+`buildExtension()` returns:
 
 - `extension` — pass to `studio.extend()`
 - `getCamera()` — active camera for `renderer.render(scene, camera)` (active scene camera or internal OrbitControls camera)
@@ -20,9 +25,15 @@ The main entry point is `buildExtension()`, which returns:
 
 | File | Role |
 | --- | --- |
-| `src/buildExtension.ts` | Core logic: cameras, OrbitControls, toolbar, remote-editor behaviour |
+| `src/buildExtension.ts` | Core logic: cameras, OrbitControls, toolbar, remote-editor behaviour, selection sync |
+| `src/autoAddObject.ts` | Register Three.js objects on Theatre sheets |
+| `src/buildTransformProps.ts` | Transform prop config + applier |
+| `src/buildMaterialProps.ts` | Material prop introspection + applier |
+| `src/objectRegistry.ts` | Object3D ↔ ISheetObject registry |
+| `src/selectionSync.ts` | Bidirectional outline ↔ orbit selection via BoxHelper + raycasting |
+| `src/colorUtils.ts` | Linear ↔ sRGB color conversion for Theatre rgba props |
 | `src/persistence.ts` | Studio sheet object for persisted devtools state |
-| `src/constants.ts` | `EXTENSION_ID`, `DEVTOOLS_SHEET_ID` |
+| `src/constants.ts` | `EXTENSION_ID`, `DEVTOOLS_SHEET_ID`, registry flags |
 | `src/types.ts` | Local `TheatreExtension` / toolbar types (avoids pulling full Studio types at build time) |
 | `src/icons.ts` | SVG strings for toolbar Switch options |
 | `src/index.ts` | Public exports |
@@ -64,6 +75,35 @@ function loop() {
 ```
 
 `buildExtension` needs the **renderer** and at least one **scene/camera pair** from the user's app. Scene switching in the render loop is user-driven via `onSceneSwitch` — the extension does not call `renderer.render()` itself. It cannot discover scenes automatically because `studio.extend()` only accepts a static extension config object.
+
+## autoAddObject
+
+Register a Three.js object on a Theatre sheet with auto-parsed transforms and material properties:
+
+```js
+import {autoAddObject, buildExtension} from '@unseenco/theatre-threejs'
+
+const sheetObject = autoAddObject(mesh, sheet, {
+  objectKey: 'My Mesh',   // default: mesh.name || 'Object'
+  namespace: '',           // optional prefix for objectKey
+  exclude: [],             // skip transform keys or material prop names
+  include: [],             // whitelist material props/uniforms
+  trackMaterial: true,     // default: true when mesh has material
+})
+```
+
+`autoAddObject` calls `sheet.object()` without `reconfigure` — same `objectKey` returns the existing instance per Theatre's normal rules. It registers the Object3D in an internal registry used by `buildExtension` for bidirectional selection.
+
+Texture/map properties are not tracked yet.
+
+## Selection sync
+
+When both `autoAddObject` and `buildExtension` are used:
+
+- **Outline → viewport**: selecting a Theatre object shows a `BoxHelper` on the matching Three.js object
+- **Viewport → outline** (orbit mode only): click a registered object to select it in the outline (uses raycasting; ignores OrbitControls drags via a 3px movement threshold)
+
+Selection state is ephemeral — not persisted to sheets.
 
 ## Persistence
 
@@ -122,9 +162,9 @@ The extension registers a global toolbar **Flyout** (when multiple scenes are co
 
 ## When extending
 
-Future features (object transforms, helpers, grid, etc.) should follow the same patterns:
+Future features (helpers, grid, etc.) should follow the same patterns:
 
 1. Keep runtime state in the user's Three.js scene; use Studio sheets only for **devtools UI state** that should persist.
 2. Respect main vs remote editor isolation — remote is for editing Theatre objects; the main window keeps rendering the scene.
 3. Add toolbar tools via the `toolbars` extension API; keep types in `src/types.ts` if Studio types are awkward to import.
-4. Test manually via the playground demo and remote editor flow (open popup, toggle cameras, drag orbit, close, refresh).
+4. Test manually via the playground demo and remote editor flow (open popup, toggle cameras, drag orbit, close, refresh). Test `autoAddObject` selection by toggling orbit mode and clicking meshes.

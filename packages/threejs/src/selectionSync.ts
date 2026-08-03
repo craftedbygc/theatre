@@ -1,0 +1,176 @@
+import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
+import {BoxHelper, Raycaster, Vector2} from 'three'
+import type {Camera, Object3D, Scene, WebGLRenderer} from 'three'
+import {EXTENSION_ID} from './constants'
+import {
+  getObject3DForSheetObject,
+  resolveRegisteredAncestor,
+} from './objectRegistry'
+import type {StudioLike} from './persistence'
+
+const POINTER_DRAG_THRESHOLD_PX = 3
+const SELECTION_HELPER_FLAG = `${EXTENSION_ID}:selectionHelper`
+
+export type SelectionSyncConfig = {
+  studio: StudioLike
+  renderer: WebGLRenderer
+  getActiveScene: () => Scene
+  getCamera: () => Camera
+  isOrbitMode: () => boolean
+}
+
+export type SelectionSync = {
+  refresh: () => void
+  update: () => void
+  dispose: () => void
+}
+
+function isSheetObject(item: ISheetObject | ISheet): item is ISheetObject {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'type' in item &&
+    item.type === 'Theatre_SheetObject_PublicAPI'
+  )
+}
+
+function isDevtoolsHelper(object: Object3D): boolean {
+  return (
+    object.userData[SELECTION_HELPER_FLAG] === true ||
+    object.type === 'CameraHelper' ||
+    object.type === 'BoxHelper'
+  )
+}
+
+export function setupSelectionSync(config: SelectionSyncConfig): SelectionSync {
+  const {studio, renderer, getActiveScene, getCamera, isOrbitMode} = config
+  const domElement = renderer.domElement
+
+  let boxHelper: BoxHelper | null = null
+  let helperScene: Scene | null = null
+  const pointerDown = new Vector2()
+  const pointerUp = new Vector2()
+  const raycaster = new Raycaster()
+
+  const clearBoxHelper = () => {
+    if (boxHelper && helperScene) {
+      helperScene.remove(boxHelper)
+      boxHelper.dispose()
+      boxHelper = null
+      helperScene = null
+    }
+  }
+
+  const showBoxHelperForObject = (object3d: Object3D) => {
+    const scene = getActiveScene()
+    clearBoxHelper()
+
+    boxHelper = new BoxHelper(object3d)
+    boxHelper.userData[SELECTION_HELPER_FLAG] = true
+    scene.add(boxHelper)
+    helperScene = scene
+    boxHelper.update()
+  }
+
+  const updateSelectionHighlight = (
+    selection: Array<ISheetObject | ISheet>,
+  ) => {
+    if (!isOrbitMode()) {
+      clearBoxHelper()
+      return
+    }
+
+    const sheetObjects = selection.filter(isSheetObject)
+    const activeScene = getActiveScene()
+
+    for (const sheetObject of sheetObjects) {
+      const object3d = getObject3DForSheetObject(sheetObject)
+      if (!object3d) continue
+
+      let current: Object3D | null = object3d
+      while (current) {
+        if (current === activeScene) {
+          showBoxHelperForObject(object3d)
+          return
+        }
+        current = current.parent
+      }
+    }
+
+    clearBoxHelper()
+  }
+
+  const onPointerDown = (event: PointerEvent) => {
+    pointerDown.set(event.clientX, event.clientY)
+  }
+
+  const onPointerUp = (event: PointerEvent) => {
+    if (!isOrbitMode()) return
+
+    pointerUp.set(event.clientX, event.clientY)
+    const dx = pointerUp.x - pointerDown.x
+    const dy = pointerUp.y - pointerDown.y
+    if (
+      dx * dx + dy * dy >
+      POINTER_DRAG_THRESHOLD_PX * POINTER_DRAG_THRESHOLD_PX
+    ) {
+      return
+    }
+
+    const rect = domElement.getBoundingClientRect()
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+    const camera = getCamera()
+    raycaster.setFromCamera(new Vector2(x, y), camera)
+
+    const intersects = raycaster.intersectObjects(
+      getActiveScene().children,
+      true,
+    )
+    for (const hit of intersects) {
+      if (isDevtoolsHelper(hit.object)) continue
+
+      const resolved = resolveRegisteredAncestor(hit.object)
+      if (resolved) {
+        studio.setSelection([resolved.sheetObject])
+        return
+      }
+    }
+
+    studio.setSelection([])
+  }
+
+  const unsubscribeFromSelection = studio.onSelectionChange(
+    updateSelectionHighlight,
+  )
+
+  domElement.addEventListener('pointerdown', onPointerDown)
+  domElement.addEventListener('pointerup', onPointerUp)
+
+  updateSelectionHighlight(studio.selection)
+
+  return {
+    refresh() {
+      updateSelectionHighlight(studio.selection)
+    },
+    update() {
+      if (!isOrbitMode()) {
+        if (boxHelper) {
+          clearBoxHelper()
+        }
+        return
+      }
+
+      if (boxHelper) {
+        boxHelper.update()
+      }
+    },
+    dispose() {
+      unsubscribeFromSelection()
+      domElement.removeEventListener('pointerdown', onPointerDown)
+      domElement.removeEventListener('pointerup', onPointerUp)
+      clearBoxHelper()
+    },
+  }
+}

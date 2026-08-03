@@ -5,7 +5,10 @@
  */
 
 export {buildExtension} from './buildExtension'
+export {autoAddObject} from './autoAddObject'
 export {EXTENSION_ID} from './constants'
+
+export type {AutoAddObjectOptions} from './autoAddObject'
 
 export type {
   SceneConfig,
