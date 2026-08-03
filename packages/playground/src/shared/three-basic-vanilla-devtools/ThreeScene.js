@@ -129,6 +129,19 @@ function createSpheresScene(sheet, width, height) {
 
   autoAddObject(group, sheet)
 
+  const testObject = sheet.object(
+    'Test Object',
+    {
+      color: 0xff0000,
+      opacity: 0.5,
+      time: 0,
+    },
+    {
+      transient: ['opacity'],
+      static: ['color'],
+    },
+  )
+
   const light = new DirectionalLight()
   light.position.set(1, 5, 4)
   scene.add(light)

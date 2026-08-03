@@ -84,6 +84,9 @@ function createPrism<T extends SerializablePrimitive>(
 ): Prism<EditingTools<T>> {
   return prism(() => {
     const pathToProp = getPointerParts(pointerToProp).path
+    const isTransient = obj.template.isTransientPropPath(pathToProp)
+    const isStatic = obj.template.isStaticPropPath(pathToProp)
+    const isNonSequencable = isStatic || isTransient
 
     const final = obj.getValueByPointer(pointerToProp) as T
 
@@ -336,7 +339,7 @@ function createPrism<T extends SerializablePrimitive>(
       })
     }
 
-    if (isSequencable) {
+    if (isSequencable && !isNonSequencable) {
       contextMenuItems.push({
         type: 'normal',
         label: 'Sequence',
@@ -365,6 +368,8 @@ function createPrism<T extends SerializablePrimitive>(
         controlIndicators: (
           <DefaultOrStaticValueIndicator
             hasStaticOverride={true}
+            isStatic={isStatic}
+            isTransient={isTransient}
             obj={obj}
             pathToProp={pathToProp}
             propConfig={propConfig}
@@ -381,6 +386,8 @@ function createPrism<T extends SerializablePrimitive>(
       controlIndicators: (
         <DefaultOrStaticValueIndicator
           hasStaticOverride={false}
+          isStatic={isStatic}
+          isTransient={isTransient}
           obj={obj}
           pathToProp={pathToProp}
           propConfig={propConfig}

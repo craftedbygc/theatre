@@ -24,6 +24,10 @@ import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import type {ObjectAddressKey} from '@unseenco/theatre-shared/utils/ids'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {notify} from '@unseenco/theatre-shared/notify'
+import type {
+  TransientPropPath,
+  StaticPropPath,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 export type SheetObjectPropTypeConfig =
   PropTypeConfig_Compound<UnknownValidCompoundProps>
@@ -38,6 +42,22 @@ export type ISheetObjectOptions = {
    * Whether the object appears in the Studio outline panel. Defaults to `true`.
    */
   visible?: boolean
+  /**
+   * Prop paths that are excluded from exported project state JSON.
+   * Values are stored in ahistoric static overrides (persist across Studio
+   * reloads) but never written to historic state or sequence tracks.
+   *
+   * Paths accept dot notation (`'foo.bar'`) or arrays (`['foo', 'bar']`).
+   * A prefix path like `'foo'` marks the entire subtree as transient.
+   */
+  transient?: readonly TransientPropPath[]
+  /**
+   * Prop paths that cannot be sequenced but are saved to exported project state.
+   *
+   * Paths accept dot notation (`'foo.bar'`) or arrays (`['foo', 'bar']`).
+   * A prefix path like `'foo'` marks the entire subtree as static.
+   */
+  static?: readonly StaticPropPath[]
   __actions__THIS_API_IS_UNSTABLE_AND_WILL_CHANGE_IN_THE_NEXT_VERSION?: SheetObjectActionsConfig
 }
 
@@ -104,6 +124,19 @@ export interface ISheet {
    *       })
    *     }
    *   }
+   * })
+   *
+   * // you can mark props as transient (excluded from exported state JSON):
+   * const obj = sheet.object("Camera", {
+   *   fov: 50,
+   *   orbitEnabled: false,
+   * }, {
+   *   transient: ['orbitEnabled']
+   * })
+   *
+   * // static props are saved to state but cannot be sequenced:
+   * const obj = sheet.object("Camera", { fov: 50, zoom: 1 }, {
+   *   static: ['zoom']
    * })
    * ```
    */
@@ -259,6 +292,18 @@ export default class TheatreSheet implements ISheet {
             if (opts?.reconfigure === true) {
               const sanitizedConfig = compound(config)
               existingObject.template.reconfigure(sanitizedConfig)
+              if (opts.transient !== undefined) {
+                existingObject.template.setTransientPropPaths(
+                  opts.transient,
+                  sanitizedConfig,
+                )
+              }
+              if (opts.static !== undefined) {
+                existingObject.template.setStaticPropPaths(
+                  opts.static,
+                  sanitizedConfig,
+                )
+              }
               weakMapOfUnsanitizedProps.set(existingObject, config)
               return existingObject.publicApi as $IntentionalAny
             } else {
@@ -281,6 +326,20 @@ export default class TheatreSheet implements ISheet {
         existingObject.template.setVisibleInOutline(opts.visible)
       }
 
+      if (opts?.transient !== undefined) {
+        existingObject.template.setTransientPropPaths(
+          opts.transient,
+          existingObject.template.staticConfig,
+        )
+      }
+
+      if (opts?.static !== undefined) {
+        existingObject.template.setStaticPropPaths(
+          opts.static,
+          existingObject.template.staticConfig,
+        )
+      }
+
       return existingObject.publicApi as $IntentionalAny
     } else {
       const sanitizedConfig = compound(config)
@@ -290,6 +349,8 @@ export default class TheatreSheet implements ISheet {
         sanitizedConfig,
         actions,
         opts?.visible,
+        opts?.transient,
+        opts?.static,
       )
       if (process.env.NODE_ENV !== 'production') {
         weakMapOfUnsanitizedProps.set(object as $FixMe, config)

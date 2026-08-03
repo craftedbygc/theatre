@@ -62,6 +62,9 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
   propConfig: PropTypeConfig_Compound<{}>,
 ): Stuff {
   const pathToProp = getPointerParts(pointerToProp).path
+  const isTransient = obj.template.isTransientPropPath(pathToProp)
+  const isStatic = obj.template.isStaticPropPath(pathToProp)
+  const isNonSequencable = isStatic || isTransient
 
   return usePrism((): Stuff => {
     // if the compound has no simple descendants, then there isn't much the user can do with it
@@ -73,6 +76,8 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
         controlIndicators: (
           <DefaultOrStaticValueIndicator
             hasStaticOverride={false}
+            isStatic={isStatic}
+            isTransient={isTransient}
             obj={obj}
             pathToProp={pathToProp}
             propConfig={propConfig}
@@ -200,8 +205,9 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
     }
 
     if (
-      !hasOneOrMoreSequencedTracks ||
-      (hasOneOrMoreSequencedTracks && hasStatics)
+      !isNonSequencable &&
+      (!hasOneOrMoreSequencedTracks ||
+        (hasOneOrMoreSequencedTracks && hasStatics))
     ) {
       contextMenuItems.push({
         type: 'normal',
@@ -255,6 +261,8 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
         controlIndicators: (
           <DefaultOrStaticValueIndicator
             hasStaticOverride={hasStatics}
+            isStatic={isStatic}
+            isTransient={isTransient}
             obj={obj}
             pathToProp={pathToProp}
             propConfig={propConfig}

@@ -14,6 +14,10 @@ import type {
   ObjectAddressKey,
   SheetInstanceId,
 } from '@unseenco/theatre-shared/utils/ids'
+import type {
+  TransientPropPath,
+  StaticPropPath,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 import type {StrictRecord} from '@unseenco/theatre-shared/utils/types'
 import type {ILogger} from '@unseenco/theatre-shared/logger'
 import {isInteger} from 'lodash-es'
@@ -91,12 +95,16 @@ export default class Sheet {
     config: SheetObjectPropTypeConfig,
     actions: SheetObjectActionsConfig = {},
     visibleInOutline?: boolean,
+    transient?: readonly TransientPropPath[],
+    staticPropPaths?: readonly StaticPropPath[],
   ): SheetObject {
     const objTemplate = this.template.getObjectTemplate(
       objectKey,
       nativeObject,
       config,
       actions,
+      transient,
+      staticPropPaths,
     )
 
     if (visibleInOutline !== undefined) {

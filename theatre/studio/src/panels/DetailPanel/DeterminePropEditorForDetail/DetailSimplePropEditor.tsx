@@ -48,6 +48,10 @@ function DetailSimplePropEditor<
     [pointerToProp],
   )
 
+  const isTransient = obj.template.isTransientPropPath(
+    getPointerParts(pointerToProp).path,
+  )
+
   return (
     <SingleRowPropEditor
       {...{
@@ -55,6 +59,7 @@ function DetailSimplePropEditor<
         propConfig,
         pointerToProp,
         isPropHighlightedD,
+        isTransient,
       }}
     >
       <EditorComponent

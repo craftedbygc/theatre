@@ -24,6 +24,10 @@ import {
   DEFAULT_SEQUENCE_VARIANT,
   validateSequenceVariantsOrThrow,
 } from '@unseenco/theatre-core/sequences/sequenceVariants'
+import type {
+  TransientPropPath,
+  StaticPropPath,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 type SheetTemplateObjectTemplateMap = StrictRecord<
   ObjectAddressKey,
@@ -68,6 +72,8 @@ export default class SheetTemplate {
     nativeObject: ObjectNativeObject,
     config: SheetObjectPropTypeConfig,
     actions: SheetObjectActionsConfig,
+    transient?: readonly TransientPropPath[],
+    staticPropPaths?: readonly StaticPropPath[],
   ): SheetObjectTemplate {
     let template = this._objectTemplates.get()[objectKey]
 
@@ -78,8 +84,17 @@ export default class SheetTemplate {
         nativeObject,
         config,
         actions,
+        transient,
+        staticPropPaths,
       )
       this._objectTemplates.setByPointer((p) => p[objectKey], template)
+    } else {
+      if (transient !== undefined) {
+        template.setTransientPropPaths(transient, config)
+      }
+      if (staticPropPaths !== undefined) {
+        template.setStaticPropPaths(staticPropPaths, config)
+      }
     }
 
     return template

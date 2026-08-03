@@ -307,6 +307,8 @@ export default class SheetObject implements PointerToPrismProvider {
           const untaps: Array<() => void> = []
 
           for (const {trackId, pathToProp, trackVariant} of tracksToProcess) {
+            if (this.template.isNonSequencablePropPath(pathToProp)) continue
+
             const pr = this._trackIdToPrism(trackId, trackVariant)
             const propConfig = getPropConfigByPath(
               config,

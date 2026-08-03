@@ -246,6 +246,10 @@ export const calculateSequenceEditorTree = (
     level: number,
     shouldRender: boolean,
   ) {
+    if (sheetObject.template.isNonSequencablePropPath(pathToProp)) {
+      return
+    }
+
     if (conf.type === 'compound') {
       const trackMapping =
         trackIdOrMapping as $IntentionalAny as IPropPathToTrackIdTree

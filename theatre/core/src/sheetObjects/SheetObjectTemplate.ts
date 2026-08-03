@@ -47,6 +47,17 @@ import {
 } from '@unseenco/theatre-core/sequences/sequenceVariants'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {cloneDeep, unset} from 'lodash-es'
+import type {
+  TransientPropPath,
+  StaticPropPath,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
+import {
+  isPathUnderTransientPrefix,
+  normalizeTransientPropPaths,
+  normalizeStaticPropPaths,
+  registerObjectTransientPropPaths,
+  stripTransientPathsFromSerializableMap,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 function isObjectEmpty(obj: unknown): boolean {
   return (
@@ -96,6 +107,8 @@ export default class SheetObjectTemplate {
   readonly pointerToAhistoricStaticOverrides: Pointer<
     SerializableMap<SerializablePrimitive> | undefined
   >
+  private _transientPropPaths: ReadonlySet<PathToProp_Encoded> = new Set()
+  private _staticPropPaths: ReadonlySet<PathToProp_Encoded> = new Set()
   private _visibleInOutline = true
 
   get staticConfig() {
@@ -120,11 +133,29 @@ export default class SheetObjectTemplate {
     nativeObject: unknown,
     config: SheetObjectPropTypeConfig,
     _temp_actions: SheetObjectActionsConfig,
+    transient?: readonly TransientPropPath[],
+    staticPropPaths?: readonly StaticPropPath[],
   ) {
     this.address = {...sheetTemplate.address, objectKey}
     this._config = new Atom(config)
     this._temp_actions_atom = new Atom(_temp_actions)
+    this._transientPropPaths = normalizeTransientPropPaths(
+      transient,
+      config,
+      objectKey,
+    )
+    this._staticPropPaths = normalizeStaticPropPaths(
+      staticPropPaths,
+      config,
+      objectKey,
+    )
     this.project = sheetTemplate.project
+    registerObjectTransientPropPaths(
+      this.address.projectId,
+      this.address.sheetId,
+      objectKey,
+      this._transientPropPaths,
+    )
 
     this.pointerToSheetState =
       this.sheetTemplate.project.pointers.historic.sheetsById[
@@ -143,6 +174,27 @@ export default class SheetObjectTemplate {
       this.pointerToAhistoricSheetState.staticOverrides.byObject[
         this.address.objectKey
       ]
+
+    this._stripTransientFromHistoricState()
+    this._stripSequencedStaticPathsFromHistoricState()
+  }
+
+  private _stripTransientFromHistoricState() {
+    if (this._transientPropPaths.size === 0) return
+    this.project._stripTransientPropsFromHistoric(
+      this.address.sheetId,
+      this.address.objectKey,
+      this._transientPropPaths,
+    )
+  }
+
+  private _stripSequencedStaticPathsFromHistoricState() {
+    if (this._staticPropPaths.size === 0) return
+    this.project._stripSequenceTracksFromHistoric(
+      this.address.sheetId,
+      this.address.objectKey,
+      this._staticPropPaths,
+    )
   }
 
   createInstance(
@@ -156,6 +208,56 @@ export default class SheetObjectTemplate {
 
   reconfigure(config: SheetObjectPropTypeConfig) {
     this._config.set(config)
+  }
+
+  setTransientPropPaths(
+    transient: readonly TransientPropPath[],
+    config: SheetObjectPropTypeConfig,
+  ) {
+    this._transientPropPaths = normalizeTransientPropPaths(
+      transient,
+      config,
+      this.address.objectKey,
+    )
+    registerObjectTransientPropPaths(
+      this.address.projectId,
+      this.address.sheetId,
+      this.address.objectKey,
+      this._transientPropPaths,
+    )
+    this._stripTransientFromHistoricState()
+  }
+
+  setStaticPropPaths(
+    staticPropPaths: readonly StaticPropPath[],
+    config: SheetObjectPropTypeConfig,
+  ) {
+    this._staticPropPaths = normalizeStaticPropPaths(
+      staticPropPaths,
+      config,
+      this.address.objectKey,
+    )
+    this._stripSequencedStaticPathsFromHistoricState()
+  }
+
+  isStaticPropPath(path: PathToProp): boolean {
+    return isPathUnderTransientPrefix(path, this._staticPropPaths)
+  }
+
+  isNonSequencablePropPath(path: PathToProp): boolean {
+    return this.isTransientPropPath(path) || this.isStaticPropPath(path)
+  }
+
+  getStaticPropPaths(): ReadonlySet<PathToProp_Encoded> {
+    return this._staticPropPaths
+  }
+
+  isTransientPropPath(path: PathToProp): boolean {
+    return isPathUnderTransientPrefix(path, this._transientPropPaths)
+  }
+
+  getTransientPropPaths(): ReadonlySet<PathToProp_Encoded> {
+    return this._transientPropPaths
   }
 
   /**
@@ -204,6 +306,12 @@ export default class SheetObjectTemplate {
 
         const config = val(this.configPointer)
         const deserialized = config.deserializeAndSanitize(json) || {}
+        if (this._transientPropPaths.size > 0) {
+          return stripTransientPathsFromSerializableMap(
+            deserialized,
+            this._transientPropPaths,
+          )
+        }
         return deserialized
       }),
     )
@@ -311,6 +419,8 @@ export default class SheetObjectTemplate {
               const {trackId, trackVariant} = effectiveTrack
               const pathToProp = parsePathToProp(pathToPropInString)
               if (!pathToProp) continue
+
+              if (this.isNonSequencablePropPath(pathToProp)) continue
 
               const propConfig = getPropConfigByPath(objectConfig, pathToProp)
 

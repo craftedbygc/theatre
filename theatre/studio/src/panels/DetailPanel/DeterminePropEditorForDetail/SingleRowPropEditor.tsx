@@ -41,6 +41,7 @@ const Left = styled.div`
 
 const PropNameContainer = styled.div<{
   isHighlighted: PropHighlighted
+  $isTransient?: boolean
 }>`
   text-align: left;
   flex: 1 0;
@@ -53,6 +54,7 @@ const PropNameContainer = styled.div<{
   cursor: default;
 
   ${propNameTextCSS};
+  ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
   &:hover {
     color: white;
   }
@@ -82,6 +84,7 @@ type ISingleRowPropEditorProps<T> = {
   pointerToProp: Pointer<T>
   editingTools: ReturnType<typeof useEditingToolsForSimplePropInDetailsPanel>
   isPropHighlightedD: Prism<PropHighlighted>
+  isTransient?: boolean
 }
 
 export function SingleRowPropEditor<T>({
@@ -90,6 +93,7 @@ export function SingleRowPropEditor<T>({
   editingTools,
   children,
   isPropHighlightedD,
+  isTransient,
 }: React.PropsWithChildren<ISingleRowPropEditorProps<T>>): React.ReactElement<
   any,
   any
@@ -99,12 +103,13 @@ export function SingleRowPropEditor<T>({
   const title = ['obj', 'props', ...getPointerParts(pointerToProp).path].join(
     '.',
   )
+  const chordialTitle = isTransient ? `${title} (transient)` : title
 
   const isHighlighted = useVal(isPropHighlightedD)
 
   const {targetRef} = useChordial(() => {
     return {
-      title,
+      title: chordialTitle,
       items: editingTools.contextMenuItems,
     }
   })
@@ -115,6 +120,7 @@ export function SingleRowPropEditor<T>({
         <ControlsContainer>{editingTools.controlIndicators}</ControlsContainer>
         <PropNameContainer
           isHighlighted={isHighlighted}
+          $isTransient={isTransient}
           ref={targetRef as $FixMe}
         >
           {label}

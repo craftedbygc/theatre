@@ -15,6 +15,7 @@ import type {Deferred} from '@unseenco/theatre-shared/utils/defer'
 import {defer} from '@unseenco/theatre-shared/utils/defer'
 import globals from '@unseenco/theatre-shared/globals'
 import type {
+  ObjectAddressKey,
   ProjectId,
   SheetId,
   SheetInstanceId,
@@ -26,6 +27,11 @@ import type {
 } from '@unseenco/theatre-shared/logger'
 import type {OutlineNamespaceConfig} from '@unseenco/theatre-shared/utils/outlineNamespaces'
 import {_coreLogger} from '@unseenco/theatre-core/_coreLogger'
+import type {PathToProp_Encoded} from '@unseenco/theatre-shared/utils/addresses'
+import {
+  stripTransientPropsFromObjectInSheetState,
+  stripSequenceTracksForPathsFromObjectInSheetState,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 type ICoreAssetStorage = {
   /** Returns a URL for the provided asset ID */
@@ -322,6 +328,68 @@ export default class Project {
         const ahistoric = {...state.ahistoric}
         fn(ahistoric)
         return {...state, ahistoric}
+      })
+    }
+  }
+
+  _stripTransientPropsFromHistoric(
+    sheetId: SheetId,
+    objectKey: ObjectAddressKey,
+    transientPaths: ReadonlySet<PathToProp_Encoded>,
+  ) {
+    if (transientPaths.size === 0) return
+
+    const strip = (historic: ProjectState['historic']) => {
+      const sheetState = historic.sheetsById[sheetId]
+      if (!sheetState) return
+      stripTransientPropsFromObjectInSheetState(
+        sheetState,
+        objectKey,
+        transientPaths,
+      )
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const historic = drafts.historic.coreByProject[this.address.projectId]
+        if (historic) strip(historic)
+      })
+    } else {
+      this._onDiskStateAtom.reduce((state) => {
+        const historic = {...state.historic}
+        strip(historic)
+        return {...state, historic}
+      })
+    }
+  }
+
+  _stripSequenceTracksFromHistoric(
+    sheetId: SheetId,
+    objectKey: ObjectAddressKey,
+    propPaths: ReadonlySet<PathToProp_Encoded>,
+  ) {
+    if (propPaths.size === 0) return
+
+    const strip = (historic: ProjectState['historic']) => {
+      const sheetState = historic.sheetsById[sheetId]
+      if (!sheetState) return
+      stripSequenceTracksForPathsFromObjectInSheetState(
+        sheetState,
+        objectKey,
+        propPaths,
+      )
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const historic = drafts.historic.coreByProject[this.address.projectId]
+        if (historic) strip(historic)
+      })
+    } else {
+      this._onDiskStateAtom.reduce((state) => {
+        const historic = {...state.historic}
+        strip(historic)
+        return {...state, historic}
       })
     }
   }

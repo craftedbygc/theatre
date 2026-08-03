@@ -25,25 +25,30 @@ const theme = {
 
 const Container = styled.div<{
   hasStaticOverride: boolean
+  $isNonInteractive?: boolean
 }>`
   width: 16px;
   margin: 0 0px 0 2px;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => (props.$isNonInteractive ? 'default' : 'pointer')};
 
   color: ${(props) =>
     props.hasStaticOverride
       ? theme.withStaticOverride.color
       : theme.defaultState.color};
 
-  &:hover {
-    color: ${(props) =>
+  ${(props) =>
+    props.$isNonInteractive
+      ? ''
+      : `&:hover {
+    color: ${
       props.hasStaticOverride
         ? theme.withStaticOverride.hoverColor
-        : theme.defaultState.hoverColor};
-  }
+        : theme.defaultState.hoverColor
+    };
+  }`}
 `
 
 const DefaultIcon = styled.div`
@@ -60,6 +65,14 @@ const FilledIcon = styled.div`
   background-color: currentColor;
   border-radius: 1px;
   transform: rotate(45deg);
+`
+
+const OutlineIcon = styled.div`
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  border: 1px solid currentColor;
 `
 
 function sequenceProp(
@@ -91,8 +104,44 @@ const DefaultOrStaticValueIndicator: React.FC<{
   pathToProp: PathToProp
   obj: SheetObject
   propConfig: PropTypeConfig
+  isStatic?: boolean
+  isTransient?: boolean
 }> = (props) => {
-  const {hasStaticOverride, obj, propConfig, pathToProp} = props
+  const {
+    hasStaticOverride,
+    obj,
+    propConfig,
+    pathToProp,
+    isStatic,
+    isTransient,
+  } = props
+
+  const usesOutlineStyle = isStatic || isTransient
+
+  if (usesOutlineStyle) {
+    const showBlueOverride = Boolean(
+      isStatic && !isTransient && hasStaticOverride,
+    )
+
+    let title: string
+    if (isTransient) {
+      title = 'This is a transient prop'
+    } else if (showBlueOverride) {
+      title = 'Static prop — the default value is overridden'
+    } else {
+      title = 'This is a static prop'
+    }
+
+    return (
+      <Container
+        hasStaticOverride={showBlueOverride}
+        $isNonInteractive
+        title={title}
+      >
+        <OutlineIcon />
+      </Container>
+    )
+  }
 
   return (
     <Container

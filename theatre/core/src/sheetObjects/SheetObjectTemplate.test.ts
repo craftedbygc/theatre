@@ -72,6 +72,86 @@ describe(`SheetObjectTemplate`, () => {
 
       expect(iter.next().value).toHaveLength(0)
     })
+
+    it('should exclude transient prop paths from valid sequence tracks', async () => {
+      const {obj} = await setupTestSheet({
+        staticOverrides: {
+          byObject: {},
+        },
+        sequence: {
+          type: 'PositionalSequence',
+          subUnitsPerUnit: 30,
+          length: 10,
+          tracksByObject: {
+            ['obj' as ObjectAddressKey]: {
+              trackIdByPropPath: {
+                [encodePathToProp(['position', 'x'])]: asSequenceTrackId('x'),
+                [encodePathToProp(['color'])]: asSequenceTrackId('color'),
+              },
+              trackData: {
+                ['x' as SequenceTrackId]: null as $IntentionalAny,
+                ['color' as SequenceTrackId]: null as $IntentionalAny,
+              },
+            },
+          },
+        },
+      })
+
+      obj.template.setTransientPropPaths(['color'], obj.template.staticConfig)
+
+      const iter = iterateOver(
+        obj.template.getArrayOfValidSequenceTracks('default'),
+      )
+
+      const validTracks = iter.next().value
+      expect(validTracks).toHaveLength(1)
+      expect(validTracks).toMatchObject([
+        {
+          pathToProp: ['position', 'x'],
+          trackId: 'x',
+        },
+      ])
+    })
+
+    it('should exclude static prop paths from valid sequence tracks', async () => {
+      const {obj} = await setupTestSheet({
+        staticOverrides: {
+          byObject: {},
+        },
+        sequence: {
+          type: 'PositionalSequence',
+          subUnitsPerUnit: 30,
+          length: 10,
+          tracksByObject: {
+            ['obj' as ObjectAddressKey]: {
+              trackIdByPropPath: {
+                [encodePathToProp(['position', 'x'])]: asSequenceTrackId('x'),
+                [encodePathToProp(['color'])]: asSequenceTrackId('color'),
+              },
+              trackData: {
+                ['x' as SequenceTrackId]: null as $IntentionalAny,
+                ['color' as SequenceTrackId]: null as $IntentionalAny,
+              },
+            },
+          },
+        },
+      })
+
+      obj.template.setStaticPropPaths(['color'], obj.template.staticConfig)
+
+      const iter = iterateOver(
+        obj.template.getArrayOfValidSequenceTracks('default'),
+      )
+
+      const validTracks = iter.next().value
+      expect(validTracks).toHaveLength(1)
+      expect(validTracks).toMatchObject([
+        {
+          pathToProp: ['position', 'x'],
+          trackId: 'x',
+        },
+      ])
+    })
   })
   describe(`getMapOfValidSequenceTracks_forStudio()`, () => {
     it('should return valid sequences in map form', async () => {

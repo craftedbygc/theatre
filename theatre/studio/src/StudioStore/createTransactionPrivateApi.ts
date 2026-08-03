@@ -134,8 +134,25 @@ export default function createTransactionPrivateApi(
           }
 
           const propAddress = {...root.address, pathToProp: path}
+          const isTransient = root.template.isTransientPropPath(path)
+          const isStatic = root.template.isStaticPropPath(path)
 
-          if (isUndoable) {
+          if (isTransient) {
+            stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
+              {...propAddress, value: value as $FixMe},
+            )
+          } else if (isStatic) {
+            const activeVariant = getStudioActiveSequenceVariant(
+              root.sheet.address,
+            )
+            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
+              {
+                ...propAddress,
+                value: value as $FixMe,
+                sequenceVariant: activeVariant,
+              },
+            )
+          } else if (isUndoable) {
             const activeVariant = getStudioActiveSequenceVariant(
               root.sheet.address,
             )
@@ -236,8 +253,21 @@ export default function createTransactionPrivateApi(
 
         const unsetStaticOrKeyframeProp = <T>(value: T, path: PathToProp) => {
           const propAddress = {...root.address, pathToProp: path}
+          const isTransient = root.template.isTransientPropPath(path)
+          const isStatic = root.template.isStaticPropPath(path)
 
-          if (isUndoable) {
+          if (isTransient) {
+            stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
+              propAddress,
+            )
+          } else if (isStatic) {
+            const activeVariant = getStudioActiveSequenceVariant(
+              root.sheet.address,
+            )
+            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
+              {...propAddress, sequenceVariant: activeVariant},
+            )
+          } else if (isUndoable) {
             const activeVariant = getStudioActiveSequenceVariant(
               root.sheet.address,
             )

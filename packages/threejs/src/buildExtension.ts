@@ -461,11 +461,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     } else if (shouldPersistDevtoolsState()) {
       pendingOrbitEnabled = enabled
     }
-    const enteringOrbit = enabled && mode !== 'orbit'
     setOrbitModeLocal(enabled)
-    if (enteringOrbit) {
-      setCameraHelperEnabled(true)
-    }
     if (shouldPersistDevtoolsState()) {
       persistOrbitEnabled(studio, getActiveStateObj(), enabled)
     }

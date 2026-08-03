@@ -26,6 +26,10 @@ import {
 } from './persistStateOfStudio'
 import type {OnDiskState} from '@unseenco/theatre-core/projects/store/storeTypes'
 import {generateDiskStateRevision} from './generateDiskStateRevision'
+import {
+  createTransientPropPathsLookup,
+  stripTransientPropsFromOnDiskState,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 import createTransactionPrivateApi from './createTransactionPrivateApi'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
@@ -213,10 +217,9 @@ export default class StudioStore {
         projectId
       ]
 
-    const generatedOnDiskState: OnDiskState = {
-      ...projectHistoricState,
-    }
-
-    return generatedOnDiskState
+    return stripTransientPropsFromOnDiskState(
+      projectHistoricState,
+      createTransientPropPathsLookup(projectId),
+    )
   }
 }

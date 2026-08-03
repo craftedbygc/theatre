@@ -56,7 +56,10 @@ const ControlIndicators = styled.div`
   flexshrink: 0;
 `
 
-const PropName = deriver(styled.div<{isHighlighted: PropHighlighted}>`
+const PropName = deriver(styled.div<{
+  isHighlighted: PropHighlighted
+  $isTransient?: boolean
+}>`
   margin-left: 4px;
   cursor: default;
   height: 100%;
@@ -70,6 +73,7 @@ const PropName = deriver(styled.div<{isHighlighted: PropHighlighted}>`
   overflow: hidden;
 
   ${() => propNameTextCSS};
+  ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
 `)
 
 const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
@@ -201,6 +205,10 @@ function DetailCompoundPropEditor<
     [pointerToProp],
   )
 
+  const isTransient = obj.template.isTransientPropPath(
+    getPointerParts(pointerToProp).path,
+  )
+
   // isVectorProp is already memoized, so no need to wrap this in `useMemo()`
   const isVector = isVectorProp(propConfig)
 
@@ -219,7 +227,10 @@ function DetailCompoundPropEditor<
     const title = ['obj', 'props', ...getPointerParts(pointerToProp).path].join(
       '.',
     )
-    return {title, items: tools.contextMenuItems}
+    return {
+      title: isTransient ? `${title} (transient)` : title,
+      items: tools.contextMenuItems,
+    }
   })
 
   return (
@@ -231,7 +242,11 @@ function DetailCompoundPropEditor<
         <Padding isVectorProp={isVector}>
           <ControlIndicators>{tools.controlIndicators}</ControlIndicators>
 
-          <PropName isHighlighted={isPropHighlightedD} ref={targetRef}>
+          <PropName
+            isHighlighted={isPropHighlightedD}
+            $isTransient={isTransient}
+            ref={targetRef}
+          >
             <span>{label}</span>
           </PropName>
           <CollapseIcon
