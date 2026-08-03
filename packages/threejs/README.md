@@ -53,17 +53,23 @@ configureTheatreThreejs({
 
 ## autoAddObject
 
-Automatically adds a Three.js `Object3D` to a Theatre sheet, parsing transform data (position, rotation, scale, visible) and material properties (colors, scalars, vectors, shader uniforms). Texture/map properties are not supported yet.
+Automatically adds a Three.js `Object3D` to a Theatre sheet, parsing transform data (position, rotation, scale, visible) and material properties (colors, scalars, vectors, textures, shader uniforms).
 
 ```js
 import {autoAddObject} from '@unseenco/theatre-threejs'
 
 const sheetObject = autoAddObject(mesh, sheet, {
   objectKey: 'My Mesh',
-  exclude: {transform: ['scale']},
+  exclude: {transform: ['scale'], material: ['normalMap']},
   include: {material: ['color', 'metalness', 'roughness']},
 })
 ```
+
+### Texture props
+
+Material texture slots (`map`, `normalMap`, etc.) and shader uniform textures are exposed as Theatre image props with `persist: false`. Assignments apply for the current session only and are cleared on refresh. They are also transient (excluded from exported project state JSON). When you swap a texture, wrap/repeat/filter settings from the existing texture are preserved.
+
+Shader uniform textures are detected by name (`uDiffuseMap`, `tDiffuse`, etc.) or by `gui: { type: 'texture' }` on the uniform.
 
 When used together with `buildExtension`, selection is synced bidirectionally in orbit mode:
 
@@ -78,6 +84,7 @@ For `ShaderMaterial` / `RawShaderMaterial`, `autoAddObject` reads optional `gui`
 | --- | --- |
 | `min` / `max` | `range: [min, max]` |
 | `step` | `nudgeMultiplier` |
+| `type: 'texture'` | Registers the uniform as a Theatre image prop (useful when the uniform value is `null`) |
 
 ```js
 import {ShaderMaterial, Color} from 'three'
@@ -90,6 +97,7 @@ const material = new ShaderMaterial({
       value: 0.85,
       gui: {min: 0, max: 1, step: 0.01},
     },
+    uDiffuseMap: {value: null},
     uTime: {value: 0}, // often excluded via configureTheatreThreejs when driven by your render loop
   },
   // vertexShader / fragmentShader ...

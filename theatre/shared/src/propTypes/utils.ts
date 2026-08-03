@@ -5,7 +5,13 @@ import type {
   PropTypeConfig_Compound,
   PropTypeConfig_Enum,
 } from '@unseenco/theatre-core/propTypes'
-import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import type {
+  PathToProp,
+  PathToProp_Encoded,
+} from '@unseenco/theatre-shared/utils/addresses'
+import {encodePathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import type {SerializableMap} from '@unseenco/theatre-shared/utils/types'
+import {stripTransientPathsFromSerializableMap} from '@unseenco/theatre-shared/utils/transientPropPaths'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 import memoizeFn from '@unseenco/theatre-shared/utils/memoizeFn'
 
@@ -59,6 +65,35 @@ export function valueInProp<PropConfig extends PropTypeConfig_AllSimples>(
   } else {
     return sanitizedVal
   }
+}
+
+export function propTypeConfigPersists(conf: PropTypeConfig): boolean {
+  if (conf.type === 'image') {
+    return conf.persist !== false
+  }
+  return true
+}
+
+export function getNonPersistingPropPathEncodings(
+  config: PropTypeConfig,
+): ReadonlySet<PathToProp_Encoded> {
+  const result = new Set<PathToProp_Encoded>()
+
+  for (const {path, conf} of iteratePropType(config, [])) {
+    if (!propTypeConfigPersists(conf)) {
+      result.add(encodePathToProp(path))
+    }
+  }
+
+  return result
+}
+
+export function stripNonPersistingPropValuesFromMap(
+  map: SerializableMap,
+  config: PropTypeConfig,
+): SerializableMap {
+  const paths = getNonPersistingPropPathEncodings(config)
+  return stripTransientPathsFromSerializableMap(map, paths)
 }
 
 /**

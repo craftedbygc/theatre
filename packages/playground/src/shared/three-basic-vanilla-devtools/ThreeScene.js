@@ -4,10 +4,12 @@ import {
   CatmullRomCurve3,
   Color,
   CylinderGeometry,
+  DataTexture,
   DirectionalLight,
   Group,
   Mesh,
   MeshPhongMaterial,
+  MeshStandardMaterial,
   PerspectiveCamera,
   Scene,
   ShaderMaterial,
@@ -174,33 +176,47 @@ function createSpheresScene(sheet, width, height) {
 
   const mesh = new Mesh(
     new SphereGeometry(3),
-    new MeshPhongMaterial({color: 0xffffff}),
+    new MeshStandardMaterial({color: 0xffffff, map: null}),
   )
   mesh.name = 'Hero Sphere'
   scene.add(mesh)
+
+  const shaderFallbackTexture = new DataTexture(
+    new Uint8Array([255, 255, 255, 255]),
+    1,
+    1,
+  )
+  shaderFallbackTexture.needsUpdate = true
 
   const shaderMaterial = new ShaderMaterial({
     uniforms: {
       uColor: {value: new Color(0xff6644)},
       uOpacity: {value: 0.85, gui: {min: 0, max: 1, step: 0.01}},
+      uDiffuseMap: {value: null},
       uTime: {value: 0},
     },
     vertexShader: /* glsl */ `
+      varying vec2 vUv;
       varying vec3 vNormal;
       void main() {
+        vUv = uv;
         vNormal = normalize(normalMatrix * normal);
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `,
     fragmentShader: /* glsl */ `
+      uniform sampler2D uDiffuseMap;
       uniform vec3 uColor;
       uniform float uOpacity;
       uniform float uTime;
+      varying vec2 vUv;
       varying vec3 vNormal;
       void main() {
         float pulse = 0.65 + 0.35 * sin(uTime * 2.0);
         float lighting = 0.35 + 0.65 * max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0);
-        gl_FragColor = vec4(uColor * lighting, uOpacity * pulse);
+        vec3 sampled = texture2D(uDiffuseMap, vUv).rgb;
+        vec3 baseColor = length(sampled) > 0.0 ? sampled : uColor;
+        gl_FragColor = vec4(baseColor * lighting, uOpacity * pulse);
       }
     `,
     transparent: true,
@@ -218,6 +234,10 @@ function createSpheresScene(sheet, width, height) {
   bindCameraTransformSheet(sheet, camera)
   autoAddObject(mesh, sheet, {objectKey: 'Hero Sphere'})
   autoAddObject(shaderCube, sheet, {exclude: ['uTime']})
+
+  if (!shaderMaterial.uniforms.uDiffuseMap.value) {
+    shaderMaterial.uniforms.uDiffuseMap.value = shaderFallbackTexture
+  }
 
   const onFrame = (elapsedTime) => {
     shaderMaterial.uniforms.uTime.value = elapsedTime

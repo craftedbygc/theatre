@@ -2,6 +2,7 @@ export type UniformGuiOptions = {
   min?: number
   max?: number
   step?: number
+  type?: 'texture'
 }
 
 export type UniformWithGui = {
@@ -12,6 +13,25 @@ export type UniformWithGui = {
 export type ParsedUniformGuiOptions = {
   range?: [number, number]
   nudgeMultiplier?: number
+}
+
+export function uniformGuiDeclaresTexture(uniform: UniformWithGui): boolean {
+  const gui = uniform.gui
+  if (!gui || typeof gui !== 'object') {
+    return false
+  }
+
+  if ('type' in gui && gui.type === 'texture') {
+    return true
+  }
+
+  if ('min' in gui || 'max' in gui || 'step' in gui) {
+    return false
+  }
+
+  return Object.values(gui).some(
+    (componentGui) => componentGui?.type === 'texture',
+  )
 }
 
 export function parseUniformGui(

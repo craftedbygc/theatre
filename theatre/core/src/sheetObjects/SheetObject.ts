@@ -35,6 +35,10 @@ import type {
   PropTypeConfig,
 } from '@unseenco/theatre-core/propTypes'
 import {getPropConfigByPath} from '@unseenco/theatre-shared/propTypes/utils'
+import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
+import removePathFromObject from '@unseenco/theatre-shared/utils/removePathFromObject'
+import setDeepImmutable from '@unseenco/theatre-shared/utils/setDeepImmutable'
+import {cloneDeep} from 'lodash-es'
 import type {ILogger, IUtilContext} from '@unseenco/theatre-shared/logger'
 import {pointerToSequenceTrackData} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
@@ -70,6 +74,11 @@ export default class SheetObject implements PointerToPrismProvider {
    * no-op merge for every app that never uses the remote-sync feature.
    */
   private readonly _remoteOverride = new Atom<SheetObjectPropsValue>({})
+  /**
+   * Session-only overrides for props with `persist: false`. Not written to
+   * persisted project state and cleared on refresh.
+   */
+  private readonly _sessionOverrides = new Atom<SerializableMap>({})
   private readonly _cache = new SimpleCache()
   readonly _logger: ILogger
   private readonly _internalUtilCtx: IUtilContext
@@ -237,6 +246,18 @@ export default class SheetObject implements PointerToPrismProvider {
           final = withSeqs
         }
 
+        const sessionOverrides = val(this._sessionOverrides.pointer)
+        const withSessionOverridesCache = prism.memo(
+          'withSessionOverridesCache',
+          () => new WeakMap(),
+          [],
+        )
+        final = deepMergeWithCache(
+          final,
+          sessionOverrides,
+          withSessionOverridesCache,
+        )
+
         /**
          * The highest-priority layer is a remote override, set by `RemoteSync`
          * when this object's value is being driven by a remote editor window.
@@ -403,6 +424,24 @@ export default class SheetObject implements PointerToPrismProvider {
   setInitialValue(val: DeepPartialOfSerializableValue<SheetObjectPropsValue>) {
     this.validateValue(this.propsP, val)
     this._initialValue.set(val)
+  }
+
+  setSessionOverride(path: PathToProp, value: unknown): void {
+    const propConfig = getPropConfigByPath(this.template.staticConfig, path)
+    if (!propConfig) return
+
+    const sanitized = propConfig.deserializeAndSanitize(value)
+    if (sanitized === undefined) return
+
+    this._sessionOverrides.set(
+      setDeepImmutable(this._sessionOverrides.get(), path, sanitized),
+    )
+  }
+
+  unsetSessionOverride(path: PathToProp): void {
+    const next = cloneDeep(this._sessionOverrides.get())
+    removePathFromObject(next, path)
+    this._sessionOverrides.set(next)
   }
 
   /**

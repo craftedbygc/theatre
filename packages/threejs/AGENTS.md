@@ -29,6 +29,7 @@ The main entry points are:
 | `src/autoAddObject.ts` | Register Three.js objects on Theatre sheets |
 | `src/buildTransformProps.ts` | Transform prop config + applier |
 | `src/buildMaterialProps.ts` | Material prop introspection + applier |
+| `src/textureUtils.ts` | Texture slot detection, settings copy, async loading |
 | `src/objectRegistry.ts` | Object3D ↔ ISheetObject registry |
 | `src/selectionSync.ts` | Bidirectional outline ↔ orbit selection via BoxHelper + raycasting |
 | `src/config.ts` | Project-wide `configureTheatreThreejs()` defaults |
@@ -117,7 +118,9 @@ const sheetObject = autoAddObject(mesh, sheet, {
 
 `autoAddObject` calls `sheet.object()` without `reconfigure` — same `objectKey` returns the existing instance per Theatre's normal rules. It registers the Object3D in an internal registry used by `buildExtension` for bidirectional selection.
 
-Texture/map properties are not tracked yet.
+### Texture props
+
+Material texture slots (`map`, `normalMap`, etc.) and shader uniform textures are registered as Theatre `types.image` props with `persist: false`, so assignments apply for the current session only and are cleared on refresh. They are also marked **transient** (excluded from exported project state JSON).
 
 ## Selection sync
 

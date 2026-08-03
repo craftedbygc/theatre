@@ -34,6 +34,8 @@ import logger from '@unseenco/theatre-shared/logger'
 import {
   getPropConfigByPath,
   isPropConfSequencable,
+  propTypeConfigPersists,
+  stripNonPersistingPropValuesFromMap,
 } from '@unseenco/theatre-shared/propTypes/utils'
 import getOrderingOfPropTypeConfig from './getOrderingOfPropTypeConfig'
 import type {SheetState_Historic} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
@@ -177,6 +179,21 @@ export default class SheetObjectTemplate {
 
     this._stripTransientFromHistoricState()
     this._stripSequencedStaticPathsFromHistoricState()
+    this._stripNonPersistingPropsFromAhistoricState()
+  }
+
+  private _stripNonPersistingPropsFromAhistoricState() {
+    const config = val(this.configPointer)
+    this.project._stripNonPersistingPropsFromAhistoric(
+      this.address.sheetId,
+      this.address.objectKey,
+      config,
+    )
+    this.project._stripNonPersistingPropsFromHistoric(
+      this.address.sheetId,
+      this.address.objectKey,
+      config,
+    )
   }
 
   private _stripTransientFromHistoricState() {
@@ -208,6 +225,7 @@ export default class SheetObjectTemplate {
 
   reconfigure(config: SheetObjectPropTypeConfig) {
     this._config.set(config)
+    this._stripNonPersistingPropsFromAhistoricState()
   }
 
   setTransientPropPaths(
@@ -245,7 +263,12 @@ export default class SheetObjectTemplate {
   }
 
   isNonSequencablePropPath(path: PathToProp): boolean {
-    return this.isTransientPropPath(path) || this.isStaticPropPath(path)
+    if (this.isTransientPropPath(path) || this.isStaticPropPath(path)) {
+      return true
+    }
+
+    const propConfig = getPropConfigByPath(this.staticConfig, path)
+    return propConfig ? !propTypeConfigPersists(propConfig) : false
   }
 
   getStaticPropPaths(): ReadonlySet<PathToProp_Encoded> {
@@ -306,13 +329,17 @@ export default class SheetObjectTemplate {
 
         const config = val(this.configPointer)
         const deserialized = config.deserializeAndSanitize(json) || {}
+        const withoutNonPersisting = stripNonPersistingPropValuesFromMap(
+          deserialized,
+          config,
+        )
         if (this._transientPropPaths.size > 0) {
           return stripTransientPathsFromSerializableMap(
-            deserialized,
+            withoutNonPersisting,
             this._transientPropPaths,
           )
         }
-        return deserialized
+        return withoutNonPersisting
       }),
     )
   }
@@ -327,7 +354,7 @@ export default class SheetObjectTemplate {
         const json = val(this.pointerToAhistoricStaticOverrides) ?? {}
         const config = val(this.configPointer)
         const deserialized = config.deserializeAndSanitize(json) || {}
-        return deserialized
+        return stripNonPersistingPropValuesFromMap(deserialized, config)
       }),
     )
   }

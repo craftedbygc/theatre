@@ -16,7 +16,10 @@ import type {
   PropTypeConfig_Compound,
 } from '@unseenco/theatre-core/propTypes'
 import type {PathToProp} from '@unseenco/theatre-shared/src/utils/addresses'
-import {getPropConfigByPath} from '@unseenco/theatre-shared/propTypes/utils'
+import {
+  getPropConfigByPath,
+  propTypeConfigPersists,
+} from '@unseenco/theatre-shared/propTypes/utils'
 import {isPlainObject} from 'lodash-es'
 import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
 import {
@@ -137,6 +140,11 @@ export default function createTransactionPrivateApi(
           const isTransient = root.template.isTransientPropPath(path)
           const isStatic = root.template.isStaticPropPath(path)
 
+          if (!propTypeConfigPersists(propConfig)) {
+            root.setSessionOverride(path, deserialized)
+            return
+          }
+
           if (isTransient) {
             stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
               {...propAddress, value: value as $FixMe},
@@ -255,6 +263,11 @@ export default function createTransactionPrivateApi(
           const propAddress = {...root.address, pathToProp: path}
           const isTransient = root.template.isTransientPropPath(path)
           const isStatic = root.template.isStaticPropPath(path)
+
+          if (propConfig && !propTypeConfigPersists(propConfig)) {
+            root.unsetSessionOverride(path)
+            return
+          }
 
           if (isTransient) {
             stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(

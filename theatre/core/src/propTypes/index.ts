@@ -232,6 +232,12 @@ export const image = (
   opts: {
     label?: string
     interpolate?: Interpolator<Asset['id']>
+    /**
+     * When `false`, values edited in Studio are kept in memory for the
+     * current session only and are not written to persisted project state.
+     * Defaults to `true`.
+     */
+    persist?: boolean
   } = {},
 ): PropTypeConfig_Image => {
   if (process.env.NODE_ENV !== 'production') {
@@ -253,6 +259,7 @@ export const image = (
     valueType: null as $IntentionalAny,
     [propTypeSymbol]: 'TheatrePropType',
     label: opts.label,
+    persist: opts.persist !== false,
     interpolate,
     deserializeAndSanitize: _ensureImage,
   }
@@ -848,7 +855,13 @@ export interface PropTypeConfig_StringLiteral<T extends string>
 
 export interface PropTypeConfig_Rgba extends ISimplePropType<'rgba', Rgba> {}
 
-export interface PropTypeConfig_Image extends ISimplePropType<'image', Asset> {}
+export interface PropTypeConfig_Image extends ISimplePropType<'image', Asset> {
+  /**
+   * When `false`, Studio edits are session-only and not written to persisted
+   * project state. Defaults to `true`.
+   */
+  persist: boolean
+}
 export interface PropTypeConfig_File extends ISimplePropType<'file', File> {}
 
 type DeepPartialCompound<Props extends UnknownValidCompoundProps> = {

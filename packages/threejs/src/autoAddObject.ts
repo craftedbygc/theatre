@@ -57,24 +57,33 @@ export function autoAddObject<T extends Object3D>(
   }
 
   let applyMaterial: ReturnType<typeof buildMaterialProps>['applier']
+  let transientPaths: ReturnType<typeof buildMaterialProps>['transientPaths'] =
+    []
 
   if (trackMaterial) {
     const material = getMeshMaterial(object)
-    const {config: materialConfig, applier} = buildMaterialProps(material, {
+    const {
+      config: materialConfig,
+      applier,
+      transientPaths: materialTransientPaths,
+    } = buildMaterialProps(material, {
       excludeMaterial: resolved.exclude.material,
       excludeUniforms: resolved.exclude.uniforms,
       includeMaterial: resolved.include.material,
       includeUniforms: resolved.include.uniforms,
+      getAssetUrl: (asset) => sheet.project.getAssetUrl(asset),
     })
     if (materialConfig) {
       Object.assign(config, materialConfig)
     }
     applyMaterial = applier
+    transientPaths = materialTransientPaths
   }
 
   const sheetObject = sheet.object(
     objectKey,
     config as Parameters<ISheet['object']>[1],
+    transientPaths.length > 0 ? {transient: transientPaths} : undefined,
   )
 
   sheetObject.onValuesChange((values) => {

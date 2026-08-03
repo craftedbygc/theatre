@@ -28,9 +28,13 @@ import type {
 import type {OutlineNamespaceConfig} from '@unseenco/theatre-shared/utils/outlineNamespaces'
 import {_coreLogger} from '@unseenco/theatre-core/_coreLogger'
 import type {PathToProp_Encoded} from '@unseenco/theatre-shared/utils/addresses'
+import type {PropTypeConfig} from '@unseenco/theatre-core/propTypes'
+import {stripImageAssetsFromAhistoricStaticOverrides} from '@unseenco/theatre-shared/utils/assets'
+import {getNonPersistingPropPathEncodings} from '@unseenco/theatre-shared/propTypes/utils'
 import {
   stripTransientPropsFromObjectInSheetState,
   stripSequenceTracksForPathsFromObjectInSheetState,
+  stripTransientPathsFromSerializableMap,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 type ICoreAssetStorage = {
@@ -223,6 +227,8 @@ export default class Project {
           studio.atomP.ephemeral.coreByProject[this.address.projectId],
         )
 
+        this._stripImageAssetsFromAhistoricState()
+
         // asset storage has to be initialized after the pointers are set
         await studio
           .createAssetStorage(this, this.config.assets?.baseUrl)
@@ -328,6 +334,88 @@ export default class Project {
         const ahistoric = {...state.ahistoric}
         fn(ahistoric)
         return {...state, ahistoric}
+      })
+    }
+  }
+
+  _stripImageAssetsFromAhistoricState() {
+    const strip = (ahistoric: ProjectAhistoricState) => {
+      for (const sheetState of Object.values(ahistoric.sheetsById ?? {})) {
+        if (!sheetState) continue
+        stripImageAssetsFromAhistoricStaticOverrides(
+          sheetState.staticOverrides.byObject,
+        )
+      }
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const ahistoric = drafts.ahistoric.coreByProject[this.address.projectId]
+        if (ahistoric) strip(ahistoric)
+      })
+    } else {
+      this._mutateCoreAhistoric(strip)
+    }
+  }
+
+  _stripNonPersistingPropsFromAhistoric(
+    sheetId: SheetId,
+    objectKey: ObjectAddressKey,
+    config: PropTypeConfig,
+  ) {
+    const paths = getNonPersistingPropPathEncodings(config)
+    if (paths.size === 0) return
+
+    const strip = (ahistoric: ProjectAhistoricState) => {
+      const sheetState = ahistoric.sheetsById?.[sheetId]
+      if (!sheetState) return
+
+      const staticOverrides = sheetState.staticOverrides.byObject[objectKey]
+      if (staticOverrides) {
+        sheetState.staticOverrides.byObject[objectKey] =
+          stripTransientPathsFromSerializableMap(staticOverrides, paths)
+      }
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const ahistoric = drafts.ahistoric.coreByProject[this.address.projectId]
+        if (ahistoric) strip(ahistoric)
+      })
+    } else {
+      this._mutateCoreAhistoric(strip)
+    }
+  }
+
+  _stripNonPersistingPropsFromHistoric(
+    sheetId: SheetId,
+    objectKey: ObjectAddressKey,
+    config: PropTypeConfig,
+  ) {
+    const paths = getNonPersistingPropPathEncodings(config)
+    if (paths.size === 0) return
+
+    const strip = (historic: ProjectState['historic']) => {
+      const sheetState = historic.sheetsById[sheetId]
+      if (!sheetState) return
+      stripTransientPropsFromObjectInSheetState(sheetState, objectKey, paths)
+      stripSequenceTracksForPathsFromObjectInSheetState(
+        sheetState,
+        objectKey,
+        paths,
+      )
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const historic = drafts.historic.coreByProject[this.address.projectId]
+        if (historic) strip(historic)
+      })
+    } else {
+      this._onDiskStateAtom.reduce((state) => {
+        const historic = {...state.historic}
+        strip(historic)
+        return {...state, historic}
       })
     }
   }

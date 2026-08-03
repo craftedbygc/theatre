@@ -1,10 +1,11 @@
 import {types} from '@unseenco/theatre-core'
+import type {Asset} from '@unseenco/theatre-shared/utils/assets'
+import type {TransientPropPath} from '@unseenco/theatre-shared/utils/transientPropPaths'
 import {
   AdditiveBlending,
   BackSide,
   Color,
   CustomBlending,
-  DataTexture,
   DoubleSide,
   Euler,
   FrontSide,
@@ -17,10 +18,21 @@ import {
   Vector2,
   Vector3,
 } from 'three'
-import type {Blending, Side, Texture, Material} from 'three'
+import type {Blending, Side, Material} from 'three'
 import {applyTheatreRgbaToColor, colorToTheatreRgba} from './colorUtils'
 import {numberTypeOptionsFromUniformGui} from './parseUniformGui'
 import type {UniformWithGui} from './parseUniformGui'
+import {
+  createTextureSlotApplier,
+  isMaterialTextureProp,
+  isTheatreImageAsset,
+  isTexture,
+  isUniformTextureProp,
+  isUnsupportedUniformValue,
+  MATERIAL_TEXTURE_PROPS,
+  textureToDefaultAssetId,
+} from './textureUtils'
+import type {TextureSlotApplier} from './textureUtils'
 
 const MATERIAL_NUMBER_PROPS = [
   'alphaTest',
@@ -100,9 +112,15 @@ export type BuildMaterialPropsOptions = {
   excludeUniforms?: string[]
   includeMaterial?: string[]
   includeUniforms?: string[]
+  getAssetUrl?: (asset: Asset) => string | undefined
 }
 
 type MaterialConfig = Record<string, unknown>
+
+type BuildSingleMaterialResult = {
+  config: MaterialConfig
+  transientPaths: TransientPropPath[]
+}
 
 function shouldTrackProp(
   key: string,
@@ -120,34 +138,25 @@ function getMaterialFilterOptions(options: BuildMaterialPropsOptions = {}) {
     excludeUniforms: options.excludeUniforms ?? [],
     includeMaterial: options.includeMaterial ?? [],
     includeUniforms: options.includeUniforms ?? [],
+    getAssetUrl: options.getAssetUrl,
   }
 }
 
-function isTexture(value: unknown): value is Texture {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'isTexture' in value &&
-    (value as Texture).isTexture === true
-  )
-}
+function buildTexturePropConfig(
+  material: Material,
+  key: string,
+  exclude: string[],
+  include: string[],
+): unknown | undefined {
+  if (!shouldTrackProp(key, exclude, include)) return undefined
 
-function isUnsupportedUniformValue(value: unknown): boolean {
-  if (value === null || value === undefined) return true
-  if (Array.isArray(value)) return true
-  if (isTexture(value)) return true
-  if (value instanceof DataTexture) return true
-  if (
-    typeof value === 'object' &&
-    value !== null &&
-    ('isMatrix4' in value ||
-      'isMatrix3' in value ||
-      'isRenderTargetTexture' in value ||
-      'isDepthTexture' in value)
-  ) {
-    return true
-  }
-  return false
+  const value = (material as unknown as Record<string, unknown>)[key]
+  if (!isMaterialTextureProp(material, key, value)) return undefined
+
+  const defaultId =
+    value && isTexture(value) ? textureToDefaultAssetId(value) : ''
+
+  return types.image(defaultId, {label: key, persist: false})
 }
 
 function buildStandardMaterialOptions(
@@ -288,8 +297,33 @@ function applyMaterialPropValue(
   material: Material,
   key: string,
   value: unknown,
+  applyTexture: TextureSlotApplier | undefined,
 ): void {
   const current = (material as unknown as Record<string, unknown>)[key]
+
+  if (
+    isMaterialTextureProp(material, key, current) &&
+    (isTheatreImageAsset(value) || value === undefined)
+  ) {
+    if (!applyTexture) return
+
+    applyTexture(
+      material,
+      key,
+      value ?? {type: 'image', id: undefined},
+      () => {
+        const slotValue = (material as unknown as Record<string, unknown>)[key]
+        return isTexture(slotValue) ? slotValue : null
+      },
+      (texture) => {
+        ;(material as unknown as Record<string, unknown>)[key] = texture
+      },
+      () => {
+        material.needsUpdate = true
+      },
+    )
+    return
+  }
 
   if (current instanceof Color && value && typeof value === 'object') {
     applyTheatreRgbaToColor(
@@ -332,6 +366,8 @@ function buildTrackedMaterialProps(
   material: Material,
   exclude: string[],
   include: string[],
+  transientPaths: TransientPropPath[],
+  materialPathPrefix: string,
 ): MaterialConfig {
   const config: MaterialConfig = {}
 
@@ -386,6 +422,14 @@ function buildTrackedMaterialProps(
         config[key] = propConfig
       }
     }
+
+    for (const key of MATERIAL_TEXTURE_PROPS) {
+      const propConfig = buildTexturePropConfig(material, key, exclude, include)
+      if (propConfig !== undefined) {
+        config[key] = propConfig
+        transientPaths.push(`${materialPathPrefix}.${key}`)
+      }
+    }
   }
 
   return config
@@ -394,6 +438,7 @@ function buildTrackedMaterialProps(
 function applyTrackedMaterialProps(
   material: Material,
   values: Record<string, unknown>,
+  applyTexture: TextureSlotApplier | undefined,
 ): void {
   for (const key of Object.keys(values)) {
     if (
@@ -410,7 +455,7 @@ function applyTrackedMaterialProps(
       continue
     }
 
-    applyMaterialPropValue(material, key, values[key])
+    applyMaterialPropValue(material, key, values[key], applyTexture)
   }
 }
 
@@ -418,6 +463,8 @@ function buildUniformsConfig(
   uniforms: ShaderMaterial['uniforms'],
   exclude: string[],
   include: string[],
+  transientPaths: TransientPropPath[],
+  uniformsPathPrefix: string,
 ): Record<string, unknown> | undefined {
   const config: Record<string, unknown> = {}
 
@@ -426,6 +473,15 @@ function buildUniformsConfig(
 
     const uniform = uniforms[key] as UniformWithGui
     const value = uniform?.value
+
+    if (isUniformTextureProp(key, value, uniform)) {
+      const defaultId =
+        value && isTexture(value) ? textureToDefaultAssetId(value) : ''
+      config[key] = types.image(defaultId, {label: key, persist: false})
+      transientPaths.push(`${uniformsPathPrefix}.${key}`)
+      continue
+    }
+
     if (isUnsupportedUniformValue(value)) continue
 
     if (value instanceof Color) {
@@ -490,12 +546,35 @@ function buildUniformsConfig(
 function applyUniforms(
   uniforms: ShaderMaterial['uniforms'],
   values: Record<string, unknown>,
+  applyTexture: TextureSlotApplier | undefined,
 ): void {
   for (const key in values) {
     const uniform = uniforms[key]
     if (!uniform) continue
 
     const value = values[key]
+
+    if (
+      isUniformTextureProp(key, uniform.value, uniform as UniformWithGui) &&
+      (isTheatreImageAsset(value) || value === undefined)
+    ) {
+      if (!applyTexture) continue
+
+      applyTexture(
+        uniforms,
+        key,
+        value ?? {type: 'image', id: undefined},
+        () => {
+          const slotValue = uniform.value
+          return isTexture(slotValue) ? slotValue : null
+        },
+        (texture) => {
+          uniform.value = texture
+        },
+      )
+      continue
+    }
+
     if (uniform.value instanceof Color && value && typeof value === 'object') {
       applyTheatreRgbaToColor(
         uniform.value,
@@ -536,15 +615,24 @@ function applyUniforms(
 function buildSingleMaterialConfig(
   material: Material,
   options: BuildMaterialPropsOptions,
-): MaterialConfig {
+  materialPathPrefix: string,
+): BuildSingleMaterialResult {
   const {excludeMaterial, excludeUniforms, includeMaterial, includeUniforms} =
     getMaterialFilterOptions(options)
 
   const config: MaterialConfig = {}
+  const transientPaths: TransientPropPath[] = []
+
   buildStandardMaterialOptions(material, config)
   Object.assign(
     config,
-    buildTrackedMaterialProps(material, excludeMaterial, includeMaterial),
+    buildTrackedMaterialProps(
+      material,
+      excludeMaterial,
+      includeMaterial,
+      transientPaths,
+      materialPathPrefix,
+    ),
   )
 
   if (
@@ -555,21 +643,24 @@ function buildSingleMaterialConfig(
       material.uniforms,
       excludeUniforms,
       includeUniforms,
+      transientPaths,
+      `${materialPathPrefix}.uniforms`,
     )
     if (uniformsConfig) {
       config.uniforms = uniformsConfig
     }
   }
 
-  return config
+  return {config, transientPaths}
 }
 
 function applySingleMaterialValues(
   material: Material,
   values: Record<string, unknown>,
+  applyTexture: TextureSlotApplier | undefined,
 ): void {
   applyStandardMaterialOptions(material, values)
-  applyTrackedMaterialProps(material, values)
+  applyTrackedMaterialProps(material, values, applyTexture)
 
   if (
     (material instanceof ShaderMaterial ||
@@ -577,7 +668,11 @@ function applySingleMaterialValues(
     values.uniforms &&
     typeof values.uniforms === 'object'
   ) {
-    applyUniforms(material.uniforms, values.uniforms as Record<string, unknown>)
+    applyUniforms(
+      material.uniforms,
+      values.uniforms as Record<string, unknown>,
+      applyTexture,
+    )
   }
 }
 
@@ -587,22 +682,35 @@ export function buildMaterialProps(
 ): {
   config: Record<string, unknown> | undefined
   applier: MaterialApplier | undefined
+  transientPaths: TransientPropPath[]
 } {
   if (!material) {
-    return {config: undefined, applier: undefined}
+    return {config: undefined, applier: undefined, transientPaths: []}
   }
+
+  const {getAssetUrl} = getMaterialFilterOptions(options)
+  const applyTexture = getAssetUrl
+    ? createTextureSlotApplier(getAssetUrl)
+    : undefined
 
   if (Array.isArray(material)) {
     const entries: Record<string, MaterialConfig> = {}
+    const transientPaths: TransientPropPath[] = []
+
     for (let index = 0; index < material.length; index++) {
-      entries[String(index)] = buildSingleMaterialConfig(
+      const materialPathPrefix = `material.${index}`
+      const result = buildSingleMaterialConfig(
         material[index],
         options,
+        materialPathPrefix,
       )
+      entries[String(index)] = result.config
+      transientPaths.push(...result.transientPaths)
     }
 
     return {
       config: {material: entries},
+      transientPaths,
       applier: (target, values) => {
         const materials = Array.isArray(target) ? target : [target]
         const materialValues = values.material as
@@ -613,24 +721,34 @@ export function buildMaterialProps(
         for (let index = 0; index < materials.length; index++) {
           const entryValues = materialValues[String(index)]
           if (entryValues) {
-            applySingleMaterialValues(materials[index], entryValues)
+            applySingleMaterialValues(
+              materials[index],
+              entryValues,
+              applyTexture,
+            )
           }
         }
       },
     }
   }
 
-  const singleConfig = buildSingleMaterialConfig(material, options)
+  const materialPathPrefix = 'material'
+  const {config: singleConfig, transientPaths} = buildSingleMaterialConfig(
+    material,
+    options,
+    materialPathPrefix,
+  )
 
   return {
     config: {material: singleConfig},
+    transientPaths,
     applier: (target, values) => {
       const materials = Array.isArray(target) ? target[0] : target
       const materialValues = values.material as
         | Record<string, unknown>
         | undefined
       if (!materials || !materialValues) return
-      applySingleMaterialValues(materials, materialValues)
+      applySingleMaterialValues(materials, materialValues, applyTexture)
     },
   }
 }

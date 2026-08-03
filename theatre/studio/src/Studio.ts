@@ -416,6 +416,8 @@ export class Studio {
 
     const idb = createStore(`${project.address.projectId}-assets`)
 
+    const resolvedBaseUrl = baseUrl ?? project.config.assets?.baseUrl
+
     // get all possible asset ids referenced by either static props or keyframes
     const possibleAssetIDs = getAllPossibleAssetIDs(project)
 
@@ -430,26 +432,29 @@ export class Studio {
       }),
     )
 
-    // Clean up idb entries exported to disk
-    await Promise.all(
-      idbKeys.map(async (key) => {
-        const assetUrl = `${baseUrl}/${key}`
+    // Clean up idb entries that also exist on disk (when a baseUrl is configured).
+    if (resolvedBaseUrl) {
+      const normalizedBaseUrl = resolvedBaseUrl.replace(/\/$/, '')
+      const remainingIdbKeys = await idb.keys<string>()
 
-        try {
-          const response = await fetch(assetUrl, {method: 'HEAD'})
-          if (response.ok) {
-            await idb.del(key)
+      await Promise.all(
+        remainingIdbKeys.map(async (key) => {
+          const assetUrl = `${normalizedBaseUrl}/${key}`
+
+          try {
+            const response = await fetch(assetUrl, {method: 'HEAD'})
+            if (response.ok) {
+              await idb.del(key)
+            }
+          } catch (e) {
+            notify.error(
+              'Failed to access assets',
+              `Failed to access assets at ${resolvedBaseUrl}. This is likely due to a CORS issue.`,
+            )
           }
-        } catch (e) {
-          notify.error(
-            'Failed to access assets',
-            `Failed to access assets at ${
-              project.config.assets?.baseUrl ?? '/'
-            }. This is likely due to a CORS issue.`,
-          )
-        }
-      }),
-    )
+        }),
+      )
+    }
 
     // A map for caching the assets outside of the db. We also need this to be able to retrieve idb asset urls synchronously.
     const assetsMap = new Map(await idb.entries<string, Blob>())
@@ -481,7 +486,9 @@ export class Studio {
       getAssetUrl: (assetId: string) => {
         return assetsMap.has(assetId)
           ? getUrlForId(assetId)
-          : `${baseUrl}/${assetId}`
+          : resolvedBaseUrl
+          ? `${resolvedBaseUrl.replace(/\/$/, '')}/${assetId}`
+          : ''
       },
       createAsset: async (asset: File) => {
         const existingIDs = getAllPossibleAssetIDs(project)
@@ -493,9 +500,11 @@ export class Studio {
           try {
             existingAsset =
               assetsMap.get(asset.name) ??
-              (await fetch(`${baseUrl}/${asset.name}`).then((r) =>
-                r.ok ? r.blob() : undefined,
-              ))
+              (resolvedBaseUrl
+                ? await fetch(
+                    `${resolvedBaseUrl.replace(/\/$/, '')}/${asset.name}`,
+                  ).then((r) => (r.ok ? r.blob() : undefined))
+                : undefined)
           } catch (e) {
             notify.error(
               'Failed to access assets',
