@@ -6,9 +6,21 @@
 
 export {buildExtension} from './buildExtension'
 export {autoAddObject} from './autoAddObject'
+export {
+  configureTheatreThreejs,
+  mergeExcludeInput,
+  resetTheatreThreejsConfig,
+} from './config'
 export {EXTENSION_ID} from './constants'
 
 export type {AutoAddObjectOptions} from './autoAddObject'
+
+export type {
+  AutoAddObjectDefaults,
+  ExcludeConfig,
+  ExcludeInput,
+  TheatreThreejsConfig,
+} from './config'
 
 export type {
   SceneConfig,

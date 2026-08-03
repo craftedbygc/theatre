@@ -17,8 +17,7 @@ import {
   Vector2,
   Vector3,
 } from 'three'
-import type {Blending, Side, Texture,
-  Material} from 'three'
+import type {Blending, Side, Texture, Material} from 'three'
 import {applyTheatreRgbaToColor, colorToTheatreRgba} from './colorUtils'
 
 const MATERIAL_NUMBER_PROPS = [
@@ -95,8 +94,10 @@ export type MaterialApplier = (
 ) => void
 
 export type BuildMaterialPropsOptions = {
-  exclude?: string[]
-  include?: string[]
+  excludeMaterial?: string[]
+  excludeUniforms?: string[]
+  includeMaterial?: string[]
+  includeUniforms?: string[]
 }
 
 type MaterialConfig = Record<string, unknown>
@@ -109,6 +110,15 @@ function shouldTrackProp(
   if (exclude.includes(key)) return false
   if (include.length > 0 && !include.includes(key)) return false
   return true
+}
+
+function getMaterialFilterOptions(options: BuildMaterialPropsOptions = {}) {
+  return {
+    excludeMaterial: options.excludeMaterial ?? [],
+    excludeUniforms: options.excludeUniforms ?? [],
+    includeMaterial: options.includeMaterial ?? [],
+    includeUniforms: options.includeUniforms ?? [],
+  }
 }
 
 function isTexture(value: unknown): value is Texture {
@@ -505,12 +515,17 @@ function applyUniforms(
 
 function buildSingleMaterialConfig(
   material: Material,
-  exclude: string[],
-  include: string[],
+  options: BuildMaterialPropsOptions,
 ): MaterialConfig {
+  const {excludeMaterial, excludeUniforms, includeMaterial, includeUniforms} =
+    getMaterialFilterOptions(options)
+
   const config: MaterialConfig = {}
   buildStandardMaterialOptions(material, config)
-  Object.assign(config, buildTrackedMaterialProps(material, exclude, include))
+  Object.assign(
+    config,
+    buildTrackedMaterialProps(material, excludeMaterial, includeMaterial),
+  )
 
   if (
     material instanceof ShaderMaterial ||
@@ -518,8 +533,8 @@ function buildSingleMaterialConfig(
   ) {
     const uniformsConfig = buildUniformsConfig(
       material.uniforms,
-      exclude,
-      include,
+      excludeUniforms,
+      includeUniforms,
     )
     if (uniformsConfig) {
       config.uniforms = uniformsConfig
@@ -557,16 +572,12 @@ export function buildMaterialProps(
     return {config: undefined, applier: undefined}
   }
 
-  const exclude = options.exclude ?? []
-  const include = options.include ?? []
-
   if (Array.isArray(material)) {
     const entries: Record<string, MaterialConfig> = {}
     for (let index = 0; index < material.length; index++) {
       entries[String(index)] = buildSingleMaterialConfig(
         material[index],
-        exclude,
-        include,
+        options,
       )
     }
 
@@ -589,7 +600,7 @@ export function buildMaterialProps(
     }
   }
 
-  const singleConfig = buildSingleMaterialConfig(material, exclude, include)
+  const singleConfig = buildSingleMaterialConfig(material, options)
 
   return {
     config: {material: singleConfig},

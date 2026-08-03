@@ -37,6 +37,20 @@ function loop() {
 
 The extension adds a toolbar flyout to switch between scenes (when more than one is configured) and a toggle between your scene camera and an OrbitControls dev camera.
 
+## configureTheatreThreejs
+
+Set project-wide defaults once at startup. Excludes from defaults and per-call `autoAddObject` options are merged.
+
+```js
+import {configureTheatreThreejs} from '@unseenco/theatre-threejs'
+
+configureTheatreThreejs({
+  autoAddObject: {
+    exclude: {uniforms: ['uTime']},
+  },
+})
+```
+
 ## autoAddObject
 
 Automatically adds a Three.js `Object3D` to a Theatre sheet, parsing transform data (position, rotation, scale, visible) and material properties (colors, scalars, vectors, shader uniforms). Texture/map properties are not supported yet.
@@ -46,8 +60,8 @@ import {autoAddObject} from '@unseenco/theatre-threejs'
 
 const sheetObject = autoAddObject(mesh, sheet, {
   objectKey: 'My Mesh',
-  exclude: ['scale'],
-  include: ['color', 'metalness', 'roughness'],
+  exclude: {transform: ['scale']},
+  include: {material: ['color', 'metalness', 'roughness']},
 })
 ```
 

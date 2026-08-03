@@ -31,6 +31,7 @@ The main entry points are:
 | `src/buildMaterialProps.ts` | Material prop introspection + applier |
 | `src/objectRegistry.ts` | Object3D ↔ ISheetObject registry |
 | `src/selectionSync.ts` | Bidirectional outline ↔ orbit selection via BoxHelper + raycasting |
+| `src/config.ts` | Project-wide `configureTheatreThreejs()` defaults |
 | `src/colorUtils.ts` | Linear ↔ sRGB color conversion for Theatre rgba props |
 | `src/persistence.ts` | Studio sheet object for persisted devtools state |
 | `src/constants.ts` | `EXTENSION_ID`, `DEVTOOLS_SHEET_ID`, registry flags |
@@ -76,6 +77,28 @@ function loop() {
 
 `buildExtension` needs the **renderer** and at least one **scene/camera pair** from the user's app. Scene switching in the render loop is user-driven via `onSceneSwitch` — the extension does not call `renderer.render()` itself. It cannot discover scenes automatically because `studio.extend()` only accepts a static extension config object.
 
+## configureTheatreThreejs
+
+Call once at project startup to set project-wide defaults for `autoAddObject`. Per-call options are merged on top (excludes accumulate; includes accumulate).
+
+```js
+import {autoAddObject, configureTheatreThreejs} from '@unseenco/theatre-threejs'
+
+configureTheatreThreejs({
+  autoAddObject: {
+    exclude: {
+      uniforms: ['uTime'],       // skip specific shader uniforms
+      material: ['map'],         // skip material props
+      transform: ['visible'],    // skip transform keys
+    },
+    // or a flat list applies to all three categories:
+    // exclude: ['uTime'],
+  },
+})
+```
+
+Returns `{ reset() }` to restore the previous config (useful in tests).
+
 ## autoAddObject
 
 Register a Three.js object on a Theatre sheet with auto-parsed transforms and material properties:
@@ -86,7 +109,7 @@ import {autoAddObject, buildExtension} from '@unseenco/theatre-threejs'
 const sheetObject = autoAddObject(mesh, sheet, {
   objectKey: 'My Mesh',   // default: mesh.name || 'Object'
   namespace: '',           // optional prefix for objectKey
-  exclude: [],             // skip transform keys or material prop names
+  exclude: {uniforms: ['uNoise']}, // merged with configureTheatreThreejs defaults
   include: [],             // whitelist material props/uniforms
   trackMaterial: true,     // default: true when mesh has material
 })

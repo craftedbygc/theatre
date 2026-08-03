@@ -2,13 +2,15 @@ import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
 import type {Material, Mesh, Object3D} from 'three'
 import {buildMaterialProps} from './buildMaterialProps'
 import {buildTransformProps} from './buildTransformProps'
+import type {ExcludeInput} from './config'
+import {resolveAutoAddObjectOptions} from './config'
 import {registerObjectLink} from './objectRegistry'
 
 export type AutoAddObjectOptions = {
   objectKey?: string
   namespace?: string
-  exclude?: string[]
-  include?: string[]
+  exclude?: ExcludeInput
+  include?: ExcludeInput
   additionalConfig?: Record<string, unknown>
   trackMaterial?: boolean
 }
@@ -42,13 +44,12 @@ export function autoAddObject<T extends Object3D>(
   }
 
   const objectKey = resolveObjectKey(object, options)
-  const exclude = options.exclude ?? []
-  const include = options.include ?? []
+  const resolved = resolveAutoAddObjectOptions(options)
   const trackMaterial =
-    options.trackMaterial ?? getMeshMaterial(object) !== undefined
+    resolved.trackMaterial ?? getMeshMaterial(object) !== undefined
 
   const {config: transformConfig, applier: applyTransform} =
-    buildTransformProps(object, {exclude})
+    buildTransformProps(object, {exclude: resolved.exclude.transform})
 
   const config: Record<string, unknown> = {
     ...transformConfig,
@@ -60,8 +61,10 @@ export function autoAddObject<T extends Object3D>(
   if (trackMaterial) {
     const material = getMeshMaterial(object)
     const {config: materialConfig, applier} = buildMaterialProps(material, {
-      exclude,
-      include,
+      excludeMaterial: resolved.exclude.material,
+      excludeUniforms: resolved.exclude.uniforms,
+      includeMaterial: resolved.include.material,
+      includeUniforms: resolved.include.uniforms,
     })
     if (materialConfig) {
       Object.assign(config, materialConfig)

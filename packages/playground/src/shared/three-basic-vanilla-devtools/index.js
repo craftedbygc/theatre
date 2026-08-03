@@ -1,11 +1,22 @@
 import {Clock} from 'three'
 import studio from '@unseenco/theatre-studio'
 import {getProject} from '@unseenco/theatre-core'
-import {buildExtension} from '@unseenco/theatre-threejs'
+import {
+  buildExtension,
+  configureTheatreThreejs,
+} from '@unseenco/theatre-threejs'
 import {bindDockedThreeViewport} from '../utils/bindDockedThreeViewport'
 import {createThreeScenes} from './ThreeScene.js'
 
 studio.initialize()
+
+configureTheatreThreejs({
+  autoAddObject: {
+    exclude: {
+      uniforms: ['uTime'],
+    },
+  },
+})
 
 const project = getProject('Three Basic Vanilla Devtools')
 const {renderer, scenes, onFrame} = createThreeScenes(project)
