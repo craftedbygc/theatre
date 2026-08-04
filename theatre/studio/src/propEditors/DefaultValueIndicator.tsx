@@ -14,7 +14,7 @@ import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/act
 
 const theme = {
   defaultState: {
-    color: transparentize(0.95, `#C4C4C4`),
+    color: transparentize(0.8, `#C4C4C4`),
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
   withStaticOverride: {
