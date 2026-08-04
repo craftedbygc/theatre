@@ -24,7 +24,7 @@ describe('transientPropPaths', () => {
       },
       qux: {type: 'number', default: 2},
     },
-  } as PropTypeConfig
+  } as unknown as PropTypeConfig
 
   describe('parseTransientPropPath', () => {
     it('parses dot notation', () => {

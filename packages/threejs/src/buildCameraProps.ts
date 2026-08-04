@@ -1,6 +1,14 @@
 import {types} from '@unseenco/theatre-core'
-import {PerspectiveCamera} from 'three'
+import {OrthographicCamera, PerspectiveCamera} from 'three'
 import type {Camera} from 'three'
+
+type ProjectionCamera = PerspectiveCamera | OrthographicCamera
+
+function isProjectionCamera(camera: Camera): camera is ProjectionCamera {
+  return (
+    camera instanceof PerspectiveCamera || camera instanceof OrthographicCamera
+  )
+}
 
 /** Full-frame vertical sensor height used for focal length ↔ FOV conversion. */
 export const DEFAULT_SENSOR_HEIGHT_MM = 24
@@ -50,41 +58,43 @@ export function buildCameraProps(
 } {
   const exclude = options.exclude ?? []
   const sensorHeight = options.sensorHeight ?? DEFAULT_SENSOR_HEIGHT_MM
+  const projectionCamera = isProjectionCamera(camera) ? camera : null
   const trackFocalLength =
-    !exclude.includes('focalLength') && camera instanceof PerspectiveCamera
-  const trackNear = !exclude.includes('near')
-  const trackFar = !exclude.includes('far')
-  const trackZoom = !exclude.includes('zoom')
+    projectionCamera instanceof PerspectiveCamera &&
+    !exclude.includes('focalLength')
+  const trackNear = projectionCamera !== null && !exclude.includes('near')
+  const trackFar = projectionCamera !== null && !exclude.includes('far')
+  const trackZoom = projectionCamera !== null && !exclude.includes('zoom')
 
   const config: CameraConfig = {}
 
-  if (trackNear) {
-    config.near = types.number(camera.near, {
+  if (trackNear && projectionCamera) {
+    config.near = types.number(projectionCamera.near, {
       range: [0.001, 1_000],
       nudgeMultiplier: 0.01,
       label: 'Near',
     })
   }
 
-  if (trackFar) {
-    config.far = types.number(camera.far, {
+  if (trackFar && projectionCamera) {
+    config.far = types.number(projectionCamera.far, {
       range: [1, 1_000_000],
       nudgeMultiplier: 1,
       label: 'Far',
     })
   }
 
-  if (trackZoom) {
-    config.zoom = types.number(camera.zoom, {
+  if (trackZoom && projectionCamera) {
+    config.zoom = types.number(projectionCamera.zoom, {
       range: [0.01, 10],
       nudgeMultiplier: 0.01,
       label: 'Zoom',
     })
   }
 
-  if (trackFocalLength) {
+  if (trackFocalLength && projectionCamera instanceof PerspectiveCamera) {
     config.focalLength = types.number(
-      fovToFocalLength(camera.fov, sensorHeight),
+      fovToFocalLength(projectionCamera.fov, sensorHeight),
       {
         range: [5, 500],
         nudgeMultiplier: 1,
@@ -94,6 +104,8 @@ export function buildCameraProps(
   }
 
   const applier: CameraApplier = (target, values) => {
+    if (!isProjectionCamera(target)) return
+
     let projectionChanged = false
 
     if (trackNear && values.near !== undefined) {

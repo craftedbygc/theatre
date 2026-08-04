@@ -56,9 +56,11 @@ function resolveAutoAddCameraExcludes(exclude?: AutoAddCameraExcludeInput): {
     return {transform: dedupe(transform), camera: dedupe(camera)}
   }
 
+  const excludeConfig = exclude as AutoAddCameraExcludeConfig
+
   return {
-    transform: dedupe(['scale', ...(exclude.transform ?? [])]),
-    camera: dedupe([...(exclude.camera ?? [])]),
+    transform: dedupe(['scale', ...(excludeConfig.transform ?? [])]),
+    camera: dedupe([...(excludeConfig.camera ?? [])]),
   }
 }
 

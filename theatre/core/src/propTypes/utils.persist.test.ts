@@ -3,22 +3,22 @@ import {
   propTypeConfigPersists,
   stripNonPersistingPropValuesFromMap,
 } from '@unseenco/theatre-shared/propTypes/utils'
-import {types} from './index'
+import {compound, image, rgba} from './index'
 
 describe('propTypes utils persist', () => {
   it('defaults image props to persisting', () => {
-    expect(propTypeConfigPersists(types.image('texture.png'))).toBe(true)
+    expect(propTypeConfigPersists(image('texture.png'))).toBe(true)
   })
 
   it('supports persist: false on image props', () => {
-    const imageProp = types.image('', {persist: false})
+    const imageProp = image('', {persist: false})
     expect(propTypeConfigPersists(imageProp)).toBe(false)
   })
 
   it('strips non-persisting prop values from maps', () => {
-    const config = types.compound({
-      map: types.image('', {persist: false}),
-      color: types.rgba(),
+    const config = compound({
+      map: image('', {persist: false}),
+      color: rgba(),
     })
 
     const paths = getNonPersistingPropPathEncodings(config)
