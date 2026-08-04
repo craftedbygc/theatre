@@ -8,6 +8,7 @@ export type DevtoolsState = {
   orbitEnabled: boolean
   cameraHelperEnabled: boolean
   linesHelperEnabled: boolean
+  transformControlsEnabled: boolean
   position: {x: number; y: number; z: number}
   target: {x: number; y: number; z: number}
 }
@@ -18,6 +19,12 @@ export type ActiveSceneState = {
 
 export interface StudioTransactionAPI {
   set(pointer: unknown, value: unknown): void
+}
+
+export interface StudioScrubLike {
+  capture(fn: (api: StudioTransactionAPI) => void): void
+  commit(): void
+  discard(): void
 }
 
 export interface StudioLike {
@@ -37,6 +44,7 @@ export interface StudioLike {
     fn: (api: StudioTransactionAPI) => void,
     opts?: {undoable?: boolean},
   ): void
+  scrub(): StudioScrubLike
   ui: {
     readonly isDocked: boolean
     readonly dockedViewport: {
@@ -68,6 +76,7 @@ export interface DevtoolsStateObject {
     orbitEnabled: unknown
     cameraHelperEnabled: unknown
     linesHelperEnabled: unknown
+    transformControlsEnabled: unknown
     position: {
       x: unknown
       y: unknown
@@ -109,6 +118,9 @@ export function createDevtoolsStateObject(
       orbitEnabled: types.boolean(initialState.orbitEnabled),
       cameraHelperEnabled: types.boolean(initialState.cameraHelperEnabled),
       linesHelperEnabled: types.boolean(initialState.linesHelperEnabled),
+      transformControlsEnabled: types.boolean(
+        initialState.transformControlsEnabled,
+      ),
       position: types.compound({
         x: initialState.position.x,
         y: initialState.position.y,
@@ -131,6 +143,7 @@ export function createInitialDevtoolsStateFromCamera(camera: {
     orbitEnabled: false,
     cameraHelperEnabled: true,
     linesHelperEnabled: false,
+    transformControlsEnabled: false,
     position: {
       x: camera.position.x,
       y: camera.position.y,
@@ -222,6 +235,19 @@ export function persistLinesHelperEnabled(
   studio.transaction(
     ({set}) => {
       set(stateObj.props.linesHelperEnabled, linesHelperEnabled)
+    },
+    {undoable: false},
+  )
+}
+
+export function persistTransformControlsEnabled(
+  studio: StudioLike,
+  stateObj: DevtoolsStateObject,
+  transformControlsEnabled: boolean,
+): void {
+  studio.transaction(
+    ({set}) => {
+      set(stateObj.props.transformControlsEnabled, transformControlsEnabled)
     },
     {undoable: false},
   )

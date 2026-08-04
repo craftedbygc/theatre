@@ -9,3 +9,21 @@ export const cameraHelperIcon = `<svg fill="currentColor" viewBox="8 8 84 84" xm
 
 /** Scene lines / paths icon */
 export const linesHelperIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 20C4 12 8 12 12 12C16 12 20 12 20 4"/></svg>`
+
+/** Translate / move icon */
+export const translateIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v20M12 2l-4 4M12 2l4 4M12 22l-4-4M12 22l4-4M2 12h20M2 12l4-4M2 12l4 4M22 12l-4-4M22 12l-4 4"/></svg>`
+
+/** Rotate icon */
+export const rotateIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>`
+
+/** Scale icon */
+export const scaleIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 3L3 21"/><path d="M15 3h6v6"/><path d="M9 21H3v-6"/></svg>`
+
+/** World space icon */
+export const worldSpaceIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18"/><path d="M12 3a15 15 0 0 0 0 18"/></svg>`
+
+/** Transform controls gizmo icon */
+export const transformControlsIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v18"/><path d="M3 12h18"/><path d="M12 3l-2 2"/><path d="M12 3l2 2"/><path d="M21 12l-2-2"/><path d="M21 12l-2 2"/><path d="M12 21l-2-2"/><path d="M12 21l2-2"/><path d="M3 12l2-2"/><path d="M3 12l2 2"/></svg>`
+
+/** Local space icon */
+export const localSpaceIcon = `<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21V3"/><path d="M12 21l-3-3"/><path d="M12 21l3-3"/><path d="M3 12h18"/><path d="M3 12l3-3"/><path d="M3 12l3 3"/></svg>`

@@ -8,8 +8,10 @@ import {
 } from 'three'
 import type {Object3D, Scene} from 'three'
 import {EXTENSION_ID} from './constants'
+import {CAMERA_HITBOX_FLAG} from './cameraHitbox'
 
 const DEVTOOLS_LINE_FLAG = `${EXTENSION_ID}:lineHelper`
+const SELECTION_HELPER_FLAG = `${EXTENSION_ID}:selectionHelper`
 const CURVE_SAMPLE_COUNT = 64
 const HELPER_LINE_COLOR = 0x44ddff
 
@@ -37,12 +39,44 @@ function collectCatmullRomCurves(
   }
 }
 
+function isTransformControlsObject(object: Object3D): boolean {
+  const candidate = object as {
+    isTransformControlsRoot?: boolean
+    isTransformControlsGizmo?: boolean
+    isTransformControlsPlane?: boolean
+  }
+  return (
+    candidate.isTransformControlsRoot === true ||
+    candidate.isTransformControlsGizmo === true ||
+    candidate.isTransformControlsPlane === true
+  )
+}
+
+function isExcludedDebugObject(object: Object3D): boolean {
+  return (
+    isDevtoolsLine(object) ||
+    object.userData[SELECTION_HELPER_FLAG] === true ||
+    object.userData[CAMERA_HITBOX_FLAG] === true ||
+    object.type === 'CameraHelper' ||
+    object.type === 'BoxHelper' ||
+    isTransformControlsObject(object)
+  )
+}
+
+function isUnderExcludedDebugObject(object: Object3D): boolean {
+  let current: Object3D | null = object
+  while (current) {
+    if (isExcludedDebugObject(current)) return true
+    current = current.parent
+  }
+  return false
+}
+
 function collectLineSources(scene: Scene): LineSource[] {
   const sources: LineSource[] = []
 
   scene.traverse((object) => {
-    if (isDevtoolsLine(object)) return
-    if (object.type === 'CameraHelper') return
+    if (isUnderExcludedDebugObject(object)) return
 
     if (
       object instanceof Line ||

@@ -6,6 +6,7 @@
 
 export {buildExtension} from './buildExtension'
 export {autoAddObject} from './autoAddObject'
+export {autoAddCamera} from './autoAddCamera'
 export {
   configureTheatreThreejs,
   mergeExcludeInput,
@@ -15,6 +16,11 @@ export {parseUniformGui} from './parseUniformGui'
 export {EXTENSION_ID} from './constants'
 
 export type {AutoAddObjectOptions} from './autoAddObject'
+export type {
+  AutoAddCameraExcludeConfig,
+  AutoAddCameraExcludeInput,
+  AutoAddCameraOptions,
+} from './autoAddCamera'
 
 export type {
   AutoAddObjectDefaults,

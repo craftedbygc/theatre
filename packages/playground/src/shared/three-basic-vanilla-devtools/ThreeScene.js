@@ -1,4 +1,4 @@
-import {autoAddObject} from '@unseenco/theatre-threejs'
+import {autoAddCamera, autoAddObject} from '@unseenco/theatre-threejs'
 import {
   BoxGeometry,
   CatmullRomCurve3,
@@ -58,39 +58,11 @@ export function createThreeScenes(project) {
 /**
  * @param {import('@unseenco/theatre-core').ISheet} sheet
  * @param {import('three').PerspectiveCamera} camera
+ * @param {Scene} scene
  */
-function bindCameraTransformSheet(sheet, camera) {
-  sheet
-    .object('Camera', {
-      transform: {
-        position: {
-          x: camera.position.x,
-          y: camera.position.y,
-          z: camera.position.z,
-        },
-        rotation: {
-          x: camera.rotation.x,
-          y: camera.rotation.y,
-          z: camera.rotation.z,
-        },
-      },
-      fov: camera.fov,
-    })
-    .onValuesChange((values) => {
-      const {transform} = values
-      camera.position.set(
-        transform.position.x,
-        transform.position.y,
-        transform.position.z,
-      )
-      camera.rotation.set(
-        transform.rotation.x,
-        transform.rotation.y,
-        transform.rotation.z,
-      )
-      camera.fov = values.fov
-      camera.updateProjectionMatrix()
-    })
+function registerSceneCamera(sheet, camera, scene) {
+  camera.name = camera.name || 'Camera'
+  autoAddCamera(camera, sheet, {scene})
 }
 
 /**
@@ -231,7 +203,7 @@ function createSpheresScene(sheet, width, height) {
 
   camera.position.set(0, 0, 45)
 
-  bindCameraTransformSheet(sheet, camera)
+  registerSceneCamera(sheet, camera, scene)
   autoAddObject(mesh, sheet, {objectKey: 'Hero Sphere'})
   autoAddObject(shaderCube, sheet, {exclude: ['uTime']})
 
@@ -268,7 +240,7 @@ function createCubeScene(sheet, width, height) {
   cube.name = 'Cube'
   scene.add(cube)
 
-  bindCameraTransformSheet(sheet, camera)
+  registerSceneCamera(sheet, camera, scene)
   autoAddObject(cube, sheet)
 
   return {scene, camera}
@@ -296,7 +268,7 @@ function createCylinderScene(sheet, width, height) {
   cylinder.name = 'Cylinder'
   scene.add(cylinder)
 
-  bindCameraTransformSheet(sheet, camera)
+  registerSceneCamera(sheet, camera, scene)
   autoAddObject(cylinder, sheet)
 
   return {scene, camera}

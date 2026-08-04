@@ -8,7 +8,18 @@ import {PerspectiveCamera, CameraHelper} from 'three'
 import type {Camera, Scene, WebGLRenderer} from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {EXTENSION_ID} from './constants'
-import {cameraHelperIcon, cameraIcon, linesHelperIcon, orbitIcon} from './icons'
+import {
+  cameraHelperIcon,
+  cameraIcon,
+  linesHelperIcon,
+  localSpaceIcon,
+  orbitIcon,
+  rotateIcon,
+  scaleIcon,
+  transformControlsIcon,
+  translateIcon,
+  worldSpaceIcon,
+} from './icons'
 import {SceneLineHelperManager} from './lineHelpers'
 import {
   createActiveSceneStateObject,
@@ -20,6 +31,7 @@ import {
   persistCameraProps,
   persistLinesHelperEnabled,
   persistOrbitEnabled,
+  persistTransformControlsEnabled,
 } from './persistence'
 import type {
   DevtoolsState,
@@ -28,6 +40,12 @@ import type {
 } from './persistence'
 import {setupSelectionSync} from './selectionSync'
 import type {SelectionSync} from './selectionSync'
+import {setupTransformControls} from './transformControlsSetup'
+import type {
+  TransformControlsSetup,
+  TransformMode,
+  TransformSpace,
+} from './transformControlsSetup'
 
 export {EXTENSION_ID} from './constants'
 
@@ -102,12 +120,14 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   let mode: CameraMode = 'scene'
   let cameraHelperEnabled = false
   let linesHelperEnabled = false
+  let transformControlsEnabled = false
   let setToolbar: ((config: ToolsetConfig) => void) | null = null
   let pendingOrbitEnabled: boolean | undefined
   let hasRemoteEditorUserToggledOrbit = false
   let modeBeforeRemoteEditor: CameraMode | undefined
   const sceneSwitchListeners = new Set<SceneSwitchCallback>()
   let selectionSync: SelectionSync | undefined
+  let transformControls: TransformControlsSetup | undefined
 
   const getActiveScene = () => normalizedScenes[activeSceneIndex]
   const getActiveSceneCamera = () => getActiveScene().camera
@@ -228,6 +248,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       // without changing local camera mode or orbit pose.
       updateCameraHelperVisibility()
       updateLinesHelperVisibility()
+      transformControls?.refresh()
     } else {
       applyActiveSceneDevtoolsState()
     }
@@ -315,6 +336,65 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
           setLinesHelperEnabled(!linesHelperEnabled)
         },
       })
+
+      toolbarConfig.push({
+        type: 'Icon',
+        svgSource: transformControlsIcon,
+        title: transformControlsEnabled
+          ? 'Hide transform controls'
+          : 'Show transform controls',
+        selected: transformControlsEnabled,
+        onClick: () => {
+          setTransformControlsEnabled(!transformControlsEnabled)
+        },
+      })
+
+      if (transformControlsEnabled && transformControls?.hasSelectedObject()) {
+        toolbarConfig.push({
+          type: 'Switch',
+          value: transformControls.getMode(),
+          onChange: (value) => {
+            transformControls?.setMode(value as TransformMode)
+          },
+          options: [
+            {
+              value: 'translate',
+              label: 'Translate',
+              svgSource: translateIcon,
+            },
+            {
+              value: 'rotate',
+              label: 'Rotate',
+              svgSource: rotateIcon,
+            },
+            {
+              value: 'scale',
+              label: 'Scale',
+              svgSource: scaleIcon,
+            },
+          ],
+        })
+
+        toolbarConfig.push({
+          type: 'Switch',
+          value: transformControls.getSpace(),
+          onChange: (value) => {
+            transformControls?.setSpace(value as TransformSpace)
+          },
+          options: [
+            {
+              value: 'world',
+              label: 'World space',
+              svgSource: worldSpaceIcon,
+            },
+            {
+              value: 'local',
+              label: 'Local space',
+              svgSource: localSpaceIcon,
+            },
+          ],
+        })
+      }
     }
 
     setToolbar(toolbarConfig)
@@ -330,6 +410,15 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     updateToolbarConfig()
     if (shouldPersistDevtoolsState()) {
       persistLinesHelperEnabled(studio, getActiveStateObj(), enabled)
+    }
+  }
+
+  const setTransformControlsEnabled = (enabled: boolean) => {
+    transformControlsEnabled = enabled
+    transformControls?.setEnabled(enabled)
+    updateToolbarConfig()
+    if (shouldPersistDevtoolsState()) {
+      persistTransformControlsEnabled(studio, getActiveStateObj(), enabled)
     }
   }
 
@@ -349,6 +438,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     updateLinesHelperVisibility()
     updateToolbarConfig()
     selectionSync?.refresh()
+    transformControls?.refresh()
   }
 
   const shouldApplyOrbitModeFromState = (orbitEnabled: boolean) => {
@@ -390,6 +480,11 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       } else {
         updateLinesHelperVisibility()
       }
+    }
+
+    if (values.transformControlsEnabled !== transformControlsEnabled) {
+      transformControlsEnabled = values.transformControlsEnabled
+      transformControls?.setEnabled(transformControlsEnabled)
     }
 
     applyCameraProps(values)
@@ -508,6 +603,18 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     isOrbitMode: () => mode === 'orbit',
   })
 
+  transformControls = setupTransformControls({
+    studio,
+    renderer,
+    getActiveScene: () => getActiveScene().scene,
+    getCamera: () => (mode === 'orbit' ? orbitCamera : getActiveSceneCamera()),
+    isOrbitMode: () => mode === 'orbit',
+    setOrbitControlsEnabled: (enabled) => {
+      controls.enabled = mode === 'orbit' && enabled
+    },
+    onToolbarUpdateNeeded: updateToolbarConfig,
+  })
+
   const extension: TheatreExtension = {
     id: EXTENSION_ID,
     toolbars: {
@@ -560,6 +667,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
         manager.dispose()
       }
       selectionSync?.dispose()
+      transformControls?.dispose()
       sceneSwitchListeners.clear()
     },
   }
