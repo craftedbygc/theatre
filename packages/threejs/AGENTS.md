@@ -175,7 +175,7 @@ The extension registers a global toolbar **Flyout** (when multiple scenes are co
 - Follow `packages/react` for package scaffolding: `devEnv/build.ts`, api-extractor, `tsconfig.json` with `composite: true`.
 - `devEnv/build.ts` must be covered by `devEnv/tsconfig.json` or ESLint pre-commit fails.
 - `@unseenco/theatre-studio` must not import `@unseenco/theatre-core` value exports (lint rule) — remote-editor helpers live in `theatre/studio/src/remoteEditor.ts` with a local `isRemoteEditorWindow()` duplicate.
-- This package **may** import `isRemoteEditorWindow` from `@unseenco/theatre-core` and remote-editor helpers from `@unseenco/theatre-studio/remoteEditor`.
+- This package **may** import `isRemoteEditorWindow` from `@unseenco/theatre-core` and remote-editor helpers (`isRemoteEditorOpen`, `onRemoteEditorOpenChange`) from `@unseenco/theatre-studio`.
 - OrbitControls import path: `three/examples/jsm/controls/OrbitControls.js` (not `three/addons/...`).
 - Register the package in root `devEnv/cli.ts`, `tsconfig.base.json`, and `devEnv/typecheck-all-projects/tsconfig.all.json` when adding new surface area.
 
