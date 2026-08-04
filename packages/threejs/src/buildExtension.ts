@@ -57,6 +57,8 @@ export interface SceneConfig {
 
 export type SceneSwitchCallback = (name: string, scene: Scene) => void
 
+export type OrbitModeSwitchCallback = (enabled: boolean) => void
+
 type NormalizedScene = {
   name: string
   scene: Scene
@@ -72,9 +74,11 @@ export interface ThreejsDevtoolsConfig {
 export interface ThreejsDevtools {
   extension: TheatreExtension
   getCamera(): Camera
+  isOrbitMode(): boolean
   update(): void
   dispose(): void
   onSceneSwitch(callback: SceneSwitchCallback): () => void
+  onOrbitModeSwitch(callback: OrbitModeSwitchCallback): () => void
 }
 
 type CameraMode = 'scene' | 'orbit'
@@ -126,6 +130,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   let hasRemoteEditorUserToggledOrbit = false
   let modeBeforeRemoteEditor: CameraMode | undefined
   const sceneSwitchListeners = new Set<SceneSwitchCallback>()
+  const orbitModeSwitchListeners = new Set<OrbitModeSwitchCallback>()
   let selectionSync: SelectionSync | undefined
   let transformControls: TransformControlsSetup | undefined
 
@@ -451,14 +456,25 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     }
   }
 
+  const notifyOrbitModeSwitch = (enabled: boolean) => {
+    for (const listener of orbitModeSwitchListeners) {
+      listener(enabled)
+    }
+  }
+
   const setOrbitModeLocal = (enabled: boolean) => {
-    mode = enabled ? 'orbit' : 'scene'
+    const nextMode: CameraMode = enabled ? 'orbit' : 'scene'
+    const changed = mode !== nextMode
+    mode = nextMode
     controls.enabled = enabled
     updateCameraHelperVisibility()
     updateLinesHelperVisibility()
     updateToolbarConfig()
     selectionSync?.refresh()
     transformControls?.refresh()
+    if (changed) {
+      notifyOrbitModeSwitch(enabled)
+    }
   }
 
   const shouldApplyOrbitModeFromState = (orbitEnabled: boolean) => {
@@ -653,6 +669,9 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     getCamera() {
       return mode === 'orbit' ? orbitCamera : getActiveSceneCamera()
     },
+    isOrbitMode() {
+      return mode === 'orbit'
+    },
     update() {
       if (mode === 'orbit') {
         controls.update()
@@ -666,6 +685,12 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       sceneSwitchListeners.add(callback)
       return () => {
         sceneSwitchListeners.delete(callback)
+      }
+    },
+    onOrbitModeSwitch(callback) {
+      orbitModeSwitchListeners.add(callback)
+      return () => {
+        orbitModeSwitchListeners.delete(callback)
       }
     },
     dispose() {
@@ -689,6 +714,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       selectionSync?.dispose()
       transformControls?.dispose()
       sceneSwitchListeners.clear()
+      orbitModeSwitchListeners.clear()
     },
   }
 }

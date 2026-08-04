@@ -36,6 +36,7 @@ export type {
 } from './parseUniformGui'
 
 export type {
+  OrbitModeSwitchCallback,
   SceneConfig,
   SceneSwitchCallback,
   ThreejsDevtools,

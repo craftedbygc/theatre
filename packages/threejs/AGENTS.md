@@ -15,7 +15,9 @@ The main entry points are:
 
 - `extension` — pass to `studio.extend()`
 - `getCamera()` — active camera for `renderer.render(scene, camera)` (active scene camera or internal OrbitControls camera)
+- `isOrbitMode()` — whether the OrbitControls camera is currently active
 - `onSceneSwitch(callback)` — subscribe to scene changes from the toolbar flyout; callback receives `(name, scene)` with the original `Scene` reference from init
+- `onOrbitModeSwitch(callback)` — subscribe to orbit/scene camera toggles; callback receives `(enabled)`
 - `update()` — call each frame when orbit mode is active
 - `dispose()` — tear down listeners and controls
 
@@ -66,6 +68,9 @@ const devtools = buildExtension({
 })
 devtools.onSceneSwitch((_name, scene) => {
   activeScene = scene
+})
+devtools.onOrbitModeSwitch((enabled) => {
+  // e.g. pause gameplay camera while orbiting
 })
 studio.extend(devtools.extension)
 

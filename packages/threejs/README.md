@@ -26,6 +26,10 @@ devtools.onSceneSwitch((_name, scene) => {
   activeScene = scene
 })
 
+devtools.onOrbitModeSwitch((enabled) => {
+  // e.g. pause gameplay camera while orbiting
+})
+
 studio.extend(devtools.extension)
 
 function loop() {
@@ -35,7 +39,7 @@ function loop() {
 }
 ```
 
-The extension adds a toolbar flyout to switch between scenes (when more than one is configured), a toggle between your scene camera and an OrbitControls dev camera, and orbit-mode tools for camera frustum visualization, line overlays, and interactive transform editing.
+The extension adds a toolbar flyout to switch between scenes (when more than one is configured), a toggle between your scene camera and an OrbitControls dev camera, and orbit-mode tools for camera frustum visualization, line overlays, and interactive transform editing. Use `devtools.isOrbitMode()` to read the current mode and `devtools.onOrbitModeSwitch(callback)` to react when it changes.
 
 ## configureTheatreThreejs
 
