@@ -1,5 +1,22 @@
 # Theatre.js changelog
 
+## 0.1.6
+
+- New features
+  - Three.js Package:
+    - `buildExtension()` orbit camera now copies `near` / `far` from the active scene camera and supports syncing from an `OrthographicCamera` as well as a `PerspectiveCamera`.
+- Maintenance
+  - Published packages now ship dual CJS + ESM builds with `exports` maps (`@unseenco/theatre-core`, `@unseenco/theatre-studio`, `@unseenco/theatre-dataverse`, `@unseenco/theatre-react`, `@unseenco/theatre-threejs`). This lets Vite/Nuxt resolve the ESM entry and share peer dependencies such as `three` instead of nesting a second copy during CJS prebundling.
+
+
+
+## 0.1.5
+
+- Bug fixes
+  - Fixed `@unseenco/theatre-threejs` importing remote-editor helpers from an unpublished `@unseenco/theatre-studio/remoteEditor` subpath; it now imports from `@unseenco/theatre-studio`.
+
+
+
 ## 0.1.4
 
 - New features
