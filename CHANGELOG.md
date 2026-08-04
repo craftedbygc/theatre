@@ -1,5 +1,16 @@
 # Theatre.js changelog
 
+## 0.1.7
+
+- New features
+  - Three.js Package:
+    - `buildExtension()` now exposes `isOrbitMode()` and `onOrbitModeSwitch(callback)` so apps can react when the orbit/scene camera toggle changes.
+- Bug fixes
+  - Three.js Package:
+    - `autoAddObject()` no longer clears existing procedural textures (e.g. `DataTexture`) when Theatre has no image asset for a texture slot.
+
+
+
 ## 0.1.6
 
 - New features
