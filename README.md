@@ -12,12 +12,12 @@ For the original project, docs, and community, see [theatrejs.com](https://www.t
 
 | Package | Description |
 | --- | --- |
-| `@unseenco/theatre-core` | Runtime animation library (ships in production bundles) |
-| `@unseenco/theatre-studio` | Visual editor (dev-time only) |
-| `@unseenco/theatre-threejs` | Three.js Studio devtools extension — orbit camera and scene inspection (dev-time only) |
-| `@unseenco/theatre-dataverse` | Reactive dataflow library used internally |
-| `@unseenco/theatre-react` | React bindings |
-| `@unseenco/theatre-browser-bundles` | Pre-built browser bundles |
+| [`@unseenco/theatre-core`](./theatre/core/README.md) | Runtime animation library (ships in production bundles) |
+| [`@unseenco/theatre-studio`](./theatre/studio/README.md) | Visual editor (dev-time only) |
+| [`@unseenco/theatre-threejs`](./packages/threejs/README.md) | Three.js Studio devtools extension — orbit camera and scene inspection (dev-time only) |
+| [`@unseenco/theatre-dataverse`](./packages/dataverse/README.md) | Reactive dataflow library used internally |
+| [`@unseenco/theatre-react`](./packages/react/README.md) | React bindings |
+| [`@unseenco/theatre-browser-bundles`](./packages/browser-bundles/README.md) | Pre-built browser bundles |
 
 ## Development
 
