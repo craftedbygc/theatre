@@ -146,9 +146,22 @@ function createSpheresScene(sheet, width, height) {
     }
   }
 
+  // Random-color DataTexture so we can verify autoAddObject does not
+  // wipe procedural maps that have no URL-backed asset id.
+  const mapSize = 64
+  const mapData = new Uint8Array(mapSize * mapSize * 4)
+  for (let i = 0; i < mapData.length; i += 4) {
+    mapData[i] = Math.floor(Math.random() * 256)
+    mapData[i + 1] = Math.floor(Math.random() * 256)
+    mapData[i + 2] = Math.floor(Math.random() * 256)
+    mapData[i + 3] = 255
+  }
+  const heroMap = new DataTexture(mapData, mapSize, mapSize)
+  heroMap.needsUpdate = true
+
   const mesh = new Mesh(
     new SphereGeometry(3),
-    new MeshStandardMaterial({color: 0xffffff, map: null}),
+    new MeshStandardMaterial({color: 0xffffff, map: heroMap}),
   )
   mesh.name = 'Hero Sphere'
   scene.add(mesh)

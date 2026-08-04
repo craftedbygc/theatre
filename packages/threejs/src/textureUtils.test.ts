@@ -99,9 +99,10 @@ describe('textureUtils', () => {
       TextureLoader.prototype.load = originalLoad
     })
 
-    it('clears the slot when the asset id is empty', () => {
+    it('preserves an existing non-Theatre texture on initial empty sync', () => {
       const owner = {}
-      let current: Texture | null = new Texture()
+      const procedural = new Texture()
+      let current: Texture | null = procedural
       let assignCount = 0
 
       const applyTexture = createTextureSlotApplier(() => 'unused')
@@ -117,7 +118,50 @@ describe('textureUtils', () => {
         },
       )
 
-      expect(current).toBeNull()
+      expect(current).toBe(procedural)
+      expect(assignCount).toBe(0)
+
+      applyTexture(
+        owner,
+        'map',
+        {type: 'image', id: undefined},
+        () => current,
+        (texture) => {
+          assignCount += 1
+          current = texture
+        },
+      )
+
+      expect(current).toBe(procedural)
+      expect(assignCount).toBe(0)
+    })
+
+    it('clears the slot when a Theatre asset is removed', () => {
+      const owner = {}
+      let current: Texture | null = new Texture()
+      let assignCount = 0
+
+      TextureLoader.prototype.load = function load(
+        _url: string,
+        onLoad: (texture: Texture) => void,
+      ) {
+        onLoad(new Texture())
+      } as typeof TextureLoader.prototype.load
+
+      const applyTexture = createTextureSlotApplier(() => '/texture.png')
+
+      applyTexture(
+        owner,
+        'map',
+        {type: 'image', id: 'texture.png'},
+        () => current,
+        (texture) => {
+          assignCount += 1
+          current = texture
+        },
+      )
+
+      expect(current).not.toBeNull()
       expect(assignCount).toBe(1)
 
       applyTexture(
@@ -131,7 +175,21 @@ describe('textureUtils', () => {
         },
       )
 
-      expect(assignCount).toBe(1)
+      expect(current).toBeNull()
+      expect(assignCount).toBe(2)
+
+      applyTexture(
+        owner,
+        'map',
+        {type: 'image', id: undefined},
+        () => current,
+        (texture) => {
+          assignCount += 1
+          current = texture
+        },
+      )
+
+      expect(assignCount).toBe(2)
     })
 
     it('copies settings from the existing texture when loading a new one', () => {

@@ -178,11 +178,20 @@ export function createTextureSlotApplier(
     }
 
     if (!assetId) {
-      state.appliedAssetId = ''
+      // Empty asset on first sync means Theatre has no image for this slot.
+      // Preserve any existing (e.g. procedural DataTexture) map — only clear
+      // when the user previously assigned a Theatre image and then removed it.
+      const previouslyHadTheatreAsset =
+        state.appliedAssetId !== undefined && state.appliedAssetId !== ''
+
       state.generation += 1
       disposeTheatreTexture(state)
-      setTexture(null)
-      onAssigned?.()
+      state.appliedAssetId = ''
+
+      if (previouslyHadTheatreAsset) {
+        setTexture(null)
+        onAssigned?.()
+      }
       return
     }
 
