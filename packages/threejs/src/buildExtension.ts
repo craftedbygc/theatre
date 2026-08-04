@@ -4,7 +4,7 @@ import {
   isRemoteEditorOpen,
   onRemoteEditorOpenChange,
 } from '@unseenco/theatre-studio'
-import {PerspectiveCamera, CameraHelper} from 'three'
+import {OrthographicCamera, PerspectiveCamera, CameraHelper} from 'three'
 import type {Camera, Scene, WebGLRenderer} from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {EXTENSION_ID} from './constants'
@@ -139,11 +139,22 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   const initialFov =
     initialCamera instanceof PerspectiveCamera ? initialCamera.fov : 60
 
+  const initialNear =
+    initialCamera instanceof PerspectiveCamera ||
+    initialCamera instanceof OrthographicCamera
+      ? initialCamera.near
+      : 0.1
+  const initialFar =
+    initialCamera instanceof PerspectiveCamera ||
+    initialCamera instanceof OrthographicCamera
+      ? initialCamera.far
+      : 1000
+
   const orbitCamera = new PerspectiveCamera(
     initialFov,
     width / height,
-    0.1,
-    1000,
+    initialNear,
+    initialFar,
   )
   orbitCamera.position.copy(initialCamera.position)
   orbitCamera.quaternion.copy(initialCamera.quaternion)
@@ -213,10 +224,17 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   const syncOrbitCameraFromSceneCamera = (camera: Camera) => {
     orbitCamera.position.copy(camera.position)
     orbitCamera.quaternion.copy(camera.quaternion)
+    if (
+      camera instanceof PerspectiveCamera ||
+      camera instanceof OrthographicCamera
+    ) {
+      orbitCamera.near = camera.near
+      orbitCamera.far = camera.far
+    }
     if (camera instanceof PerspectiveCamera) {
       orbitCamera.fov = camera.fov
-      orbitCamera.updateProjectionMatrix()
     }
+    orbitCamera.updateProjectionMatrix()
     controls.target.set(0, 0, 0)
   }
 
