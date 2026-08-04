@@ -246,13 +246,15 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     } else if (isRemoteEditorOpen() || modeBeforeRemoteEditor !== undefined) {
       // Main window while the remote editor is open: switch the rendered scene
       // without changing local camera mode or orbit pose.
-      updateCameraHelperVisibility()
-      updateLinesHelperVisibility()
       transformControls?.refresh()
     } else {
       applyActiveSceneDevtoolsState()
     }
 
+    // Visibility depends on activeSceneIndex as well as the enabled flags, so
+    // always refresh after a scene switch even when those flags are unchanged.
+    updateCameraHelperVisibility()
+    updateLinesHelperVisibility()
     rebuildActiveSceneLineHelpers()
     notifySceneSwitch()
   }
