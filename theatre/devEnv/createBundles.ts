@@ -7,7 +7,7 @@ export async function createBundles(watch: boolean) {
     const pathToPackage = path.join(__dirname, '../', which)
     const esbuildConfig: Parameters<typeof esbuild.context>[0] = {
       entryPoints: [path.join(pathToPackage, 'src/index.ts')],
-      target: ['es6'],
+      target: 'es2020',
       loader: {'.png': 'file', '.svg': 'dataurl'},
       bundle: true,
       sourcemap: true,
@@ -44,7 +44,6 @@ export async function createBundles(watch: boolean) {
     if (which === 'core') {
       esbuildConfig.platform = 'neutral'
       esbuildConfig.mainFields = ['browser', 'module', 'main']
-      esbuildConfig.target = ['firefox57', 'chrome58']
       esbuildConfig.conditions = ['browser', 'node']
     } else {
       esbuildConfig.define!['process.env.NODE_ENV'] =
@@ -53,46 +52,24 @@ export async function createBundles(watch: boolean) {
       esbuildConfig.minify = true
     }
 
-    const ctx = await esbuild.context({
-      ...esbuildConfig,
-      outfile: path.join(pathToPackage, 'dist/index.js'),
-      format: 'cjs',
-    })
+    const outputs: Array<{outfile: string; format: 'cjs' | 'esm'}> = [
+      {outfile: path.join(pathToPackage, 'dist/index.js'), format: 'cjs'},
+      {outfile: path.join(pathToPackage, 'dist/index.mjs'), format: 'esm'},
+    ]
 
-    if (watch) {
-      await ctx.watch()
-    } else {
-      await ctx.rebuild()
-      await ctx.dispose()
+    for (const {outfile, format} of outputs) {
+      const ctx = await esbuild.context({
+        ...esbuildConfig,
+        outfile,
+        format,
+      })
+
+      if (watch) {
+        await ctx.watch()
+      } else {
+        await ctx.rebuild()
+        await ctx.dispose()
+      }
     }
-
-    /**
-     * @remarks
-     * I just disabled ESM builds because I couldn't get them to work
-     * with create-react-app which uses webpack v4. I'm sure that's fixable,
-     * but not worth the hassle right now. There is not much to tree-shake
-     * in \@unseenco/theatre-core as we've done all the tree-shaking pre-bundle already.
-     */
-
-    // build({
-    //   ...esbuildConfig,
-    //   outfile: path.join(pathToPackage, 'dist/index.mjs'),
-    //   format: 'esm',
-    // })
-
-    // build({
-    //   ...esbuildConfig,
-    //   outfile: path.join(pathToPackage, 'dist/index.min.js'),
-    //   format: 'iife',
-    //   external: [],
-    //   minify: true,
-    //   globalName: `Theatre.${which}`,
-    //   legalComments: 'external',
-    //   platform: 'browser',
-    //   define: {
-    //     ...definedGlobals,
-    //     'process.env.NODE_ENV': JSON.stringify('production'),
-    //   },
-    // })
   }
 }

@@ -6608,7 +6608,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@unseenco/theatre-browser-bundles@workspace:packages/browser-bundles"
   dependencies:
-    esbuild: ^0.12.15
+    esbuild: ^0.18.18
     esbuild-register: ^2.5.0
     npm-run-all: ^4.1.5
     typescript: 5.1.6
@@ -6664,7 +6664,7 @@ __metadata:
     "@types/jest": ^26.0.23
     "@types/lodash-es": ^4.17.4
     "@types/node": ^15.6.2
-    esbuild: ^0.12.15
+    esbuild: ^0.18.18
     esbuild-register: ^2.5.0
     lodash-es: ^4.17.21
     npm-run-all: ^4.1.5
@@ -6685,7 +6685,7 @@ __metadata:
     "@types/react": ^17.0.9
     "@types/react-dom": ^17.0.6
     "@unseenco/theatre-dataverse": "workspace:*"
-    esbuild: ^0.12.15
+    esbuild: ^0.18.18
     esbuild-register: ^2.5.0
     lodash-es: ^4.17.21
     npm-run-all: ^4.1.5
@@ -6725,7 +6725,7 @@ __metadata:
     "@types/three": ^0.185.1
     "@unseenco/theatre-core": "workspace:*"
     "@unseenco/theatre-studio": "workspace:*"
-    esbuild: ^0.12.15
+    esbuild: ^0.18.18
     esbuild-register: ^2.5.0
     npm-run-all: ^4.1.5
     three: ^0.185.1
@@ -11792,15 +11792,6 @@ __metadata:
   bin:
     esbuild: bin/esbuild
   checksum: d55bea84f94e7854fa6fb013ffc63747f2286001b3d73c2a7beb605e6e4847c24ff2cde0660f03045d06d083695c8082423b007a9ee8687e70b52719458bfdd6
-  languageName: node
-  linkType: hard
-
-"esbuild@npm:^0.12.15":
-  version: 0.12.15
-  resolution: "esbuild@npm:0.12.15"
-  bin:
-    esbuild: bin/esbuild
-  checksum: 7d496cb355d6612506639002224a48469d3bff546cbb3acababfdb84dd5a927973e8b9646ef4af8716647113d4dd25ae6309b7b8956251f73749f7e59c005cb6
   languageName: node
   linkType: hard
 

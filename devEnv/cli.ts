@@ -98,6 +98,7 @@ prog.command('build', 'Builds all the main packages').action(async () => {
     '@unseenco/theatre-dataverse',
     '@unseenco/theatre-react',
     '@unseenco/theatre-browser-bundles',
+    '@unseenco/theatre-threejs',
   ]
   async function build() {
     await Promise.all([
@@ -144,6 +145,7 @@ prog
       '@unseenco/theatre-dataverse': 'packages/dataverse',
       '@unseenco/theatre-react': 'packages/react',
       '@unseenco/theatre-browser-bundles': 'packages/browser-bundles',
+      '@unseenco/theatre-threejs': 'packages/threejs',
     }
 
     /**

@@ -173,6 +173,7 @@ The extension registers a global toolbar **Flyout** (when multiple scenes are co
 ## Build / lint quirks
 
 - Follow `packages/react` for package scaffolding: `devEnv/build.ts`, api-extractor, `tsconfig.json` with `composite: true`.
+- Publish both CJS (`dist/index.js`) and ESM (`dist/index.mjs`) via `exports` so Vite/Nuxt share the consumer's `three` peer instead of nesting a second copy during CJS prebundling. Keep `three` / Theatre peers external in esbuild; target `es2020`.
 - `devEnv/build.ts` must be covered by `devEnv/tsconfig.json` or ESLint pre-commit fails.
 - `@unseenco/theatre-studio` must not import `@unseenco/theatre-core` value exports (lint rule) — remote-editor helpers live in `theatre/studio/src/remoteEditor.ts` with a local `isRemoteEditorWindow()` duplicate.
 - This package **may** import `isRemoteEditorWindow` from `@unseenco/theatre-core` and remote-editor helpers (`isRemoteEditorOpen`, `onRemoteEditorOpenChange`) from `@unseenco/theatre-studio`.

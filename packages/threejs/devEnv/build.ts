@@ -1,6 +1,6 @@
 import * as path from 'path'
 import {build} from 'esbuild'
-import type {Plugin} from 'esbuild'
+import type {BuildOptions, Plugin} from 'esbuild'
 
 const externalPlugin = (patterns: RegExp[]): Plugin => {
   return {
@@ -26,26 +26,32 @@ const definedGlobals = {
   global: 'window',
 }
 
-async function createBundles(watch: boolean) {
+async function createBundles() {
   const pathToPackage = path.join(__dirname, '../')
-  const esbuildConfig: Parameters<typeof build>[0] = {
+  const esbuildConfig: BuildOptions = {
     entryPoints: [path.join(pathToPackage, 'src/index.ts')],
     bundle: true,
     sourcemap: true,
     define: definedGlobals,
-    watch,
     platform: 'neutral',
     mainFields: ['browser', 'module', 'main'],
-    target: ['firefox57', 'chrome58'],
+    target: 'es2020',
     conditions: ['browser', 'node'],
     plugins: [externalPlugin([/^[\@a-zA-Z]+/])],
   }
 
-  await build({
-    ...esbuildConfig,
-    outfile: path.join(pathToPackage, 'dist/index.js'),
-    format: 'cjs',
-  })
+  await Promise.all([
+    build({
+      ...esbuildConfig,
+      outfile: path.join(pathToPackage, 'dist/index.js'),
+      format: 'cjs',
+    }),
+    build({
+      ...esbuildConfig,
+      outfile: path.join(pathToPackage, 'dist/index.mjs'),
+      format: 'esm',
+    }),
+  ])
 }
 
-void createBundles(false)
+void createBundles()
