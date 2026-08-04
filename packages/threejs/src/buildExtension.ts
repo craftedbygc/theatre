@@ -3,7 +3,7 @@ import {isRemoteEditorWindow} from '@unseenco/theatre-core'
 import {
   isRemoteEditorOpen,
   onRemoteEditorOpenChange,
-} from '@unseenco/theatre-studio/remoteEditor'
+} from '@unseenco/theatre-studio'
 import {PerspectiveCamera, CameraHelper} from 'three'
 import type {Camera, Scene, WebGLRenderer} from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
