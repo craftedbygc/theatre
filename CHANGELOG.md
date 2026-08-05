@@ -1,5 +1,13 @@
 # Theatre.js changelog
 
+## 0.1.8
+
+- Bug fixes
+  - Three.js Package:
+    - Importing runtime helpers (`autoAddObject`, `autoAddCamera`, `configureTheatreThreejs`, …) from `@unseenco/theatre-threejs` no longer loads `@unseenco/theatre-studio`. `buildExtension()` moved to `@unseenco/theatre-threejs/extension` (breaking for anyone importing it from the package root). Studio is now an optional peer dependency.
+
+
+
 ## 0.1.7
 
 - New features
