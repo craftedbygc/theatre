@@ -40,6 +40,34 @@ Join us on [Discord](https://discord.gg/bm9f8F9Y9N), follow the updates on [twit
 
 Theatre.js comes in two packages: `@unseenco/theatre-core` (the library) and `@unseenco/theatre-studio` (the editor). This package is the core library.
 
+### Listing and unloading sheets / objects
+
+Runtime helpers for tearing down loaded sheets and objects (for example when switching scenes). These drop in-memory instances so Studio stops showing them, but **do not** clear persisted project state. Recreating the same `sheetId` / object `key` restores prior prop overrides and sequence data.
+
+```ts
+import {getProject} from '@unseenco/theatre-core'
+
+const project = getProject('My project')
+const sheet = project.sheet('Scene')
+sheet.object('Box', {x: 0, y: 0})
+
+// List what is currently loaded
+project.getSheets() // ISheet[]
+sheet.getObjects() // ISheetObject[]
+
+// Detach one object (sheet stays loaded)
+sheet.detachObject('Box')
+
+// Unload this sheet instance (all of its objects, then the sheet)
+sheet.unload()
+
+// Or from the project:
+project.unloadSheet('Scene') // optional second arg: instanceId
+project.unloadSheets() // unload every loaded sheet
+```
+
+Try the interactive demo in the playground: `/shared/unload-sheets/`.
+
 ## Bundle size
 
 `@unseenco/theatre-core` is currently around 20KiB compressed with all its dependencies.

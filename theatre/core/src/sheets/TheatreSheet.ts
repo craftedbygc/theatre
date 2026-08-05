@@ -157,6 +157,22 @@ export interface ISheet {
   detachObject(key: string): void
 
   /**
+   * Returns all currently attached objects on this sheet.
+   *
+   * Use with {@link ISheet.detachObject} to detach individual objects.
+   */
+  getObjects(): ISheetObject[]
+
+  /**
+   * Unloads this sheet instance from memory: detaches all objects, pauses
+   * sequences, and removes the sheet from the project.
+   *
+   * Runtime-only: persisted prop overrides and sequence data are kept. Calling
+   * `project.sheet` again with the same id recreates the sheet.
+   */
+  unload(): void
+
+  /**
    * Declares an outline namespace folder in the Studio. The folder appears in
    * the outline panel even before any sheet objects are added under it.
    *
@@ -403,6 +419,16 @@ To fix this, make sure you are calling \`sheet.deleteObject("${sanitizedPath}")\
     }
 
     internal.deleteObject(sanitizedPath as ObjectAddressKey)
+  }
+
+  getObjects(): ISheetObject[] {
+    return privateAPI(this)
+      .getObjects()
+      .map((obj) => obj.publicApi)
+  }
+
+  unload(): void {
+    privateAPI(this).unload()
   }
 
   declareOutlineNamespace(

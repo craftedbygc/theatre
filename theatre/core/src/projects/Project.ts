@@ -283,6 +283,73 @@ export default class Project {
     return sheet
   }
 
+  getSheets(): Sheet[] {
+    const sheets: Sheet[] = []
+    for (const template of Object.values(this._sheetTemplates.get())) {
+      if (!template) continue
+      sheets.push(...template.getInstances())
+    }
+    return sheets
+  }
+
+  /**
+   * Runtime-only: unload one or all instances of a sheet. Persisted state is kept.
+   * When `instanceId` is omitted, all loaded instances of `sheetId` are unloaded.
+   */
+  unloadSheet(sheetId: SheetId, instanceId?: SheetInstanceId): boolean {
+    const template = this._sheetTemplates.get()[sheetId]
+    if (!template) {
+      return false
+    }
+
+    const instances = instanceId
+      ? template.hasInstance(instanceId)
+        ? [template.getInstance(instanceId)]
+        : []
+      : template.getInstances()
+
+    if (instances.length === 0) {
+      return false
+    }
+
+    for (const sheet of instances) {
+      sheet.unload()
+    }
+    return true
+  }
+
+  unloadSheets(): void {
+    for (const sheet of this.getSheets()) {
+      sheet.unload()
+    }
+  }
+
+  /**
+   * Called by {@link Sheet.unload} after objects are detached. Removes the
+   * instance from its template and drops the template when no instances remain.
+   */
+  _unloadSheetInstance(sheet: Sheet) {
+    const sheetId = sheet.address.sheetId
+    const template = this._sheetTemplates.get()[sheetId]
+    if (!template || !template.hasInstance(sheet.instanceId)) {
+      return
+    }
+
+    template.removeInstance(sheet.instanceId)
+    const wasRegistered = this._remoteSync.unregisterSheet(sheet)
+    const remaining = template.getInstances()
+
+    if (remaining.length === 0) {
+      this._sheetTemplates.reduce((state) => {
+        const next = {...state}
+        delete next[sheetId]
+        return next
+      })
+    } else if (wasRegistered) {
+      this._remoteSync.registerSheet(remaining[0]!)
+    }
+  }
+
   _commitOutlineNamespaceConfig(
     sheetId: SheetId,
     namespacePathKey: string,

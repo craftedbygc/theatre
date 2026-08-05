@@ -43,6 +43,7 @@ export default class RemoteSync {
   private readonly channel: BroadcastChannel | undefined
   private readonly sheets = new Map<string, Sheet>()
   private readonly objects = new Map<string, SheetObject>()
+  private readonly objectUnsubs = new Map<string, () => void>()
   private studio: Studio | undefined
   private activeSheet: Sheet | undefined
 
@@ -89,13 +90,28 @@ export default class RemoteSync {
     this.sheets.set(sheet.address.sheetId, sheet)
   }
 
+  /**
+   * Removes `sheet` from the sync map if it is the currently registered
+   * instance for its `sheetId`. Returns whether it was removed.
+   */
+  unregisterSheet(sheet: Sheet): boolean {
+    if (this.sheets.get(sheet.address.sheetId) !== sheet) {
+      return false
+    }
+    this.sheets.delete(sheet.address.sheetId)
+    if (this.activeSheet === sheet) {
+      this.activeSheet = undefined
+    }
+    return true
+  }
+
   registerObject(obj: SheetObject) {
     const id = `${obj.address.sheetId}_${obj.address.objectKey}`
     this.objects.set(id, obj)
 
     if (this.isEditor && this.channel) {
       const channel = this.channel
-      obj.onFinalValueChange((values) => {
+      const unsubscribe = obj.onFinalValueChange((values) => {
         const message: BroadcastData = {
           event: 'updateSheetObject',
           // Some prop values (e.g. rgba colors) are class instances with
@@ -106,6 +122,17 @@ export default class RemoteSync {
         }
         channel.postMessage(message)
       })
+      this.objectUnsubs.set(id, unsubscribe)
+    }
+  }
+
+  unregisterObject(obj: SheetObject) {
+    const id = `${obj.address.sheetId}_${obj.address.objectKey}`
+    this.objects.delete(id)
+    const unsubscribe = this.objectUnsubs.get(id)
+    if (unsubscribe) {
+      unsubscribe()
+      this.objectUnsubs.delete(id)
     }
   }
 

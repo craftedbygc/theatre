@@ -25,7 +25,7 @@ src/
 
 Simply run `yarn run serve` in this folder to start the dev server.
 
-There are some shared playgrounds in `src/shared` which are committed to the repo. You can make your own playgrounds in `src/personal` which will be `.gitignore`d. Note that every playground must include an entry file called `index.tsx` (as you see in the [Directory structure section](#directory-structure)).
+There are some shared playgrounds in `src/shared` which are committed to the repo. You can make your own playgrounds in `src/personal` which will be `.gitignore`d. Note that every playground must include an entry file called `index.tsx` (as you see in the [Directory structure section](#directory-structure)). After `yarn serve` (or `yarn playground` from the repo root), demos are at `/shared/<name>/` — for example `/shared/unload-sheets/` exercises `project.getSheets()`, `sheet.getObjects()`, `detachObject`, and the unload APIs via DOM buttons.
 
 ## How to write and run end-to-end tests
 

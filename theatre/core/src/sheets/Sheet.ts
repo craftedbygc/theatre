@@ -123,12 +123,38 @@ export default class Sheet {
     return this._objects.get()[key]
   }
 
+  getObjects(): SheetObject[] {
+    return Object.values(this._objects.get()).filter(
+      (obj): obj is SheetObject => !!obj,
+    )
+  }
+
   deleteObject(objectKey: ObjectAddressKey) {
+    const obj = this._objects.get()[objectKey]
     this._objects.reduce((state) => {
       const newState = {...state}
       delete newState[objectKey]
       return newState
     })
+    if (obj) {
+      this.project._remoteSync.unregisterObject(obj)
+    }
+  }
+
+  /**
+   * Runtime-only teardown: pause sequences, detach all objects, and remove
+   * this sheet instance from the project. Persisted state is kept.
+   */
+  unload() {
+    for (const sequence of Object.values(this._sequences)) {
+      sequence.pause()
+    }
+    for (const objectKey of Object.keys(
+      this._objects.get(),
+    ) as ObjectAddressKey[]) {
+      this.deleteObject(objectKey)
+    }
+    this.project._unloadSheetInstance(this)
   }
 
   getSequence(variant?: SequenceVariantId): Sequence {

@@ -2,6 +2,14 @@
 
 ## 0.1.10
 
+- New features
+  - **List / unload sheets and objects** — runtime APIs to enumerate and tear down loaded sheets/objects without clearing persisted project state. Re-calling `project.sheet()` / `sheet.object()` recreates instances that pick up existing overrides and sequence data.
+    - `project.getSheets()` / `sheet.getObjects()` — list currently loaded instances
+    - `sheet.unload()` — detach all objects, pause sequences, remove the sheet instance
+    - `project.unloadSheet(sheetId, instanceId?)` — unload one sheet (all instances if `instanceId` is omitted)
+    - `project.unloadSheets()` — unload every loaded sheet
+    - Existing `sheet.detachObject(key)` remains for per-object detach after listing
+  - Playground demo: [`packages/playground/src/shared/unload-sheets`](./packages/playground/src/shared/unload-sheets) (`/shared/unload-sheets/`)
 - Bug fixes
   - Three.js Package:
     - Fixed orbit-mode selection sync when using the split runtime / `/extension` entries: `autoAddObject` and `buildExtension` again share the same Object3D ↔ sheet-object registry (outline BoxHelper and viewport click-to-select).

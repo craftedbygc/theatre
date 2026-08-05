@@ -67,6 +67,24 @@ export default class SheetTemplate {
     return inst
   }
 
+  getInstances(): Sheet[] {
+    return Object.values(this._instances.get()).filter(
+      (inst): inst is Sheet => !!inst,
+    )
+  }
+
+  hasInstance(instanceId: SheetInstanceId): boolean {
+    return !!this._instances.get()[instanceId]
+  }
+
+  removeInstance(instanceId: SheetInstanceId): void {
+    this._instances.reduce((state) => {
+      const next = {...state}
+      delete next[instanceId]
+      return next
+    })
+  }
+
   getObjectTemplate(
     objectKey: ObjectAddressKey,
     nativeObject: ObjectNativeObject,
