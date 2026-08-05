@@ -38,6 +38,7 @@ export interface StudioLike {
         props: Record<string, unknown>,
         opts?: {visible?: boolean},
       ): DevtoolsStateObject & ActiveSceneStateObject
+      detachObject(objectKey: string): void
     }
   }
   transaction(
@@ -167,6 +168,20 @@ export function createActiveSceneStateObject(
     },
     {visible: false},
   )
+}
+
+/** Detach all extension sheet objects from the Studio project (e.g. on dispose). */
+export function detachDevtoolsSheetObjects(
+  studio: StudioLike,
+  sceneNames: string[],
+): void {
+  const sheet = studio.getStudioProject().sheet(DEVTOOLS_SHEET_ID, {
+    visible: false,
+  })
+  for (const sceneName of sceneNames) {
+    sheet.detachObject(getDevtoolsObjectKey(sceneName))
+  }
+  sheet.detachObject(ACTIVE_SCENE_OBJECT_KEY)
 }
 
 export function persistActiveSceneName(

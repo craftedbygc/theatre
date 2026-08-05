@@ -25,6 +25,7 @@ import {
   createActiveSceneStateObject,
   createDevtoolsStateObject,
   createInitialDevtoolsStateFromCamera,
+  detachDevtoolsSheetObjects,
   getDevtoolsObjectKey,
   persistActiveSceneName,
   persistCameraHelperEnabled,
@@ -713,6 +714,10 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       }
       selectionSync?.dispose()
       transformControls?.dispose()
+      detachDevtoolsSheetObjects(
+        studio,
+        normalizedScenes.map((entry) => entry.name),
+      )
       sceneSwitchListeners.clear()
       orbitModeSwitchListeners.clear()
     },
