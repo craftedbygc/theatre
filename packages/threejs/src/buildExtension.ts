@@ -70,6 +70,18 @@ export interface ThreejsDevtoolsConfig {
   renderer: WebGLRenderer
   studio: StudioLike
   scenes: SceneConfig[]
+  /**
+   * Called when the active scene changes (toolbar or persisted restore).
+   * Registered before init restore, so it receives the initial restore event.
+   * Prefer this over `onSceneSwitch()` when you need the load-time value.
+   */
+  onSceneSwitch?: SceneSwitchCallback
+  /**
+   * Called when orbit mode is toggled (toolbar or persisted restore).
+   * Registered before init restore, so it receives the initial restore event.
+   * Prefer this over `onOrbitModeSwitch()` when you need the load-time value.
+   */
+  onOrbitModeSwitch?: OrbitModeSwitchCallback
 }
 
 export interface ThreejsDevtools {
@@ -118,7 +130,7 @@ function normalizeScenes(scenes: SceneConfig[]): NormalizedScene[] {
 }
 
 export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
-  const {renderer, studio, scenes} = config
+  const {renderer, studio, scenes, onSceneSwitch, onOrbitModeSwitch} = config
   const normalizedScenes = normalizeScenes(scenes)
 
   let activeSceneIndex = 0
@@ -132,6 +144,10 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   let modeBeforeRemoteEditor: CameraMode | undefined
   const sceneSwitchListeners = new Set<SceneSwitchCallback>()
   const orbitModeSwitchListeners = new Set<OrbitModeSwitchCallback>()
+  // Register config callbacks before any init restore so they receive the
+  // first persisted orbit/scene apply (onValuesChange is immediate).
+  if (onSceneSwitch) sceneSwitchListeners.add(onSceneSwitch)
+  if (onOrbitModeSwitch) orbitModeSwitchListeners.add(onOrbitModeSwitch)
   let selectionSync: SelectionSync | undefined
   let transformControls: TransformControlsSetup | undefined
 

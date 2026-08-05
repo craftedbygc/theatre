@@ -26,10 +26,12 @@ const devtools = buildExtension({
   renderer,
   scenes,
   studio,
-})
-
-devtools.onSceneSwitch((_name, scene) => {
-  activeScene = scene
+  onSceneSwitch(_name, scene) {
+    activeScene = scene
+  },
+  onOrbitModeSwitch(enabled) {
+    console.log('orbit mode switched', enabled)
+  },
 })
 
 studio.extend(devtools.extension)

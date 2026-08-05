@@ -23,14 +23,13 @@ const devtools = buildExtension({
     {name: 'Scene 2', scene: scene2, camera: camera2},
   ],
   studio,
-})
-
-devtools.onSceneSwitch((_name, scene) => {
-  activeScene = scene
-})
-
-devtools.onOrbitModeSwitch((enabled) => {
-  // e.g. pause gameplay camera while orbiting
+  // Prefer config callbacks to receive persisted restore during init.
+  onSceneSwitch(_name, scene) {
+    activeScene = scene
+  },
+  onOrbitModeSwitch(enabled) {
+    // e.g. pause gameplay camera while orbiting
+  },
 })
 
 studio.extend(devtools.extension)
@@ -42,7 +41,7 @@ function loop() {
 }
 ```
 
-The extension adds a toolbar flyout to switch between scenes (when more than one is configured), a toggle between your scene camera and an OrbitControls dev camera, and orbit-mode tools for camera frustum visualization, line overlays, and interactive transform editing. Use `devtools.isOrbitMode()` to read the current mode and `devtools.onOrbitModeSwitch(callback)` to react when it changes.
+The extension adds a toolbar flyout to switch between scenes (when more than one is configured), a toggle between your scene camera and an OrbitControls dev camera, and orbit-mode tools for camera frustum visualization, line overlays, and interactive transform editing. Use `devtools.isOrbitMode()` to read the current mode. Pass `onOrbitModeSwitch` / `onSceneSwitch` in the `buildExtension` config to react to persisted restore during init; the returned `devtools.onOrbitModeSwitch()` / `devtools.onSceneSwitch()` methods also accept late subscribers but only receive subsequent changes.
 
 ## configureTheatreThreejs
 
