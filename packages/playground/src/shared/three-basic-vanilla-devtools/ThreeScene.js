@@ -7,9 +7,11 @@ import {
   DataTexture,
   DirectionalLight,
   Group,
+  InstancedMesh,
   Mesh,
   MeshPhongMaterial,
   MeshStandardMaterial,
+  Object3D,
   PerspectiveCamera,
   Scene,
   ShaderMaterial,
@@ -131,20 +133,47 @@ function createSpheresScene(sheet, width, height) {
   }
 
   const sphereGeometry = new SphereGeometry(1, 24, 24)
-  for (const [index, position] of gridPositions.entries()) {
-    const hue = (index / gridPositions.length) * 0.85
-    const material = new MeshPhongMaterial({
-      color: new Color().setHSL(hue, 0.55, 0.5),
-    })
-    const sphere = new Mesh(sphereGeometry, material)
-    sphere.position.set(position.x, position.y, position.z)
-    sphere.name = `Sphere ${index + 1}`
-    scene.add(sphere)
+  const sphereMaterial = new MeshPhongMaterial({color: 0xffffff})
+  const sphereGrid = new InstancedMesh(
+    sphereGeometry,
+    sphereMaterial,
+    gridPositions.length,
+  )
+  sphereGrid.name = 'Sphere Grid'
 
-    if (index < 3) {
-      autoAddObject(sphere, sheet)
-    }
+  const dummy = new Object3D()
+  const instanceColor = new Color()
+  for (const [index, position] of gridPositions.entries()) {
+    dummy.position.set(position.x, position.y, position.z)
+    dummy.updateMatrix()
+    sphereGrid.setMatrixAt(index, dummy.matrix)
+    instanceColor.setHSL(Math.random(), 0.55, 0.5)
+    sphereGrid.setColorAt(index, instanceColor)
   }
+  sphereGrid.instanceMatrix.needsUpdate = true
+  if (sphereGrid.instanceColor) {
+    sphereGrid.instanceColor.needsUpdate = true
+  }
+
+  scene.add(sphereGrid)
+  autoAddObject(sphereGrid, sheet)
+
+  // Two meshes sharing one material — both registered so we can test
+  // whether autoAddObject appliers fight over the same Material.
+  const sharedMaterial = new MeshPhongMaterial({color: 0x4caf50})
+  const sharedGeo = new BoxGeometry(3, 3, 3)
+  const sharedMeshA = new Mesh(sharedGeo, sharedMaterial)
+  sharedMeshA.name = 'Shared Material A'
+  sharedMeshA.position.set(-8, 0, 8)
+  scene.add(sharedMeshA)
+
+  const sharedMeshB = new Mesh(sharedGeo, sharedMaterial)
+  sharedMeshB.name = 'Shared Material B'
+  sharedMeshB.position.set(8, 0, 8)
+  scene.add(sharedMeshB)
+
+  autoAddObject(sharedMeshA, sheet)
+  autoAddObject(sharedMeshB, sheet)
 
   // Random-color DataTexture so we can verify autoAddObject does not
   // wipe procedural maps that have no URL-backed asset id.
