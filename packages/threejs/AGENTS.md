@@ -32,7 +32,7 @@ The main entry points are:
 | `src/buildTransformProps.ts` | Transform prop config + applier |
 | `src/buildMaterialProps.ts` | Material prop introspection + applier |
 | `src/textureUtils.ts` | Texture slot detection, settings copy, async loading |
-| `src/objectRegistry.ts` | Object3D ↔ ISheetObject registry |
+| `src/objectRegistry.ts` | Object3D ↔ ISheetObject registry (singleton on `globalThis` so runtime + `/extension` bundles share it) |
 | `src/selectionSync.ts` | Bidirectional outline ↔ orbit selection via BoxHelper + raycasting |
 | `src/config.ts` | Project-wide `configureTheatreThreejs()` defaults |
 | `src/colorUtils.ts` | Linear ↔ sRGB color conversion for Theatre rgba props |
@@ -186,6 +186,7 @@ The extension registers a global toolbar **Flyout** (when multiple scenes are co
 - Publish both CJS (`dist/index.js`, `dist/extension.js`) and ESM (`dist/index.mjs`, `dist/extension.mjs`) via `exports` so Vite/Nuxt share the consumer's `three` peer instead of nesting a second copy during CJS prebundling. Keep `three` / Theatre peers external in esbuild; target `es2020`.
 - The package root must not import `@unseenco/theatre-studio` (runtime-only). Studio imports belong only in the `/extension` entry and files it pulls in (`buildExtension`, remote-editor helpers, etc.).
 - `@unseenco/theatre-studio` is an optional peer (`peerDependenciesMeta`); required only when importing `/extension`.
+- Runtime and `/extension` are separate esbuild bundles. Any module-level mutable state shared between them (today: `objectRegistry`) must live on `globalThis` (or an equivalent cross-bundle singleton), or selection sync will break in published builds while still working in the playground (source aliases).
 - `devEnv/build.ts` must be covered by `devEnv/tsconfig.json` or ESLint pre-commit fails.
 - `@unseenco/theatre-studio` must not import `@unseenco/theatre-core` value exports (lint rule) — remote-editor helpers live in `theatre/studio/src/remoteEditor.ts` with a local `isRemoteEditorWindow()` duplicate.
 - This package **may** import `isRemoteEditorWindow` from `@unseenco/theatre-core` and remote-editor helpers (`isRemoteEditorOpen`, `onRemoteEditorOpenChange`) from `@unseenco/theatre-studio`.
