@@ -28,6 +28,7 @@ import type {
   TransientPropPath,
   StaticPropPath,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
+import {resolveShowPropsOfSources} from '@unseenco/theatre-core/sheetObjects/resolveShowPropsOf'
 
 export type SheetObjectPropTypeConfig =
   PropTypeConfig_Compound<UnknownValidCompoundProps>
@@ -42,6 +43,18 @@ export type ISheetObjectOptions = {
    * Whether the object appears in the Studio outline panel. Defaults to `true`.
    */
   visible?: boolean
+  /**
+   * Other sheet objects whose props are shown in this object's Studio details
+   * pane. Runtime-only (not persisted). Edits and sequencing still target the
+   * source objects. Same-sheet only; cannot include the host object.
+   *
+   * @example
+   * ```ts
+   * const appearance = sheet.object('Appearance', {color: types.rgba()})
+   * sheet.object('Box', {x: 0}, {showPropsOf: [appearance]})
+   * ```
+   */
+  showPropsOf?: ISheetObject[]
   /**
    * Prop paths that are excluded from exported project state JSON.
    * Values are stored in ahistoric static overrides (persist across Studio
@@ -320,6 +333,15 @@ export default class TheatreSheet implements ISheet {
                   sanitizedConfig,
                 )
               }
+              if (opts.showPropsOf !== undefined) {
+                existingObject.template.setShowPropsOf(
+                  resolveShowPropsOfSources(
+                    existingObject.publicApi,
+                    opts.showPropsOf,
+                    `sheet.object(..., {showPropsOf})`,
+                  ),
+                )
+              }
               weakMapOfUnsanitizedProps.set(existingObject, config)
               return existingObject.publicApi as $IntentionalAny
             } else {
@@ -356,6 +378,16 @@ export default class TheatreSheet implements ISheet {
         )
       }
 
+      if (opts?.showPropsOf !== undefined) {
+        existingObject.template.setShowPropsOf(
+          resolveShowPropsOfSources(
+            existingObject.publicApi,
+            opts.showPropsOf,
+            `sheet.object(..., {showPropsOf})`,
+          ),
+        )
+      }
+
       return existingObject.publicApi as $IntentionalAny
     } else {
       const sanitizedConfig = compound(config)
@@ -370,6 +402,15 @@ export default class TheatreSheet implements ISheet {
       )
       if (process.env.NODE_ENV !== 'production') {
         weakMapOfUnsanitizedProps.set(object as $FixMe, config)
+      }
+      if (opts?.showPropsOf !== undefined) {
+        object.template.setShowPropsOf(
+          resolveShowPropsOfSources(
+            object.publicApi,
+            opts.showPropsOf,
+            `sheet.object(..., {showPropsOf})`,
+          ),
+        )
       }
       return object.publicApi as $IntentionalAny
     }

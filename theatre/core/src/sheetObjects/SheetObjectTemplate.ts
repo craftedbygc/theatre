@@ -97,6 +97,11 @@ export default class SheetObjectTemplate {
   readonly type: 'Theatre_SheetObjectTemplate' = 'Theatre_SheetObjectTemplate'
   protected _config: Atom<SheetObjectPropTypeConfig>
   readonly _temp_actions_atom: Atom<SheetObjectActionsConfig>
+  /**
+   * Runtime-only list of other sheet objects whose props are shown in this
+   * object's Studio details pane. Not persisted to project state.
+   */
+  readonly showPropsOf_atom: Atom<SheetObject[]>
   readonly _cache = new SimpleCache()
   readonly project: Project
   readonly pointerToSheetState: Pointer<SheetState_Historic | undefined>
@@ -129,6 +134,14 @@ export default class SheetObjectTemplate {
     return this._temp_actions_atom.pointer
   }
 
+  get showPropsOf() {
+    return this.showPropsOf_atom.get()
+  }
+
+  get showPropsOfPointer() {
+    return this.showPropsOf_atom.pointer
+  }
+
   constructor(
     readonly sheetTemplate: SheetTemplate,
     objectKey: ObjectAddressKey,
@@ -141,6 +154,7 @@ export default class SheetObjectTemplate {
     this.address = {...sheetTemplate.address, objectKey}
     this._config = new Atom(config)
     this._temp_actions_atom = new Atom(_temp_actions)
+    this.showPropsOf_atom = new Atom<SheetObject[]>([])
     this._transientPropPaths = normalizeTransientPropPaths(
       transient,
       config,
@@ -288,6 +302,10 @@ export default class SheetObjectTemplate {
    */
   _temp_setActions(actions: SheetObjectActionsConfig) {
     this._temp_actions_atom.set(actions)
+  }
+
+  setShowPropsOf(objects: SheetObject[]): void {
+    this.showPropsOf_atom.set(objects)
   }
 
   setVisibleInOutline(visible: boolean): void {

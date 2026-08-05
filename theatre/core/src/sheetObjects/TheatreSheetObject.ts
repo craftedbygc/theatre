@@ -20,6 +20,7 @@ import type {DebouncedFunc} from 'lodash-es'
 import type {IRafDriver} from '@unseenco/theatre-core/rafDrivers'
 import {onChange} from '@unseenco/theatre-core/coreExports'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import {resolveShowPropsOfSources} from './resolveShowPropsOf'
 
 export type SheetObjectValuesChangeMeta = {
   /**
@@ -123,6 +124,20 @@ export interface ISheetObject<
    * ```
    */
   set initialValue(value: DeepPartialOfSerializableValue<this['value']>)
+
+  /**
+   * Show another object's props in this object's Studio details pane.
+   * Runtime-only (not persisted). Edits and sequencing still target the
+   * source objects. Pass `[]` to clear.
+   *
+   * @example
+   * ```ts
+   * const appearance = sheet.object('Appearance', {color: types.rgba()})
+   * const box = sheet.object('Box', {x: 0})
+   * box.showPropsOf([appearance])
+   * ```
+   */
+  showPropsOf(objects: ISheetObject[]): void
 }
 
 // Enabled for https://linear.app/theatre/issue/P-217/if-objvalue-is-read-make-sure-its-derivation-remains-hot-for-a-while
@@ -237,5 +252,12 @@ export default class TheatreSheetObject<
 
   set initialValue(val: DeepPartialOfSerializableValue<this['value']>) {
     privateAPI(this).setInitialValue(val)
+  }
+
+  showPropsOf(objects: ISheetObject[]): void {
+    const host = privateAPI(this)
+    host.template.setShowPropsOf(
+      resolveShowPropsOfSources(this, objects, `object.showPropsOf()`),
+    )
   }
 }
