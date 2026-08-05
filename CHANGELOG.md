@@ -1,5 +1,16 @@
 # Theatre.js changelog
 
+## 0.1.9
+
+- New features
+  - Three.js Package:
+    - `buildExtension()` accepts optional `onSceneSwitch` / `onOrbitModeSwitch` config callbacks, registered before persisted state restore so apps can react to the load-time orbit/scene value. Returned `onSceneSwitch()` / `onOrbitModeSwitch()` methods still support late subscribers for subsequent changes.
+- Bug fixes
+  - Three.js Package:
+    - `dispose()` now detaches extension sheet objects from the Studio project so they do not linger after teardown.
+
+
+
 ## 0.1.8
 
 - Bug fixes
