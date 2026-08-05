@@ -1,10 +1,8 @@
 import {Clock} from 'three'
 import studio from '@unseenco/theatre-studio'
 import {getProject} from '@unseenco/theatre-core'
-import {
-  buildExtension,
-  configureTheatreThreejs,
-} from '@unseenco/theatre-threejs'
+import {configureTheatreThreejs} from '@unseenco/theatre-threejs'
+import {buildExtension} from '@unseenco/theatre-threejs/extension'
 import {bindDockedThreeViewport} from '../utils/bindDockedThreeViewport'
 import {createThreeScenes} from './ThreeScene.js'
 

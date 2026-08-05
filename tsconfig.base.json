@@ -24,6 +24,9 @@
       "@unseenco/theatre-dataverse": ["./packages/dataverse/src/index.ts"],
       "@unseenco/theatre-react": ["./packages/react/src/index.ts"],
       "@unseenco/theatre-threejs": ["./packages/threejs/src/index.ts"],
+      "@unseenco/theatre-threejs/extension": [
+        "./packages/threejs/src/extension.ts"
+      ],
       "@unseenco/theatre-dataverse-experiments": [
         "./packages/dataverse-experiments/src/index.ts"
       ]

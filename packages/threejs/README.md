@@ -1,12 +1,15 @@
 # @unseenco/theatre-threejs
 
-Three.js devtools extension for [Theatre.js Studio](https://www.theatrejs.com/).
+Three.js helpers and Studio extension for [Theatre.js](https://www.theatrejs.com/).
+
+Runtime helpers (`autoAddObject`, `autoAddCamera`, …) import from the package root and do **not** load Studio. Studio devtools (`buildExtension`) import from `@unseenco/theatre-threejs/extension`.
 
 ## Usage
 
 ```js
 import studio from '@unseenco/theatre-studio'
-import {autoAddObject, buildExtension} from '@unseenco/theatre-threejs'
+import {autoAddObject} from '@unseenco/theatre-threejs'
+import {buildExtension} from '@unseenco/theatre-threejs/extension'
 
 let activeScene = scene1
 

@@ -28,8 +28,12 @@ const definedGlobals = {
 
 async function createBundles() {
   const pathToPackage = path.join(__dirname, '../')
+  const entries = [
+    {entry: 'index.ts', outfileBase: 'index'},
+    {entry: 'extension.ts', outfileBase: 'extension'},
+  ] as const
+
   const esbuildConfig: BuildOptions = {
-    entryPoints: [path.join(pathToPackage, 'src/index.ts')],
     bundle: true,
     sourcemap: true,
     define: definedGlobals,
@@ -40,18 +44,22 @@ async function createBundles() {
     plugins: [externalPlugin([/^[\@a-zA-Z]+/])],
   }
 
-  await Promise.all([
-    build({
-      ...esbuildConfig,
-      outfile: path.join(pathToPackage, 'dist/index.js'),
-      format: 'cjs',
-    }),
-    build({
-      ...esbuildConfig,
-      outfile: path.join(pathToPackage, 'dist/index.mjs'),
-      format: 'esm',
-    }),
-  ])
+  await Promise.all(
+    entries.flatMap(({entry, outfileBase}) => [
+      build({
+        ...esbuildConfig,
+        entryPoints: [path.join(pathToPackage, 'src', entry)],
+        outfile: path.join(pathToPackage, 'dist', `${outfileBase}.js`),
+        format: 'cjs',
+      }),
+      build({
+        ...esbuildConfig,
+        entryPoints: [path.join(pathToPackage, 'src', entry)],
+        outfile: path.join(pathToPackage, 'dist', `${outfileBase}.mjs`),
+        format: 'esm',
+      }),
+    ]),
+  )
 }
 
 void createBundles()

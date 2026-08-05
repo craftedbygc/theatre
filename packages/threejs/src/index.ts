@@ -1,10 +1,11 @@
 /**
  * @packageDocumentation
  *
- * Three.js devtools for Theatre.js Studio.
+ * Runtime helpers for binding Three.js objects to Theatre.js sheets.
+ * For Studio devtools (`buildExtension`), import from
+ * `@unseenco/theatre-threejs/extension`.
  */
 
-export {buildExtension} from './buildExtension'
 export {autoAddObject} from './autoAddObject'
 export {autoAddCamera} from './autoAddCamera'
 export {
@@ -34,20 +35,3 @@ export type {
   UniformGuiOptions,
   UniformWithGui,
 } from './parseUniformGui'
-
-export type {
-  OrbitModeSwitchCallback,
-  SceneConfig,
-  SceneSwitchCallback,
-  ThreejsDevtools,
-  ThreejsDevtoolsConfig,
-} from './buildExtension'
-
-export type {DevtoolsState, StudioLike} from './persistence'
-
-export type {
-  TheatreExtension,
-  ToolConfig,
-  ToolConfigSwitch,
-  ToolsetConfig,
-} from './types'

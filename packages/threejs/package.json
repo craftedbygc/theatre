@@ -21,6 +21,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./extension": {
+      "types": "./dist/extension.d.ts",
+      "import": "./dist/extension.mjs",
+      "require": "./dist/extension.js"
     }
   },
   "sideEffects": false,
@@ -53,5 +58,10 @@
     "@unseenco/theatre-core": "*",
     "@unseenco/theatre-studio": "*",
     "three": ">=0.150.0"
+  },
+  "peerDependenciesMeta": {
+    "@unseenco/theatre-studio": {
+      "optional": true
+    }
   }
 }

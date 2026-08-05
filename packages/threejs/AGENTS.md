@@ -8,8 +8,8 @@ A **Studio extension** (dev-time only, AGPL-3.0) that adds Three.js scene inspec
 
 The main entry points are:
 
-- `buildExtension()` — Studio devtools (cameras, orbit controls, selection sync)
-- `autoAddObject()` — register a Three.js `Object3D` on a Theatre sheet with auto-parsed transforms and material props
+- Package root (`@unseenco/theatre-threejs`) — runtime helpers: `autoAddObject()`, `autoAddCamera()`, `configureTheatreThreejs()` (no Studio)
+- `@unseenco/theatre-threejs/extension` — `buildExtension()` Studio devtools (cameras, orbit controls, selection sync)
 
 `buildExtension()` returns:
 
@@ -21,7 +21,7 @@ The main entry points are:
 - `update()` — call each frame when orbit mode is active
 - `dispose()` — tear down listeners and controls
 
-`three`, `@unseenco/theatre-core`, and `@unseenco/theatre-studio` are **peer dependencies**. The bundle marks them external in `devEnv/build.ts`.
+`three` and `@unseenco/theatre-core` are **peer dependencies**. `@unseenco/theatre-studio` is an **optional** peer (required only for `/extension`). The bundle marks them external in `devEnv/build.ts`.
 
 ## Source layout
 
@@ -40,7 +40,8 @@ The main entry points are:
 | `src/constants.ts` | `EXTENSION_ID`, `DEVTOOLS_SHEET_ID`, registry flags |
 | `src/types.ts` | Local `TheatreExtension` / toolbar types (avoids pulling full Studio types at build time) |
 | `src/icons.ts` | SVG strings for toolbar Switch options |
-| `src/index.ts` | Public exports |
+| `src/index.ts` | Public runtime exports (no Studio) |
+| `src/extension.ts` | Public Studio extension exports (`buildExtension`) |
 
 ## Commands (from repo root unless noted)
 
@@ -51,13 +52,13 @@ The main entry points are:
 | Full monorepo typecheck | `yarn typecheck` |
 | Manual test in browser | `yarn playground` → open `/shared/three-basic-vanilla-devtools/` |
 
-The playground demo lives at `packages/playground/src/shared/three-basic-vanilla-devtools/`. Vite resolves `@unseenco/theatre-threejs` to source via `tsconfig.base.json` — no separate build step needed for playground dev.
+The playground demo lives at `packages/playground/src/shared/three-basic-vanilla-devtools/`. Vite resolves `@unseenco/theatre-threejs` and `@unseenco/theatre-threejs/extension` to source via `tsconfig.base.json` — no separate build step needed for playground dev.
 
 ## Integration pattern
 
 ```js
 import studio from '@unseenco/theatre-studio'
-import {buildExtension} from '@unseenco/theatre-threejs'
+import {buildExtension} from '@unseenco/theatre-threejs/extension'
 
 let activeScene = scene
 
@@ -110,7 +111,8 @@ Returns `{ reset() }` to restore the previous config (useful in tests).
 Register a Three.js object on a Theatre sheet with auto-parsed transforms and material properties:
 
 ```js
-import {autoAddObject, buildExtension} from '@unseenco/theatre-threejs'
+import {autoAddObject} from '@unseenco/theatre-threejs'
+import {buildExtension} from '@unseenco/theatre-threejs/extension'
 
 const sheetObject = autoAddObject(mesh, sheet, {
   objectKey: 'My Mesh',   // default: mesh.name || 'Object'
@@ -178,7 +180,9 @@ The extension registers a global toolbar **Flyout** (when multiple scenes are co
 ## Build / lint quirks
 
 - Follow `packages/react` for package scaffolding: `devEnv/build.ts`, api-extractor, `tsconfig.json` with `composite: true`.
-- Publish both CJS (`dist/index.js`) and ESM (`dist/index.mjs`) via `exports` so Vite/Nuxt share the consumer's `three` peer instead of nesting a second copy during CJS prebundling. Keep `three` / Theatre peers external in esbuild; target `es2020`.
+- Publish both CJS (`dist/index.js`, `dist/extension.js`) and ESM (`dist/index.mjs`, `dist/extension.mjs`) via `exports` so Vite/Nuxt share the consumer's `three` peer instead of nesting a second copy during CJS prebundling. Keep `three` / Theatre peers external in esbuild; target `es2020`.
+- The package root must not import `@unseenco/theatre-studio` (runtime-only). Studio imports belong only in the `/extension` entry and files it pulls in (`buildExtension`, remote-editor helpers, etc.).
+- `@unseenco/theatre-studio` is an optional peer (`peerDependenciesMeta`); required only when importing `/extension`.
 - `devEnv/build.ts` must be covered by `devEnv/tsconfig.json` or ESLint pre-commit fails.
 - `@unseenco/theatre-studio` must not import `@unseenco/theatre-core` value exports (lint rule) — remote-editor helpers live in `theatre/studio/src/remoteEditor.ts` with a local `isRemoteEditorWindow()` duplicate.
 - This package **may** import `isRemoteEditorWindow` from `@unseenco/theatre-core` and remote-editor helpers (`isRemoteEditorOpen`, `onRemoteEditorOpenChange`) from `@unseenco/theatre-studio`.
