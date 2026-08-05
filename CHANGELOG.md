@@ -1,5 +1,13 @@
 # Theatre.js changelog
 
+## 0.1.10
+
+- Bug fixes
+  - Three.js Package:
+    - Fixed orbit-mode selection sync when using the split runtime / `/extension` entries: `autoAddObject` and `buildExtension` again share the same Object3D ↔ sheet-object registry (outline BoxHelper and viewport click-to-select).
+
+
+
 ## 0.1.9
 
 - New features

@@ -2,19 +2,45 @@ import type {ISheetObject} from '@unseenco/theatre-core'
 import type {Object3D} from 'three'
 import {REGISTERED_OBJECT_FLAG} from './constants'
 
-const objectToSheetObject = new WeakMap<Object3D, ISheetObject>()
-const sheetObjectToObject = new WeakMap<ISheetObject, Object3D>()
+/**
+ * Shared across the runtime and `/extension` bundles via `globalThis`.
+ * Each entry is esbuild-bundled separately, so a module-level WeakMap would
+ * otherwise be duplicated and selection sync would see an empty registry.
+ */
+const REGISTRY_KEY = '__unseenco_theatre_threejs_objectRegistry__'
+
+type ObjectRegistryMaps = {
+  objectToSheetObject: WeakMap<Object3D, ISheetObject>
+  sheetObjectToObject: WeakMap<ISheetObject, Object3D>
+}
+
+function getMaps(): ObjectRegistryMaps {
+  const store = globalThis as typeof globalThis & {
+    [REGISTRY_KEY]?: ObjectRegistryMaps
+  }
+  let maps = store[REGISTRY_KEY]
+  if (!maps) {
+    maps = {
+      objectToSheetObject: new WeakMap(),
+      sheetObjectToObject: new WeakMap(),
+    }
+    store[REGISTRY_KEY] = maps
+  }
+  return maps
+}
 
 export function registerObjectLink(
   object3d: Object3D,
   sheetObject: ISheetObject,
 ): void {
+  const {objectToSheetObject, sheetObjectToObject} = getMaps()
   objectToSheetObject.set(object3d, sheetObject)
   sheetObjectToObject.set(sheetObject, object3d)
   object3d.userData[REGISTERED_OBJECT_FLAG] = true
 }
 
 export function unregisterObjectLink(object3d: Object3D): void {
+  const {objectToSheetObject, sheetObjectToObject} = getMaps()
   const sheetObject = objectToSheetObject.get(object3d)
   if (sheetObject) {
     sheetObjectToObject.delete(sheetObject)
@@ -26,18 +52,19 @@ export function unregisterObjectLink(object3d: Object3D): void {
 export function getSheetObjectForObject3D(
   object3d: Object3D,
 ): ISheetObject | undefined {
-  return objectToSheetObject.get(object3d)
+  return getMaps().objectToSheetObject.get(object3d)
 }
 
 export function getObject3DForSheetObject(
   sheetObject: ISheetObject,
 ): Object3D | undefined {
-  return sheetObjectToObject.get(sheetObject)
+  return getMaps().sheetObjectToObject.get(sheetObject)
 }
 
 export function resolveRegisteredAncestor(
   object: Object3D,
 ): {object3d: Object3D; sheetObject: ISheetObject} | undefined {
+  const {objectToSheetObject} = getMaps()
   let current: Object3D | null = object
   while (current) {
     const sheetObject = objectToSheetObject.get(current)
