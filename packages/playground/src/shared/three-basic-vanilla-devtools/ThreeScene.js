@@ -158,17 +158,18 @@ function createSpheresScene(sheet, width, height) {
   scene.add(sphereGrid)
   autoAddObject(sphereGrid, sheet)
 
-  // Two meshes sharing one material — both registered so we can test
-  // whether autoAddObject appliers fight over the same Material.
+  // Two meshes share one named material — the second autoAddObject splits
+  // it into "Shared Materials / Shared Material" and wires showPropsOf.
   const sharedMaterial = new MeshPhongMaterial({color: 0x4caf50})
+  sharedMaterial.name = 'Shared Material'
   const sharedGeo = new BoxGeometry(3, 3, 3)
   const sharedMeshA = new Mesh(sharedGeo, sharedMaterial)
-  sharedMeshA.name = 'Shared Material A'
+  sharedMeshA.name = 'Shared Mesh A'
   sharedMeshA.position.set(-8, 0, 8)
   scene.add(sharedMeshA)
 
   const sharedMeshB = new Mesh(sharedGeo, sharedMaterial)
-  sharedMeshB.name = 'Shared Material B'
+  sharedMeshB.name = 'Shared Mesh B'
   sharedMeshB.position.set(8, 0, 8)
   scene.add(sharedMeshB)
 

@@ -35,6 +35,7 @@ import {
   stripTransientPropsFromObjectInSheetState,
   stripSequenceTracksForPathsFromObjectInSheetState,
   stripTransientPathsFromSerializableMap,
+  getOrphanedTopLevelPropPathEncodings,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 type ICoreAssetStorage = {
@@ -484,6 +485,66 @@ export default class Project {
         strip(historic)
         return {...state, historic}
       })
+    }
+  }
+
+  /**
+   * After reconfigure, remove historic statics/tracks for top-level props that
+   * are no longer present in the object's config.
+   */
+  _stripPropsMissingFromConfig(
+    sheetId: SheetId,
+    objectKey: ObjectAddressKey,
+    config: PropTypeConfig,
+  ) {
+    const stripHistoric = (historic: ProjectState['historic']) => {
+      const sheetState = historic.sheetsById[sheetId]
+      if (!sheetState) return
+      const orphaned = getOrphanedTopLevelPropPathEncodings(
+        config,
+        sheetState,
+        objectKey,
+      )
+      if (orphaned.size === 0) return
+      stripTransientPropsFromObjectInSheetState(sheetState, objectKey, orphaned)
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const historic = drafts.historic.coreByProject[this.address.projectId]
+        if (historic) stripHistoric(historic)
+      })
+    } else {
+      this._onDiskStateAtom.reduce((state) => {
+        const historic = {...state.historic}
+        stripHistoric(historic)
+        return {...state, historic}
+      })
+    }
+
+    const stripAhistoric = (ahistoric: ProjectAhistoricState) => {
+      const sheetState = ahistoric.sheetsById?.[sheetId]
+      if (!sheetState) return
+      const orphaned = getOrphanedTopLevelPropPathEncodings(
+        config,
+        sheetState,
+        objectKey,
+      )
+      if (orphaned.size === 0) return
+      const staticOverrides = sheetState.staticOverrides.byObject[objectKey]
+      if (staticOverrides) {
+        sheetState.staticOverrides.byObject[objectKey] =
+          stripTransientPathsFromSerializableMap(staticOverrides, orphaned)
+      }
+    }
+
+    if (this._studio) {
+      this._studio.transaction(({drafts}) => {
+        const ahistoric = drafts.ahistoric.coreByProject[this.address.projectId]
+        if (ahistoric) stripAhistoric(ahistoric)
+      })
+    } else {
+      this._mutateCoreAhistoric(stripAhistoric)
     }
   }
 

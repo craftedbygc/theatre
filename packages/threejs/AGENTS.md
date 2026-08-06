@@ -4,11 +4,11 @@ Agent-facing notes for developing this package. See the repo root `AGENTS.md` fo
 
 ## What this package is
 
-A **Studio extension** (dev-time only, AGPL-3.0) that adds Three.js scene inspection tools. It also exports `autoAddObject()`, a runtime helper that binds Three.js objects to Theatre sheets. Consumers still use `@unseenco/theatre-core` for animation; `autoAddObject` automates the manual `sheet.object()` + `onValuesChange` wiring.
+A **Studio extension** (dev-time only, AGPL-3.0) that adds Three.js scene inspection tools. It also exports runtime helpers (`autoAddObject()`, `autoAddMaterial()`, `autoAddCamera()`) that bind Three.js objects and materials to Theatre sheets. Consumers still use `@unseenco/theatre-core` for animation; these helpers automate the manual `sheet.object()` + `onValuesChange` wiring.
 
 The main entry points are:
 
-- Package root (`@unseenco/theatre-threejs`) — runtime helpers: `autoAddObject()`, `autoAddCamera()`, `configureTheatreThreejs()` (no Studio)
+- Package root (`@unseenco/theatre-threejs`) — runtime helpers: `autoAddObject()`, `autoAddMaterial()`, `autoAddCamera()`, `configureTheatreThreejs()` (no Studio)
 - `@unseenco/theatre-threejs/extension` — `buildExtension()` Studio devtools (cameras, orbit controls, selection sync)
 
 `buildExtension()` returns:
@@ -29,6 +29,7 @@ The main entry points are:
 | --- | --- |
 | `src/buildExtension.ts` | Core logic: cameras, OrbitControls, toolbar, remote-editor behaviour, selection sync |
 | `src/autoAddObject.ts` | Register Three.js objects on Theatre sheets |
+| `src/autoAddMaterial.ts` | Register Three.js materials on Theatre sheets (material props only) |
 | `src/buildTransformProps.ts` | Transform prop config + applier |
 | `src/buildMaterialProps.ts` | Material prop introspection + applier |
 | `src/textureUtils.ts` | Texture slot detection, settings copy, async loading |
@@ -127,6 +128,33 @@ const sheetObject = autoAddObject(mesh, sheet, {
 ```
 
 `autoAddObject` calls `sheet.object()` without `reconfigure` — same `objectKey` returns the existing instance per Theatre's normal rules. It registers the Object3D in an internal registry used by `buildExtension` for bidirectional selection.
+
+### Shared materials (auto-split)
+
+When a second `autoAddObject` call uses the **same Material instance** as a previously registered mesh:
+
+1. Material props are removed from the first mesh (via `reconfigure`)
+2. A dedicated Theatre object is created under `Shared Materials / <material.name>`
+3. Both meshes get `showPropsOf([materialObject])` so material props appear in each mesh’s details pane
+
+Unnamed materials log a warning and use a temporary `Shared Materials / Material (<uuid>)` key — name the material for stable persisted state. Pass `trackMaterial: false` to opt out of embedding/split. If you already called `autoAddMaterial`, the first mesh skips embedding and links via `showPropsOf` immediately.
+
+## autoAddMaterial
+
+Register a Three.js material on a Theatre sheet with auto-parsed material properties only (no transforms, no selection registry):
+
+```js
+import {autoAddMaterial} from '@unseenco/theatre-threejs'
+
+const sheetObject = autoAddMaterial(material, sheet, {
+  objectKey: 'Shared Material', // default: material.name || 'Material'
+  namespace: '',
+  exclude: {uniforms: ['uTime']}, // merged with configureTheatreThreejs defaults
+  include: [],
+})
+```
+
+Uses the same material parser as `autoAddObject` (`buildMaterialProps`). Prefer this when you only need material props (e.g. a shared material used by multiple meshes). Explicit `autoAddMaterial` also marks the material as shared so later `autoAddObject` calls do not embed it.
 
 ### Texture props
 

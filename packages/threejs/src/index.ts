@@ -8,6 +8,7 @@
 
 export {autoAddObject} from './autoAddObject'
 export {autoAddCamera} from './autoAddCamera'
+export {autoAddMaterial} from './autoAddMaterial'
 export {
   configureTheatreThreejs,
   mergeExcludeInput,
@@ -22,6 +23,11 @@ export type {
   AutoAddCameraExcludeInput,
   AutoAddCameraOptions,
 } from './autoAddCamera'
+export type {
+  AutoAddMaterialExcludeConfig,
+  AutoAddMaterialExcludeInput,
+  AutoAddMaterialOptions,
+} from './autoAddMaterial'
 
 export type {
   AutoAddObjectDefaults,

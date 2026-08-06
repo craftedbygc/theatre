@@ -190,6 +190,96 @@ export function stripSequenceTracksForPathsFromObjectInSheetState(
 }
 
 /**
+ * Collects top-level prop path prefixes present in historic (or ahistoric-shaped)
+ * sheet state for an object but missing from the given config. Used when
+ * reconfigure drops props so leftover statics/tracks can be stripped.
+ */
+export function getOrphanedTopLevelPropPathEncodings(
+  config: PropTypeConfig,
+  sheetState: {
+    staticOverrides?: {
+      byObject?: Partial<Record<ObjectAddressKey, SerializableMap | undefined>>
+    }
+    staticOverridesByVariant?: Partial<
+      Record<
+        string,
+        | {
+            byObject?: Partial<
+              Record<ObjectAddressKey, SerializableMap | undefined>
+            >
+          }
+        | undefined
+      >
+    >
+    sequence?: HistoricPositionalSequence
+    sequencesById?: Partial<
+      Record<string, HistoricPositionalSequence | undefined>
+    >
+  },
+  objectKey: ObjectAddressKey,
+): ReadonlySet<PathToProp_Encoded> {
+  const validTopKeys = new Set<string>()
+  if (config.type === 'compound') {
+    for (const key of Object.keys(config.props)) {
+      validTopKeys.add(key)
+    }
+  }
+
+  const orphaned = new Set<PathToProp_Encoded>()
+
+  const considerTopKey = (key: string) => {
+    if (!validTopKeys.has(key)) {
+      orphaned.add(encodePathToProp([key]))
+    }
+  }
+
+  const staticOverrides = sheetState.staticOverrides?.byObject?.[objectKey]
+  if (staticOverrides) {
+    for (const key of Object.keys(staticOverrides)) {
+      considerTopKey(key)
+    }
+  }
+
+  if (sheetState.staticOverridesByVariant) {
+    for (const variantOverrides of Object.values(
+      sheetState.staticOverridesByVariant,
+    )) {
+      const objOverrides = variantOverrides?.byObject?.[objectKey]
+      if (objOverrides) {
+        for (const key of Object.keys(objOverrides)) {
+          considerTopKey(key)
+        }
+      }
+    }
+  }
+
+  const considerTracks = (sequence: HistoricPositionalSequence | undefined) => {
+    const objectTracks = sequence?.tracksByObject?.[objectKey]
+    if (!objectTracks) return
+    for (const encodedPath of Object.keys(objectTracks.trackIdByPropPath)) {
+      try {
+        const path = JSON.parse(encodedPath) as PathToProp
+        if (path.length === 0) continue
+        if (!getPropConfigByPath(config, path)) {
+          considerTopKey(String(path[0]))
+        }
+      } catch {
+        // ignore malformed path keys
+      }
+    }
+  }
+
+  considerTracks(sheetState.sequence)
+  if (sheetState.sequencesById) {
+    for (const sequence of Object.values(sheetState.sequencesById)) {
+      considerTracks(sequence)
+    }
+  }
+
+  return orphaned
+}
+
+/**
  * Removes transient prop data from historic state for a single object.
  * Mutates `sheetState` in place.
  */

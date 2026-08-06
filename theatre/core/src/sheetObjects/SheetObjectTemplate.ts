@@ -240,6 +240,11 @@ export default class SheetObjectTemplate {
   reconfigure(config: SheetObjectPropTypeConfig) {
     this._config.set(config)
     this._stripNonPersistingPropsFromAhistoricState()
+    this.project._stripPropsMissingFromConfig(
+      this.address.sheetId,
+      this.address.objectKey,
+      config,
+    )
   }
 
   setTransientPropPaths(

@@ -15,12 +15,17 @@ import type {
   UnknownShorthandCompoundProps,
   PropsValue,
 } from '@unseenco/theatre-core/propTypes/internals'
+import {compound} from '@unseenco/theatre-core/propTypes'
 import {debounce} from 'lodash-es'
 import type {DebouncedFunc} from 'lodash-es'
 import type {IRafDriver} from '@unseenco/theatre-core/rafDrivers'
 import {onChange} from '@unseenco/theatre-core/coreExports'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {resolveShowPropsOfSources} from './resolveShowPropsOf'
+import type {
+  TransientPropPath,
+  StaticPropPath,
+} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 export type SheetObjectValuesChangeMeta = {
   /**
@@ -138,6 +143,24 @@ export interface ISheetObject<
    * ```
    */
   showPropsOf(objects: ISheetObject[]): void
+
+  /**
+   * Returns the objects currently linked via {@link showPropsOf}.
+   */
+  getShowPropsOf(): ISheetObject[]
+
+  /**
+   * Replace this object's prop config. Props removed from `config` disappear
+   * from the Studio details pane; historic statics/tracks for those paths are
+   * stripped. Same effect as `sheet.object(key, config, {reconfigure: true})`.
+   */
+  reconfigure(
+    config: UnknownShorthandCompoundProps,
+    opts?: {
+      transient?: readonly TransientPropPath[]
+      static?: readonly StaticPropPath[]
+    },
+  ): void
 }
 
 // Enabled for https://linear.app/theatre/issue/P-217/if-objvalue-is-read-make-sure-its-derivation-remains-hot-for-a-while
@@ -259,5 +282,29 @@ export default class TheatreSheetObject<
     host.template.setShowPropsOf(
       resolveShowPropsOfSources(this, objects, `object.showPropsOf()`),
     )
+  }
+
+  getShowPropsOf(): ISheetObject[] {
+    return privateAPI(this).template.showPropsOf.map(
+      (object) => object.publicApi,
+    )
+  }
+
+  reconfigure(
+    config: UnknownShorthandCompoundProps,
+    opts?: {
+      transient?: readonly TransientPropPath[]
+      static?: readonly StaticPropPath[]
+    },
+  ): void {
+    const host = privateAPI(this)
+    const sanitizedConfig = compound(config)
+    host.template.reconfigure(sanitizedConfig)
+    if (opts?.transient !== undefined) {
+      host.template.setTransientPropPaths(opts.transient, sanitizedConfig)
+    }
+    if (opts?.static !== undefined) {
+      host.template.setStaticPropPaths(opts.static, sanitizedConfig)
+    }
   }
 }

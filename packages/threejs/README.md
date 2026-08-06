@@ -2,7 +2,7 @@
 
 Three.js helpers and Studio extension for [Theatre.js](https://www.theatrejs.com/).
 
-Runtime helpers (`autoAddObject`, `autoAddCamera`, …) import from the package root and do **not** load Studio. Studio devtools (`buildExtension`) import from `@unseenco/theatre-threejs/extension`.
+Runtime helpers (`autoAddObject`, `autoAddMaterial`, `autoAddCamera`, …) import from the package root and do **not** load Studio. Studio devtools (`buildExtension`) import from `@unseenco/theatre-threejs/extension`.
 
 ## Usage
 
@@ -68,8 +68,13 @@ const sheetObject = autoAddObject(mesh, sheet, {
   objectKey: 'My Mesh',
   exclude: {transform: ['scale'], material: ['normalMap']},
   include: {material: ['color', 'metalness', 'roughness']},
+  trackMaterial: true, // default when the object has a material
 })
 ```
+
+### Shared materials
+
+If two meshes registered with `autoAddObject` share the same Three.js `Material` instance, the package auto-splits that material into its own Theatre object under `Shared Materials / <material.name>`, removes material props from the first mesh, and links both via `showPropsOf`. Name your materials for stable keys; unnamed materials warn and fall back to a UUID-based key. Use `trackMaterial: false` to opt out, or call `autoAddMaterial` first to own the material object yourself.
 
 ### Static and transient props
 
@@ -131,6 +136,22 @@ uOffset: {
 ```
 
 If `gui` is omitted, number uniforms default to `nudgeMultiplier: 0.01` with no range.
+
+## autoAddMaterial
+
+Register a Three.js `Material` (or material array) on a Theatre sheet with auto-parsed material properties only — no transforms or Object3D selection sync. Use this when a material is shared across meshes, or when you only want to animate material props.
+
+```js
+import {autoAddMaterial} from '@unseenco/theatre-threejs'
+
+autoAddMaterial(mesh.material, sheet, {
+  objectKey: 'Shared Material',
+  exclude: {uniforms: ['uTime']},
+  include: {material: ['color', 'metalness', 'roughness']},
+})
+```
+
+Material / uniform `exclude` and `include` lists merge with `configureTheatreThreejs({ autoAddObject })` defaults the same way as `autoAddObject`. Texture slots are registered as transient image props (see [Static and transient props](#static-and-transient-props)).
 
 ## autoAddCamera
 
