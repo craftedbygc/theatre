@@ -1,5 +1,13 @@
 # Theatre.js changelog
 
+## 0.1.12
+
+- New features
+  - Three.js Package:
+    - `buildExtension()` now exposes `switchScene(nameOrIndex)` and `getActiveSceneName()` so apps can drive scene changes outside the toolbar flyout (same persist / side effects / `onSceneSwitch` path as the flyout).
+
+
+
 ## 0.1.11
 
 - New features
