@@ -1,5 +1,12 @@
 # Theatre.js changelog
 
+## 0.1.13
+
+- Bug fixes
+  - Three.js Package:
+    - `autoAddObject` / `autoAddMaterial` no longer throw when shader number uniforms omit a `gui` options object (`opts.range` was being passed as `undefined` into `types.number()`).
+
+
 ## 0.1.12
 
 - New features

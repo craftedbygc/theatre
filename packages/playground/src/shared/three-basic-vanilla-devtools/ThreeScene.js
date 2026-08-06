@@ -206,7 +206,7 @@ function createSpheresScene(sheet, width, height) {
   const shaderMaterial = new ShaderMaterial({
     uniforms: {
       uColor: {value: new Color(0xff6644)},
-      uOpacity: {value: 0.85, gui: {min: 0, max: 1, step: 0.01}},
+      uOpacity: {value: 0.85},
       uDiffuseMap: {value: null},
       uTime: {value: 0},
     },
