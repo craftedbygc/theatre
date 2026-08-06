@@ -92,6 +92,13 @@ export interface ThreejsDevtools {
   dispose(): void
   onSceneSwitch(callback: SceneSwitchCallback): () => void
   onOrbitModeSwitch(callback: OrbitModeSwitchCallback): () => void
+  /**
+   * Switch the active scene by configured name or index.
+   * No-op if already active, out of range, or the name is unknown.
+   * Persists and notifies like a toolbar flyout click.
+   */
+  switchScene(nameOrIndex: string | number): void
+  getActiveSceneName(): string
 }
 
 type CameraMode = 'scene' | 'orbit'
@@ -709,6 +716,16 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
       return () => {
         orbitModeSwitchListeners.delete(callback)
       }
+    },
+    switchScene(nameOrIndex) {
+      const index =
+        typeof nameOrIndex === 'number'
+          ? nameOrIndex
+          : findSceneIndexByName(nameOrIndex)
+      switchToScene(index, 'user')
+    },
+    getActiveSceneName() {
+      return getActiveScene().name
     },
     dispose() {
       for (const unsubscribe of unsubscribeFromState) {

@@ -34,6 +34,10 @@ const devtools = buildExtension({
 
 studio.extend(devtools.extension)
 
+// When the app switches scenes outside the toolbar flyout:
+// devtools.switchScene('Scene 2')
+// or: devtools.switchScene(1)
+
 function loop() {
   requestAnimationFrame(loop)
   devtools.update()
@@ -41,7 +45,7 @@ function loop() {
 }
 ```
 
-The extension adds a toolbar flyout to switch between scenes (when more than one is configured), a toggle between your scene camera and an OrbitControls dev camera, and orbit-mode tools for camera frustum visualization, line overlays, and interactive transform editing. Use `devtools.isOrbitMode()` to read the current mode. Pass `onOrbitModeSwitch` / `onSceneSwitch` in the `buildExtension` config to react to persisted restore during init; the returned `devtools.onOrbitModeSwitch()` / `devtools.onSceneSwitch()` methods also accept late subscribers but only receive subsequent changes.
+The extension adds a toolbar flyout to switch between scenes (when more than one is configured), a toggle between your scene camera and an OrbitControls dev camera, and orbit-mode tools for camera frustum visualization, line overlays, and interactive transform editing. Use `devtools.isOrbitMode()` to read the current mode. Pass `onOrbitModeSwitch` / `onSceneSwitch` in the `buildExtension` config to react to persisted restore during init; the returned `devtools.onOrbitModeSwitch()` / `devtools.onSceneSwitch()` methods also accept late subscribers but only receive subsequent changes. Call `devtools.switchScene(nameOrIndex)` when your app changes scenes outside the toolbar so the extension stays in sync; `devtools.getActiveSceneName()` returns the current scene name.
 
 ## configureTheatreThreejs
 

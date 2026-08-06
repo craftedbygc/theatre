@@ -17,6 +17,8 @@ The main entry points are:
 - `getCamera()` — active camera for `renderer.render(scene, camera)` (active scene camera or internal OrbitControls camera)
 - `isOrbitMode()` — whether the OrbitControls camera is currently active
 - `onSceneSwitch(callback)` / config `onSceneSwitch` — subscribe to scene changes; callback receives `(name, scene)` with the original `Scene` reference from init. Pass via `buildExtension({ onSceneSwitch })` to receive persisted restore during init; the returned `onSceneSwitch()` only gets later changes.
+- `switchScene(nameOrIndex)` — programmatically switch the active scene by configured name or index (same path as the toolbar flyout: persist, side effects, notify). No-op if already active or unknown.
+- `getActiveSceneName()` — current active scene name
 - `onOrbitModeSwitch(callback)` / config `onOrbitModeSwitch` — subscribe to orbit/scene camera toggles; callback receives `(enabled)`. Pass via `buildExtension({ onOrbitModeSwitch })` to receive persisted restore during init; the returned `onOrbitModeSwitch()` only gets later changes.
 - `update()` — call each frame when orbit mode is active
 - `dispose()` — tear down listeners and controls
@@ -79,6 +81,10 @@ const devtools = buildExtension({
 // devtools.onOrbitModeSwitch((enabled) => { ... })
 studio.extend(devtools.extension)
 
+// When the app switches scenes outside the toolbar flyout:
+// devtools.switchScene('Scene 2')
+// or: devtools.switchScene(1)
+
 function loop() {
   requestAnimationFrame(loop)
   devtools.update()
@@ -86,7 +92,7 @@ function loop() {
 }
 ```
 
-`buildExtension` needs the **renderer** and at least one **scene/camera pair** from the user's app. Scene switching in the render loop is user-driven via `onSceneSwitch` — the extension does not call `renderer.render()` itself. It cannot discover scenes automatically because `studio.extend()` only accepts a static extension config object.
+`buildExtension` needs the **renderer** and at least one **scene/camera pair** from the user's app. Scene switching in the render loop is user-driven via `onSceneSwitch` — the extension does not call `renderer.render()` itself. It cannot discover scenes automatically because `studio.extend()` only accepts a static extension config object. Call `devtools.switchScene(nameOrIndex)` when the app changes scenes outside the toolbar so persistence, orbit/helpers, and listeners stay in sync.
 
 ## configureTheatreThreejs
 
