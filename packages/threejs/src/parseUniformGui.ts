@@ -76,9 +76,22 @@ export function numberTypeOptionsFromUniformGui(
   nudgeMultiplier?: number
 } {
   const parsed = parseUniformGui(uniform, component)
+  // Only include defined keys. Theatre's t.number() treats an own `range`
+  // property as present even when undefined and throws in development.
+  const opts: {
+    range?: [number, number]
+    nudgeMultiplier?: number
+  } = {}
 
-  return {
-    range: parsed.range ?? defaults.range,
-    nudgeMultiplier: parsed.nudgeMultiplier ?? defaults.nudgeMultiplier,
+  const range = parsed.range ?? defaults.range
+  if (range !== undefined) {
+    opts.range = range
   }
+
+  const nudgeMultiplier = parsed.nudgeMultiplier ?? defaults.nudgeMultiplier
+  if (nudgeMultiplier !== undefined) {
+    opts.nudgeMultiplier = nudgeMultiplier
+  }
+
+  return opts
 }
