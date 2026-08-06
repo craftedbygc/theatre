@@ -1,5 +1,20 @@
 # Theatre.js changelog
 
+## 0.1.11
+
+- New features
+  - **`showPropsOf`** — embed another sheet object's props in an object's Studio details pane (UI-only; edits and sequencing still target the source object).
+    - `sheet.object(key, props, { showPropsOf: [other] })` or retroactive `object.showPropsOf([other])` / `object.getShowPropsOf()`
+    - Linked props render in fieldset sections titled with the source object key
+    - Playground demo: [`packages/playground/src/shared/show-props-of`](./packages/playground/src/shared/show-props-of) (`/shared/show-props-of/`)
+  - **`object.reconfigure(config, opts?)`** — replace an object's prop config after creation; historic statics/tracks for removed props are stripped
+  - Three.js Package:
+    - `autoAddMaterial()` — register a Three.js `Material` on a sheet (material props only; no transforms / selection registry)
+    - **Shared-material auto-split** — when a second `autoAddObject` uses the same `Material` instance, material props are moved to a dedicated object under `Shared Materials / <name>`, both meshes link via `showPropsOf`, and the first mesh stops applying material locally. Unnamed materials warn and fall back to a UUID-based key; pass `trackMaterial: false` to opt out, or call `autoAddMaterial` first to own the material object
+    - Devtools playground: InstancedMesh sphere grid and shared-material meshes exercising auto-split (`/shared/three-basic-vanilla-devtools/`)
+
+
+
 ## 0.1.10
 
 - New features
