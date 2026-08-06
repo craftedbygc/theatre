@@ -13,6 +13,7 @@ import {
 } from './materialRegistry'
 import type {MaterialBinding} from './materialRegistry'
 import {registerObjectLink} from './objectRegistry'
+import type {TransientPropPath} from '@unseenco/theatre-shared/utils/transientPropPaths'
 
 export type AutoAddObjectOptions = {
   objectKey?: string
@@ -106,7 +107,7 @@ export function autoAddObject<T extends Object3D>(
 
   const config: Record<string, unknown> = {...transformOnlyConfig}
   const binding: MaterialBinding = {}
-  let transientPaths: string[] = []
+  let transientPaths: TransientPropPath[] = []
   let shareMaterialSheetObject: ISheetObject | undefined
   let embedMaterial = false
 

@@ -54,7 +54,7 @@ export type ISheetObjectOptions = {
    * sheet.object('Box', {x: 0}, {showPropsOf: [appearance]})
    * ```
    */
-  showPropsOf?: ISheetObject[]
+  showPropsOf?: ISheetObject<any>[]
   /**
    * Prop paths that are excluded from exported project state JSON.
    * Values are stored in ahistoric static overrides (persist across Studio
@@ -336,7 +336,7 @@ export default class TheatreSheet implements ISheet {
               if (opts.showPropsOf !== undefined) {
                 existingObject.template.setShowPropsOf(
                   resolveShowPropsOfSources(
-                    existingObject.publicApi,
+                    existingObject,
                     opts.showPropsOf,
                     `sheet.object(..., {showPropsOf})`,
                   ),
@@ -381,7 +381,7 @@ export default class TheatreSheet implements ISheet {
       if (opts?.showPropsOf !== undefined) {
         existingObject.template.setShowPropsOf(
           resolveShowPropsOfSources(
-            existingObject.publicApi,
+            existingObject,
             opts.showPropsOf,
             `sheet.object(..., {showPropsOf})`,
           ),
@@ -406,7 +406,7 @@ export default class TheatreSheet implements ISheet {
       if (opts?.showPropsOf !== undefined) {
         object.template.setShowPropsOf(
           resolveShowPropsOfSources(
-            object.publicApi,
+            object,
             opts.showPropsOf,
             `sheet.object(..., {showPropsOf})`,
           ),

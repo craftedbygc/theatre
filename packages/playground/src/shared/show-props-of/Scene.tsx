@@ -45,7 +45,7 @@ const Box: React.FC<{
   name: string
   x: number
   y: number
-  appearance: ISheetObject
+  appearance: ISheetObject<any>
   /** When true, link Appearance via object.showPropsOf() after create. */
   linkRetroactively?: boolean
 }> = ({sheet, name, x, y, appearance, linkRetroactively = false}) => {

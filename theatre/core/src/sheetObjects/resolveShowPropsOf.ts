@@ -10,8 +10,8 @@ import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadable
  * Sources must be from the same sheet instance as the host and must not include the host.
  */
 export function resolveShowPropsOfSources(
-  hostPublic: ISheetObject,
-  objects: ISheetObject[],
+  host: SheetObject,
+  objects: ISheetObject<any>[],
   apiName: string,
 ): SheetObject[] {
   if (!Array.isArray(objects)) {
@@ -20,8 +20,6 @@ export function resolveShowPropsOfSources(
         `Instead, it was ${userReadableTypeOfValue(objects)}.`,
     )
   }
-
-  const host = privateAPI(hostPublic)
 
   return objects.map((obj, index) => {
     if (!isSheetObjectPublicAPI(obj)) {

@@ -142,12 +142,12 @@ export interface ISheetObject<
    * box.showPropsOf([appearance])
    * ```
    */
-  showPropsOf(objects: ISheetObject[]): void
+  showPropsOf(objects: ISheetObject<any>[]): void
 
   /**
    * Returns the objects currently linked via {@link showPropsOf}.
    */
-  getShowPropsOf(): ISheetObject[]
+  getShowPropsOf(): ISheetObject<any>[]
 
   /**
    * Replace this object's prop config. Props removed from `config` disappear
@@ -277,14 +277,14 @@ export default class TheatreSheetObject<
     privateAPI(this).setInitialValue(val)
   }
 
-  showPropsOf(objects: ISheetObject[]): void {
+  showPropsOf(objects: ISheetObject<any>[]): void {
     const host = privateAPI(this)
     host.template.setShowPropsOf(
-      resolveShowPropsOfSources(this, objects, `object.showPropsOf()`),
+      resolveShowPropsOfSources(host, objects, `object.showPropsOf()`),
     )
   }
 
-  getShowPropsOf(): ISheetObject[] {
+  getShowPropsOf(): ISheetObject<any>[] {
     return privateAPI(this).template.showPropsOf.map(
       (object) => object.publicApi,
     )

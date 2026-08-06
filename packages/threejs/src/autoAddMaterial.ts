@@ -28,9 +28,10 @@ function toExcludeInput(
 ): ExcludeInput | undefined {
   if (!input) return undefined
   if (Array.isArray(input)) return input
+  const config = input as AutoAddMaterialExcludeConfig
   return {
-    material: input.material,
-    uniforms: input.uniforms,
+    material: config.material,
+    uniforms: config.uniforms,
   }
 }
 
