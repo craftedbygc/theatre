@@ -1,10 +1,10 @@
-import {Clock} from 'three'
+import { Clock } from 'three'
 import studio from '@unseenco/theatre-studio'
-import {getProject} from '@unseenco/theatre-core'
-import {configureTheatreThreejs} from '@unseenco/theatre-threejs'
-import {buildExtension} from '@unseenco/theatre-threejs/extension'
-import {bindDockedThreeViewport} from '../utils/bindDockedThreeViewport'
-import {createThreeScenes} from './ThreeScene.js'
+import { getProject } from '@unseenco/theatre-core'
+import { configureTheatreThreejs } from '@unseenco/theatre-threejs'
+import { buildExtension } from '@unseenco/theatre-threejs/extension'
+import { bindDockedThreeViewport } from '../utils/bindDockedThreeViewport'
+import { createThreeScenes } from './ThreeScene.js'
 
 studio.initialize()
 
@@ -16,37 +16,43 @@ configureTheatreThreejs({
   },
 })
 
-const project = getProject('Three Basic Vanilla Devtools')
-const {renderer, scenes, onFrame} = createThreeScenes(project)
-const clock = new Clock()
+async function main() {
 
-let activeScene = scenes[0].scene
+  const project = getProject('Three Basic Vanilla Devtools', { assets: { baseUrl: '/public' } })
+  await project.ready
+  const { renderer, scenes, onFrame } = await createThreeScenes(project)
+  const clock = new Clock()
 
-const devtools = buildExtension({
-  renderer,
-  scenes,
-  studio,
-  onSceneSwitch(_name, scene) {
-    activeScene = scene
-  },
-  onOrbitModeSwitch(enabled) {
-    console.log('orbit mode switched', enabled)
-  },
-})
+  let activeScene = scenes[0].scene
 
-studio.extend(devtools.extension)
+  const devtools = buildExtension({
+    renderer,
+    scenes,
+    studio,
+    onSceneSwitch(_name, scene) {
+      activeScene = scene
+    },
+    onOrbitModeSwitch(enabled) {
+      console.log('orbit mode switched', enabled)
+    },
+  })
 
-bindDockedThreeViewport({
-  canvas: document.getElementById('canvas'),
-  renderer,
-  cameras: scenes.map(({camera}) => camera),
-})
+  studio.extend(devtools.extension)
 
-function render() {
-  requestAnimationFrame(render)
-  onFrame?.(clock.getElapsedTime())
-  devtools.update()
-  renderer.render(activeScene, devtools.getCamera())
+  bindDockedThreeViewport({
+    canvas: document.getElementById('canvas'),
+    renderer,
+    cameras: scenes.map(({ camera }) => camera),
+  })
+
+  function render() {
+    requestAnimationFrame(render)
+    onFrame?.(clock.getElapsedTime())
+    devtools.update()
+    renderer.render(activeScene, devtools.getCamera())
+  }
+
+  render()
 }
 
-render()
+main()

@@ -97,3 +97,16 @@ export function getAllPossibleAssetIDs(project: Project, type?: string) {
 
 export type Asset = {type: 'image'; id: string | undefined}
 export type File = {type: 'file'; id: string | undefined}
+
+/**
+ * True when an asset id is already a loadable URL (absolute or path-like),
+ * rather than a Theatre-managed filename such as `texture.png`.
+ *
+ * Used by `getAssetUrl` so pre-existing Three.js texture URLs (and similar)
+ * can be used as image prop defaults without going through `baseUrl`.
+ */
+export function isDirectAssetUrl(assetId: string): boolean {
+  if (/^(?:https?:\/\/|blob:|data:)/i.test(assetId)) return true
+  // Relative / absolute paths — Theatre-managed ids are bare filenames.
+  return assetId.includes('/') || assetId.includes('\\')
+}

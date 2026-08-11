@@ -79,19 +79,15 @@ export function isUniformTextureProp(
   )
 }
 
+/**
+ * Default Theatre image asset id for an existing Three.js texture.
+ * Uses the image's original URL so Studio can preview it directly (via
+ * `getAssetUrl` passthrough for direct URLs) instead of a bare basename
+ * that 404s under the project's asset `baseUrl`.
+ */
 export function textureToDefaultAssetId(texture: Texture): string {
   const image = texture.image as {src?: string} | undefined
-  if (!image?.src) return ''
-
-  try {
-    const url = new URL(image.src, window.location.href)
-    const segments = url.pathname.split('/')
-    const basename = segments[segments.length - 1]
-    return basename ?? ''
-  } catch {
-    const segments = image.src.split('/')
-    return segments[segments.length - 1] ?? ''
-  }
+  return image?.src ?? ''
 }
 
 export function copyTextureSettings(from: Texture, to: Texture): void {
@@ -173,6 +169,8 @@ export function createTextureSlotApplier(
     const state = getSlotState(owner, key)
     const assetId = getImageAssetId(asset)
 
+    // Skip when the image id is unchanged — onValuesChange fires for every
+    // prop edit, and reloading an unchanged texture causes needless fetches.
     if (state.appliedAssetId === assetId) {
       return
     }
@@ -195,13 +193,28 @@ export function createTextureSlotApplier(
       return
     }
 
+    // First sync: Theatre echoes the default asset id derived from an
+    // already-present texture. Keep that texture — do not reload.
+    if (state.appliedAssetId === undefined) {
+      const existingTexture = getCurrentTexture()
+      if (existingTexture && isTexture(existingTexture)) {
+        state.appliedAssetId = assetId
+        return
+      }
+    }
+
     const url = getAssetUrl(asset as Asset)
     if (!url) {
+      // Remember the id so a missing asset is not retried on every edit.
+      state.appliedAssetId = assetId
       return
     }
 
     state.generation += 1
     const generation = state.generation
+    // Mark before the async load so concurrent same-id callbacks are no-ops,
+    // including when the load later 404s.
+    state.appliedAssetId = assetId
 
     loader.load(
       url,
@@ -218,7 +231,6 @@ export function createTextureSlotApplier(
 
         disposeTheatreTexture(state)
         state.theatreTexture = loadedTexture
-        state.appliedAssetId = assetId
         setTexture(loadedTexture)
         onAssigned?.()
       },

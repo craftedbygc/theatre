@@ -29,7 +29,10 @@ import type {OutlineNamespaceConfig} from '@unseenco/theatre-shared/utils/outlin
 import {_coreLogger} from '@unseenco/theatre-core/_coreLogger'
 import type {PathToProp_Encoded} from '@unseenco/theatre-shared/utils/addresses'
 import type {PropTypeConfig} from '@unseenco/theatre-core/propTypes'
-import {stripImageAssetsFromAhistoricStaticOverrides} from '@unseenco/theatre-shared/utils/assets'
+import {
+  isDirectAssetUrl,
+  stripImageAssetsFromAhistoricStaticOverrides,
+} from '@unseenco/theatre-shared/utils/assets'
 import {getNonPersistingPropPathEncodings} from '@unseenco/theatre-shared/propTypes/utils'
 import {
   stripTransientPropsFromObjectInSheetState,
@@ -133,7 +136,10 @@ export default class Project {
 
     this._assetStorageReadyDeferred = defer()
     this.assetStorage = {
-      getAssetUrl: (assetId: string) => `${config.assets?.baseUrl}/${assetId}`,
+      getAssetUrl: (assetId: string) =>
+        isDirectAssetUrl(assetId)
+          ? assetId
+          : `${config.assets?.baseUrl}/${assetId}`,
 
       // Until the asset storage is ready, we'll throw an error when the user tries to use it
       createAsset: () => {

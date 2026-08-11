@@ -24,7 +24,7 @@ import {defer} from '@unseenco/theatre-shared/utils/defer'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 import shallowEqual from 'shallowequal'
 import {createStore} from './IDBStorage'
-import {getAllPossibleAssetIDs} from '@unseenco/theatre-shared/utils/assets'
+import {getAllPossibleAssetIDs, isDirectAssetUrl} from '@unseenco/theatre-shared/utils/assets'
 import {notify} from './notify'
 import type {RafDriverPrivateAPI} from '@unseenco/theatre-core/rafDrivers'
 import {syncAllStudioPreviewVariants} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
@@ -484,9 +484,13 @@ export class Studio {
 
     return {
       getAssetUrl: (assetId: string) => {
-        return assetsMap.has(assetId)
-          ? getUrlForId(assetId)
-          : resolvedBaseUrl
+        if (assetsMap.has(assetId)) {
+          return getUrlForId(assetId)
+        }
+        if (isDirectAssetUrl(assetId)) {
+          return assetId
+        }
+        return resolvedBaseUrl
           ? `${resolvedBaseUrl.replace(/\/$/, '')}/${assetId}`
           : ''
       },

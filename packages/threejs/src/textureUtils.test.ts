@@ -79,11 +79,20 @@ describe('textureUtils', () => {
   })
 
   describe('textureToDefaultAssetId', () => {
-    it('extracts the basename from an image src', () => {
+    it('uses the image src as the default asset id', () => {
       const texture = new Texture()
       texture.image = {src: 'https://example.com/assets/texture.png'}
 
-      expect(textureToDefaultAssetId(texture)).toBe('texture.png')
+      expect(textureToDefaultAssetId(texture)).toBe(
+        'https://example.com/assets/texture.png',
+      )
+    })
+
+    it('preserves relative image srcs', () => {
+      const texture = new Texture()
+      texture.image = {src: './textures/noise.jpg'}
+
+      expect(textureToDefaultAssetId(texture)).toBe('./textures/noise.jpg')
     })
 
     it('returns an empty string when no src is available', () => {
@@ -150,6 +159,7 @@ describe('textureUtils', () => {
 
       const applyTexture = createTextureSlotApplier(() => '/texture.png')
 
+      // First sync with an existing map only records the default id.
       applyTexture(
         owner,
         'map',
@@ -162,7 +172,7 @@ describe('textureUtils', () => {
       )
 
       expect(current).not.toBeNull()
-      expect(assignCount).toBe(1)
+      expect(assignCount).toBe(0)
 
       applyTexture(
         owner,
@@ -176,7 +186,7 @@ describe('textureUtils', () => {
       )
 
       expect(current).toBeNull()
-      expect(assignCount).toBe(2)
+      expect(assignCount).toBe(1)
 
       applyTexture(
         owner,
@@ -189,7 +199,123 @@ describe('textureUtils', () => {
         },
       )
 
-      expect(assignCount).toBe(2)
+      expect(assignCount).toBe(1)
+    })
+
+    it('loads when a Theatre asset is assigned after the slot was empty', () => {
+      const owner = {}
+      let current: Texture | null = null
+      let assignCount = 0
+      let loadCount = 0
+
+      TextureLoader.prototype.load = function load(
+        _url: string,
+        onLoad: (texture: Texture) => void,
+      ) {
+        loadCount += 1
+        onLoad(new Texture())
+      } as typeof TextureLoader.prototype.load
+
+      const applyTexture = createTextureSlotApplier(() => '/texture.png')
+
+      applyTexture(
+        owner,
+        'map',
+        {type: 'image', id: 'texture.png'},
+        () => current,
+        (texture) => {
+          assignCount += 1
+          current = texture
+        },
+      )
+
+      expect(loadCount).toBe(1)
+      expect(assignCount).toBe(1)
+      expect(current).not.toBeNull()
+    })
+
+    it('preserves an existing texture on first sync with a default asset id', () => {
+      const owner = {}
+      const existing = new Texture()
+      let current: Texture | null = existing
+      let loadCount = 0
+
+      TextureLoader.prototype.load = function load(
+        _url: string,
+        onLoad: (texture: Texture) => void,
+      ) {
+        loadCount += 1
+        onLoad(new Texture())
+      } as typeof TextureLoader.prototype.load
+
+      const applyTexture = createTextureSlotApplier(() => '/noise.jpg')
+      const asset = {type: 'image' as const, id: 'noise.jpg'}
+
+      applyTexture(
+        owner,
+        'uDiffuseMap',
+        asset,
+        () => current,
+        (texture) => {
+          current = texture
+        },
+      )
+
+      expect(loadCount).toBe(0)
+      expect(current).toBe(existing)
+
+      // Unrelated prop edits re-deliver the same image id — still no reload.
+      applyTexture(
+        owner,
+        'uDiffuseMap',
+        asset,
+        () => current,
+        (texture) => {
+          current = texture
+        },
+      )
+
+      expect(loadCount).toBe(0)
+      expect(current).toBe(existing)
+    })
+
+    it('does not retry when getAssetUrl returns undefined', () => {
+      const owner = {}
+      let current: Texture | null = null
+      let loadCount = 0
+
+      TextureLoader.prototype.load = function load(
+        _url: string,
+        onLoad: (texture: Texture) => void,
+      ) {
+        loadCount += 1
+        onLoad(new Texture())
+      } as typeof TextureLoader.prototype.load
+
+      const applyTexture = createTextureSlotApplier(() => undefined)
+      const asset = {type: 'image' as const, id: 'missing.png'}
+
+      applyTexture(
+        owner,
+        'map',
+        asset,
+        () => current,
+        (texture) => {
+          current = texture
+        },
+      )
+      applyTexture(
+        owner,
+        'map',
+        asset,
+        () => current,
+        (texture) => {
+          current = texture
+        },
+      )
+
+      expect(loadCount).toBe(0)
+      expect(current).toBeNull()
     })
 
     it('copies settings from the existing texture when loading a new one', () => {
@@ -210,13 +336,25 @@ describe('textureUtils', () => {
         onLoad(new Texture())
       } as typeof TextureLoader.prototype.load
 
-      const applyTexture = createTextureSlotApplier(() => '/texture.png')
-      const asset = {type: 'image' as const, id: 'texture.png'}
+      const applyTexture = createTextureSlotApplier((asset) => `/${asset.id}`)
+
+      // Establish a prior Theatre assignment so the next id is a real change.
+      applyTexture(
+        owner,
+        'map',
+        {type: 'image', id: 'first.png'},
+        () => current,
+        (texture) => {
+          current = texture
+        },
+      )
+      expect(loadCount).toBe(0)
+      expect(current).toBe(existing)
 
       applyTexture(
         owner,
         'map',
-        asset,
+        {type: 'image', id: 'texture.png'},
         () => current,
         (texture) => {
           assigned = texture
@@ -234,7 +372,7 @@ describe('textureUtils', () => {
       applyTexture(
         owner,
         'map',
-        asset,
+        {type: 'image', id: 'texture.png'},
         () => current,
         (texture) => {
           assigned = texture

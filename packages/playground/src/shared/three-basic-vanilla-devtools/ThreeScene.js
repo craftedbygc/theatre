@@ -16,6 +16,7 @@ import {
   Scene,
   ShaderMaterial,
   SphereGeometry,
+  TextureLoader,
   Vector3,
   WebGLRenderer,
 } from 'three'
@@ -23,7 +24,7 @@ import {
 /**
  * @param {import('@unseenco/theatre-core').IProject} project
  */
-export function createThreeScenes(project) {
+export async function createThreeScenes(project) {
   const canvas = document.getElementById('canvas')
   const width = window.innerWidth
   const height = window.innerHeight
@@ -34,7 +35,7 @@ export function createThreeScenes(project) {
   renderer.setPixelRatio(devicePixelRatio)
   renderer.setSize(width, height)
 
-  const spheresScene = createSpheresScene(
+  const spheresScene = await createSpheresScene(
     project.sheet('Sphere'),
     width,
     height,
@@ -93,7 +94,7 @@ function addInvisibleCameraPath(scene) {
 /**
  * @param {import('@unseenco/theatre-core').ISheet} sheet
  */
-function createSpheresScene(sheet, width, height) {
+async function createSpheresScene(sheet, width, height) {
   const scene = new Scene()
   scene.name = 'Spheres'
   scene.background = new Color(0xcccccc)
@@ -196,18 +197,13 @@ function createSpheresScene(sheet, width, height) {
   mesh.name = 'Hero Sphere'
   scene.add(mesh)
 
-  const shaderFallbackTexture = new DataTexture(
-    new Uint8Array([255, 255, 255, 255]),
-    1,
-    1,
-  )
-  shaderFallbackTexture.needsUpdate = true
+  const texture = await new TextureLoader().loadAsync('./textures/noise.jpg')
 
   const shaderMaterial = new ShaderMaterial({
     uniforms: {
       uColor: {value: new Color(0xff6644)},
       uOpacity: {value: 0.85},
-      uDiffuseMap: {value: null},
+      uDiffuseMap: {value: texture},
       uTime: {value: 0},
     },
     vertexShader: /* glsl */ `
@@ -249,10 +245,6 @@ function createSpheresScene(sheet, width, height) {
   registerSceneCamera(sheet, camera, scene)
   autoAddObject(mesh, sheet, {objectKey: 'Hero Sphere'})
   autoAddObject(shaderCube, sheet, {exclude: ['uTime']})
-
-  if (!shaderMaterial.uniforms.uDiffuseMap.value) {
-    shaderMaterial.uniforms.uDiffuseMap.value = shaderFallbackTexture
-  }
 
   const onFrame = (elapsedTime) => {
     shaderMaterial.uniforms.uTime.value = elapsedTime
