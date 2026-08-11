@@ -1,5 +1,13 @@
 # Theatre.js changelog
 
+## 0.1.14
+
+- Bug fixes
+  - Three.js Package:
+    - Texture / image props from `autoAddObject` / `autoAddMaterial` only reload when the image asset id actually changes, so editing other material props no longer re-fetches (and 404s) the existing map.
+    - Preloaded textures now register their original image URL as the Theatre image prop default; `getAssetUrl` passes direct URLs through so the details-pane preview loads the real texture instead of a basename under the asset `baseUrl`.
+
+
 ## 0.1.13
 
 - Bug fixes
