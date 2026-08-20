@@ -8,11 +8,15 @@ import {REGISTERED_OBJECT_FLAG} from './constants'
  * otherwise be duplicated and selection sync would see an empty registry.
  */
 const REGISTRY_KEY = '__unseenco_theatre_threejs_objectRegistry__'
+const REGISTRY_LISTENERS_KEY =
+  '__unseenco_theatre_threejs_objectRegistryListeners__'
 
 type ObjectRegistryMaps = {
   objectToSheetObject: WeakMap<Object3D, ISheetObject>
   sheetObjectToObject: WeakMap<ISheetObject, Object3D>
 }
+
+type RegistryListener = () => void
 
 function getMaps(): ObjectRegistryMaps {
   const store = globalThis as typeof globalThis & {
@@ -29,6 +33,36 @@ function getMaps(): ObjectRegistryMaps {
   return maps
 }
 
+function getListeners(): Set<RegistryListener> {
+  const store = globalThis as typeof globalThis & {
+    [REGISTRY_LISTENERS_KEY]?: Set<RegistryListener>
+  }
+  let listeners = store[REGISTRY_LISTENERS_KEY]
+  if (!listeners) {
+    listeners = new Set()
+    store[REGISTRY_LISTENERS_KEY] = listeners
+  }
+  return listeners
+}
+
+function notifyRegistryChange(): void {
+  for (const listener of getListeners()) {
+    listener()
+  }
+}
+
+/**
+ * Subscribe to object registry add/remove. Used by the Studio extension to
+ * re-sync outline visibility when objects are auto-added after init.
+ */
+export function onObjectRegistryChange(listener: RegistryListener): () => void {
+  const listeners = getListeners()
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
 export function registerObjectLink(
   object3d: Object3D,
   sheetObject: ISheetObject,
@@ -37,6 +71,7 @@ export function registerObjectLink(
   objectToSheetObject.set(object3d, sheetObject)
   sheetObjectToObject.set(sheetObject, object3d)
   object3d.userData[REGISTERED_OBJECT_FLAG] = true
+  notifyRegistryChange()
 }
 
 export function unregisterObjectLink(object3d: Object3D): void {
@@ -47,6 +82,7 @@ export function unregisterObjectLink(object3d: Object3D): void {
   }
   objectToSheetObject.delete(object3d)
   delete object3d.userData[REGISTERED_OBJECT_FLAG]
+  notifyRegistryChange()
 }
 
 export function getSheetObjectForObject3D(

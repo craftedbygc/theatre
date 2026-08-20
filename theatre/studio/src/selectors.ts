@@ -13,7 +13,10 @@ import {uniq} from 'lodash-es'
 import getStudio from './getStudio'
 import type {OutlineSelectable, OutlineSelection} from './store/types'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
-import {STUDIO_PROJECT_ID} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import {
+  STUDIO_PROJECT_ID,
+  isSheetVisibleInOutline,
+} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 
 export const getOutlineSelection = (): OutlineSelection => {
@@ -60,7 +63,7 @@ export const getSheetOfSheetId = (
 function getFirstSheetInProject(project: Project): Sheet | undefined {
   for (const sheetId of getRegisteredSheetIds(project)) {
     const sheet = getSheetOfSheetId(project, sheetId)
-    if (sheet) return sheet
+    if (sheet && isSheetVisibleInOutline(sheet)) return sheet
   }
   return undefined
 }

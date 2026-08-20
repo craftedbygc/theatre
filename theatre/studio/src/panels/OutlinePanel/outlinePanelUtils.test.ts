@@ -10,6 +10,7 @@ import {
 } from './outlinePanelUtils'
 import type {NamespacedObjects} from './outlinePanelUtils'
 import type {SheetId} from '@unseenco/theatre-shared/utils/ids'
+import {Atom} from '@unseenco/theatre-dataverse'
 
 describe('outlinePanelUtils', () => {
   test('parseOutlineNamespacePath normalizes slashes', () => {
@@ -73,11 +74,13 @@ describe('outlinePanelUtils', () => {
   })
 
   test('isSheetVisibleInOutline respects sheet template visibility', () => {
+    const visibleAtom = new Atom(true)
+    const hiddenAtom = new Atom(false)
     const visibleSheet = {
-      template: {isVisibleInOutline: () => true},
+      template: {visibleInOutlineP: visibleAtom.pointer},
     } as Parameters<typeof isSheetVisibleInOutline>[0]
     const hiddenSheet = {
-      template: {isVisibleInOutline: () => false},
+      template: {visibleInOutlineP: hiddenAtom.pointer},
     } as Parameters<typeof isSheetVisibleInOutline>[0]
 
     expect(isSheetVisibleInOutline(visibleSheet)).toBe(true)

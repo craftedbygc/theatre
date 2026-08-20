@@ -2,6 +2,7 @@ import type Project from '@unseenco/theatre-core/projects/Project'
 import {useCallback} from 'react'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import {useVal} from '@unseenco/theatre-react'
+import {val} from '@unseenco/theatre-dataverse'
 import type Sheet from '@unseenco/theatre-core/sheets/Sheet'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
@@ -34,7 +35,8 @@ export function shouldShowSequenceVariantsInOutline(sheet: Sheet): boolean {
 }
 
 export function isSheetVisibleInOutline(sheet: Sheet): boolean {
-  return sheet.template.isVisibleInOutline()
+  // Read via pointer so outline UI re-renders when visibility changes.
+  return val(sheet.template.visibleInOutlineP)
 }
 
 export function isSheetObjectVisibleInOutline(object: SheetObject): boolean {

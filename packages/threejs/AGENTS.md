@@ -37,6 +37,7 @@ The main entry points are:
 | `src/textureUtils.ts` | Texture slot detection, settings copy, async loading |
 | `src/objectRegistry.ts` | Object3D ↔ ISheetObject registry (singleton on `globalThis` so runtime + `/extension` bundles share it) |
 | `src/selectionSync.ts` | Bidirectional outline ↔ orbit selection via BoxHelper + raycasting |
+| `src/outlineSceneVisibility.ts` | Multi-scene: hide inactive scenes' sheets from the Studio outline |
 | `src/config.ts` | Project-wide `configureTheatreThreejs()` defaults |
 | `src/colorUtils.ts` | Linear ↔ sRGB color conversion for Theatre rgba props |
 | `src/persistence.ts` | Studio sheet object for persisted devtools state |
@@ -174,6 +175,10 @@ When both `autoAddObject` and `buildExtension` are used:
 - **Viewport → outline** (orbit mode only): click a registered object to select it in the outline (uses raycasting; ignores OrbitControls drags via a 3px movement threshold)
 
 Selection state is ephemeral — not persisted to sheets.
+
+### Multi-scene outline filtering
+
+When `scenes` has more than one entry, the outline shows only sheets that have registered objects in the **active** scene. Sheets belonging solely to other scenes are hidden via `project.sheet(id, {visible})`. Sheets with objects in multiple scenes stay visible whenever any of those scenes is active. Filtering re-runs on scene switch and when the object registry changes.
 
 ## Persistence
 

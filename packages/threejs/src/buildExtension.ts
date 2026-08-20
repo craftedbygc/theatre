@@ -41,6 +41,7 @@ import type {
 } from './persistence'
 import {setupSelectionSync} from './selectionSync'
 import type {SelectionSync} from './selectionSync'
+import {setupOutlineSceneVisibility} from './outlineSceneVisibility'
 import {setupTransformControls} from './transformControlsSetup'
 import type {
   TransformControlsSetup,
@@ -157,6 +158,9 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
   if (onOrbitModeSwitch) orbitModeSwitchListeners.add(onOrbitModeSwitch)
   let selectionSync: SelectionSync | undefined
   let transformControls: TransformControlsSetup | undefined
+  let outlineSceneVisibility:
+    | ReturnType<typeof setupOutlineSceneVisibility>
+    | undefined
 
   const getActiveScene = () => normalizedScenes[activeSceneIndex]
   const getActiveSceneCamera = () => getActiveScene().camera
@@ -303,6 +307,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     updateCameraHelperVisibility()
     updateLinesHelperVisibility()
     rebuildActiveSceneLineHelpers()
+    outlineSceneVisibility?.refresh()
     notifySceneSwitch()
   }
 
@@ -663,6 +668,12 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
     isOrbitMode: () => mode === 'orbit',
   })
 
+  outlineSceneVisibility = setupOutlineSceneVisibility({
+    studio,
+    getScenes: () => normalizedScenes.map((entry) => entry.scene),
+    getActiveScene: () => getActiveScene().scene,
+  })
+
   transformControls = setupTransformControls({
     studio,
     renderer,
@@ -746,6 +757,7 @@ export function buildExtension(config: ThreejsDevtoolsConfig): ThreejsDevtools {
         manager.dispose()
       }
       selectionSync?.dispose()
+      outlineSceneVisibility?.dispose()
       transformControls?.dispose()
       detachDevtoolsSheetObjects(
         studio,

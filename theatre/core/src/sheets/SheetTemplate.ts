@@ -50,7 +50,8 @@ export default class SheetTemplate {
   > = {}
 
   private _sequenceVariants: SequenceVariantId[] = [DEFAULT_SEQUENCE_VARIANT]
-  private _visibleInOutline = true
+  private readonly _visibleInOutline = new Atom(true)
+  readonly visibleInOutlineP: Pointer<boolean> = this._visibleInOutline.pointer
 
   constructor(readonly project: Project, sheetId: SheetId) {
     this.address = {...project.address, sheetId}
@@ -149,10 +150,10 @@ export default class SheetTemplate {
   }
 
   setVisibleInOutline(visible: boolean): void {
-    this._visibleInOutline = visible
+    this._visibleInOutline.set(visible)
   }
 
   isVisibleInOutline(): boolean {
-    return this._visibleInOutline
+    return this._visibleInOutline.get()
   }
 }
