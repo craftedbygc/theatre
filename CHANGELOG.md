@@ -1,5 +1,15 @@
 # Theatre.js changelog
 
+## 0.1.15
+
+- New features
+  - Three.js Package:
+    - Multi-scene setups now hide sheets that only have registered objects in inactive scenes from the Studio outline (re-runs on scene switch and object registry changes).
+- Bug fixes
+  - Three.js Package:
+    - Selecting an empty `Object3D` in orbit mode now shows a minimum-size yellow `BoxHelper` (previously invisible because the object has no dimensions).
+
+
 ## 0.1.14
 
 - Bug fixes
