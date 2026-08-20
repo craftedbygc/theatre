@@ -177,6 +177,14 @@ async function createSpheresScene(sheet, width, height) {
   autoAddObject(sharedMeshA, sheet)
   autoAddObject(sharedMeshB, sheet)
 
+  // Empty Object3D — no geometry, so selection BoxHelper must fall back to a
+  // minimum-size wireframe (see selectionSync applyMinimumSelectionBoxIfEmpty).
+  const emptyObject = new Object3D()
+  emptyObject.name = 'Empty Object'
+  emptyObject.position.set(0, 6, -8)
+  scene.add(emptyObject)
+  autoAddObject(emptyObject, sheet)
+
   // Random-color DataTexture so we can verify autoAddObject does not
   // wipe procedural maps that have no URL-backed asset id.
   const mapSize = 64

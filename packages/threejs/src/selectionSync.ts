@@ -1,5 +1,5 @@
 import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
-import {BoxHelper, Raycaster, Vector2} from 'three'
+import {Box3, BoxHelper, Raycaster, Vector2, Vector3} from 'three'
 import type {Camera, Object3D, Scene, WebGLRenderer} from 'three'
 import {EXTENSION_ID} from './constants'
 import {
@@ -10,6 +10,65 @@ import type {StudioLike} from './persistence'
 
 const POINTER_DRAG_THRESHOLD_PX = 3
 const SELECTION_HELPER_FLAG = `${EXTENSION_ID}:selectionHelper`
+/** World-space size used when the selected object has no geometry (empty Object3D). */
+const MIN_SELECTION_BOX_SIZE = 1
+
+const _selectionBox = new Box3()
+const _selectionCenter = new Vector3()
+
+/**
+ * BoxHelper.update() no-ops when Box3.setFromObject() is empty, leaving a
+ * degenerate (invisible) wireframe. Expand to a minimum cube at the object's
+ * world position so empty Object3Ds still show a yellow selection box in orbit mode.
+ */
+function applyMinimumSelectionBoxIfEmpty(
+  boxHelper: BoxHelper,
+  object3d: Object3D,
+): void {
+  _selectionBox.setFromObject(object3d)
+  if (!_selectionBox.isEmpty()) return
+
+  object3d.getWorldPosition(_selectionCenter)
+  const half = MIN_SELECTION_BOX_SIZE / 2
+  const minX = _selectionCenter.x - half
+  const minY = _selectionCenter.y - half
+  const minZ = _selectionCenter.z - half
+  const maxX = _selectionCenter.x + half
+  const maxY = _selectionCenter.y + half
+  const maxZ = _selectionCenter.z + half
+
+  // Corner order matches three.js BoxHelper.update()
+  const position = boxHelper.geometry.attributes.position
+  const array = position.array as Float32Array
+
+  array[0] = maxX
+  array[1] = maxY
+  array[2] = maxZ
+  array[3] = minX
+  array[4] = maxY
+  array[5] = maxZ
+  array[6] = minX
+  array[7] = minY
+  array[8] = maxZ
+  array[9] = maxX
+  array[10] = minY
+  array[11] = maxZ
+  array[12] = maxX
+  array[13] = maxY
+  array[14] = minZ
+  array[15] = minX
+  array[16] = maxY
+  array[17] = minZ
+  array[18] = minX
+  array[19] = minY
+  array[20] = minZ
+  array[21] = maxX
+  array[22] = minY
+  array[23] = minZ
+
+  position.needsUpdate = true
+  boxHelper.geometry.computeBoundingSphere()
+}
 
 export type SelectionSyncConfig = {
   studio: StudioLike
@@ -70,6 +129,7 @@ export function setupSelectionSync(config: SelectionSyncConfig): SelectionSync {
     scene.add(boxHelper)
     helperScene = scene
     boxHelper.update()
+    applyMinimumSelectionBoxIfEmpty(boxHelper, object3d)
   }
 
   const updateSelectionHighlight = (
@@ -164,6 +224,7 @@ export function setupSelectionSync(config: SelectionSyncConfig): SelectionSync {
 
       if (boxHelper) {
         boxHelper.update()
+        applyMinimumSelectionBoxIfEmpty(boxHelper, boxHelper.object)
       }
     },
     dispose() {
