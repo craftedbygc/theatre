@@ -16,21 +16,27 @@ const config = ['studio', 'core'].map((which) => {
       entryFileNames: 'index.d.ts',
       format: 'es',
     },
-    external: (s) => {
+    external: (id) => {
       if (
-        s === '@unseenco/theatre-dataverse' ||
-        s.startsWith(
+        id === '@unseenco/theatre-dataverse' ||
+        id.startsWith(
           `@unseenco/theatre-${which === 'studio' ? 'core' : 'studio'}`,
         )
       ) {
         return true
       }
 
-      if (s.startsWith('@unseenco/theatre')) {
+      if (id.startsWith('@unseenco/theatre')) {
         return false
       }
 
-      if (s.startsWith('/') || s.startsWith('./') || s.startsWith('../')) {
+      // Keep local declaration files in the rollup. Rollup may pass either the
+      // original specifier (`./coreExports`) or a resolved filesystem path.
+      // Unix absolute paths start with `/`; Windows ones are like `C:\...` and
+      // must be detected with `path.isAbsolute`, otherwise they are treated as
+      // externals and the published `dist/index.d.ts` re-exports files that
+      // are not shipped (so consumers see "has no exported member 'types'").
+      if (id.startsWith('./') || id.startsWith('../') || path.isAbsolute(id)) {
         return false
       }
 
@@ -51,6 +57,34 @@ const config = ['studio', 'core'].map((which) => {
           },
         ],
       }),
+      {
+        name: 'assert-bundled-dts-exports',
+        generateBundle(_options, bundle) {
+          if (which !== 'core') return
+          const chunk = Object.values(bundle).find(
+            (file) => file.type === 'chunk' && file.fileName === 'index.d.ts',
+          )
+          if (!chunk || chunk.type !== 'chunk') {
+            throw new Error(
+              'Declarations bundler did not emit theatre/core/dist/index.d.ts',
+            )
+          }
+          for (const exportName of [
+            'types',
+            'getProject',
+            'createRafDriver',
+            'setCoreRafDriver',
+            'IRafDriver',
+          ]) {
+            if (!chunk.exports.includes(exportName)) {
+              throw new Error(
+                `Bundled @unseenco/theatre-core types are missing export '${exportName}'. ` +
+                  `dist/index.d.ts must be a self-contained rollup, not re-exports of ./coreExports.`,
+              )
+            }
+          }
+        },
+      },
     ],
   }
 })

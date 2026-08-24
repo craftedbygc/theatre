@@ -1,5 +1,12 @@
 # Theatre.js changelog
 
+## 0.1.16
+
+- Bug fixes
+  - Core / Studio:
+    - Published TypeScript declarations now include the public API (`types`, `getProject`, `createRafDriver`, `setCoreRafDriver`, `IRafDriver`, and other core exports). Windows builds previously treated local `.d.ts` paths as externals, so npm shipped a stub `index.d.ts` that re-exported files that are not in the package.
+
+
 ## 0.1.15
 
 - New features
