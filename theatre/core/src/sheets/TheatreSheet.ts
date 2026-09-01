@@ -11,7 +11,6 @@ import {InvalidArgumentError} from '@unseenco/theatre-shared/utils/errors'
 import {validateAndSanitiseSlashedPathOrThrow} from '@unseenco/theatre-shared/utils/slashedPaths'
 import {parseOutlineNamespacePath} from '@unseenco/theatre-shared/utils/outlineNamespaces'
 import type {
-  $FixMe,
   $IntentionalAny,
 } from '@unseenco/theatre-shared/utils/types'
 import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
@@ -20,7 +19,6 @@ import type {
   UnknownShorthandCompoundProps,
   UnknownValidCompoundProps,
 } from '@unseenco/theatre-core/propTypes/internals'
-import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import type {ObjectAddressKey} from '@unseenco/theatre-shared/utils/ids'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {notify} from '@unseenco/theatre-shared/notify'
@@ -29,6 +27,10 @@ import type {
   StaticPropPath,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
 import {resolveShowPropsOfSources} from '@unseenco/theatre-core/sheetObjects/resolveShowPropsOf'
+import {
+  getUnsanitizedObjectProps,
+  setUnsanitizedObjectProps,
+} from '@unseenco/theatre-core/sheetObjects/unsanitizedObjectProps'
 
 export type SheetObjectPropTypeConfig =
   PropTypeConfig_Compound<UnknownValidCompoundProps>
@@ -272,11 +274,6 @@ export interface ISheet {
   getActiveSequenceVariant(): SequenceVariantId
 }
 
-const weakMapOfUnsanitizedProps = new WeakMap<
-  SheetObject,
-  UnknownShorthandCompoundProps
->()
-
 export default class TheatreSheet implements ISheet {
   get type(): 'Theatre_Sheet_PublicAPI' {
     return 'Theatre_Sheet_PublicAPI'
@@ -315,7 +312,7 @@ export default class TheatreSheet implements ISheet {
 
     if (existingObject) {
       if (process.env.NODE_ENV !== 'production') {
-        const prevConfig = weakMapOfUnsanitizedProps.get(existingObject)
+        const prevConfig = getUnsanitizedObjectProps(existingObject)
         if (prevConfig) {
           if (!deepEqual(config, prevConfig)) {
             if (opts?.reconfigure === true) {
@@ -342,7 +339,7 @@ export default class TheatreSheet implements ISheet {
                   ),
                 )
               }
-              weakMapOfUnsanitizedProps.set(existingObject, config)
+              setUnsanitizedObjectProps(existingObject, config)
               return existingObject.publicApi as $IntentionalAny
             } else {
               throw new Error(
@@ -401,7 +398,7 @@ export default class TheatreSheet implements ISheet {
         opts?.static,
       )
       if (process.env.NODE_ENV !== 'production') {
-        weakMapOfUnsanitizedProps.set(object as $FixMe, config)
+        setUnsanitizedObjectProps(object, config)
       }
       if (opts?.showPropsOf !== undefined) {
         object.template.setShowPropsOf(
