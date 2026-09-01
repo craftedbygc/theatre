@@ -2,10 +2,15 @@
 # Each PR gets a Netlify Deploy Preview; merges to main update production.
 #
 # Netlify UI: enable "Deploy Previews" under Build & deploy → Deploy contexts.
+#
+# Base directory is packages/playground (Vite app root). Yarn install must run from
+# the monorepo root, so the build command cds up two levels first. Publish path is
+# relative to base → packages/playground/build.
 
 [build]
-  command = "corepack enable && yarn install --immutable && yarn workspace playground run build"
-  publish = "packages/playground/build"
+  base = "packages/playground"
+  command = "cd ../.. && corepack enable && yarn install --immutable && yarn workspace playground run build"
+  publish = "build"
 
 [build.environment]
   NODE_VERSION = "18"
