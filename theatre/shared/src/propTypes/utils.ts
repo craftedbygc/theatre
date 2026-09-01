@@ -5,12 +5,13 @@ import type {
   PropTypeConfig_Compound,
   PropTypeConfig_Enum,
 } from '@unseenco/theatre-core/propTypes'
+import deepEqual from 'fast-deep-equal'
 import type {
   PathToProp,
   PathToProp_Encoded,
 } from '@unseenco/theatre-shared/utils/addresses'
 import {encodePathToProp} from '@unseenco/theatre-shared/utils/addresses'
-import type {SerializableMap} from '@unseenco/theatre-shared/utils/types'
+import type {SerializableMap, SerializableValue} from '@unseenco/theatre-shared/utils/types'
 import {stripTransientPathsFromSerializableMap} from '@unseenco/theatre-shared/utils/transientPropPaths'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 import memoizeFn from '@unseenco/theatre-shared/utils/memoizeFn'
@@ -94,6 +95,67 @@ export function stripNonPersistingPropValuesFromMap(
 ): SerializableMap {
   const paths = getNonPersistingPropPathEncodings(config)
   return stripTransientPathsFromSerializableMap(map, paths)
+}
+
+/**
+ * Returns true if `value` equals the prop config's default after sanitization.
+ */
+export function isPropValueEqualToDefault(
+  value: unknown,
+  propConfig: PropTypeConfig_AllSimples,
+): boolean {
+  const sanitized = propConfig.deserializeAndSanitize(value)
+  if (sanitized === undefined) {
+    return true
+  }
+
+  return deepEqual(sanitized, propConfig.default)
+}
+
+/**
+ * Returns a copy of `map` with static override values removed when they equal
+ * their prop defaults.
+ */
+export function stripDefaultPropValuesFromMap(
+  map: SerializableMap,
+  config: PropTypeConfig,
+): SerializableMap {
+  if (config.type === 'compound') {
+    const result: SerializableMap = {}
+
+    for (const [key, value] of Object.entries(map)) {
+      const subConfig = config.props[
+        key as $IntentionalAny as keyof typeof config.props
+      ] as PropTypeConfig | undefined
+
+      if (!subConfig) continue
+
+      if (isPropConfigComposite(subConfig)) {
+        const stripped = stripDefaultPropValuesFromMap(
+          value as SerializableMap,
+          subConfig,
+        )
+        if (Object.keys(stripped).length > 0) {
+          result[key] = stripped
+        }
+      } else if (!isPropValueEqualToDefault(value, subConfig)) {
+        result[key] = value as SerializableValue
+      }
+    }
+
+    return result
+  }
+
+  if (config.type === 'enum') {
+    throw new Error(`Not implemented yet for enums`)
+  }
+
+  const sanitized = config.deserializeAndSanitize(map)
+  if (sanitized !== undefined && !deepEqual(sanitized, config.default)) {
+    return map
+  }
+
+  return {}
 }
 
 /**

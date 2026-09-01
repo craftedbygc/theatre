@@ -30,6 +30,10 @@ import {
   createTransientPropPathsLookup,
   stripTransientPropsFromOnDiskState,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
+import {
+  createObjectPropConfigLookup,
+  stripDefaultPropValuesFromOnDiskState,
+} from '@unseenco/theatre-shared/utils/defaultPropValues'
 
 import createTransactionPrivateApi from './createTransactionPrivateApi'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
@@ -217,9 +221,12 @@ export default class StudioStore {
         projectId
       ]
 
-    return stripTransientPropsFromOnDiskState(
-      projectHistoricState,
-      createTransientPropPathsLookup(projectId),
+    return stripDefaultPropValuesFromOnDiskState(
+      stripTransientPropsFromOnDiskState(
+        projectHistoricState,
+        createTransientPropPathsLookup(projectId),
+      ),
+      createObjectPropConfigLookup(projectId),
     )
   }
 }

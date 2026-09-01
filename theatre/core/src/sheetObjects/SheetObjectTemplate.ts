@@ -60,6 +60,7 @@ import {
   registerObjectTransientPropPaths,
   stripTransientPathsFromSerializableMap,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
+import {registerObjectPropConfig} from '@unseenco/theatre-shared/utils/defaultPropValues'
 
 function isObjectEmpty(obj: unknown): boolean {
   return (
@@ -171,6 +172,12 @@ export default class SheetObjectTemplate {
       this.address.sheetId,
       objectKey,
       this._transientPropPaths,
+    )
+    registerObjectPropConfig(
+      this.address.projectId,
+      this.address.sheetId,
+      objectKey,
+      config,
     )
 
     this.pointerToSheetState =
