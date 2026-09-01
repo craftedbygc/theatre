@@ -20,6 +20,10 @@ export type AbsolutePlacementBoxConstraints = {
 
 const PopoverPositioner: React.FC<{
   target: HTMLElement | SVGElement | Element
+  clickPoint?: {
+    clientX: number
+    clientY: number
+  }
   onClickOutside?: (e: MouseEvent) => void
   children: () => React.ReactElement
   onPointerOutside?: {
@@ -87,7 +91,8 @@ const PopoverPositioner: React.FC<{
 
     let arrowLeft = 0
     if (verticalPlacement !== 'overlay') {
-      const anchorLeft = targetRect.left + targetRect.width / 2
+      const anchorLeft =
+        props.clickPoint?.clientX ?? targetRect.left + targetRect.width / 2
       if (anchorLeft < containerRect.width / 2) {
         left = gap
         arrowLeft = Math.max(
