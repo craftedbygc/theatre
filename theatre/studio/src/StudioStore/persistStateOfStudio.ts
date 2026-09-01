@@ -4,10 +4,24 @@ import {studioActions} from '@unseenco/theatre-studio/store'
 import type {FullStudioState} from '@unseenco/theatre-studio/store/index'
 import debounce from 'lodash-es/debounce'
 import type {Store} from 'redux'
+import {
+  getLegacyStorageKey,
+  getProjectStorageKey,
+  getStudioStorageKey,
+  mergePersistentState,
+  type ProjectOnlyPersistentState,
+  splitPersistentState,
+  type StudioOnlyPersistentState,
+} from './splitPersistentState'
+
+type LastPersistedSplit = {
+  studio: StudioOnlyPersistentState
+  project: ProjectOnlyPersistentState
+}
 
 const lastStateByStore = new WeakMap<
   Store<FullStudioState>,
-  StudioPersistentState
+  LastPersistedSplit
 >()
 
 export const persistStateOfStudio = (
@@ -19,17 +33,27 @@ export const persistStateOfStudio = (
     reduxStore.dispatch(studioActions.replacePersistentState(s))
   }
 
-  const storageKey = getStorageKey(localStoragePrefix)
+  const studioStorageKey = getStudioStorageKey(localStoragePrefix)
+  const projectStorageKey = getProjectStorageKey(localStoragePrefix)
+  const legacyStorageKey = getLegacyStorageKey(localStoragePrefix)
   const getState = () => reduxStore.getState().$persistent
 
   loadFromPersistentStorage()
 
   const persist = () => {
     const newState = getState()
+    const {studio, project} = splitPersistentState(newState)
     const lastState = lastStateByStore.get(reduxStore)
-    if (newState === lastState) return
-    lastStateByStore.set(reduxStore, newState)
-    localStorage.setItem(storageKey, JSON.stringify(newState))
+    if (
+      lastState &&
+      lastState.studio === studio &&
+      lastState.project === project
+    ) {
+      return
+    }
+    lastStateByStore.set(reduxStore, {studio, project})
+    localStorage.setItem(studioStorageKey, JSON.stringify(studio))
+    localStorage.setItem(projectStorageKey, JSON.stringify(project))
   }
   reduxStore.subscribe(debounce(persist, 1000))
   if (window) {
@@ -37,26 +61,48 @@ export const persistStateOfStudio = (
   }
 
   function loadFromPersistentStorage() {
-    const persistedS = localStorage.getItem(storageKey)
-    if (persistedS) {
-      let persistedObj
-      let errored = true
-      try {
-        persistedObj = JSON.parse(persistedS)
-        errored = false
-      } catch (e) {
-        logger.warn(
-          `Could not parse Theatre's persisted state. This must be a bug. Please report it.`,
-        )
-      } finally {
-        if (!errored) {
-          loadState(persistedObj)
+    try {
+      const studioState = loadJsonFromStorage<StudioOnlyPersistentState>(
+        studioStorageKey,
+      )
+      const projectState = loadJsonFromStorage<ProjectOnlyPersistentState>(
+        projectStorageKey,
+      )
+
+      if (studioState || projectState) {
+        const merged = mergePersistentState(studioState, projectState)
+        if (merged) {
+          loadState(merged)
         }
-        onInitialize()
+      } else {
+        const legacyState = loadJsonFromStorage<StudioPersistentState>(
+          legacyStorageKey,
+        )
+        if (legacyState) {
+          loadState(legacyState)
+          const {studio, project} = splitPersistentState(legacyState)
+          localStorage.setItem(studioStorageKey, JSON.stringify(studio))
+          localStorage.setItem(projectStorageKey, JSON.stringify(project))
+          localStorage.removeItem(legacyStorageKey)
+        }
       }
-    } else {
+    } finally {
       onInitialize()
     }
+  }
+}
+
+function loadJsonFromStorage<T>(storageKey: string): T | null {
+  const persistedS = localStorage.getItem(storageKey)
+  if (!persistedS) return null
+
+  try {
+    return JSON.parse(persistedS) as T
+  } catch (e) {
+    logger.warn(
+      `Could not parse Theatre's persisted state at "${storageKey}". This must be a bug. Please report it.`,
+    )
+    return null
   }
 }
 
@@ -64,17 +110,30 @@ export const __experimental_clearPersistentStorage = (
   reduxStore: Store<FullStudioState>,
   localStoragePrefix: string,
 ) => {
-  // This removes the persisted state from localStorage,
-  // while also preventing the current state from being persisted on window unload.
-  // Once the new storage PR lands, this method won't be needed anymore.
-  const storageKey = getStorageKey(localStoragePrefix)
-  const currentState = reduxStore.getState().$persistent
-  localStorage.removeItem(storageKey)
-  // prevent the current state from being persistent on window unload,
-  // unless further state changes are made.
-  lastStateByStore.set(reduxStore, currentState)
+  __experimental_clearStudioPersistentStorage(reduxStore, localStoragePrefix)
+  __experimental_clearProjectPersistentStorage(reduxStore, localStoragePrefix)
 }
 
-function getStorageKey(localStoragePrefix: string) {
-  return localStoragePrefix + '.persistent'
+export const __experimental_clearStudioPersistentStorage = (
+  reduxStore: Store<FullStudioState>,
+  localStoragePrefix: string,
+) => {
+  const storageKey = getStudioStorageKey(localStoragePrefix)
+  const currentState = reduxStore.getState().$persistent
+  const {studio, project} = splitPersistentState(currentState)
+  localStorage.removeItem(storageKey)
+  localStorage.removeItem(getLegacyStorageKey(localStoragePrefix))
+  lastStateByStore.set(reduxStore, {studio, project})
+}
+
+export const __experimental_clearProjectPersistentStorage = (
+  reduxStore: Store<FullStudioState>,
+  localStoragePrefix: string,
+) => {
+  const storageKey = getProjectStorageKey(localStoragePrefix)
+  const currentState = reduxStore.getState().$persistent
+  const {studio, project} = splitPersistentState(currentState)
+  localStorage.removeItem(storageKey)
+  localStorage.removeItem(getLegacyStorageKey(localStoragePrefix))
+  lastStateByStore.set(reduxStore, {studio, project})
 }

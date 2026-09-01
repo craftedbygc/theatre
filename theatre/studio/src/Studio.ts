@@ -29,6 +29,8 @@ import {notify} from './notify'
 import type {RafDriverPrivateAPI} from '@unseenco/theatre-core/rafDrivers'
 import {syncAllStudioPreviewVariants} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import {STUDIO_PROJECT_ID} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
+import initialiseProjectState from '@unseenco/theatre-core/projects/initialiseProjectState'
+import {val} from '@unseenco/theatre-dataverse'
 
 const DEFAULT_PERSISTENCE_KEY = 'theatre-0.4'
 
@@ -575,5 +577,22 @@ export class Studio {
 
   clearPersistentStorage(persistenceKey = DEFAULT_PERSISTENCE_KEY) {
     this._store.__experimental_clearPersistentStorage(persistenceKey)
+  }
+
+  clearStudioPersistentStorage(persistenceKey = DEFAULT_PERSISTENCE_KEY) {
+    this._store.clearStudioPersistentStorage(persistenceKey)
+  }
+
+  async clearProjectPersistentStorage(
+    persistenceKey = DEFAULT_PERSISTENCE_KEY,
+  ): Promise<void> {
+    this._store.clearProjectPersistentStorage(persistenceKey)
+
+    const projects = val(this.projectsP)
+    await Promise.all(
+      Object.values(projects).map((project) =>
+        initialiseProjectState(this, project, project.config.state),
+      ),
+    )
   }
 }

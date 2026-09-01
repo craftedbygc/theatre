@@ -13,6 +13,8 @@ import {
   Details,
   Outline,
   Bell,
+  Trash,
+  ArrowClockwise,
 } from '@unseenco/theatre-studio/uiComponents/icons'
 import DoubleChevronLeft from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronLeft'
 import DoubleChevronRight from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronRight'
@@ -137,6 +139,36 @@ const GlobalToolbar: React.FC = () => {
   return (
     <Container $docked={isDocked}>
       <SubContainer>
+        <ToolbarIconButton
+          data-testid="GlobalToolbar-ClearStudioStateButton"
+          onClick={() => {
+            if (
+              window.confirm(
+                'Clear studio state? This resets panel layout, sequencer scroll/zoom, and other studio preferences. Project animation data will not be affected.',
+              )
+            ) {
+              getStudio().clearStudioPersistentStorage()
+            }
+          }}
+          title="Clear studio state"
+        >
+          <ArrowClockwise />
+        </ToolbarIconButton>
+        <ToolbarIconButton
+          data-testid="GlobalToolbar-ClearProjectStateButton"
+          onClick={() => {
+            if (
+              window.confirm(
+                'Clear project state? This removes all keyframes, sheets, and other project animation data. Studio preferences will not be affected.',
+              )
+            ) {
+              void getStudio().clearProjectPersistentStorage()
+            }
+          }}
+          title="Clear project state"
+        >
+          <Trash />
+        </ToolbarIconButton>
         {triggerTooltip}
         <PinButton
           ref={triggerButtonRef as $IntentionalAny}
