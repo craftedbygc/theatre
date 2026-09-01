@@ -6734,6 +6734,9 @@ __metadata:
     "@unseenco/theatre-core": "*"
     "@unseenco/theatre-studio": "*"
     three: ">=0.150.0"
+  peerDependenciesMeta:
+    "@unseenco/theatre-studio":
+      optional: true
   languageName: unknown
   linkType: soft
 
