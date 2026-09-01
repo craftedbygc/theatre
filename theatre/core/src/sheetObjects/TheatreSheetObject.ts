@@ -22,6 +22,7 @@ import type {IRafDriver} from '@unseenco/theatre-core/rafDrivers'
 import {onChange} from '@unseenco/theatre-core/coreExports'
 import type {SequenceVariantId} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {resolveShowPropsOfSources} from './resolveShowPropsOf'
+import {mergeUnsanitizedObjectProps} from './unsanitizedObjectProps'
 import type {
   TransientPropPath,
   StaticPropPath,
@@ -155,6 +156,25 @@ export interface ISheetObject<
    * stripped. Same effect as `sheet.object(key, config, {reconfigure: true})`.
    */
   reconfigure(
+    config: UnknownShorthandCompoundProps,
+    opts?: {
+      transient?: readonly TransientPropPath[]
+      static?: readonly StaticPropPath[]
+    },
+  ): void
+
+  /**
+   * Add new props to this object's config. Existing props are preserved; only
+   * the keys in `config` are added. Throws if a key already exists on the object.
+   *
+   * @example
+   * ```ts
+   * const obj = sheet.object('Box', {x: 0})
+   * obj.addProps({y: 0})
+   * // obj now has props x and y
+   * ```
+   */
+  addProps(
     config: UnknownShorthandCompoundProps,
     opts?: {
       transient?: readonly TransientPropPath[]
@@ -305,6 +325,27 @@ export default class TheatreSheetObject<
     }
     if (opts?.static !== undefined) {
       host.template.setStaticPropPaths(opts.static, sanitizedConfig)
+    }
+  }
+
+  addProps(
+    config: UnknownShorthandCompoundProps,
+    opts?: {
+      transient?: readonly TransientPropPath[]
+      static?: readonly StaticPropPath[]
+    },
+  ): void {
+    const host = privateAPI(this)
+    host.template.addProps(config)
+    if (process.env.NODE_ENV !== 'production') {
+      mergeUnsanitizedObjectProps(host, config)
+    }
+    const mergedConfig = host.template.staticConfig
+    if (opts?.transient !== undefined) {
+      host.template.setTransientPropPaths(opts.transient, mergedConfig)
+    }
+    if (opts?.static !== undefined) {
+      host.template.setStaticPropPaths(opts.static, mergedConfig)
     }
   }
 }

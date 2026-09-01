@@ -1,14 +1,14 @@
 # Deploy the Theatre.js playground as a static site.
 # Each PR gets a Netlify Deploy Preview; merges to main update production.
 #
-# Netlify UI: enable "Deploy Previews" under Build & deploy → Deploy contexts.
+# Netlify UI (Site configuration → Build & deploy → Build settings):
+#   • Base directory: "packages/playground" (or leave blank and use publish below as-is)
+#   • Publish directory: leave BLANK — this file sets it
 #
-# Base directory is packages/playground (Vite app root). Yarn install must run from
-# the monorepo root, so the build command cds up two levels first. Publish path is
-# relative to base → packages/playground/build.
+# Publish is relative to the base directory. With base = packages/playground, use "build"
+# (Vite writes to packages/playground/build). Yarn install runs from monorepo root.
 
 [build]
-  base = "packages/playground"
   command = "cd ../.. && corepack enable && yarn install --immutable && yarn workspace playground run build"
   publish = "build"
 

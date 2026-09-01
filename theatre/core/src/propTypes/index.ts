@@ -91,18 +91,15 @@ const validateCommonOpts = (fnCallSignature: string, opts?: CommonOpts) => {
  * ```
  *
  */
-export const compound = <Props extends UnknownShorthandCompoundProps>(
-  props: Props,
+export function compoundFromSanitizedProps<
+  Props extends UnknownValidCompoundProps,
+>(
+  sanitizedProps: Props,
   opts: CommonOpts = {},
-): PropTypeConfig_Compound<
-  ShorthandCompoundPropsToLonghandCompoundProps<Props>
-> => {
+): PropTypeConfig_Compound<Props> {
   validateCommonOpts('t.compound(props, opts)', opts)
-  const sanitizedProps = sanitizeCompoundProps(props)
   const deserializationCache = new WeakMap<{}, unknown>()
-  const config: PropTypeConfig_Compound<
-    ShorthandCompoundPropsToLonghandCompoundProps<Props>
-  > = {
+  const config: PropTypeConfig_Compound<Props> = {
     type: 'compound',
     props: sanitizedProps as $IntentionalAny,
     valueType: null as $IntentionalAny,
@@ -139,6 +136,18 @@ export const compound = <Props extends UnknownShorthandCompoundProps>(
     },
   }
   return config
+}
+
+export const compound = <Props extends UnknownShorthandCompoundProps>(
+  props: Props,
+  opts: CommonOpts = {},
+): PropTypeConfig_Compound<
+  ShorthandCompoundPropsToLonghandCompoundProps<Props>
+> => {
+  const sanitizedProps = sanitizeCompoundProps(props)
+  return compoundFromSanitizedProps(sanitizedProps, opts) as PropTypeConfig_Compound<
+    ShorthandCompoundPropsToLonghandCompoundProps<Props>
+  >
 }
 
 /**
