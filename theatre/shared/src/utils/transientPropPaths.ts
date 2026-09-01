@@ -384,7 +384,7 @@ export function stripTransientPropsFromOnDiskState(
 
     const objectKeys = new Set<ObjectAddressKey>()
 
-    for (const key of Object.keys(sheetState.staticOverrides.byObject)) {
+    for (const key of Object.keys(sheetState.staticOverrides?.byObject ?? {})) {
       objectKeys.add(key as ObjectAddressKey)
     }
 
