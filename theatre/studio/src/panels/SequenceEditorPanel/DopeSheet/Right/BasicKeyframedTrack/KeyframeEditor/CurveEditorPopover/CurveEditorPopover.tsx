@@ -93,6 +93,8 @@ const SearchBox = styled.input.attrs({type: 'text'})`
 const CurveEditorContainer = styled.div`
   grid-area: tween;
   background: ${COLOR_BASE};
+  height: ${CURVE_EDITOR_WIDTH}px;
+  align-self: start;
 `
 
 const NoResultsFoundContainer = styled.div`
