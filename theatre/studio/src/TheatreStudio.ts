@@ -152,7 +152,15 @@ export type ToolConfigFlyoutMenu = {
   /**
    * The label of the trigger button
    */
-  label: string
+  label: string | React.ReactElement
+  /**
+   * Optional tooltip for the trigger button
+   */
+  title?: string
+  /**
+   * Optional test id for the trigger button
+   */
+  'data-testid'?: string
   items: ToolconfigFlyoutMenuItem[]
 }
 

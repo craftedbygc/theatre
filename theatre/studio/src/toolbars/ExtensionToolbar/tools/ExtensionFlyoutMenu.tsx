@@ -73,6 +73,8 @@ const ExtensionFlyoutMenu: React.FC<{
       {popover.node}
       <FlyoutTriggerButton
         ref={triggerRef as $IntentionalAny}
+        data-testid={config['data-testid']}
+        title={config.title}
         onClick={(e) => {
           popover.open(e, triggerRef.current!)
         }}
