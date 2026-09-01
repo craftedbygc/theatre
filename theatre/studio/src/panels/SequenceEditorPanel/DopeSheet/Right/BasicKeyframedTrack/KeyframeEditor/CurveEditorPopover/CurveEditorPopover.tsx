@@ -27,7 +27,9 @@ import {useUIOptionGrid, Outcome} from './useUIOptionGrid'
 import type {KeyframeConnectionWithAddress} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
 
 const PRESET_COLUMNS = 3
-const PRESET_SIZE = 53
+const PRESET_SIZE = 60
+const GRID_HEIGHT = 240
+const CURVE_EDITOR_WIDTH = 120
 
 const APPROX_TOOLTIP_HEIGHT = 25
 
@@ -38,9 +40,9 @@ const Grid = styled.div`
     'search  tween'
     'presets tween';
   grid-template-rows: 32px 1fr;
-  grid-template-columns: ${PRESET_COLUMNS * PRESET_SIZE}px 120px;
+  grid-template-columns: ${PRESET_COLUMNS * PRESET_SIZE}px ${CURVE_EDITOR_WIDTH}px;
   gap: 1px;
-  height: 120px;
+  height: ${GRID_HEIGHT}px;
 `
 
 const OptionsContainer = styled.div`
@@ -94,7 +96,7 @@ const CurveEditorContainer = styled.div`
 `
 
 const NoResultsFoundContainer = styled.div`
-  grid-column: 1 / 4;
+  grid-column: 1 / ${PRESET_COLUMNS + 1};
   padding: 6px;
   color: #888888;
 `

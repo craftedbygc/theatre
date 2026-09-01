@@ -19,7 +19,7 @@ const textInterpolate = (left: string, right: string, progression: number) => {
 
 const globalConfig = {
   background: {
-    type: types.stringLiteral('black', {
+    type: types.stringLiteral('white', {
       black: 'black',
       white: 'white',
       dynamic: 'dynamic',
@@ -153,10 +153,10 @@ const Box: React.FC<{
       style={{
         width: 300,
         height: 300,
-        color: 'white',
+        color: 'black',
         position: 'absolute',
         boxSizing: 'border-box',
-        border: isSelected ? '1px solid #5a92fa' : '1px solid white',
+        border: isSelected ? '1px solid #5a92fa' : '1px solid #ccc',
       }}
     >
       <pre style={{margin: 0, padding: '1rem'}} ref={preRef}></pre>
@@ -208,7 +208,7 @@ export const Scene: React.FC<{project: IProject}> = ({project}) => {
         right: '0',
         top: 0,
         bottom: '0',
-        background: '#333',
+        background: 'white',
       }}
     >
       <button
