@@ -1,0 +1,11 @@
+# Deploy the Theatre.js playground as a static site.
+# Each PR gets a Netlify Deploy Preview; merges to main update production.
+#
+# Netlify UI: enable "Deploy Previews" under Build & deploy → Deploy contexts.
+
+[build]
+  command = "corepack enable && yarn install --immutable && yarn workspace playground run build"
+  publish = "packages/playground/build"
+
+[build.environment]
+  NODE_VERSION = "18"
