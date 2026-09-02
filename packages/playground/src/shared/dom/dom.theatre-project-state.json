@@ -1,0 +1,30 @@
+{
+  "sheetsById": {
+    "Scene": {
+      "staticOverrides": {
+        "byObject": {
+          "Box / 0": {
+            "pos": {
+              "x": 80,
+              "y": 120
+            },
+            "color": {
+              "r": 0.2,
+              "g": 0.5,
+              "b": 1,
+              "a": 1
+            },
+            "test": "Loaded from JSON"
+          },
+          "global": {
+            "background": {
+              "type": "black"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitionVersion": "0.4.0",
+  "revisionHistory": ["dom-saved-state-demo"]
+}
