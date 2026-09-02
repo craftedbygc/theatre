@@ -13,8 +13,8 @@ const Wrapper = styled.div<{$showOuterDiamond: boolean}>`
     &::before {
       content: '';
       position: absolute;
-      width: 7px;
-      height: 7px;
+      width: 9px;
+      height: 9px;
       border-radius: 1px;
       transform: rotate(45deg);
       border: 1px solid rgba(255, 255, 255, 0.35);
