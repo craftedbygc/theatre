@@ -1,6 +1,7 @@
 import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
 import {Box3, BoxHelper, Raycaster, Vector2, Vector3} from 'three'
-import type {Camera, Object3D, Scene, WebGLRenderer} from 'three'
+import type {Camera, Object3D, Scene} from 'three'
+import type {ThreejsRenderer} from './types'
 import {EXTENSION_ID} from './constants'
 import {
   getObject3DForSheetObject,
@@ -72,7 +73,7 @@ function applyMinimumSelectionBoxIfEmpty(
 
 export type SelectionSyncConfig = {
   studio: StudioLike
-  renderer: WebGLRenderer
+  renderer: ThreejsRenderer
   getActiveScene: () => Scene
   getCamera: () => Camera
   isOrbitMode: () => boolean

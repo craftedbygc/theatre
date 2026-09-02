@@ -1,5 +1,9 @@
 import {types} from '@unseenco/theatre-core'
-import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
+import type {
+  ISheet,
+  ISheetObject,
+  UnknownShorthandCompoundProps,
+} from '@unseenco/theatre-core'
 import type {PerspectiveCamera} from 'three'
 import type {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {DEVTOOLS_SHEET_ID} from './constants'
@@ -35,9 +39,9 @@ export interface StudioLike {
     ): {
       object(
         objectKey: string,
-        props: Record<string, unknown>,
+        props: UnknownShorthandCompoundProps,
         opts?: {visible?: boolean},
-      ): DevtoolsStateObject & ActiveSceneStateObject
+      ): ISheetObject
       detachObject(objectKey: string): void
     }
   }
@@ -134,7 +138,7 @@ export function createDevtoolsStateObject(
       }),
     },
     {visible: false},
-  )
+  ) as unknown as DevtoolsStateObject
 }
 
 export function createInitialDevtoolsStateFromCamera(camera: {
@@ -167,7 +171,7 @@ export function createActiveSceneStateObject(
       activeSceneName: types.string(initialSceneName),
     },
     {visible: false},
-  )
+  ) as unknown as ActiveSceneStateObject
 }
 
 /** Detach all extension sheet objects from the Studio project (e.g. on dispose). */

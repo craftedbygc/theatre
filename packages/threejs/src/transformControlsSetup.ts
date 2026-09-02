@@ -1,6 +1,7 @@
 import type {ISheet, ISheetObject} from '@unseenco/theatre-core'
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls.js'
-import type {Camera, Object3D, Scene, WebGLRenderer} from 'three'
+import type {Camera, Object3D, Scene} from 'three'
+import type {ThreejsRenderer} from './types'
 import {
   getObject3DForSheetObject,
   getSheetObjectForObject3D,
@@ -17,7 +18,7 @@ export type TransformSpace = 'world' | 'local'
 
 export type TransformControlsSetupConfig = {
   studio: StudioLike
-  renderer: WebGLRenderer
+  renderer: ThreejsRenderer
   getActiveScene: () => Scene
   getCamera: () => Camera
   isOrbitMode: () => boolean

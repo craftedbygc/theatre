@@ -5,7 +5,8 @@ import {
   onRemoteEditorOpenChange,
 } from '@unseenco/theatre-studio'
 import {OrthographicCamera, PerspectiveCamera, CameraHelper} from 'three'
-import type {Camera, Scene, WebGLRenderer} from 'three'
+import type {Camera, Scene} from 'three'
+import type {ThreejsRenderer} from './types'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {EXTENSION_ID} from './constants'
 import {
@@ -68,7 +69,7 @@ type NormalizedScene = {
 }
 
 export interface ThreejsDevtoolsConfig {
-  renderer: WebGLRenderer
+  renderer: ThreejsRenderer
   studio: StudioLike
   scenes: SceneConfig[]
   /**

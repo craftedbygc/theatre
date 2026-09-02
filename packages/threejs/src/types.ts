@@ -1,7 +1,20 @@
+import type {WebGLRenderer} from 'three'
+
 /**
  * Minimal types compatible with `@unseenco/theatre-studio`'s `IExtension`.
  * Defined locally so this package can compile without depending on studio source.
  */
+
+/**
+ * Structural stand-in for three.js `WebGPURenderer` (not in all `@types/three` versions).
+ * Both WebGL and WebGPU renderers expose `domElement` for controls and raycasting.
+ */
+export type WebGPURendererLike = {
+  readonly domElement: HTMLCanvasElement
+}
+
+/** Renderer accepted by `buildExtension()` and related devtools setup. */
+export type ThreejsRenderer = WebGLRenderer | WebGPURendererLike
 export type ToolConfigIcon = {
   type: 'Icon'
   svgSource: string

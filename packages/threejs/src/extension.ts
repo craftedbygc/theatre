@@ -18,6 +18,7 @@ export type {
 } from './buildExtension'
 
 export type {DevtoolsState, StudioLike} from './persistence'
+export type {ThreejsRenderer, WebGPURendererLike} from './types'
 
 export type {
   TheatreExtension,
