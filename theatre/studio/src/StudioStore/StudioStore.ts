@@ -22,14 +22,24 @@ import {createDraft, finishDraft} from 'immer'
 import type {Store} from 'redux'
 import {
   __experimental_clearPersistentStorage,
+  __experimental_clearProjectPersistentStorage,
+  __experimental_clearStudioPersistentStorage,
   persistStateOfStudio,
 } from './persistStateOfStudio'
+import {
+  resetProjectFieldsInPersistentState,
+  resetStudioFieldsInPersistentState,
+} from './resetPersistentState'
 import type {OnDiskState} from '@unseenco/theatre-core/projects/store/storeTypes'
 import {generateDiskStateRevision} from './generateDiskStateRevision'
 import {
   createTransientPropPathsLookup,
   stripTransientPropsFromOnDiskState,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
+import {
+  createObjectPropConfigLookup,
+  stripDefaultPropValuesFromOnDiskState,
+} from '@unseenco/theatre-shared/utils/defaultPropValues'
 
 import createTransactionPrivateApi from './createTransactionPrivateApi'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
@@ -100,6 +110,27 @@ export default class StudioStore {
     persistenceKey: string,
   ): FullStudioState {
     __experimental_clearPersistentStorage(this._reduxStore, persistenceKey)
+    return this.getState()
+  }
+
+  clearStudioPersistentStorage(persistenceKey: string): FullStudioState {
+    __experimental_clearStudioPersistentStorage(this._reduxStore, persistenceKey)
+    const resetState = resetStudioFieldsInPersistentState(
+      this.getState().$persistent,
+    )
+    this._reduxStore.dispatch(studioActions.replacePersistentState(resetState))
+    return this.getState()
+  }
+
+  clearProjectPersistentStorage(persistenceKey: string): FullStudioState {
+    __experimental_clearProjectPersistentStorage(
+      this._reduxStore,
+      persistenceKey,
+    )
+    const resetState = resetProjectFieldsInPersistentState(
+      this.getState().$persistent,
+    )
+    this._reduxStore.dispatch(studioActions.replacePersistentState(resetState))
     return this.getState()
   }
 
@@ -217,9 +248,12 @@ export default class StudioStore {
         projectId
       ]
 
-    return stripTransientPropsFromOnDiskState(
-      projectHistoricState,
-      createTransientPropPathsLookup(projectId),
+    return stripDefaultPropValuesFromOnDiskState(
+      stripTransientPropsFromOnDiskState(
+        projectHistoricState,
+        createTransientPropPathsLookup(projectId),
+      ),
+      createObjectPropConfigLookup(projectId),
     )
   }
 }

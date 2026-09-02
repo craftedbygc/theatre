@@ -154,6 +154,7 @@ export default function usePopover(
         <PopoverPositioner
           children={render}
           target={state.target}
+          clickPoint={state.clickPoint}
           onClickOutside={state.onClickOutside}
           onPointerOutside={state.onPointerOutside}
           constraints={state.opts.constraints}

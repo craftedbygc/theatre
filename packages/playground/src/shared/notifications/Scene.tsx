@@ -4,7 +4,7 @@ import {onChange, types} from '@unseenco/theatre-core'
 
 const globalConfig = {
   background: {
-    type: types.stringLiteral('black', {
+    type: types.stringLiteral('white', {
       black: 'black',
       white: 'white',
       dynamic: 'dynamic',
@@ -38,7 +38,7 @@ export const Scene: React.FC<{project: IProject}> = ({project}) => {
         right: '0',
         top: 0,
         bottom: '0',
-        background: '#333',
+        background: 'white',
       }}
     ></div>
   )

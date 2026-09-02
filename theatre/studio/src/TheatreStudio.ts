@@ -152,7 +152,15 @@ export type ToolConfigFlyoutMenu = {
   /**
    * The label of the trigger button
    */
-  label: string
+  label: string | React.ReactElement
+  /**
+   * Optional tooltip for the trigger button
+   */
+  title?: string
+  /**
+   * Optional test id for the trigger button
+   */
+  'data-testid'?: string
   items: ToolconfigFlyoutMenuItem[]
 }
 
@@ -486,6 +494,25 @@ export interface IStudio {
    */
   createContentOfSaveFile(projectId: string): Record<string, unknown>
 
+  /**
+   * Clears the persisted studio state (panel layout, sequencer scroll/zoom,
+   * pin states, etc.) and resets the in-memory studio preferences to their
+   * defaults. Project animation data is not affected.
+   *
+   * @param persistenceKey - same persistenceKey as in `studio.initialize(opts)`, if any
+   */
+  clearStudioState(persistenceKey?: string): void
+
+  /**
+   * Clears the persisted project state (keyframes, sheets, static overrides,
+   * etc.) and resets the in-memory project data. Each loaded project is
+   * re-initialized from its on-disk state (if any). Studio preferences are
+   * not affected.
+   *
+   * @param persistenceKey - same persistenceKey as in `studio.initialize(opts)`, if any
+   */
+  clearProjectState(persistenceKey?: string): Promise<void>
+
   __experimental: {
     /**
      * Warning: This is an experimental API and will change in the future.
@@ -736,5 +763,13 @@ export default class TheatreStudio implements IStudio {
     return getStudio().createContentOfSaveFile(
       projectId as ProjectId,
     ) as $IntentionalAny
+  }
+
+  clearStudioState(persistenceKey?: string): void {
+    getStudio().clearStudioPersistentStorage(persistenceKey)
+  }
+
+  clearProjectState(persistenceKey?: string): Promise<void> {
+    return getStudio().clearProjectPersistentStorage(persistenceKey)
   }
 }

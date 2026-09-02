@@ -16,6 +16,7 @@ import type {
   PropTypeConfig_Compound,
 } from '@unseenco/theatre-core/propTypes'
 import type {PathToProp} from '@unseenco/theatre-shared/src/utils/addresses'
+import deepEqual from 'fast-deep-equal'
 import {
   getPropConfigByPath,
   propTypeConfigPersists,
@@ -136,6 +137,13 @@ export default function createTransactionPrivateApi(
             )
           }
 
+          const defaultValue = getDeep(
+            root.template.getDefaultValues().getValue(),
+            path,
+          )
+          const equalsDefault =
+            defaultValue !== undefined && deepEqual(deserialized, defaultValue)
+
           const propAddress = {...root.address, pathToProp: path}
           const isTransient = root.template.isTransientPropPath(path)
           const isStatic = root.template.isStaticPropPath(path)
@@ -145,20 +153,38 @@ export default function createTransactionPrivateApi(
             return
           }
 
+          const setStaticOverride = (
+            setFn: typeof stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp,
+            unsetFn: typeof stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp,
+            args: Parameters<
+              typeof stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp
+            >[0],
+          ) => {
+            if (equalsDefault) {
+              unsetFn(args)
+            } else {
+              setFn({...args, value: value as $FixMe})
+            }
+          }
+
           if (isTransient) {
-            stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-              {...propAddress, value: value as $FixMe},
+            setStaticOverride(
+              stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides
+                .byObject.setValueOfPrimitiveProp,
+              stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides
+                .byObject.unsetValueOfPrimitiveProp,
+              propAddress,
             )
           } else if (isStatic) {
             const activeVariant = getStudioActiveSequenceVariant(
               root.sheet.address,
             )
-            stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-              {
-                ...propAddress,
-                value: value as $FixMe,
-                sequenceVariant: activeVariant,
-              },
+            setStaticOverride(
+              stateEditors.coreByProject.historic.sheetsById.staticOverrides
+                .byObject.setValueOfPrimitiveProp,
+              stateEditors.coreByProject.historic.sheetsById.staticOverrides
+                .byObject.unsetValueOfPrimitiveProp,
+              {...propAddress, sequenceVariant: activeVariant},
             )
           } else if (isUndoable) {
             const activeVariant = getStudioActiveSequenceVariant(
@@ -192,17 +218,21 @@ export default function createTransactionPrivateApi(
                 },
               )
             } else {
-              stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-                {
-                  ...propAddress,
-                  value: value as $FixMe,
-                  sequenceVariant: activeVariant,
-                },
+              setStaticOverride(
+                stateEditors.coreByProject.historic.sheetsById.staticOverrides
+                  .byObject.setValueOfPrimitiveProp,
+                stateEditors.coreByProject.historic.sheetsById.staticOverrides
+                  .byObject.unsetValueOfPrimitiveProp,
+                {...propAddress, sequenceVariant: activeVariant},
               )
             }
           } else {
-            stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides.byObject.setValueOfPrimitiveProp(
-              {...propAddress, value: value as $FixMe},
+            setStaticOverride(
+              stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides
+                .byObject.setValueOfPrimitiveProp,
+              stateEditors.coreByProject.ahistoric.sheetsById.staticOverrides
+                .byObject.unsetValueOfPrimitiveProp,
+              propAddress,
             )
           }
         }

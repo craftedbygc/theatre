@@ -8,11 +8,13 @@ import ErrorTooltip from '@unseenco/theatre-studio/uiComponents/Popover/ErrorToo
 import BasicTooltip from '@unseenco/theatre-studio/uiComponents/Popover/BasicTooltip'
 import {val} from '@unseenco/theatre-dataverse'
 import ExtensionToolbar from './ExtensionToolbar/ExtensionToolbar'
+import ExtensionFlyoutMenu from './ExtensionToolbar/tools/ExtensionFlyoutMenu'
 import PinButton from './PinButton'
 import {
   Details,
   Outline,
   Bell,
+  ArrowClockwise,
 } from '@unseenco/theatre-studio/uiComponents/icons'
 import DoubleChevronLeft from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronLeft'
 import DoubleChevronRight from '@unseenco/theatre-studio/uiComponents/icons/DoubleChevronRight'
@@ -171,6 +173,40 @@ const GlobalToolbar: React.FC = () => {
           pinHintIcon={<TimelineIcon />}
           unpinHintIcon={<TimelineIcon />}
           pinned={sequenceEditorPinned}
+        />
+        <ExtensionFlyoutMenu
+          config={{
+            type: 'Flyout',
+            label: <ArrowClockwise />,
+            title: 'Clear state',
+            'data-testid': 'GlobalToolbar-ClearStateButton',
+            items: [
+              {
+                label: 'Clear project state',
+                onClick: () => {
+                  if (
+                    window.confirm(
+                      'Clear project state? This removes all keyframes, sheets, and other project animation data. Studio preferences will not be affected.',
+                    )
+                  ) {
+                    void getStudio().clearProjectPersistentStorage()
+                  }
+                },
+              },
+              {
+                label: 'Clear studio state',
+                onClick: () => {
+                  if (
+                    window.confirm(
+                      'Clear studio state? This resets panel layout, sequencer scroll/zoom, and other studio preferences. Project animation data will not be affected.',
+                    )
+                  ) {
+                    getStudio().clearStudioPersistentStorage()
+                  }
+                },
+              },
+            ],
+          }}
         />
         <ToolbarIconButton
           data-testid="DockedLayout-ToggleButton"

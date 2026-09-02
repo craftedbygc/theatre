@@ -60,6 +60,10 @@ import {
   registerObjectTransientPropPaths,
   stripTransientPathsFromSerializableMap,
 } from '@unseenco/theatre-shared/utils/transientPropPaths'
+import {registerObjectPropConfig} from '@unseenco/theatre-shared/utils/defaultPropValues'
+import {InvalidArgumentError} from '@unseenco/theatre-shared/utils/errors'
+import type {UnknownShorthandCompoundProps} from '@unseenco/theatre-core/propTypes/internals'
+import {compound, compoundFromSanitizedProps} from '@unseenco/theatre-core/propTypes'
 
 function isObjectEmpty(obj: unknown): boolean {
   return (
@@ -172,6 +176,12 @@ export default class SheetObjectTemplate {
       objectKey,
       this._transientPropPaths,
     )
+    registerObjectPropConfig(
+      this.address.projectId,
+      this.address.sheetId,
+      objectKey,
+      config,
+    )
 
     this.pointerToSheetState =
       this.sheetTemplate.project.pointers.historic.sheetsById[
@@ -245,6 +255,32 @@ export default class SheetObjectTemplate {
       this.address.objectKey,
       config,
     )
+  }
+
+  addProps(config: UnknownShorthandCompoundProps) {
+    const existing = this._config.get()
+    const additional = compound(config)
+
+    for (const key of Object.keys(additional.props)) {
+      if (Object.prototype.hasOwnProperty.call(existing.props, key)) {
+        throw new InvalidArgumentError(
+          `Cannot add prop "${key}" because it already exists on object "${this.address.objectKey}".`,
+        )
+      }
+    }
+
+    const merged = compoundFromSanitizedProps({
+      ...existing.props,
+      ...additional.props,
+    })
+    this._config.set(merged)
+    registerObjectPropConfig(
+      this.address.projectId,
+      this.address.sheetId,
+      this.address.objectKey,
+      merged,
+    )
+    this._stripNonPersistingPropsFromAhistoricState()
   }
 
   setTransientPropPaths(
