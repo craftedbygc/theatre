@@ -12,10 +12,11 @@ import state from './dom.theatre-project-state.json'
  * the selection behavior.
  *
  * Saved state is loaded from `dom.theatre-project-state.json` so Studio can
- * compare live edits against the on-disk baseline (outer diamond indicator).
+ * compare live edits against the on-disk baseline (outer diamond indicator),
+ * even after refresh when state is restored from localStorage.
  */
 
-studio.initialize({usePersistentStorage: false})
+studio.initialize()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <Scene project={getProject('Sample project', {state})} />,
