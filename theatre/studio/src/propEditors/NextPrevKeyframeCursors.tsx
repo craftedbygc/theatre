@@ -136,6 +136,14 @@ const Next = styled(PrevOrNextButton)<{
   }
 `
 
+const CurDiamond = styled.div`
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background-color: currentColor;
+`
+
 namespace Icons {
   const Chevron_Group = styled.g`
     stroke-width: 1;
@@ -171,28 +179,6 @@ namespace Icons {
       </Chevron_Group>
     </svg>
   )
-
-  const Cur_Group = styled.g`
-    stroke-width: 0;
-    ${CurButton}:hover & path {
-      stroke: currentColor;
-      stroke-width: 2;
-    }
-  `
-
-  export const Cur = () => (
-    <svg
-      width="8"
-      height="12"
-      viewBox="0 0 8 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <Cur_Group transform="translate(1 4)">
-        <path d="M3 0L6 3L3 6L0 3L3 0Z" fill="currentColor" />
-      </Cur_Group>
-    </svg>
-  )
 }
 
 const NextPrevKeyframeCursors: React.VFC<
@@ -225,7 +211,7 @@ const NextPrevKeyframeCursors: React.VFC<
         <SavedStateDiamondWrapper
           hasDivergedFromSavedState={props.hasDivergedFromSavedState ?? false}
         >
-          <Icons.Cur />
+          <CurDiamond />
         </SavedStateDiamondWrapper>
       </CurButton>
       <Next
