@@ -1,5 +1,24 @@
 # Theatre.js changelog
 
+## 0.1.17
+
+- New features
+  - Core:
+    - `ISheetObject.addProps(config)` — add new top-level props to an existing sheet object without re-specifying the full config via `sheet.object(..., {reconfigure: true})`. Existing props and their historic statics/tracks are preserved.
+    - Exported project state omits static overrides that match each prop's default value (set/undo back to default no longer bloats persisted JSON).
+  - Studio:
+    - Studio preferences and project animation data now persist under separate localStorage keys (`{prefix}.studio` and `{prefix}.project`), with migration from the legacy combined key.
+    - `studio.clearStudioState()` and `studio.clearProjectState()` clear each store independently; the toolbar uses a single flyout menu with separate clear options.
+- Bug fixes
+  - Studio:
+    - Ease selector popover opens at the click position instead of centering on long keyframe connector lines.
+    - Toolbar flyout menu SVG icons no longer render smaller than other toolbar buttons; dock toggle icon redesigned (default shape switches to overlapping windows when docked).
+  - Three.js Package:
+    - `buildExtension()` renderer parameter now accepts `WebGPURenderer` (via `ThreejsRenderer`); `studio` accepts real `IStudio` instances without type errors.
+- Maintenance
+  - Playground: Netlify config for per-PR deploy previews; custom RAF driver wired in the three devtools demo.
+
+
 ## 0.1.16
 
 - Bug fixes
