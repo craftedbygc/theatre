@@ -1,7 +1,5 @@
-import type {ProjectOnlyPersistentState} from '@unseenco/theatre-studio/StudioStore/splitPersistentState'
 import type {StudioState} from '@unseenco/theatre-studio/store/types'
 import actionCreator from '@unseenco/theatre-studio/utils/redux/actionCreator'
-import cloneDeep from 'lodash-es/cloneDeep'
 import type {IWithHistory} from '@unseenco/theatre-studio/utils/redux/withHistory/withHistory'
 import {
   historicActions,
@@ -74,16 +72,10 @@ const reduceParts = actionCreator(
   (fn: (wholeState: StudioState) => StudioState) => fn,
 )
 
-const setLastPersistedProjectState = actionCreator(
-  '@storeBundle/setLastPersistedProjectState',
-  (s: ProjectOnlyPersistentState | undefined) => s,
-)
-
 export const studioActions = {
   historic: historicActions,
   replacePersistentState,
   reduceParts,
-  setLastPersistedProjectState,
 }
 
 const setInnerHistoricState = actionCreator(
@@ -129,17 +121,7 @@ const permanentReducer: ReduxReducer<PermanentState> = (
     let {historic, ahistoric} = prevState.$persistent
     let {ephemeral} = prevState
 
-    if (setLastPersistedProjectState.is(action)) {
-      return {
-        ...prevState,
-        ephemeral: {
-          ...prevState.ephemeral,
-          lastPersistedProjectState: action.payload
-            ? cloneDeep(action.payload)
-            : undefined,
-        },
-      }
-    } else if (reduceParts.is(action)) {
+    if (reduceParts.is(action)) {
       const wholeState: StudioState = {
         historic: prevState.$persistent.historic.innerState,
         ahistoric: prevState.$persistent.ahistoric,

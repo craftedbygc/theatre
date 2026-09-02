@@ -88,8 +88,8 @@ function keyframeAtPositionDiffers(
 }
 
 /**
- * Returns true when the prop differs from the project state last persisted to
- * disk (localStorage), i.e. it changed since the last save.
+ * Returns true when the prop differs from the project state loaded from the
+ * on-disk JSON (`config.state` passed to `getProject()`).
  */
 export function propHasDivergedFromSavedState(
   obj: SheetObject,
@@ -100,30 +100,26 @@ export function propHasDivergedFromSavedState(
     sequencePosition?: number
   },
 ): boolean {
-  const studio = getStudio()!
-  const lastPersistedOnDisk = val(
-    studio.atomP.ephemeral.lastPersistedProjectState,
-  )
-  if (!lastPersistedOnDisk) {
+  const loadedProjectHistoric = obj.template.project.config.state
+  if (!loadedProjectHistoric) {
     return false
   }
 
+  const studio = getStudio()!
   const projectId = obj.address.projectId
   const sheetId = obj.address.sheetId
 
   const currentProjectHistoric = val(
     studio.atomP.historic.coreByProject[projectId],
   )
-  const onDiskProjectHistoric = lastPersistedOnDisk.historic[projectId]
   const currentProjectAhistoric = val(
     studio.atomP.ahistoric.coreByProject[projectId],
   )
-  const onDiskProjectAhistoric = lastPersistedOnDisk.ahistoric[projectId]
 
   const currentSheetState = currentProjectHistoric?.sheetsById[sheetId]
-  const onDiskSheetState = onDiskProjectHistoric?.sheetsById[sheetId]
+  const onDiskSheetState = loadedProjectHistoric.sheetsById[sheetId]
   const currentAhistoricSheet = currentProjectAhistoric?.sheetsById?.[sheetId]
-  const onDiskAhistoricSheet = onDiskProjectAhistoric?.sheetsById?.[sheetId]
+  const onDiskAhistoricSheet = undefined
 
   const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
 

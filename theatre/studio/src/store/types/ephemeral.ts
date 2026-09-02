@@ -1,5 +1,4 @@
 import type {ProjectState} from '@unseenco/theatre-core/projects/store/storeTypes'
-import type {ProjectOnlyPersistentState} from '@unseenco/theatre-studio/StudioStore/splitPersistentState'
 import type {
   ObjectAddressKey,
   ProjectId,
@@ -36,11 +35,6 @@ import type {
  */
 export type StudioEphemeralState = {
   initialised: boolean
-  /**
-   * Snapshot of the project slice last written to disk (localStorage). Used to
-   * detect props that changed since the last persist.
-   */
-  lastPersistedProjectState?: ProjectOnlyPersistentState
   coreByProject: {[projectId in string]: ProjectState['ephemeral']}
   projects: {
     stateByProjectId: StrictRecord<
