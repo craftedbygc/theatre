@@ -31,7 +31,6 @@ const Container = styled.div`
   margin: 0 0px 0 2px;
   position: relative;
   z-index: 0;
-  opacity: 0.7;
 
   &:after {
     position: absolute;
@@ -46,10 +45,15 @@ const Container = styled.div`
   }
 
   &:hover {
-    opacity: 1;
     &:after {
       display: block;
     }
+  }
+`
+
+const dimWhenIdle = css`
+  ${Container}:not(:hover) & {
+    opacity: 0.7;
   }
 `
 
@@ -86,6 +90,10 @@ const CurButton = styled(Button)<{
   isOn: boolean
   presence: PresenceFlag | undefined
 }>`
+  width: 8px;
+  height: 12px;
+  flex-shrink: 0;
+
   &:hover {
     color: #e0c917;
   }
@@ -121,6 +129,7 @@ const Prev = styled(PrevOrNextButton)<{
   available: boolean
   flag: PresenceFlag | undefined
 }>`
+  ${dimWhenIdle};
   transform: translateX(2px);
   ${Container}:hover & {
     transform: translateX(-7px);
@@ -130,6 +139,7 @@ const Next = styled(PrevOrNextButton)<{
   available: boolean
   flag: PresenceFlag | undefined
 }>`
+  ${dimWhenIdle};
   transform: translateX(-2px);
   ${Container}:hover & {
     transform: translateX(7px);
@@ -142,6 +152,7 @@ const CurDiamond = styled.div`
   border-radius: 1px;
   transform: rotate(45deg);
   background-color: currentColor;
+  ${dimWhenIdle};
 `
 
 namespace Icons {
@@ -210,6 +221,7 @@ const NextPrevKeyframeCursors: React.VFC<
       >
         <SavedStateDiamondWrapper
           hasDivergedFromSavedState={props.hasDivergedFromSavedState ?? false}
+          layout="sequenced"
         >
           <CurDiamond />
         </SavedStateDiamondWrapper>
