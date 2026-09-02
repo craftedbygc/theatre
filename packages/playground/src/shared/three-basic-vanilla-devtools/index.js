@@ -1,12 +1,19 @@
 import { Clock } from 'three'
 import studio from '@unseenco/theatre-studio'
-import { getProject } from '@unseenco/theatre-core'
+import {
+  createRafDriver,
+  getProject,
+  setCoreRafDriver,
+} from '@unseenco/theatre-core'
 import { configureTheatreThreejs } from '@unseenco/theatre-threejs'
 import { buildExtension } from '@unseenco/theatre-threejs/extension'
 import { bindDockedThreeViewport } from '../utils/bindDockedThreeViewport'
 import { createThreeScenes } from './ThreeScene.js'
 
-studio.initialize()
+const rafDriver = createRafDriver({ name: 'three-basic-vanilla-devtools' })
+setCoreRafDriver(rafDriver)
+
+studio.initialize({ __experimental_rafDriver: rafDriver })
 
 configureTheatreThreejs({
   autoAddObject: {
@@ -17,8 +24,9 @@ configureTheatreThreejs({
 })
 
 async function main() {
-
-  const project = getProject('Three Basic Vanilla Devtools', { assets: { baseUrl: '/public' } })
+  const project = getProject('Three Basic Vanilla Devtools', {
+    assets: { baseUrl: '/public' },
+  })
   await project.ready
   const { renderer, scenes, onFrame } = await createThreeScenes(project)
   const clock = new Clock()
@@ -45,14 +53,15 @@ async function main() {
     cameras: scenes.map(({ camera }) => camera),
   })
 
-  function render() {
+  function render(time) {
     requestAnimationFrame(render)
+    rafDriver.tick(time)
     onFrame?.(clock.getElapsedTime())
     devtools.update()
     renderer.render(activeScene, devtools.getCamera())
   }
 
-  render()
+  requestAnimationFrame(render)
 }
 
 main()
