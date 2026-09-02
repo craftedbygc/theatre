@@ -11,6 +11,9 @@
 [build]
   command = "cd ../.. && corepack enable && yarn install --immutable && yarn workspace playground run build"
   publish = "build"
+  # Base directory is packages/playground, but Vite bundles theatre/* and packages/* from
+  # source. Diff the whole repo so PRs that only touch those paths still get previews.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF .."
 
 [build.environment]
   NODE_VERSION = "18"
