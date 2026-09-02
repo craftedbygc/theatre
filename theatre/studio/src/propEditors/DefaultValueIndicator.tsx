@@ -11,6 +11,7 @@ import {
   iteratePropType,
 } from '@unseenco/theatre-shared/propTypes/utils'
 import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import SavedStateDiamondWrapper from './SavedStateDiamondWrapper'
 
 const theme = {
   defaultState: {
@@ -101,6 +102,7 @@ function sequenceProp(
 
 const DefaultOrStaticValueIndicator: React.FC<{
   hasStaticOverride: boolean
+  hasDivergedFromSavedState: boolean
   pathToProp: PathToProp
   obj: SheetObject
   propConfig: PropTypeConfig
@@ -109,6 +111,7 @@ const DefaultOrStaticValueIndicator: React.FC<{
 }> = (props) => {
   const {
     hasStaticOverride,
+    hasDivergedFromSavedState,
     obj,
     propConfig,
     pathToProp,
@@ -138,7 +141,11 @@ const DefaultOrStaticValueIndicator: React.FC<{
         $isNonInteractive
         title={title}
       >
-        <OutlineIcon />
+        <SavedStateDiamondWrapper
+          hasDivergedFromSavedState={hasDivergedFromSavedState}
+        >
+          <OutlineIcon />
+        </SavedStateDiamondWrapper>
       </Container>
     )
   }
@@ -149,11 +156,15 @@ const DefaultOrStaticValueIndicator: React.FC<{
       onClick={() => sequenceProp(obj, propConfig, pathToProp)}
       title="Sequence this prop"
     >
-      {hasStaticOverride ? (
-        <FilledIcon title="The default value is overridden" />
-      ) : (
-        <DefaultIcon title="This is the default value for this prop" />
-      )}
+      <SavedStateDiamondWrapper
+        hasDivergedFromSavedState={hasDivergedFromSavedState}
+      >
+        {hasStaticOverride ? (
+          <FilledIcon title="The default value is overridden" />
+        ) : (
+          <DefaultIcon title="This is the default value for this prop" />
+        )}
+      </SavedStateDiamondWrapper>
     </Container>
   )
 }

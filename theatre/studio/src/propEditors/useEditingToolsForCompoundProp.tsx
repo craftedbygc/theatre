@@ -13,6 +13,7 @@ import get from 'lodash-es/get'
 import React from 'react'
 import DefaultOrStaticValueIndicator from './DefaultValueIndicator'
 import type {PropTypeConfig_Compound} from '@unseenco/theatre-core/propTypes'
+import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
 import {
   compoundHasSimpleDescendants,
   isPropConfigComposite,
@@ -33,6 +34,7 @@ import {
 } from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 // eslint-disable-next-line no-restricted-syntax
 import {getSequenceStateFromSheet} from '@unseenco/theatre-core/sequences/sequenceVariants'
+import {propHasDivergedFromSavedState} from './propHasDivergedFromSavedState'
 
 interface CommonStuff {
   beingScrubbed: boolean
@@ -76,6 +78,10 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
         controlIndicators: (
           <DefaultOrStaticValueIndicator
             hasStaticOverride={false}
+            hasDivergedFromSavedState={propHasDivergedFromSavedState(
+              obj,
+              pathToProp,
+            )}
             isStatic={isStatic}
             isTransient={isTransient}
             obj={obj}
@@ -239,6 +245,7 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
             {...{
               pointerToProp,
               obj,
+              propConfig,
               possibleSequenceTrackIds,
               listOfDescendantTrackIds,
             }}
@@ -261,6 +268,10 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
         controlIndicators: (
           <DefaultOrStaticValueIndicator
             hasStaticOverride={hasStatics}
+            hasDivergedFromSavedState={propHasDivergedFromSavedState(
+              obj,
+              pathToProp,
+            )}
             isStatic={isStatic}
             isTransient={isTransient}
             obj={obj}
@@ -276,11 +287,13 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
 function ControlIndicators({
   pointerToProp,
   obj,
+  propConfig,
   possibleSequenceTrackIds,
   listOfDescendantTrackIds,
 }: {
   pointerToProp: Pointer<{}>
   obj: SheetObject
+  propConfig: PropTypeConfig_Compound<{}>
   possibleSequenceTrackIds: IPropPathToTrackIdTree
   listOfDescendantTrackIds: SequenceTrackId[]
 }) {
@@ -428,6 +441,60 @@ function ControlIndicators({
           : undefined,
     }
 
-    return <NextPrevKeyframeCursors {...pr} />
-  }, [pointerToProp, obj, possibleSequenceTrackIds, listOfDescendantTrackIds])
+    return (
+      <NextPrevKeyframeCursors
+        {...pr}
+        hasDivergedFromSavedState={compoundHasDivergedFromSavedState(
+          obj,
+          pathToProp,
+          propConfig,
+          possibleSequenceTrackIds,
+          sequencePosition,
+          activeVariant,
+        )}
+      />
+    )
+  }, [pointerToProp, obj, propConfig, possibleSequenceTrackIds, listOfDescendantTrackIds])
+}
+
+function compoundHasDivergedFromSavedState(
+  obj: SheetObject,
+  pathToProp: PathToProp,
+  propConfig: PropTypeConfig_Compound<{}>,
+  possibleSequenceTrackIds: IPropPathToTrackIdTree,
+  sequencePosition: number,
+  activeVariant: ReturnType<typeof getStudioActiveSequenceVariant>,
+): boolean {
+  if (propHasDivergedFromSavedState(obj, pathToProp)) {
+    return true
+  }
+
+  for (const {path, conf} of iteratePropType(propConfig, pathToProp)) {
+    if (isPropConfigComposite(conf)) continue
+
+    const pathSuffix = path.slice(pathToProp.length)
+    const trackId = getDeep(
+      possibleSequenceTrackIds,
+      pathSuffix,
+    ) as SequenceTrackId | undefined
+
+    if (
+      propHasDivergedFromSavedState(obj, path, {
+        sequenceTrackId:
+          typeof trackId === 'string' ? trackId : undefined,
+        trackVariant:
+          typeof trackId === 'string'
+            ? obj.template.getSequenceVariantOwningTrack(
+                trackId,
+                activeVariant,
+              ) ?? activeVariant
+            : activeVariant,
+        sequencePosition,
+      })
+    ) {
+      return true
+    }
+  }
+
+  return false
 }

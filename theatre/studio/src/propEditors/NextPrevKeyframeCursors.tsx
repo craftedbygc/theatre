@@ -7,6 +7,7 @@ import React from 'react'
 import styled, {css} from 'styled-components'
 import {PresenceFlag} from '@unseenco/theatre-studio/uiComponents/usePresence'
 import usePresence from '@unseenco/theatre-studio/uiComponents/usePresence'
+import SavedStateDiamondWrapper from './SavedStateDiamondWrapper'
 
 export type NearbyKeyframesControls = {
   prev?: Pick<Keyframe, 'position'> & {
@@ -194,7 +195,11 @@ namespace Icons {
   )
 }
 
-const NextPrevKeyframeCursors: React.VFC<NearbyKeyframesControls> = (props) => {
+const NextPrevKeyframeCursors: React.VFC<
+  NearbyKeyframesControls & {
+    hasDivergedFromSavedState?: boolean
+  }
+> = (props) => {
   const prevPresence = usePresence(props.prev?.itemKey)
   const curPresence = usePresence(
     props.cur?.type === 'on' ? props.cur.itemKey : undefined,
@@ -217,7 +222,11 @@ const NextPrevKeyframeCursors: React.VFC<NearbyKeyframesControls> = (props) => {
         presence={curPresence.flag}
         {...curPresence.attrs}
       >
-        <Icons.Cur />
+        <SavedStateDiamondWrapper
+          hasDivergedFromSavedState={props.hasDivergedFromSavedState ?? false}
+        >
+          <Icons.Cur />
+        </SavedStateDiamondWrapper>
       </CurButton>
       <Next
         available={!!props.next}
