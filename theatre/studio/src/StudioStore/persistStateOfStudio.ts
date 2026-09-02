@@ -1,6 +1,7 @@
 import logger from '@unseenco/theatre-shared/logger'
 import type {StudioPersistentState} from '@unseenco/theatre-studio/store'
 import {studioActions} from '@unseenco/theatre-studio/store'
+import type {ProjectOnlyPersistentState} from './splitPersistentState'
 import type {FullStudioState} from '@unseenco/theatre-studio/store/index'
 import debounce from 'lodash-es/debounce'
 import type {Store} from 'redux'
@@ -9,7 +10,6 @@ import {
   getProjectStorageKey,
   getStudioStorageKey,
   mergePersistentState,
-  type ProjectOnlyPersistentState,
   splitPersistentState,
   type StudioOnlyPersistentState,
 } from './splitPersistentState'
@@ -38,6 +38,12 @@ export const persistStateOfStudio = (
   const legacyStorageKey = getLegacyStorageKey(localStoragePrefix)
   const getState = () => reduxStore.getState().$persistent
 
+  const markProjectStateAsPersistedToDisk = (
+    project: ProjectOnlyPersistentState,
+  ) => {
+    reduxStore.dispatch(studioActions.setLastPersistedProjectState(project))
+  }
+
   loadFromPersistentStorage()
 
   const persist = () => {
@@ -54,6 +60,7 @@ export const persistStateOfStudio = (
     lastStateByStore.set(reduxStore, {studio, project})
     localStorage.setItem(studioStorageKey, JSON.stringify(studio))
     localStorage.setItem(projectStorageKey, JSON.stringify(project))
+    markProjectStateAsPersistedToDisk(project)
   }
   reduxStore.subscribe(debounce(persist, 1000))
   if (window) {
@@ -87,9 +94,19 @@ export const persistStateOfStudio = (
         }
       }
     } finally {
+      markProjectStateAsPersistedToDisk(
+        splitPersistentState(getState()).project,
+      )
       onInitialize()
     }
   }
+}
+
+export function markCurrentProjectStateAsPersistedToDisk(
+  reduxStore: Store<FullStudioState>,
+) {
+  const {project} = splitPersistentState(reduxStore.getState().$persistent)
+  reduxStore.dispatch(studioActions.setLastPersistedProjectState(project))
 }
 
 function loadJsonFromStorage<T>(storageKey: string): T | null {
@@ -136,4 +153,5 @@ export const __experimental_clearProjectPersistentStorage = (
   localStorage.removeItem(storageKey)
   localStorage.removeItem(getLegacyStorageKey(localStoragePrefix))
   lastStateByStore.set(reduxStore, {studio, project})
+  markCurrentProjectStateAsPersistedToDisk(reduxStore)
 }

@@ -1,5 +1,5 @@
 import deepEqual from 'fast-deep-equal'
-import type {OnDiskState} from '@unseenco/theatre-core/projects/store/storeTypes'
+import type {SheetAhistoricState} from '@unseenco/theatre-core/projects/store/storeTypes'
 import {
   getEffectiveStaticOverrideForObject,
   getSequenceStateFromSheet,
@@ -13,38 +13,54 @@ import {val} from '@unseenco/theatre-dataverse'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
-type ProjectHistoricState = OnDiskState
-
 function staticOverrideAtPathDiffers(
-  surfaceSheetState: Parameters<typeof getEffectiveStaticOverrideForObject>[0],
-  permanentSheetState: Parameters<typeof getEffectiveStaticOverrideForObject>[0],
+  currentSheetState: Parameters<typeof getEffectiveStaticOverrideForObject>[0],
+  onDiskSheetState: Parameters<typeof getEffectiveStaticOverrideForObject>[0],
   sequenceVariant: SequenceVariantId,
   objectKey: SheetObject['address']['objectKey'],
   pathToProp: PathToProp,
 ): boolean {
-  const surfaceStatic = getDeep(
+  const currentStatic = getDeep(
     getEffectiveStaticOverrideForObject(
-      surfaceSheetState,
+      currentSheetState,
       sequenceVariant,
       objectKey,
     ) ?? {},
     pathToProp,
   )
-  const permanentStatic = getDeep(
+  const onDiskStatic = getDeep(
     getEffectiveStaticOverrideForObject(
-      permanentSheetState,
+      onDiskSheetState,
       sequenceVariant,
       objectKey,
     ) ?? {},
     pathToProp,
   )
 
-  return !deepEqual(surfaceStatic, permanentStatic)
+  return !deepEqual(currentStatic, onDiskStatic)
+}
+
+function ahistoricStaticOverrideAtPathDiffers(
+  currentAhistoricSheet: SheetAhistoricState | undefined,
+  onDiskAhistoricSheet: SheetAhistoricState | undefined,
+  objectKey: SheetObject['address']['objectKey'],
+  pathToProp: PathToProp,
+): boolean {
+  const currentStatic = getDeep(
+    currentAhistoricSheet?.staticOverrides?.byObject?.[objectKey] ?? {},
+    pathToProp,
+  )
+  const onDiskStatic = getDeep(
+    onDiskAhistoricSheet?.staticOverrides?.byObject?.[objectKey] ?? {},
+    pathToProp,
+  )
+
+  return !deepEqual(currentStatic, onDiskStatic)
 }
 
 function keyframeAtPositionDiffers(
-  surfaceSheetState: Parameters<typeof getSequenceStateFromSheet>[0],
-  permanentSheetState: Parameters<typeof getSequenceStateFromSheet>[0],
+  currentSheetState: Parameters<typeof getSequenceStateFromSheet>[0],
+  onDiskSheetState: Parameters<typeof getSequenceStateFromSheet>[0],
   obj: SheetObject,
   trackId: SequenceTrackId,
   trackVariant: SequenceVariantId,
@@ -52,28 +68,28 @@ function keyframeAtPositionDiffers(
 ): boolean {
   const objectKey = obj.address.objectKey
 
-  const surfaceTrack = getSequenceStateFromSheet(
-    surfaceSheetState,
+  const currentTrack = getSequenceStateFromSheet(
+    currentSheetState,
     trackVariant,
   )?.tracksByObject[objectKey]?.trackData[trackId]
-  const permanentTrack = getSequenceStateFromSheet(
-    permanentSheetState,
+  const onDiskTrack = getSequenceStateFromSheet(
+    onDiskSheetState,
     trackVariant,
   )?.tracksByObject[objectKey]?.trackData[trackId]
 
-  const surfaceKeyframe = surfaceTrack?.keyframes.find(
+  const currentKeyframe = currentTrack?.keyframes.find(
     (kf) => kf.position === position,
   )
-  const permanentKeyframe = permanentTrack?.keyframes.find(
+  const onDiskKeyframe = onDiskTrack?.keyframes.find(
     (kf) => kf.position === position,
   )
 
-  return !deepEqual(surfaceKeyframe?.value, permanentKeyframe?.value)
+  return !deepEqual(currentKeyframe?.value, onDiskKeyframe?.value)
 }
 
 /**
- * Returns true when the prop's committed (permanent) project state differs from
- * the live studio surface state, e.g. while a scrub transaction is open.
+ * Returns true when the prop differs from the project state last persisted to
+ * disk (localStorage), i.e. it changed since the last save.
  */
 export function propHasDivergedFromSavedState(
   obj: SheetObject,
@@ -85,30 +101,48 @@ export function propHasDivergedFromSavedState(
   },
 ): boolean {
   const studio = getStudio()!
+  const lastPersistedOnDisk = val(
+    studio.atomP.ephemeral.lastPersistedProjectState,
+  )
+  if (!lastPersistedOnDisk) {
+    return false
+  }
+
   const projectId = obj.address.projectId
   const sheetId = obj.address.sheetId
 
-  const surfaceProjectHistoric = val(
+  const currentProjectHistoric = val(
     studio.atomP.historic.coreByProject[projectId],
-  ) as ProjectHistoricState | undefined
-  const permanentProjectHistoric = val(
-    studio.atomP.$persistent.historic.innerState.coreByProject[projectId],
-  ) as ProjectHistoricState | undefined
+  )
+  const onDiskProjectHistoric = lastPersistedOnDisk.historic[projectId]
+  const currentProjectAhistoric = val(
+    studio.atomP.ahistoric.coreByProject[projectId],
+  )
+  const onDiskProjectAhistoric = lastPersistedOnDisk.ahistoric[projectId]
 
-  const surfaceSheetState = surfaceProjectHistoric?.sheetsById[sheetId]
-  const permanentSheetState = permanentProjectHistoric?.sheetsById[sheetId]
-
-  if (surfaceSheetState === permanentSheetState) {
-    return false
-  }
+  const currentSheetState = currentProjectHistoric?.sheetsById[sheetId]
+  const onDiskSheetState = onDiskProjectHistoric?.sheetsById[sheetId]
+  const currentAhistoricSheet = currentProjectAhistoric?.sheetsById?.[sheetId]
+  const onDiskAhistoricSheet = onDiskProjectAhistoric?.sheetsById?.[sheetId]
 
   const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
 
   if (
     staticOverrideAtPathDiffers(
-      surfaceSheetState,
-      permanentSheetState,
+      currentSheetState,
+      onDiskSheetState,
       activeVariant,
+      obj.address.objectKey,
+      pathToProp,
+    )
+  ) {
+    return true
+  }
+
+  if (
+    ahistoricStaticOverrideAtPathDiffers(
+      currentAhistoricSheet,
+      onDiskAhistoricSheet,
       obj.address.objectKey,
       pathToProp,
     )
@@ -124,8 +158,8 @@ export function propHasDivergedFromSavedState(
 
     if (
       keyframeAtPositionDiffers(
-        surfaceSheetState,
-        permanentSheetState,
+        currentSheetState,
+        onDiskSheetState,
         obj,
         opts.sequenceTrackId,
         trackVariant,
