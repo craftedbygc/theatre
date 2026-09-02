@@ -220,7 +220,7 @@ const GlobalToolbar: React.FC = () => {
           }}
           title={dockedMode ? 'Float panels' : 'Dock panels'}
         >
-          <DockLayout />
+          <DockLayout docked={dockedMode} />
         </ToolbarIconButton>
         {window.location.hash !== '#editor' && (
           <ToolbarIconButton

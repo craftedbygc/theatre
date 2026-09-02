@@ -16,12 +16,6 @@ const FlyoutTriggerButton = styled(ToolbarIconButton)`
   width: auto;
   padding: 0 8px;
   font-size: 11px;
-
-  & > svg {
-    width: 1em;
-    height: 1em;
-    pointer-events: none;
-  }
 `
 
 const ExtensionFlyoutMenu: React.FC<{
