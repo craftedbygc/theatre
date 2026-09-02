@@ -29,7 +29,6 @@ import {notify} from './notify'
 import type {RafDriverPrivateAPI} from '@unseenco/theatre-core/rafDrivers'
 import {syncAllStudioPreviewVariants} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import {STUDIO_PROJECT_ID} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
-import initialiseProjectState from '@unseenco/theatre-core/projects/initialiseProjectState'
 import {val} from '@unseenco/theatre-dataverse'
 
 const DEFAULT_PERSISTENCE_KEY = 'theatre-0.4'
@@ -591,7 +590,7 @@ export class Studio {
     const projects = val(this.projectsP)
     await Promise.all(
       Object.values(projects).map((project) =>
-        initialiseProjectState(this, project, project.config.state),
+        project.reinitializeStateFromConfig(),
       ),
     )
   }

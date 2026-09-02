@@ -615,4 +615,14 @@ export default class Project {
       })
     }
   }
+
+  /** Re-initialize studio state from this project's `config.state`. */
+  async reinitializeStateFromConfig(): Promise<void> {
+    if (!this._studio) {
+      throw new Error(
+        `Cannot reinitialize project ${this.address.projectId}: not attached to studio`,
+      )
+    }
+    await initialiseProjectState(this._studio, this, this.config.state)
+  }
 }
