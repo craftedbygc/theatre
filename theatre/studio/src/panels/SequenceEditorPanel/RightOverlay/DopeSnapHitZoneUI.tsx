@@ -7,7 +7,7 @@ import DopeSnap from './DopeSnap'
 import {includeLockFrameStampAttrs} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 
 const HIT_ZONE_SIZE_PX = 12
-const SNAP_CURSOR_SIZE_PX = 34
+const SNAP_CURSOR_SIZE_PX = 17
 const BEING_DRAGGED_CLASS = 'beingDragged'
 
 /**
@@ -39,7 +39,10 @@ export const DopeSnapHitZoneUI = {
       height: ${SNAP_CURSOR_SIZE_PX}px;
       display: block;
       content: ' ';
-      background: url(${SnapCursor}) no-repeat 100% 100%;
+      // Must be quoted: esbuild inlines the SVG as a data URL, and an unquoted
+      // data-URL url() is invalid CSS (playground still works because Vite
+      // resolves the import to a plain file path).
+      background: url('${SnapCursor}') no-repeat center / 100% 100%;
       // This icon might also fit: GiConvergenceTarget
     }
   `,
