@@ -11,6 +11,9 @@ import {
   iteratePropType,
 } from '@unseenco/theatre-shared/propTypes/utils'
 import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import SavedStateDiamondWrapper, {
+  DIVERGED_FROM_SAVED_STATE_TITLE,
+} from './SavedStateDiamondWrapper'
 
 const theme = {
   defaultState: {
@@ -33,6 +36,7 @@ const Container = styled.div<{
   justify-content: center;
   align-items: center;
   cursor: ${(props) => (props.$isNonInteractive ? 'default' : 'pointer')};
+  line-height: 0;
 
   color: ${(props) =>
     props.hasStaticOverride
@@ -49,30 +53,6 @@ const Container = styled.div<{
         : theme.defaultState.hoverColor
     };
   }`}
-`
-
-const DefaultIcon = styled.div`
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  transform: rotate(45deg);
-  background-color: currentColor;
-`
-
-const FilledIcon = styled.div`
-  width: 5px;
-  height: 5px;
-  background-color: currentColor;
-  border-radius: 1px;
-  transform: rotate(45deg);
-`
-
-const OutlineIcon = styled.div`
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  transform: rotate(45deg);
-  border: 1px solid currentColor;
 `
 
 function sequenceProp(
@@ -101,6 +81,7 @@ function sequenceProp(
 
 const DefaultOrStaticValueIndicator: React.FC<{
   hasStaticOverride: boolean
+  hasDivergedFromSavedState: boolean
   pathToProp: PathToProp
   obj: SheetObject
   propConfig: PropTypeConfig
@@ -109,6 +90,7 @@ const DefaultOrStaticValueIndicator: React.FC<{
 }> = (props) => {
   const {
     hasStaticOverride,
+    hasDivergedFromSavedState,
     obj,
     propConfig,
     pathToProp,
@@ -124,7 +106,9 @@ const DefaultOrStaticValueIndicator: React.FC<{
     )
 
     let title: string
-    if (isTransient) {
+    if (hasDivergedFromSavedState) {
+      title = DIVERGED_FROM_SAVED_STATE_TITLE
+    } else if (isTransient) {
       title = 'This is a transient prop'
     } else if (showBlueOverride) {
       title = 'Static prop — the default value is overridden'
@@ -138,7 +122,10 @@ const DefaultOrStaticValueIndicator: React.FC<{
         $isNonInteractive
         title={title}
       >
-        <OutlineIcon />
+        <SavedStateDiamondWrapper
+          hasDivergedFromSavedState={hasDivergedFromSavedState}
+          variant="outline"
+        />
       </Container>
     )
   }
@@ -147,13 +134,21 @@ const DefaultOrStaticValueIndicator: React.FC<{
     <Container
       hasStaticOverride={hasStaticOverride}
       onClick={() => sequenceProp(obj, propConfig, pathToProp)}
-      title="Sequence this prop"
+      title={
+        hasDivergedFromSavedState
+          ? DIVERGED_FROM_SAVED_STATE_TITLE
+          : 'Sequence this prop'
+      }
     >
-      {hasStaticOverride ? (
-        <FilledIcon title="The default value is overridden" />
-      ) : (
-        <DefaultIcon title="This is the default value for this prop" />
-      )}
+      <SavedStateDiamondWrapper
+        hasDivergedFromSavedState={hasDivergedFromSavedState}
+        variant="filled"
+        title={
+          hasStaticOverride
+            ? 'The default value is overridden'
+            : 'This is the default value for this prop'
+        }
+      />
     </Container>
   )
 }

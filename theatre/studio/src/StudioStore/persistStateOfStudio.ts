@@ -9,8 +9,8 @@ import {
   getProjectStorageKey,
   getStudioStorageKey,
   mergePersistentState,
-  type ProjectOnlyPersistentState,
   splitPersistentState,
+  type ProjectOnlyPersistentState,
   type StudioOnlyPersistentState,
 } from './splitPersistentState'
 

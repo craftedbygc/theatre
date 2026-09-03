@@ -31,7 +31,8 @@ import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodr
 
 const Container = styled.div`
   --step: 10px;
-  --left-pad: 5px;
+  /* Enough room for keyframe-cursor hover background + expanded chevrons */
+  --left-pad: 16px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 40%;
 `
@@ -47,13 +48,17 @@ const Padding = styled.div<{isVectorProp: boolean}>`
   padding-left: ${rowIndentationFormulaCSS};
   display: flex;
   align-items: center;
-  overflow: hidden;
+  /* Allow keyframe-cursor hover bg to paint; text ellipsis lives on PropName */
+  overflow: visible;
   ${({isVectorProp}) =>
     isVectorProp ? 'width: calc(100% - var(--right-width))' : ''};
 `
 
 const ControlIndicators = styled.div`
-  flexshrink: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  line-height: 0;
 `
 
 const PropName = deriver(styled.div<{
