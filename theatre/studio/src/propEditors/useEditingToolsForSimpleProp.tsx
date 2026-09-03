@@ -28,6 +28,7 @@ import {
   getStudioActiveSequenceVariant,
   getStudioSequence,
 } from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {propHasDivergedFromSavedState} from './propHasDivergedFromSavedState'
 // eslint-disable-next-line no-restricted-syntax
 import {
   getSequenceStateFromSheet,
@@ -287,8 +288,25 @@ function createPrism<T extends SerializablePrimitive>(
               : undefined,
         }
 
+        const sequencePosition = val(
+          getStudioSequence(obj.sheet).positionPrism,
+        )
+
+        const hasDivergedFromSavedState = propHasDivergedFromSavedState(
+          obj,
+          pathToProp,
+          {
+            sequenceTrackId,
+            trackVariant,
+            sequencePosition,
+          },
+        )
+
         const nextPrevKeyframeCursors = (
-          <NextPrevKeyframeCursors {...controls} />
+          <NextPrevKeyframeCursors
+            {...controls}
+            hasDivergedFromSavedState={hasDivergedFromSavedState}
+          />
         )
 
         const ret: EditingToolsSequenced<T> = {
@@ -360,6 +378,11 @@ function createPrism<T extends SerializablePrimitive>(
       })
     }
 
+    const hasDivergedFromSavedState = propHasDivergedFromSavedState(
+      obj,
+      pathToProp,
+    )
+
     if (typeof staticOverride !== 'undefined') {
       const ret: EditingToolsStatic<T> = {
         ...common,
@@ -368,6 +391,7 @@ function createPrism<T extends SerializablePrimitive>(
         controlIndicators: (
           <DefaultOrStaticValueIndicator
             hasStaticOverride={true}
+            hasDivergedFromSavedState={hasDivergedFromSavedState}
             isStatic={isStatic}
             isTransient={isTransient}
             obj={obj}
@@ -386,6 +410,7 @@ function createPrism<T extends SerializablePrimitive>(
       controlIndicators: (
         <DefaultOrStaticValueIndicator
           hasStaticOverride={false}
+          hasDivergedFromSavedState={hasDivergedFromSavedState}
           isStatic={isStatic}
           isTransient={isTransient}
           obj={obj}

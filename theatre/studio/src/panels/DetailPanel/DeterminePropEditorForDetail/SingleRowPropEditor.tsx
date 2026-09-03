@@ -61,10 +61,10 @@ const PropNameContainer = styled.div<{
 `
 
 const ControlsContainer = styled.div`
-  flex-basis: 8px;
-  flex: 0 0;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
+  line-height: 0;
 `
 
 const InputContainer = styled.div`

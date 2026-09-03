@@ -187,18 +187,6 @@ export const Scene: React.FC<{project: IProject}> = ({project}) => {
 
   const containerRef = useRef<HTMLDivElement>(null!)
 
-  const globalObj = sheet.object('global', globalConfig)
-
-  useLayoutEffect(() => {
-    const unsubscribeFromChanges = onChange(globalObj.props, (newValues) => {
-      containerRef.current.style.background =
-        newValues.background.type !== 'dynamic'
-          ? newValues.background.type
-          : newValues.background.dynamic.toString()
-    })
-    return unsubscribeFromChanges
-  }, [globalObj])
-
   return (
     <div
       ref={containerRef}

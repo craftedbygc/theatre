@@ -1,7 +1,4 @@
-import type {
-  TrackData,
-  Keyframe,
-} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
+import type {TrackData} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
 import {createStudioSheetItemKey} from '@unseenco/theatre-shared/utils/ids'
 import type {
@@ -16,6 +13,19 @@ const cache = new WeakMap<
 
 const noKeyframes: NearbyKeyframes = {}
 
+/**
+ * Matches {@link Sequence.closestGridPosition} (`toFixed(3)`) so a playhead
+ * that sits on a keyframe visually isn't treated as "between" keyframes due
+ * to float noise.
+ */
+export function normalizeSequencePosition(position: number): number {
+  return parseFloat(position.toFixed(3))
+}
+
+export function sequencePositionsEqual(a: number, b: number): boolean {
+  return normalizeSequencePosition(a) === normalizeSequencePosition(b)
+}
+
 export function getNearbyKeyframesOfTrack(
   obj: SheetObject,
   track: TrackWithId | undefined,
@@ -23,8 +33,10 @@ export function getNearbyKeyframesOfTrack(
 ): NearbyKeyframes {
   if (!track || track.data.keyframes.length === 0) return noKeyframes
 
+  const pos = normalizeSequencePosition(sequencePosition)
+
   const cachedItem = cache.get(track.data)
-  if (cachedItem && cachedItem[0] === sequencePosition) {
+  if (cachedItem && cachedItem[0] === pos) {
     return cachedItem[1]
   }
 
@@ -46,7 +58,7 @@ export function getNearbyKeyframesOfTrack(
 
   const calculate = (): NearbyKeyframes => {
     const nextOrCurIdx = track.data.keyframes.findIndex(
-      (kf) => kf.position >= sequencePosition,
+      (kf) => normalizeSequencePosition(kf.position) >= pos,
     )
 
     if (nextOrCurIdx === -1) {
@@ -56,7 +68,7 @@ export function getNearbyKeyframesOfTrack(
     }
 
     const nextOrCur = getKeyframeWithTrackId(nextOrCurIdx)!
-    if (nextOrCur.kf.position === sequencePosition) {
+    if (sequencePositionsEqual(nextOrCur.kf.position, pos)) {
       return {
         prev: getKeyframeWithTrackId(nextOrCurIdx - 1),
         cur: nextOrCur,
@@ -71,7 +83,7 @@ export function getNearbyKeyframesOfTrack(
   }
 
   const result = calculate()
-  cache.set(track.data, [sequencePosition, result])
+  cache.set(track.data, [pos, result])
 
   return result
 }
