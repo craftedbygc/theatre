@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
 import {zIndexes} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/SequenceEditorPanel'
 import {topStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/TopStrip'
+import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import type {CommitOrDiscard} from '@unseenco/theatre-studio/StudioStore/StudioStore'
 import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
@@ -56,7 +57,7 @@ const Strip = styled.div`
 
 const ThumbContainer = styled.div`
   position: absolute;
-  top: ${topStripHeight - 15}px;
+  top: ${transportStripHeight + topStripHeight - 15}px;
   width: 100px;
   left: -50px;
   pointer-events: none;

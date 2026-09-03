@@ -19,6 +19,7 @@ import type {
 import {prism, val, pointerToPrism} from '@unseenco/theatre-dataverse'
 import logger from '@unseenco/theatre-shared/logger'
 import {titleBarHeight} from '@unseenco/theatre-studio/panels/BasePanel/common'
+import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 import type {Studio} from '@unseenco/theatre-studio/Studio'
 import type {UnknownValidCompoundProps} from '@unseenco/theatre-core/propTypes/internals'
 import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
@@ -111,7 +112,10 @@ export const calculateSequenceEditorTree = (
 ): SequenceEditorTree => {
   prism.ensurePrism()
   const rootShouldRender = true
-  let topSoFar = titleBarHeight + (rootShouldRender ? HEIGHT_OF_ANY_TITLE : 0)
+  let topSoFar =
+    transportStripHeight +
+    titleBarHeight +
+    (rootShouldRender ? HEIGHT_OF_ANY_TITLE : 0)
   let nSoFar = 0
 
   const collapsableItemSetP =
@@ -131,7 +135,7 @@ export const calculateSequenceEditorTree = (
     children: [],
     sheetItemKey: createStudioSheetItemKey.forSheet(),
     shouldRender: rootShouldRender,
-    top: titleBarHeight,
+    top: transportStripHeight + titleBarHeight,
     depth: 0,
     n: nSoFar,
     nodeHeight: rootShouldRender ? HEIGHT_OF_ANY_TITLE : 0,

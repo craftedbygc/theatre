@@ -635,6 +635,16 @@ namespace stateEditors {
                 }
               }
 
+              export function setLooping(
+                p: WithoutSheetInstance<SheetAddress> & {
+                  looping: boolean
+                },
+              ) {
+                stateEditors.studio.ahistoric.projects.stateByProjectId.stateBySheetId.sequence._ensure(
+                  p,
+                ).looping = p.looping
+              }
+
               export namespace clippedSpaceRange {
                 export function set(
                   p: WithoutSheetInstance<SheetAddress> & {

@@ -4,16 +4,14 @@ import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import {usePrism} from '@unseenco/theatre-react'
 import type {Pointer} from '@unseenco/theatre-dataverse'
 import {prism, val} from '@unseenco/theatre-dataverse'
-import {clamp, mapValues} from 'lodash-es'
+import { mapValues} from 'lodash-es'
 import React, {useLayoutEffect, useMemo} from 'react'
 import styled from 'styled-components'
 import {useReceiveVerticalWheelEvent} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/VerticalScrollContainer'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
-import {useCssCursorLock} from '@unseenco/theatre-studio/uiComponents/PointerEventsHandler'
 import type {IRange} from '@unseenco/theatre-shared/utils/types'
-import DopeSnap from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/DopeSnap'
-import {snapToAll, snapToNone} from './KeyframeSnapTarget'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {useDragPlayheadHandlers} from './useDragPlayheadHandlers'
 
 const Container = styled.div`
   position: absolute;
@@ -71,86 +69,6 @@ const HorizontallyScrollableArea: React.FC<{
 })
 
 export default HorizontallyScrollableArea
-
-function useDragPlayheadHandlers(
-  layoutP: Pointer<SequenceEditorPanelLayout>,
-  containerEl: HTMLDivElement | null,
-) {
-  const handlers = useMemo((): Parameters<typeof useDrag>[1] => {
-    return {
-      debugName: 'HorizontallyScrollableArea',
-      onDragStart(event) {
-        if (event.target instanceof HTMLInputElement) {
-          // editing some value
-          return false
-        }
-        if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) {
-          // e.g. marquee selection has shiftKey
-          return false
-        }
-        if (
-          event
-            .composedPath()
-            .some((el) => el instanceof HTMLElement && el.draggable === true)
-        ) {
-          // Question: I think to check if we want another descendent element
-          // to be able to take control of this drag event.
-          // Question: e.g. for `useDragKeyframe`?
-          return false
-        }
-
-        const initialPositionInClippedSpace =
-          event.clientX - containerEl!.getBoundingClientRect().left
-
-        const initialPositionInUnitSpace = clamp(
-          val(layoutP.clippedSpace.toUnitSpace)(initialPositionInClippedSpace),
-          0,
-          Infinity,
-        )
-
-        const setIsSeeking = val(layoutP.seeker.setIsSeeking)
-
-        const sequence = getStudioSequence(val(layoutP.sheet))
-
-        sequence.position = initialPositionInUnitSpace
-
-        const posBeforeSeek = initialPositionInUnitSpace
-        const scaledSpaceToUnitSpace = val(layoutP.scaledSpace.toUnitSpace)
-        setIsSeeking(true)
-
-        snapToAll()
-
-        return {
-          onDrag(dx: number, _, event) {
-            const deltaPos = scaledSpaceToUnitSpace(dx)
-            const unsnappedPos = clamp(
-              posBeforeSeek + deltaPos,
-              0,
-              sequence.length,
-            )
-
-            let newPosition = unsnappedPos
-
-            const snapPos = DopeSnap.checkIfMouseEventSnapToPos(event, {})
-            if (snapPos != null) {
-              newPosition = snapPos
-            }
-
-            sequence.position = newPosition
-          },
-          onDragEnd() {
-            setIsSeeking(false)
-            snapToNone()
-          },
-        }
-      },
-    }
-  }, [layoutP, containerEl])
-
-  const [isDragging] = useDrag(containerEl, handlers)
-
-  useCssCursorLock(isDragging, 'draggingPositionInSequenceEditor', 'ew-resize')
-}
 
 function useHandlePanAndZoom(
   layoutP: Pointer<SequenceEditorPanelLayout>,

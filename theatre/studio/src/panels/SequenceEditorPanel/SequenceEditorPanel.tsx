@@ -15,7 +15,6 @@ import BasePanel, {
   usePanel,
 } from '@unseenco/theatre-studio/panels/BasePanel/BasePanel'
 import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
-import PanelDragZone from '@unseenco/theatre-studio/panels/BasePanel/PanelDragZone'
 import PanelWrapper from '@unseenco/theatre-studio/panels/BasePanel/PanelWrapper'
 import FrameStampPositionProvider from './FrameStampPositionProvider'
 import GraphEditorToggle from './GraphEditorToggle'
@@ -31,6 +30,8 @@ import {usePresenceListenersOnRootElement} from '@unseenco/theatre-studio/uiComp
 import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
 import DockResizeHandle from '@unseenco/theatre-studio/UIRoot/DockResizeHandle'
 import {DOCKED_PANE_BACKGROUND} from '@unseenco/theatre-studio/UIRoot/dockedLayoutConstants'
+import PlaybackControls from './PlaybackControls/PlaybackControls'
+import {transportStripHeight} from './PlaybackControls/constants'
 
 const Container = styled(PanelWrapper)<{$docked?: boolean}>`
   z-index: ${panelZIndexes.sequenceEditorPanel};
@@ -72,17 +73,10 @@ export const zIndexes = (() => {
   return s
 })()
 
-const Header_Container = styled(PanelDragZone)`
+const Header_Container = styled.div`
   position: absolute;
   left: 0;
-  top: 0;
-  z-index: 1;
-`
-
-const Header_Container_Static = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0;
+  top: ${transportStripHeight}px;
   z-index: 1;
 `
 
@@ -218,7 +212,8 @@ const Content: React.VFC<{}> = () => {
           style={{width: `${val(layoutP.leftDims.width)}px`}}
         />
         <FrameStampPositionProvider layoutP={layoutP}>
-          <Header layoutP={layoutP} docked={isDocked} />
+          <PlaybackControls layoutP={layoutP} docked={isDocked} />
+          <Header layoutP={layoutP} />
           <DopeSheet key={key + '-dopeSheet'} layoutP={layoutP} />
           {graphEditorOpen && (
             <GraphEditor key={key + '-graphEditor'} layoutP={layoutP} />
@@ -233,8 +228,7 @@ const Content: React.VFC<{}> = () => {
 
 const Header: React.FC<{
   layoutP: Pointer<SequenceEditorPanelLayout>
-  docked?: boolean
-}> = ({layoutP, docked = false}) => {
+}> = ({layoutP}) => {
   return usePrism(() => {
     const sheet = val(layoutP.sheet)
     const activeVariant = getStudioActiveSequenceVariant(sheet.address)
@@ -250,18 +244,6 @@ const Header: React.FC<{
       </TitleBar>
     )
 
-    if (docked) {
-      return (
-        <Header_Container_Static
-          style={{
-            width: val(layoutP.leftDims.width),
-          }}
-        >
-          {titleBar}
-        </Header_Container_Static>
-      )
-    }
-
     return (
       <Header_Container
         style={{
@@ -271,7 +253,7 @@ const Header: React.FC<{
         {titleBar}
       </Header_Container>
     )
-  }, [layoutP, docked])
+  }, [layoutP])
 }
 
 export default SequenceEditorPanel

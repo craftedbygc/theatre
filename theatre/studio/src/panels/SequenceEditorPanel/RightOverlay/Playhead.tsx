@@ -32,14 +32,15 @@ import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodr
 import {mergeRefs} from 'react-merge-refs'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
+import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 
 const Container = styled.div<{isVisible: boolean}>`
   --thumbColor: #00e0ff;
   position: absolute;
-  top: 0;
+  top: ${transportStripHeight}px;
   left: 0;
   width: 5px;
-  height: 100%;
+  height: calc(100% - ${transportStripHeight}px);
   z-index: ${() => zIndexes.playhead};
   pointer-events: none;
 
@@ -72,8 +73,8 @@ const Thumb = styled.div`
   background-color: var(--thumbColor);
   position: absolute;
   width: 5px;
-  height: 13px;
-  top: -4px;
+  height: 18px;
+  top: 0px;
   left: -2px;
   z-index: 11;
   cursor: ew-resize;
@@ -128,7 +129,7 @@ const Squinch = styled.div`
   position: absolute;
   left: 1px;
   right: 1px;
-  top: 13px;
+  top: 18px;
   border-top: 3px solid var(--thumbColor);
   border-right: 1px solid transparent;
   border-left: 1px solid transparent;

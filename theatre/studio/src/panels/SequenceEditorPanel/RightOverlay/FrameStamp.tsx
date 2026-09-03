@@ -12,10 +12,11 @@ import {
   useFrameStampPositionD,
 } from '@unseenco/theatre-studio/panels/SequenceEditorPanel/FrameStampPositionProvider'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 
 const Container = styled.div`
   position: absolute;
-  top: 0;
+  top: ${transportStripHeight}px;
   left: 0;
   margin-top: 0px;
 `

@@ -30,6 +30,8 @@ import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover
 import BasicPopover from '@unseenco/theatre-studio/uiComponents/Popover/BasicPopover'
 import MarkerEditorPopover from './MarkerEditorPopover'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import {topStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/TopStrip'
+import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 
 const MARKER_SIZE_W_PX = 12
 const MARKER_SIZE_H_PX = 12
@@ -39,7 +41,7 @@ const MARKER_HOVER_SIZE_H_PX = MARKER_SIZE_H_PX * 2
 const MarkerDotContainer = styled.div`
   position: absolute;
   // below the sequence ruler "top bar"
-  top: 18px;
+  top: ${transportStripHeight + topStripHeight}px;
   z-index: ${() => zIndexes.marker};
 `
 

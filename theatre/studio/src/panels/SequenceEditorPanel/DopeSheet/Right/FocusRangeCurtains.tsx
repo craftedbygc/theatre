@@ -4,6 +4,7 @@ import {usePrism} from '@unseenco/theatre-react'
 import getStudio from '@unseenco/theatre-studio/getStudio'
 import type {SequenceEditorPanelLayout} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/layout/layout'
 import {topStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/RightOverlay/TopStrip'
+import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 import React, {useMemo} from 'react'
 import styled from 'styled-components'
 
@@ -11,7 +12,7 @@ const divWidth = 1000
 
 const Curtain = styled.div<{enabled: boolean}>`
   position: absolute;
-  top: ${topStripHeight}px;
+  top: ${transportStripHeight + topStripHeight}px;
   left: 0;
   opacity: 0.15;
   width: ${divWidth}px;
@@ -43,7 +44,8 @@ const FocusRangeCurtains: React.FC<{
 
     const {range} = existingRange
 
-    const height = val(layoutP.rightDims.height) - topStripHeight
+    const height =
+      val(layoutP.rightDims.height) - topStripHeight - transportStripHeight
 
     const unitSpaceToClippedSpace = val(layoutP.clippedSpace.fromUnitSpace)
     const clippedSpaceWidth = val(layoutP.clippedSpace.width)

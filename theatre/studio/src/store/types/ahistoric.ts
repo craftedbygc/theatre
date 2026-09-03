@@ -67,6 +67,12 @@ export type StudioAhistoricState = {
                 range: IRange
               }
 
+              /**
+               * Whether sequence playback should loop.
+               * `undefined` is treated as `true` so existing Space behavior is preserved.
+               */
+              looping?: boolean
+
               collapsableItems?: PointableSet<
                 StudioSheetItemKey,
                 {

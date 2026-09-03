@@ -17,6 +17,23 @@ const Container = styled.div`
   cursor: move;
 `
 
+function isInteractiveTarget(event: MouseEvent): boolean {
+  return event.composedPath().some((node) => {
+    if (!(node instanceof HTMLElement)) return false
+    if (node.isContentEditable) return true
+    if (
+      node instanceof HTMLInputElement ||
+      node instanceof HTMLButtonElement ||
+      node instanceof HTMLSelectElement ||
+      node instanceof HTMLTextAreaElement ||
+      node instanceof HTMLAnchorElement
+    ) {
+      return true
+    }
+    return node.getAttribute('role') === 'button'
+  })
+}
+
 const PanelDragZone: React.FC<
   React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
 > = (props) => {
@@ -30,7 +47,10 @@ const PanelDragZone: React.FC<
     return {
       debugName: 'PanelDragZone',
       lockCursorTo: 'move',
-      onDragStart() {
+      onDragStart(event) {
+        if (isInteractiveTarget(event)) {
+          return false
+        }
         const stuffBeforeDrag = panelStuffRef.current
         let tempTransaction: CommitOrDiscard | undefined
 
