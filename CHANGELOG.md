@@ -1,5 +1,23 @@
 # Theatre.js changelog
 
+## 0.1.18
+
+- New features
+  - Studio:
+    - Sequencer playback controls strip — play/pause, jump to start/end, step prev/next, loop toggle, close, and zoom slider are now always visible above the dope-sheet. Playhead scrubbing via click/drag on the top strip. Loop state persists across sessions (ahistoric store flag).
+    - Spacebar shortcut wired to a shared `toggleSequencePlayback` helper so loop state applies to both keyboard and UI controls.
+  - Studio (details pane):
+    - Prop hover labels in the details pane now include the parent object name for easier identification in multi-object projects.
+    - Clicking a nested sequencer prop row opens the object's details pane automatically.
+- Bug fixes
+  - Studio:
+    - Ctrl+Z undo is no longer blocked when a checkbox input remains focused after being toggled.
+    - Keyframe snap crosshair is no longer missing in built/npm studio packages (SVG `data:` URL is now quoted so esbuild inlines it correctly); snap marker resized for improved readability.
+  - Playground:
+    - Netlify deploy previews now trigger correctly for monorepo changes outside the playground package.
+- Maintenance
+  - Playground: DOM demo with JSON file–backed saved state; prop divergence indicator compares against last disk-persisted state rather than `localStorage`. Outer diamond visible when a prop diverges from saved state; unified SVG diamond indicators across sequenced and saved-state prop rows.
+
 ## 0.1.17
 
 - New features
