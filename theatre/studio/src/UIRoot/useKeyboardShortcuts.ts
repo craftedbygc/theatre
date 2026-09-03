@@ -27,16 +27,40 @@ export function enableVisibilityToggleKeyboardShortcut() {
   visibilityToggleKeyboardShortcutIsEnabled = true
 }
 
+/**
+ * True when the event target is a text-editable field where browser-native
+ * editing shortcuts (e.g. Ctrl+Z for text) should take precedence over
+ * studio shortcuts. Non-text inputs like checkboxes must not block undo/redo.
+ */
+function isTextEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+
+  if (target.tagName === 'TEXTAREA') return true
+
+  if (target.tagName === 'INPUT') {
+    const type = (target as HTMLInputElement).type
+    return (
+      type !== 'checkbox' &&
+      type !== 'radio' &&
+      type !== 'button' &&
+      type !== 'submit' &&
+      type !== 'reset' &&
+      type !== 'file' &&
+      type !== 'color' &&
+      type !== 'range'
+    )
+  }
+
+  return target.isContentEditable
+}
+
 export default function useKeyboardShortcuts() {
   const studio = getStudio()
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target: null | HTMLElement =
         e.composedPath()[0] as unknown as $IntentionalAny
-      if (
-        target &&
-        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')
-      ) {
+      if (isTextEditableTarget(target)) {
         return
       }
 
