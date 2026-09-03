@@ -141,6 +141,14 @@ const PrimitivePropRow: React.FC<{
 
   usePropHighlightMouseEnter(headRef.current, leaf)
 
+  const selectParentObject = useCallback(() => {
+    getStudio()!.transaction(({stateEditors}) => {
+      stateEditors.studio.historic.panels.outline.selection.set([
+        leaf.sheetObject,
+      ])
+    })
+  }, [leaf.sheetObject])
+
   return (
     <PrimitivePropRowContainer depth={leaf.depth}>
       <PrimitivePropRowHead
@@ -150,11 +158,15 @@ const PrimitivePropRow: React.FC<{
           height: leaf.nodeHeight + 'px',
         }}
         isSelected={isSelected === true}
+        onClick={selectParentObject}
       >
         <PrimitivePropRowHead_Label>{label}</PrimitivePropRowHead_Label>
         {controlIndicators}
         <PrimitivePropRowIconContainer
-          onClick={toggleSelect}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleSelect()
+          }}
           isSelected={isSelected === true}
           graphEditorColor={possibleColor ?? '1'}
           style={{opacity: isSelectable ? 1 : 0.25}}
