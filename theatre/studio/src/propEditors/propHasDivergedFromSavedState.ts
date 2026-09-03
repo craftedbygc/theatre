@@ -1,5 +1,6 @@
 import deepEqual from 'fast-deep-equal'
 import type {SheetAhistoricState} from '@unseenco/theatre-core/projects/store/storeTypes'
+// eslint-disable-next-line no-restricted-syntax
 import {
   getEffectiveStaticOverrideForObject,
   getSequenceStateFromSheet,
@@ -58,13 +59,16 @@ function ahistoricStaticOverrideAtPathDiffers(
   return !deepEqual(currentStatic, onDiskStatic)
 }
 
-function keyframeAtPositionDiffers(
+/**
+ * True when this prop's sequence track differs from the loaded JSON, at any
+ * playhead position (including between keyframes).
+ */
+function sequenceTrackDiffers(
   currentSheetState: Parameters<typeof getSequenceStateFromSheet>[0],
   onDiskSheetState: Parameters<typeof getSequenceStateFromSheet>[0],
   obj: SheetObject,
   trackId: SequenceTrackId,
   trackVariant: SequenceVariantId,
-  position: number,
 ): boolean {
   const objectKey = obj.address.objectKey
 
@@ -72,19 +76,10 @@ function keyframeAtPositionDiffers(
     currentSheetState,
     trackVariant,
   )?.tracksByObject[objectKey]?.trackData[trackId]
-  const onDiskTrack = getSequenceStateFromSheet(
-    onDiskSheetState,
-    trackVariant,
-  )?.tracksByObject[objectKey]?.trackData[trackId]
+  const onDiskTrack = getSequenceStateFromSheet(onDiskSheetState, trackVariant)
+    ?.tracksByObject[objectKey]?.trackData[trackId]
 
-  const currentKeyframe = currentTrack?.keyframes.find(
-    (kf) => kf.position === position,
-  )
-  const onDiskKeyframe = onDiskTrack?.keyframes.find(
-    (kf) => kf.position === position,
-  )
-
-  return !deepEqual(currentKeyframe?.value, onDiskKeyframe?.value)
+  return !deepEqual(currentTrack?.keyframes, onDiskTrack?.keyframes)
 }
 
 /**
@@ -97,6 +92,7 @@ export function propHasDivergedFromSavedState(
   opts?: {
     sequenceTrackId?: SequenceTrackId
     trackVariant?: SequenceVariantId
+    /** @deprecated Ignored — track divergence is independent of playhead position */
     sequencePosition?: number
   },
 ): boolean {
@@ -146,20 +142,16 @@ export function propHasDivergedFromSavedState(
     return true
   }
 
-  if (
-    opts?.sequenceTrackId !== undefined &&
-    typeof opts.sequencePosition === 'number'
-  ) {
+  if (opts?.sequenceTrackId !== undefined) {
     const trackVariant = opts.trackVariant ?? activeVariant
 
     if (
-      keyframeAtPositionDiffers(
+      sequenceTrackDiffers(
         currentSheetState,
         onDiskSheetState,
         obj,
         opts.sequenceTrackId,
         trackVariant,
-        opts.sequencePosition,
       )
     ) {
       return true

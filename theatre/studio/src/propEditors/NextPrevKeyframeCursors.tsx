@@ -8,6 +8,7 @@ import styled, {css} from 'styled-components'
 import {PresenceFlag} from '@unseenco/theatre-studio/uiComponents/usePresence'
 import usePresence from '@unseenco/theatre-studio/uiComponents/usePresence'
 import SavedStateDiamondWrapper from './SavedStateDiamondWrapper'
+import {ChevronNextSvg, ChevronPrevSvg} from './propIndicatorIcons'
 
 export type NearbyKeyframesControls = {
   prev?: Pick<Keyframe, 'position'> & {
@@ -27,21 +28,26 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 16px;
-  margin: 0 0px 0 2px;
+  width: 18px;
+  height: 12px;
+  margin: 0 0 0 2px;
   position: relative;
   z-index: 0;
 
   &:after {
     position: absolute;
-    left: -14px;
-    right: -14px;
-    top: -2px;
-    bottom: -2px;
+    /* Cover expanded chevrons on hover, with a little padding past the tips */
+    left: -12px;
+    right: -12px;
+    /* Optical icon center is ~1px below geometric mid (SVG content at y=7/12) */
+    top: -1px;
+    height: 16px;
+    border-radius: 2px;
     content: ' ';
     display: none;
     z-index: -1;
     background: ${transparentize(0.2, 'black')};
+    pointer-events: none;
   }
 
   &:hover {
@@ -65,6 +71,10 @@ const Button = styled.div`
   z-index: 0;
   outline: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 
   &:after {
     display: none;
@@ -83,6 +93,9 @@ const Button = styled.div`
 
 export const nextPrevCursorsTheme = {
   offColor: '#555',
+  /** Visible even on the dark detail pane when there is no keyframe yet */
+  offDiamondColor: '#8a8a8a',
+  offDiamondHoverColor: '#b0b0b0',
   onColor: '#e0c917',
 }
 
@@ -95,7 +108,10 @@ const CurButton = styled(Button)<{
   flex-shrink: 0;
 
   &:hover {
-    color: #e0c917;
+    color: ${(props) =>
+      props.isOn
+        ? nextPrevCursorsTheme.onColor
+        : nextPrevCursorsTheme.offDiamondHoverColor};
   }
 
   color: ${(props) =>
@@ -103,7 +119,12 @@ const CurButton = styled(Button)<{
       ? 'white'
       : props.isOn
       ? nextPrevCursorsTheme.onColor
-      : nextPrevCursorsTheme.offColor};
+      : nextPrevCursorsTheme.offDiamondColor};
+
+  /* Dim only the inner diamond so the saved-state outline stays full strength */
+  ${Container}:not(:hover) & [data-diamond-inner] {
+    opacity: 0.7;
+  }
 `
 
 const pointerEventsNone = css`
@@ -123,6 +144,10 @@ const PrevOrNextButton = styled(Button)<{
 
   ${(props) =>
     props.available ? pointerEventsAutoInNormalMode : pointerEventsNone};
+
+  &:hover svg path {
+    stroke-width: 3;
+  }
 `
 
 const Prev = styled(PrevOrNextButton)<{
@@ -130,9 +155,10 @@ const Prev = styled(PrevOrNextButton)<{
   flag: PresenceFlag | undefined
 }>`
   ${dimWhenIdle};
-  transform: translateX(2px);
+  /* 1px further out than the previous 2px / -2px idle tuck */
+  transform: translateX(1px);
   ${Container}:hover & {
-    transform: translateX(-7px);
+    transform: translateX(-8px);
   }
 `
 const Next = styled(PrevOrNextButton)<{
@@ -140,57 +166,11 @@ const Next = styled(PrevOrNextButton)<{
   flag: PresenceFlag | undefined
 }>`
   ${dimWhenIdle};
-  transform: translateX(-2px);
+  transform: translateX(-1px);
   ${Container}:hover & {
-    transform: translateX(7px);
+    transform: translateX(8px);
   }
 `
-
-const CurDiamond = styled.div`
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  transform: rotate(45deg);
-  background-color: currentColor;
-  ${dimWhenIdle};
-`
-
-namespace Icons {
-  const Chevron_Group = styled.g`
-    stroke-width: 1;
-    ${PrevOrNextButton}:hover & path {
-      stroke-width: 3;
-    }
-  `
-
-  export const Prev = () => (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <Chevron_Group transform={`translate(6 3)`}>
-        <path d="M4 1L1 4L4 7" stroke="currentColor" />
-      </Chevron_Group>
-    </svg>
-  )
-
-  export const Next = () => (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <Chevron_Group transform={`translate(1 3)`}>
-        <path d="M1 1L4 4L1 7" stroke="currentColor" />
-      </Chevron_Group>
-    </svg>
-  )
-}
 
 const NextPrevKeyframeCursors: React.VFC<
   NearbyKeyframesControls & {
@@ -211,7 +191,7 @@ const NextPrevKeyframeCursors: React.VFC<
         flag={prevPresence.flag}
         {...prevPresence.attrs}
       >
-        <Icons.Prev />
+        <ChevronPrevSvg />
       </Prev>
       <CurButton
         isOn={props.cur.type === 'on'}
@@ -222,9 +202,7 @@ const NextPrevKeyframeCursors: React.VFC<
         <SavedStateDiamondWrapper
           hasDivergedFromSavedState={props.hasDivergedFromSavedState ?? false}
           layout="sequenced"
-        >
-          <CurDiamond />
-        </SavedStateDiamondWrapper>
+        />
       </CurButton>
       <Next
         available={!!props.next}
@@ -232,7 +210,7 @@ const NextPrevKeyframeCursors: React.VFC<
         flag={nextPresence.flag}
         {...nextPresence.attrs}
       >
-        <Icons.Next />
+        <ChevronNextSvg />
       </Next>
     </Container>
   )
