@@ -229,9 +229,11 @@ function DetailCompoundPropEditor<
   }, [isCollapsedAtom, isVector])
 
   const {targetRef} = useChordial(() => {
-    const title = ['obj', 'props', ...getPointerParts(pointerToProp).path].join(
-      '.',
-    )
+    const title = [
+      obj.address.objectKey,
+      'props',
+      ...getPointerParts(pointerToProp).path,
+    ].join('.')
     return {
       title: isTransient ? `${title} (transient)` : title,
       items: tools.contextMenuItems,

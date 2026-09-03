@@ -59,6 +59,7 @@ function DetailSimplePropEditor<
         propConfig,
         pointerToProp,
         isPropHighlightedD,
+        objectKey: obj.address.objectKey,
         isTransient,
       }}
     >

@@ -84,6 +84,7 @@ type ISingleRowPropEditorProps<T> = {
   pointerToProp: Pointer<T>
   editingTools: ReturnType<typeof useEditingToolsForSimplePropInDetailsPanel>
   isPropHighlightedD: Prism<PropHighlighted>
+  objectKey: string
   isTransient?: boolean
 }
 
@@ -93,6 +94,7 @@ export function SingleRowPropEditor<T>({
   editingTools,
   children,
   isPropHighlightedD,
+  objectKey,
   isTransient,
 }: React.PropsWithChildren<ISingleRowPropEditorProps<T>>): React.ReactElement<
   any,
@@ -100,9 +102,11 @@ export function SingleRowPropEditor<T>({
 > | null {
   const label = propConfig.label ?? last(getPointerParts(pointerToProp).path)
 
-  const title = ['obj', 'props', ...getPointerParts(pointerToProp).path].join(
-    '.',
-  )
+  const title = [
+    objectKey,
+    'props',
+    ...getPointerParts(pointerToProp).path,
+  ].join('.')
   const chordialTitle = isTransient ? `${title} (transient)` : title
 
   const isHighlighted = useVal(isPropHighlightedD)
