@@ -11,9 +11,14 @@
 [build]
   command = "cd ../.. && corepack enable && yarn install --immutable && yarn workspace playground run build"
   publish = "build"
-  # Base directory is packages/playground, but Vite bundles theatre/* and packages/* from
-  # source. Diff the whole repo so PRs that only touch those paths still get previews.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF .."
+  # Diff the full repo (no path filter). Do not append " .." — git treats that as revision
+  # range syntax, so theatre-only PRs look unchanged when the base directory is packages/playground.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF"
+
+# Deploy previews must always build: PRs need a preview URL even when the ignore diff above
+# would skip (e.g. CACHED_COMMIT_REF equals COMMIT_REF on a re-run).
+[context.deploy-preview]
+  ignore = "false"
 
 [build.environment]
   NODE_VERSION = "18"

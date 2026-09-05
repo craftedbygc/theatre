@@ -29,6 +29,10 @@ import {
   getStudioSequence,
 } from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import {propHasDivergedFromSavedState} from './propHasDivergedFromSavedState'
+import {
+  propCanRevertToSavedState,
+  revertPropToSavedState,
+} from './revertPropToSavedState'
 // eslint-disable-next-line no-restricted-syntax
 import {
   getSequenceStateFromSheet,
@@ -200,6 +204,28 @@ function createPrism<T extends SerializablePrimitive>(
           },
         })
 
+        if (
+          propCanRevertToSavedState(obj, pathToProp, {
+            sequenceVariant: activeVariant,
+          })
+        ) {
+          contextMenuItems.push({
+            type: 'normal',
+            label: 'Revert to saved value',
+            callback: () => {
+              getStudio()!.transaction(({stateEditors}) => {
+                revertPropToSavedState(
+                  stateEditors,
+                  obj,
+                  pathToProp,
+                  propConfig,
+                  {sequenceVariant: activeVariant},
+                )
+              })
+            },
+          })
+        }
+
         const nearbyKeyframes = prism.sub(
           'lcr',
           (): NearbyKeyframes => {
@@ -352,6 +378,24 @@ function createPrism<T extends SerializablePrimitive>(
                 sequenceVariant: activeVariant,
               },
             )
+          })
+        },
+      })
+    }
+
+    if (
+      propCanRevertToSavedState(obj, pathToProp, {
+        sequenceVariant: activeVariant,
+      })
+    ) {
+      contextMenuItems.push({
+        type: 'normal',
+        label: 'Revert to saved value',
+        callback: () => {
+          getStudio()!.transaction(({stateEditors}) => {
+            revertPropToSavedState(stateEditors, obj, pathToProp, propConfig, {
+              sequenceVariant: activeVariant,
+            })
           })
         },
       })

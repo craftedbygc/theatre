@@ -1,4 +1,4 @@
-import {clamp, isInteger, round} from 'lodash-es'
+import {clamp, isInteger} from 'lodash-es'
 import type {MutableRefObject} from 'react'
 import {useEffect} from 'react'
 import {useState} from 'react'
@@ -8,6 +8,10 @@ import {mergeRefs} from 'react-merge-refs'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import useOnClickOutside from '@unseenco/theatre-studio/uiComponents/useOnClickOutside'
 import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import {
+  DEFAULT_NUMBER_PRECISION,
+  roundNumberToPrecision,
+} from '@unseenco/theatre-shared/propTypes/numberPrecision'
 
 const Container = styled.div`
   height: 100%;
@@ -52,6 +56,7 @@ const Input = styled.input`
   width: 100%;
   height: calc(100% - 4px);
   border-radius: 2px;
+  touch-action: none;
 
   &:focus {
     cursor: text;
@@ -74,7 +79,10 @@ const FillIndicator = styled.div`
 `
 
 const DragWrap = styled.div`
-  display: contents;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  touch-action: none;
 `
 
 type IState_NoFocus = {
@@ -117,14 +125,23 @@ const BasicNumberInput: React.FC<{
   onBlur?: () => void
   nudge: BasicNumberInputNudgeFn
   autoFocus?: boolean
+  precision?: number
 }> = (propsA) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
   const isValid = propsA.isValid ?? alwaysValid
+  const precision = propsA.precision ?? DEFAULT_NUMBER_PRECISION
 
   const propsRef = useRef(propsA)
   propsRef.current = propsA
 
+  const getPrecision = () =>
+    propsRef.current.precision ?? DEFAULT_NUMBER_PRECISION
+
   const inputRef = useRef<HTMLInputElement | null>(null)
+  // While dragging on touch, React must not push new `value` props into the input —
+  // that re-sync cancels the active pointer gesture. We freeze the prop and update
+  // the DOM directly instead.
+  const frozenInputValueRef = useRef<string | null>(null)
 
   useOnClickOutside(
     inputRef.current,
@@ -147,7 +164,9 @@ const BasicNumberInput: React.FC<{
       const valInFloat = parseFloat(value)
       if (!isFinite(valInFloat) || !isValid(valInFloat)) return
 
-      propsRef.current.temporarilySetValue(valInFloat)
+      propsRef.current.temporarilySetValue(
+        roundNumberToPrecision(valInFloat, getPrecision()),
+      )
     }
 
     const onBlur = () => {
@@ -160,7 +179,10 @@ const BasicNumberInput: React.FC<{
 
     const commitKeyboardInput = () => {
       const curState = stateRef.current as IState_EditingViaKeyboard
-      const value = parseFloat(curState.currentEditedValueInString)
+      const value = roundNumberToPrecision(
+        parseFloat(curState.currentEditedValueInString),
+        getPrecision(),
+      )
 
       if (!isFinite(value) || !isValid(value)) {
         propsRef.current.discardTemporaryValue()
@@ -222,6 +244,12 @@ const BasicNumberInput: React.FC<{
       const curValue = propsRef.current.value
       inputWidth = inputRef.current?.getBoundingClientRect().width!
 
+      frozenInputValueRef.current = format(curValue, getPrecision())
+      inputRef.current?.blur()
+      if (inputRef.current) {
+        inputRef.current.readOnly = true
+      }
+
       stateRef.current = {
         mode: 'dragging',
       }
@@ -230,6 +258,14 @@ const BasicNumberInput: React.FC<{
       let valueDuringDragging = curValue
 
       bodyCursorBeforeDrag.current = document.body.style.cursor
+
+      const updateDragDisplay = (nextValue: number) => {
+        const formatted = format(nextValue, getPrecision())
+        frozenInputValueRef.current = formatted
+        if (inputRef.current) {
+          inputRef.current.value = formatted
+        }
+      }
 
       return {
         onDrag(_dx: number, _dy: number, e: MouseEvent, mx: number) {
@@ -251,9 +287,20 @@ const BasicNumberInput: React.FC<{
             ? clamp(newValue, propsA.range[0], propsA.range[1])
             : newValue
 
+          valueDuringDragging = roundNumberToPrecision(
+            valueDuringDragging,
+            getPrecision(),
+          )
+
+          updateDragDisplay(valueDuringDragging)
           propsRef.current.temporarilySetValue(valueDuringDragging)
         },
         onDragEnd(happened: boolean) {
+          frozenInputValueRef.current = null
+          if (inputRef.current) {
+            inputRef.current.readOnly = false
+          }
+
           if (!happened) {
             propsRef.current.discardTemporaryValue()
             stateRef.current = {mode: 'noFocus'}
@@ -291,8 +338,10 @@ const BasicNumberInput: React.FC<{
   }, [])
 
   let value =
-    stateRef.current.mode !== 'editingViaKeyboard'
-      ? format(propsA.value)
+    frozenInputValueRef.current != null
+      ? frozenInputValueRef.current
+      : stateRef.current.mode !== 'editingViaKeyboard'
+      ? format(propsA.value, precision)
       : stateRef.current.currentEditedValueInString
 
   if (typeof value === 'number' && isNaN(value)) {
@@ -316,6 +365,12 @@ const BasicNumberInput: React.FC<{
       onMouseDown={(e: React.MouseEvent) => {
         e.stopPropagation()
       }}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (stateRef.current.mode !== 'editingViaKeyboard') {
+          // Prevent the input from taking focus on touch, which would cancel the drag.
+          e.preventDefault()
+        }
+      }}
       onDoubleClick={(e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -325,7 +380,8 @@ const BasicNumberInput: React.FC<{
   )
 
   const {range} = propsA
-  const num = parseFloat(value)
+  const isDraggingValue = frozenInputValueRef.current != null
+  const num = isDraggingValue ? propsA.value : parseFloat(value)
 
   const fillIndicator = range ? (
     <FillIndicator
@@ -353,8 +409,12 @@ const BasicNumberInput: React.FC<{
   )
 }
 
-function format(v: number): string {
-  return isNaN(v) ? 'NaN' : isInteger(v) ? v.toFixed(0) : round(v, 3).toString()
+function format(v: number, precision: number): string {
+  return isNaN(v)
+    ? 'NaN'
+    : isInteger(v)
+    ? v.toFixed(0)
+    : roundNumberToPrecision(v, precision).toString()
 }
 
 export default BasicNumberInput

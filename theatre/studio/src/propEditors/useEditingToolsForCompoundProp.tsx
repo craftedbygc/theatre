@@ -35,6 +35,10 @@ import {
 // eslint-disable-next-line no-restricted-syntax
 import {getSequenceStateFromSheet} from '@unseenco/theatre-core/sequences/sequenceVariants'
 import {propHasDivergedFromSavedState} from './propHasDivergedFromSavedState'
+import {
+  compoundCanRevertToSavedState,
+  revertPropToSavedState,
+} from './revertPropToSavedState'
 
 interface CommonStuff {
   beingScrubbed: boolean
@@ -174,6 +178,26 @@ export function useEditingToolsForCompoundProp<T extends SerializablePrimitive>(
                   sequenceVariant: activeVariant,
                 },
               )
+            }
+          })
+        },
+      })
+    }
+
+    if (compoundCanRevertToSavedState(obj, pathToProp, propConfig)) {
+      contextMenuItems.push({
+        type: 'normal',
+        label: 'Revert all to saved value',
+        callback: () => {
+          getStudio()!.transaction(({stateEditors}) => {
+            for (const {path, conf} of iteratePropType(
+              propConfig,
+              pathToProp,
+            )) {
+              if (isPropConfigComposite(conf)) continue
+              revertPropToSavedState(stateEditors, obj, path, conf, {
+                sequenceVariant: activeVariant,
+              })
             }
           })
         },
