@@ -19,10 +19,7 @@ import {usePrism} from '@unseenco/theatre-react'
 import type {KeyframeConnectionWithAddress} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
 import {copyableKeyframesFromSelection} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
 import {selectedKeyframeConnections} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
-import TweenNameEditorPopover, {
-  getSharedTweenLabel,
-  type TweenNameEditorTarget,
-} from './TweenNameEditorPopover'
+import TweenNameEditorPopover from './TweenNameEditorPopover'
 
 import styled from 'styled-components'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
