@@ -127,6 +127,16 @@ export default class SheetObjectTemplate {
     return this._config.get()
   }
 
+  private _withNumberPrecisionDefaults(
+    config: SheetObjectPropTypeConfig,
+    project: Project = this.project,
+  ): SheetObjectPropTypeConfig {
+    return applyNumberPrecisionDefaultsToPropConfig(
+      config,
+      project.config.numberPrecision,
+    )
+  }
+
   get configPointer() {
     return this._config.pointer
   }
@@ -157,12 +167,11 @@ export default class SheetObjectTemplate {
     staticPropPaths?: readonly StaticPropPath[],
   ) {
     this.address = {...sheetTemplate.address, objectKey}
-    this._config = new Atom(
-      applyNumberPrecisionDefaultsToPropConfig(
-        config,
-        sheetTemplate.project.config.numberPrecision,
-      ),
+    const configWithPrecisionDefaults = this._withNumberPrecisionDefaults(
+      config,
+      sheetTemplate.project,
     )
+    this._config = new Atom(configWithPrecisionDefaults)
     this._temp_actions_atom = new Atom(_temp_actions)
     this.showPropsOf_atom = new Atom<SheetObject[]>([])
     this._transientPropPaths = normalizeTransientPropPaths(
@@ -186,7 +195,7 @@ export default class SheetObjectTemplate {
       this.address.projectId,
       this.address.sheetId,
       objectKey,
-      config,
+      configWithPrecisionDefaults,
     )
 
     this.pointerToSheetState =
@@ -249,17 +258,19 @@ export default class SheetObjectTemplate {
     nativeObject: unknown,
     config: SheetObjectPropTypeConfig,
   ): SheetObject {
-    this._config.set(config)
+    this._config.set(this._withNumberPrecisionDefaults(config))
     return new SheetObject(sheet, this, nativeObject)
   }
 
   reconfigure(config: SheetObjectPropTypeConfig) {
-    this._config.set(config)
+    const configWithPrecisionDefaults =
+      this._withNumberPrecisionDefaults(config)
+    this._config.set(configWithPrecisionDefaults)
     this._stripNonPersistingPropsFromAhistoricState()
     this.project._stripPropsMissingFromConfig(
       this.address.sheetId,
       this.address.objectKey,
-      config,
+      configWithPrecisionDefaults,
     )
   }
 
@@ -275,10 +286,12 @@ export default class SheetObjectTemplate {
       }
     }
 
-    const merged = compoundFromSanitizedProps({
-      ...existing.props,
-      ...additional.props,
-    })
+    const merged = this._withNumberPrecisionDefaults(
+      compoundFromSanitizedProps({
+        ...existing.props,
+        ...additional.props,
+      }),
+    )
     this._config.set(merged)
     registerObjectPropConfig(
       this.address.projectId,
