@@ -7,8 +7,7 @@ import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip
 import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
 
 const CONNECTOR_HEIGHT = DOT_SIZE_PX / 2 + 1
-const CONNECTOR_HEIGHT_WITH_LABEL = DOT_SIZE_PX + 2
-const CONNECTOR_WIDTH_UNSCALED = 1000
+const CONNECTOR_HEIGHT_WITH_LABEL = 12
 
 export type IConnectorThemeValues = {
   isPopoverOpen: boolean
@@ -40,8 +39,6 @@ const Container = styled.div<IConnectorThemeValues>`
   background: ${CONNECTOR_THEME.barColor};
   height: ${(props) =>
     props.hasTweenLabel ? CONNECTOR_HEIGHT_WITH_LABEL : CONNECTOR_HEIGHT}px;
-  width: ${CONNECTOR_WIDTH_UNSCALED}px;
-
   left: 0;
   top: ${(props) =>
     props.hasTweenLabel
@@ -50,6 +47,7 @@ const Container = styled.div<IConnectorThemeValues>`
   transform-origin: top left;
   z-index: 0;
   cursor: ew-resize;
+  overflow: hidden;
 
   &:after {
     display: block;
@@ -68,12 +66,7 @@ const Container = styled.div<IConnectorThemeValues>`
 
 const Label = styled.div`
   position: absolute;
-  left: 0;
-  top: 0;
-  width: ${CONNECTOR_WIDTH_UNSCALED}px;
-  height: 100%;
-  transform: scaleX(calc(1 / var(--connectorScaleX)));
-  transform-origin: top left;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,7 +74,7 @@ const Label = styled.div`
   box-sizing: border-box;
   pointer-events: none;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -101,8 +94,6 @@ export const ConnectorLine = React.forwardRef<
   IConnectorLineProps
 >((props, ref) => {
   const hasTweenLabel = !!props.tweenLabel
-  const connectorScale =
-    props.connectorLengthInUnitSpace / CONNECTOR_WIDTH_UNSCALED
 
   const themeValues: IConnectorThemeValues = {
     isPopoverOpen: props.isPopoverOpen,
@@ -121,10 +112,7 @@ export const ConnectorLine = React.forwardRef<
         {...themeValues}
         ref={mergeRefs([ref, tooltipTargetRef])}
         style={{
-          // Previously we used scale3d, which had weird fuzzy rendering look in both FF & Chrome
-          transform: `scaleX(calc(var(--unitSpaceToScaledSpaceMultiplier) * ${connectorScale}))`,
-          // @ts-expect-error CSS custom property
-          '--connectorScaleX': `calc(var(--unitSpaceToScaledSpaceMultiplier) * ${connectorScale})`,
+          width: `calc(var(--unitSpaceToScaledSpaceMultiplier) * ${props.connectorLengthInUnitSpace}px)`,
         }}
         onClick={(e) => {
           props.openPopover?.(e)
