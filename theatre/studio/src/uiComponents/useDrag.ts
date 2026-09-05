@@ -157,6 +157,23 @@ type IUseDragStateDetection_Detected = {
   dragEventCount: number
 }
 
+function getPointerCaptureElement(
+  target: HTMLElement | SVGElement,
+  event: PointerEvent,
+): Element {
+  if (!(event.target instanceof Element) || !target.contains(event.target)) {
+    return target
+  }
+
+  // Elements with display:contents don't generate a box, so pointer capture on
+  // them is unreliable. Capture on the actual event target instead.
+  if (getComputedStyle(target).display === 'contents') {
+    return event.target
+  }
+
+  return target
+}
+
 function getMovementFromEvent(
   event: PointerEvent,
   lastPos: {x: number; y: number},
@@ -190,6 +207,7 @@ export default function useDrag(
   }>({onDrag: noop, onDragEnd: noop, onClick: noop})
 
   const capturedPointerRef = useRef<undefined | CapturedPointer>()
+  const pointerCaptureElementRef = useRef<Element | null>(null)
   // needed to have a state on the react lifecycle which can be updated
   // via a ref (e.g. via the below layout effect).
   const [isDraggingRef, isDragging] = useRefAndState(false)
@@ -309,15 +327,17 @@ export default function useDrag(
 
     const removeDragListeners = () => {
       capturedPointerRef.current?.release()
-      if (stateRef.current.domDragStarted) {
+      const captureEl = pointerCaptureElementRef.current
+      if (captureEl && stateRef.current.domDragStarted) {
         try {
-          if (target.hasPointerCapture(stateRef.current.pointerId)) {
-            target.releasePointerCapture(stateRef.current.pointerId)
+          if (captureEl.hasPointerCapture(stateRef.current.pointerId)) {
+            captureEl.releasePointerCapture(stateRef.current.pointerId)
           }
         } catch {
           // pointer may already be released
         }
       }
+      pointerCaptureElementRef.current = null
       document.removeEventListener('pointermove', dragHandler)
       document.removeEventListener('pointerup', dragEndHandler)
       document.removeEventListener('pointercancel', dragEndHandler)
@@ -375,10 +395,23 @@ export default function useDrag(
         event.preventDefault()
       }
 
+      const captureEl = getPointerCaptureElement(target, event)
+      pointerCaptureElementRef.current = captureEl
       try {
-        target.setPointerCapture(event.pointerId)
+        captureEl.setPointerCapture(event.pointerId)
       } catch {
         // setPointerCapture may fail in some edge cases
+      }
+
+      if (event.pointerType === 'touch') {
+        const touchActionTarget =
+          event.target instanceof Element ? event.target : captureEl
+        if (
+          touchActionTarget instanceof HTMLElement &&
+          !touchActionTarget.style.touchAction
+        ) {
+          touchActionTarget.style.touchAction = 'none'
+        }
       }
 
       stateRef.current = {
