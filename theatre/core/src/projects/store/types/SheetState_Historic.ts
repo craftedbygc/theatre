@@ -116,6 +116,11 @@ export type Keyframe = {
   connectedRight: boolean
   // defaults to 'bezier' to support project states made with theatre0.5.1 or earlier
   type?: KeyframeType
+  /**
+   * Optional label for the tween to the right of this keyframe.
+   * Only meaningful when {@link connectedRight} is true.
+   */
+  tweenLabel?: string
 }
 
 type TrackDataCommon<TypeName extends string> = {

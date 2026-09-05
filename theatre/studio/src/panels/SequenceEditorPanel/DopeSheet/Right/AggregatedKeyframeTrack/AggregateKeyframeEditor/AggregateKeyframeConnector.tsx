@@ -22,6 +22,10 @@ import useContextMenu from '@unseenco/theatre-studio/uiComponents/simpleContextM
 import {commonRootOfPathsToProps} from '@unseenco/theatre-shared/utils/addresses'
 import type {KeyframeWithPathToPropFromCommonRoot} from '@unseenco/theatre-studio/store/types'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
+import TweenNameEditorPopover, {
+  getSharedTweenLabel,
+  type TweenNameEditorTarget,
+} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/TweenNameEditorPopover'
 
 const POPOVER_MARGIN_PX = 5
 const EasingPopoverWrapper = styled(BasicPopover)`
@@ -53,7 +57,48 @@ export const AggregateKeyframeConnector: React.VFC<IAggregateKeyframeConnectorPr
     const [nodeRef, node] = useRefAndState<HTMLDivElement | null>(null)
     const {editorProps} = props
 
-    const [contextMenu] = useConnectorContextMenu(props, node)
+    const tweenNameTargets = useMemo((): TweenNameEditorTarget[] => {
+      const cur = editorProps.aggregateKeyframes[editorProps.index]
+      if (!cur) return []
+
+      return cur.keyframes.map(({kf, track}) => ({
+        sheetObject: track.sheetObject,
+        trackId: track.id,
+        keyframe: kf,
+      }))
+    }, [editorProps.aggregateKeyframes, editorProps.index])
+
+    const tweenLabel = getSharedTweenLabel(tweenNameTargets)
+
+    const {
+      node: namePopoverNode,
+      open: openNamePopover,
+      close: closeNamePopover,
+    } = usePopover({debugName: 'AggregateTweenNamePopover'}, () => (
+      <BasicPopover showPopoverEdgeTriangle>
+        <TweenNameEditorPopover
+          targets={tweenNameTargets}
+          onRequestClose={closeNamePopover}
+        />
+      </BasicPopover>
+    ))
+
+    const openTweenNameEditor = () => {
+      if (node) {
+        const rect = node.getBoundingClientRect()
+        openNamePopover(
+          {clientX: rect.left + rect.width / 2, clientY: rect.top},
+          node,
+        )
+      }
+    }
+
+    const [contextMenu] = useConnectorContextMenu(
+      props,
+      node,
+      tweenNameTargets,
+      openTweenNameEditor,
+    )
     const [isDragging] = useDragKeyframe(node, props.editorProps)
 
     const {
@@ -93,11 +138,13 @@ export const AggregateKeyframeConnector: React.VFC<IAggregateKeyframeConnectorPr
           connectorLengthInUnitSpace={connected ? connected.length : 0}
           isSelected={connected ? connected.selected : false}
           isPopoverOpen={isAggregateEditingInCurvePopover}
+          tweenLabel={tweenLabel}
           openPopover={(e) => {
             if (node) togglePopover(e, node)
           }}
         />
         {popoverNode}
+        {namePopoverNode}
         {contextMenu}
       </>
     ) : (
@@ -205,6 +252,8 @@ function useDragKeyframe(
 function useConnectorContextMenu(
   props: IAggregateKeyframeConnectorProps,
   node: HTMLDivElement | null,
+  tweenNameTargets: TweenNameEditorTarget[],
+  openTweenNameEditor: () => void,
 ) {
   return useContextMenu(node, {
     displayName: 'Aggregate Tween',
@@ -238,7 +287,43 @@ function useConnectorContextMenu(
           ? viewModel.sheet.address
           : viewModel.sheetObject.address
 
+      const sharedTweenLabel = getSharedTweenLabel(tweenNameTargets)
+      const tweenNameMenuItems = sharedTweenLabel
+        ? [
+            {
+              type: 'normal' as const,
+              label: 'Edit tween name',
+              callback: openTweenNameEditor,
+            },
+            {
+              type: 'normal' as const,
+              label: 'Clear tween name',
+              callback: () => {
+                getStudio().transaction(({stateEditors}) => {
+                  for (const target of tweenNameTargets) {
+                    stateEditors.coreByProject.historic.sheetsById.sequence.setTweenLabel(
+                      {
+                        ...target.sheetObject.address,
+                        trackId: target.trackId,
+                        keyframeId: target.keyframe.id,
+                        tweenLabel: undefined,
+                      },
+                    )
+                  }
+                })
+              },
+            },
+          ]
+        : [
+            {
+              type: 'normal' as const,
+              label: 'Name tween',
+              callback: openTweenNameEditor,
+            },
+          ]
+
       return [
+        ...tweenNameMenuItems,
         {
           type: 'normal',
           label: 'Copy',
