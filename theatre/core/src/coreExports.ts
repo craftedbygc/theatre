@@ -89,6 +89,10 @@ export function getProject(id: string, config: IProjectConfig = {}): IProject {
     plogger._debug('no config.state')
   }
 
+  if (process.env.NODE_ENV !== 'production') {
+    validateProjectNumberPrecisionOrThrow(config.numberPrecision)
+  }
+
   return new TheatreProject(id, config)
 }
 
@@ -113,6 +117,24 @@ const shallowValidateOnDiskState = (projectId: ProjectId, s: OnDiskState) => {
 const deepValidateOnDiskState = (projectId: ProjectId, s: OnDiskState) => {
   shallowValidateOnDiskState(projectId, s)
   // @TODO do a deep validation here
+}
+
+const validateProjectNumberPrecisionOrThrow = (
+  numberPrecision: number | undefined,
+) => {
+  if (numberPrecision === undefined) return
+  if (
+    typeof numberPrecision !== 'number' ||
+    !isFinite(numberPrecision) ||
+    numberPrecision < 0 ||
+    Math.floor(numberPrecision) !== numberPrecision
+  ) {
+    throw new InvalidArgumentError(
+      `Argument config.numberPrecision in Theatre.getProject(projectId, config) must be a non-negative integer. ${userReadableTypeOfValue(
+        numberPrecision,
+      )} given.`,
+    )
+  }
 }
 
 const validateProjectIdOrThrow = (value: string) => {

@@ -66,6 +66,7 @@ type IAssetConf = {
 export type Conf = Partial<{
   state: OnDiskState
   assets: IAssetConf
+  numberPrecision: number
   experiments: ExperimentsConf
 }>
 
