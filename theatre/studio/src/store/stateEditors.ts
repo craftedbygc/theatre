@@ -1218,6 +1218,23 @@ namespace stateEditors {
             }
           }
 
+          export function setTweenLabel(
+            p: WithoutSheetInstance<SheetObjectAddress> & {
+              trackId: SequenceTrackId
+              keyframeId: KeyframeId
+              tweenLabel: string | undefined
+            },
+          ) {
+            const keyframe = _getKeyframeById(p)
+            if (!keyframe) return
+
+            if (p.tweenLabel === undefined || p.tweenLabel === '') {
+              delete keyframe.tweenLabel
+            } else {
+              keyframe.tweenLabel = p.tweenLabel
+            }
+          }
+
           // Future: consider whether a list of "partial" keyframes requiring `id` is possible to accept
           //  * Consider how common this pattern is, as this sort of concept would best be encountered
           //    a few times to start to see an opportunity for improved ergonomics / crdt.

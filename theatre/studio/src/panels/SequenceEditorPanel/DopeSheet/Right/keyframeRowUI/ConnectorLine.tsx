@@ -1,14 +1,18 @@
 import {lighten, saturate} from 'polished'
 import React from 'react'
 import styled from 'styled-components'
+import {mergeRefs} from 'react-merge-refs'
 import {DOT_SIZE_PX} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/SingleKeyframeDot'
+import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
+import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
 
 const CONNECTOR_HEIGHT = DOT_SIZE_PX / 2 + 1
-const CONNECTOR_WIDTH_UNSCALED = 1000
+const CONNECTOR_HEIGHT_WITH_LABEL = 12
 
 export type IConnectorThemeValues = {
   isPopoverOpen: boolean
   isSelected: boolean
+  hasTweenLabel: boolean
 }
 
 export const CONNECTOR_THEME = {
@@ -33,14 +37,17 @@ export const CONNECTOR_THEME = {
 const Container = styled.div<IConnectorThemeValues>`
   position: absolute;
   background: ${CONNECTOR_THEME.barColor};
-  height: ${CONNECTOR_HEIGHT}px;
-  width: ${CONNECTOR_WIDTH_UNSCALED}px;
-
+  height: ${(props) =>
+    props.hasTweenLabel ? CONNECTOR_HEIGHT_WITH_LABEL : CONNECTOR_HEIGHT}px;
   left: 0;
-  top: -${CONNECTOR_HEIGHT / 2}px;
+  top: ${(props) =>
+    props.hasTweenLabel
+      ? -(CONNECTOR_HEIGHT_WITH_LABEL / 2)
+      : -(CONNECTOR_HEIGHT / 2)}px;
   transform-origin: top left;
   z-index: 0;
   cursor: ew-resize;
+  overflow: hidden;
 
   &:after {
     display: block;
@@ -57,37 +64,76 @@ const Container = styled.div<IConnectorThemeValues>`
   }
 `
 
+const Label = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  box-sizing: border-box;
+  pointer-events: none;
+  overflow: hidden;
+  min-width: 0;
+`
+
+const LabelText = styled.span`
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 9px;
+  line-height: 1;
+`
+
 type IConnectorLineProps = React.PropsWithChildren<{
   isPopoverOpen: boolean
   openPopover?: (event: React.MouseEvent) => void
   isSelected: boolean
   connectorLengthInUnitSpace: number
+  tweenLabel?: string
 }>
 
 export const ConnectorLine = React.forwardRef<
   HTMLDivElement,
   IConnectorLineProps
 >((props, ref) => {
+  const hasTweenLabel = !!props.tweenLabel
+
   const themeValues: IConnectorThemeValues = {
     isPopoverOpen: props.isPopoverOpen,
     isSelected: props.isSelected,
+    hasTweenLabel,
   }
 
+  const [tooltipNode, tooltipTargetRef] = useTooltip(
+    {enabled: hasTweenLabel, enterDelay: 300},
+    () => <MinimalTooltip>{props.tweenLabel}</MinimalTooltip>,
+  )
+
   return (
-    <Container
-      {...themeValues}
-      ref={ref}
-      style={{
-        // Previously we used scale3d, which had weird fuzzy rendering look in both FF & Chrome
-        transform: `scaleX(calc(var(--unitSpaceToScaledSpaceMultiplier) * ${
-          props.connectorLengthInUnitSpace / CONNECTOR_WIDTH_UNSCALED
-        }))`,
-      }}
-      onClick={(e) => {
-        props.openPopover?.(e)
-      }}
-    >
-      {props.children}
-    </Container>
+    <>
+      <Container
+        {...themeValues}
+        ref={mergeRefs([ref, tooltipTargetRef])}
+        style={{
+          width: `calc(var(--unitSpaceToScaledSpaceMultiplier) * ${props.connectorLengthInUnitSpace}px)`,
+        }}
+        onClick={(e) => {
+          props.openPopover?.(e)
+        }}
+      >
+        {hasTweenLabel ? (
+          <Label>
+            <LabelText>{props.tweenLabel}</LabelText>
+          </Label>
+        ) : undefined}
+        {props.children}
+      </Container>
+      {tooltipNode}
+    </>
   )
 })

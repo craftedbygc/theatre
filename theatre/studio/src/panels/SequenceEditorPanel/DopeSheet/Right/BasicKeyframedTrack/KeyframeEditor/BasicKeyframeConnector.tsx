@@ -13,13 +13,13 @@ import CurveEditorPopover, {
 } from './CurveEditorPopover/CurveEditorPopover'
 import type {Keyframe} from '@unseenco/theatre-core/projects/store/types/SheetState_Historic'
 import type {ISingleKeyframeEditorProps} from './SingleKeyframeEditor'
-import type {IConnectorThemeValues} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
 import {ConnectorLine} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/keyframeRowUI/ConnectorLine'
 import {COLOR_POPOVER_BACK} from './CurveEditorPopover/colors'
 import {usePrism} from '@unseenco/theatre-react'
 import type {KeyframeConnectionWithAddress} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
 import {copyableKeyframesFromSelection} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
 import {selectedKeyframeConnections} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import TweenNameEditorPopover from './TweenNameEditorPopover'
 
 import styled from 'styled-components'
 import {getStudioSequence} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
@@ -62,7 +62,42 @@ const BasicKeyframeConnector: React.VFC<IBasicKeyframeConnectorProps> = (
     () => <SingleCurveEditorPopover {...props} closePopover={closePopover} />,
   )
 
-  const [contextMenu] = useConnectorContextMenu(props, node, cur, next)
+  const {
+    node: namePopoverNode,
+    open: openNamePopover,
+    close: closeNamePopover,
+  } = usePopover({debugName: 'TweenNamePopover'}, () => (
+    <BasicPopover showPopoverEdgeTriangle>
+      <TweenNameEditorPopover
+        targets={[
+          {
+            sheetObject: props.leaf.sheetObject,
+            trackId: props.leaf.trackId,
+            keyframe: cur,
+          },
+        ]}
+        onRequestClose={closeNamePopover}
+      />
+    </BasicPopover>
+  ))
+
+  const openTweenNameEditor = () => {
+    if (node) {
+      const rect = node.getBoundingClientRect()
+      openNamePopover(
+        {clientX: rect.left + rect.width / 2, clientY: rect.top},
+        node,
+      )
+    }
+  }
+
+  const [contextMenu] = useConnectorContextMenu(
+    props,
+    node,
+    cur,
+    next,
+    openTweenNameEditor,
+  )
   useDragKeyframe(node, props)
 
   const connectorLengthInUnitSpace = next.position - cur.position
@@ -78,23 +113,21 @@ const BasicKeyframeConnector: React.VFC<IBasicKeyframeConnectorProps> = (
     [props.leaf.sheetObject.address, props.leaf.trackId, cur, next],
   )
 
-  const themeValues: IConnectorThemeValues = {
-    isPopoverOpen: isInCurveEditorPopoverSelection,
-    isSelected: props.selection !== undefined,
-  }
-
   return (
     <>
       <ConnectorLine
         ref={nodeRef}
         connectorLengthInUnitSpace={connectorLengthInUnitSpace}
-        {...themeValues}
+        tweenLabel={cur.tweenLabel}
+        isPopoverOpen={isInCurveEditorPopoverSelection}
+        isSelected={props.selection !== undefined}
         openPopover={(e) => {
           if (node) togglePopover(e, node)
         }}
       >
         {popoverNode}
       </ConnectorLine>
+      {namePopoverNode}
       {/* contextMenu is placed outside of the ConnectorLine so that clicking on
       the contextMenu does not count as clicking on the ConnectorLine */}
       {contextMenu}
@@ -236,6 +269,7 @@ function useConnectorContextMenu(
   node: HTMLDivElement | null,
   cur: Keyframe,
   next: Keyframe,
+  openTweenNameEditor: () => void,
 ) {
   // TODO?: props.selection is undefined if only one of the connected keyframes is selected
 
@@ -248,7 +282,40 @@ function useConnectorContextMenu(
         props.selection,
       )
 
+      const tweenNameMenuItems = cur.tweenLabel
+        ? [
+            {
+              type: 'normal' as const,
+              label: 'Edit tween name',
+              callback: openTweenNameEditor,
+            },
+            {
+              type: 'normal' as const,
+              label: 'Clear tween name',
+              callback: () => {
+                getStudio().transaction(({stateEditors}) => {
+                  stateEditors.coreByProject.historic.sheetsById.sequence.setTweenLabel(
+                    {
+                      ...props.leaf.sheetObject.address,
+                      trackId: props.leaf.trackId,
+                      keyframeId: cur.id,
+                      tweenLabel: undefined,
+                    },
+                  )
+                })
+              },
+            },
+          ]
+        : [
+            {
+              type: 'normal' as const,
+              label: 'Name tween',
+              callback: openTweenNameEditor,
+            },
+          ]
+
       return [
+        ...tweenNameMenuItems,
         {
           type: 'normal',
           label: copyableKeyframes.length > 0 ? 'Copy (selection)' : 'Copy',
