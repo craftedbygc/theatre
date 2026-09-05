@@ -32,6 +32,13 @@ export type IProjectConfig = {
   assets?: {
     baseUrl?: string
   }
+  /**
+   * The default number of decimal places to use for number props in the Studio.
+   * Can be overridden per prop via `types.number(defaultValue, {precision})`.
+   *
+   * @defaultValue 3
+   */
+  numberPrecision?: number
 }
 
 // export type IProjectConfigExperiments = {

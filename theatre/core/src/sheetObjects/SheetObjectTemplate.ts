@@ -64,6 +64,7 @@ import {registerObjectPropConfig} from '@unseenco/theatre-shared/utils/defaultPr
 import {InvalidArgumentError} from '@unseenco/theatre-shared/utils/errors'
 import type {UnknownShorthandCompoundProps} from '@unseenco/theatre-core/propTypes/internals'
 import {compound, compoundFromSanitizedProps} from '@unseenco/theatre-core/propTypes'
+import {applyNumberPrecisionDefaultsToPropConfig} from '@unseenco/theatre-shared/propTypes/numberPrecision'
 
 function isObjectEmpty(obj: unknown): boolean {
   return (
@@ -156,7 +157,12 @@ export default class SheetObjectTemplate {
     staticPropPaths?: readonly StaticPropPath[],
   ) {
     this.address = {...sheetTemplate.address, objectKey}
-    this._config = new Atom(config)
+    this._config = new Atom(
+      applyNumberPrecisionDefaultsToPropConfig(
+        config,
+        sheetTemplate.project.config.numberPrecision,
+      ),
+    )
     this._temp_actions_atom = new Atom(_temp_actions)
     this.showPropsOf_atom = new Atom<SheetObject[]>([])
     this._transientPropPaths = normalizeTransientPropPaths(
