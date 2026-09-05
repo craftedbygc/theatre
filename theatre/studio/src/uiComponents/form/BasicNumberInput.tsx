@@ -1,4 +1,4 @@
-import {clamp, isInteger, round} from 'lodash-es'
+import {clamp, isInteger} from 'lodash-es'
 import type {MutableRefObject} from 'react'
 import {useEffect} from 'react'
 import {useState} from 'react'
@@ -8,6 +8,10 @@ import {mergeRefs} from 'react-merge-refs'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import useOnClickOutside from '@unseenco/theatre-studio/uiComponents/useOnClickOutside'
 import useDrag from '@unseenco/theatre-studio/uiComponents/useDrag'
+import {
+  DEFAULT_NUMBER_PRECISION,
+  roundNumberToPrecision,
+} from '@unseenco/theatre-shared/propTypes/numberPrecision'
 
 const Container = styled.div`
   height: 100%;
@@ -117,12 +121,17 @@ const BasicNumberInput: React.FC<{
   onBlur?: () => void
   nudge: BasicNumberInputNudgeFn
   autoFocus?: boolean
+  precision?: number
 }> = (propsA) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
   const isValid = propsA.isValid ?? alwaysValid
+  const precision = propsA.precision ?? DEFAULT_NUMBER_PRECISION
 
   const propsRef = useRef(propsA)
   propsRef.current = propsA
+
+  const getPrecision = () =>
+    propsRef.current.precision ?? DEFAULT_NUMBER_PRECISION
 
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -147,7 +156,9 @@ const BasicNumberInput: React.FC<{
       const valInFloat = parseFloat(value)
       if (!isFinite(valInFloat) || !isValid(valInFloat)) return
 
-      propsRef.current.temporarilySetValue(valInFloat)
+      propsRef.current.temporarilySetValue(
+        roundNumberToPrecision(valInFloat, getPrecision()),
+      )
     }
 
     const onBlur = () => {
@@ -160,7 +171,10 @@ const BasicNumberInput: React.FC<{
 
     const commitKeyboardInput = () => {
       const curState = stateRef.current as IState_EditingViaKeyboard
-      const value = parseFloat(curState.currentEditedValueInString)
+      const value = roundNumberToPrecision(
+        parseFloat(curState.currentEditedValueInString),
+        getPrecision(),
+      )
 
       if (!isFinite(value) || !isValid(value)) {
         propsRef.current.discardTemporaryValue()
@@ -251,6 +265,11 @@ const BasicNumberInput: React.FC<{
             ? clamp(newValue, propsA.range[0], propsA.range[1])
             : newValue
 
+          valueDuringDragging = roundNumberToPrecision(
+            valueDuringDragging,
+            getPrecision(),
+          )
+
           propsRef.current.temporarilySetValue(valueDuringDragging)
         },
         onDragEnd(happened: boolean) {
@@ -292,7 +311,7 @@ const BasicNumberInput: React.FC<{
 
   let value =
     stateRef.current.mode !== 'editingViaKeyboard'
-      ? format(propsA.value)
+      ? format(propsA.value, precision)
       : stateRef.current.currentEditedValueInString
 
   if (typeof value === 'number' && isNaN(value)) {
@@ -353,8 +372,12 @@ const BasicNumberInput: React.FC<{
   )
 }
 
-function format(v: number): string {
-  return isNaN(v) ? 'NaN' : isInteger(v) ? v.toFixed(0) : round(v, 3).toString()
+function format(v: number, precision: number): string {
+  return isNaN(v)
+    ? 'NaN'
+    : isInteger(v)
+    ? v.toFixed(0)
+    : roundNumberToPrecision(v, precision).toString()
 }
 
 export default BasicNumberInput

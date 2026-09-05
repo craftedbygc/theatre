@@ -313,6 +313,9 @@ const _ensureImage = (val: unknown): Asset | undefined => {
  * // With custom nudging
  * const x = t.number(0, {nudgeMultiplier: 0.1}) // nudging will happen in 0.1 increments
  *
+ * // With custom precision (decimal places shown/stored in Studio)
+ * const x = t.number(0, {precision: 2})
+ *
  * // With custom nudging function
  * const x = t.number({
  *   nudgeFn: (
@@ -340,6 +343,7 @@ export const number = (
     nudgeFn?: PropTypeConfig_Number['nudgeFn']
     range?: PropTypeConfig_Number['range']
     nudgeMultiplier?: number
+    precision?: number
     label?: string
   } = {},
 ): PropTypeConfig_Number => {
@@ -400,6 +404,20 @@ export const number = (
           )
         }
       }
+      if (Object.prototype.hasOwnProperty.call(opts, 'precision')) {
+        if (
+          typeof opts.precision !== 'number' ||
+          !isFinite(opts.precision) ||
+          opts.precision < 0 ||
+          Math.floor(opts.precision) !== opts.precision
+        ) {
+          throw new Error(
+            `opts.precision in t.number(defaultValue, opts) must be a non-negative integer. ${userReadableTypeOfValue(
+              opts.precision,
+            )} given.`,
+          )
+        }
+      }
     }
   }
 
@@ -415,6 +433,8 @@ export const number = (
       typeof opts.nudgeMultiplier === 'number'
         ? opts.nudgeMultiplier
         : undefined,
+    precision:
+      typeof opts.precision === 'number' ? opts.precision : undefined,
     interpolate: _interpolateNumber,
     deserializeAndSanitize: numberDeserializer(opts.range),
   }
@@ -795,6 +815,11 @@ export interface PropTypeConfig_Number
    * See {@link defaultNumberNudgeFn} to see how `nudgeMultiplier` is treated.
    */
   nudgeMultiplier: number | undefined
+  /**
+   * The number of decimal places to use for this prop in the Studio.
+   * Falls back to the project's `numberPrecision` config, then to 3.
+   */
+  precision?: number
 }
 
 export type NumberNudgeFn = (p: {
