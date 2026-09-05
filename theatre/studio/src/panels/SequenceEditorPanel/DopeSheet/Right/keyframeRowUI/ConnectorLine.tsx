@@ -69,16 +69,24 @@ const Label = styled.div`
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 4px;
+  padding: 0 6px;
   box-sizing: border-box;
   pointer-events: none;
+  overflow: hidden;
+  min-width: 0;
+`
+
+const LabelText = styled.span`
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
   color: rgba(255, 255, 255, 0.85);
   font-size: 9px;
   line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `
 
 type IConnectorLineProps = React.PropsWithChildren<{
@@ -118,7 +126,11 @@ export const ConnectorLine = React.forwardRef<
           props.openPopover?.(e)
         }}
       >
-        {hasTweenLabel ? <Label>{props.tweenLabel}</Label> : undefined}
+        {hasTweenLabel ? (
+          <Label>
+            <LabelText>{props.tweenLabel}</LabelText>
+          </Label>
+        ) : undefined}
         {props.children}
       </Container>
       {tooltipNode}
