@@ -25,6 +25,7 @@ import type {
   ObjectAddressKey,
   SequenceTrackId,
 } from '@unseenco/theatre-shared/utils/ids'
+import type {SerializablePrimitive} from '@unseenco/theatre-shared/utils/types'
 import {generateSequenceTrackId} from '@unseenco/theatre-shared/utils/ids'
 import type {IStateEditors} from '@unseenco/theatre-studio/store/stateEditors'
 import getStudio from '@unseenco/theatre-studio/getStudio'
@@ -176,7 +177,7 @@ function revertStaticOverrideToSavedState(
       obj.address.objectKey,
     ) ?? {},
     pathToProp,
-  )
+  ) as SerializablePrimitive | undefined
 
   if (onDiskStatic === undefined) {
     stateEditors.coreByProject.historic.sheetsById.staticOverrides.byObject.unsetValueOfPrimitiveProp(
