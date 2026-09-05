@@ -56,6 +56,7 @@ const Input = styled.input`
   width: 100%;
   height: calc(100% - 4px);
   border-radius: 2px;
+  touch-action: none;
 
   &:focus {
     cursor: text;
@@ -78,7 +79,10 @@ const FillIndicator = styled.div`
 `
 
 const DragWrap = styled.div`
-  display: contents;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  touch-action: none;
 `
 
 type IState_NoFocus = {
@@ -134,6 +138,10 @@ const BasicNumberInput: React.FC<{
     propsRef.current.precision ?? DEFAULT_NUMBER_PRECISION
 
   const inputRef = useRef<HTMLInputElement | null>(null)
+  // While dragging on touch, React must not push new `value` props into the input —
+  // that re-sync cancels the active pointer gesture. We freeze the prop and update
+  // the DOM directly instead.
+  const frozenInputValueRef = useRef<string | null>(null)
 
   useOnClickOutside(
     inputRef.current,
@@ -236,6 +244,12 @@ const BasicNumberInput: React.FC<{
       const curValue = propsRef.current.value
       inputWidth = inputRef.current?.getBoundingClientRect().width!
 
+      frozenInputValueRef.current = format(curValue, getPrecision())
+      inputRef.current?.blur()
+      if (inputRef.current) {
+        inputRef.current.readOnly = true
+      }
+
       stateRef.current = {
         mode: 'dragging',
       }
@@ -244,6 +258,14 @@ const BasicNumberInput: React.FC<{
       let valueDuringDragging = curValue
 
       bodyCursorBeforeDrag.current = document.body.style.cursor
+
+      const updateDragDisplay = (nextValue: number) => {
+        const formatted = format(nextValue, getPrecision())
+        frozenInputValueRef.current = formatted
+        if (inputRef.current) {
+          inputRef.current.value = formatted
+        }
+      }
 
       return {
         onDrag(_dx: number, _dy: number, e: MouseEvent, mx: number) {
@@ -270,9 +292,15 @@ const BasicNumberInput: React.FC<{
             getPrecision(),
           )
 
+          updateDragDisplay(valueDuringDragging)
           propsRef.current.temporarilySetValue(valueDuringDragging)
         },
         onDragEnd(happened: boolean) {
+          frozenInputValueRef.current = null
+          if (inputRef.current) {
+            inputRef.current.readOnly = false
+          }
+
           if (!happened) {
             propsRef.current.discardTemporaryValue()
             stateRef.current = {mode: 'noFocus'}
@@ -310,7 +338,9 @@ const BasicNumberInput: React.FC<{
   }, [])
 
   let value =
-    stateRef.current.mode !== 'editingViaKeyboard'
+    frozenInputValueRef.current != null
+      ? frozenInputValueRef.current
+      : stateRef.current.mode !== 'editingViaKeyboard'
       ? format(propsA.value, precision)
       : stateRef.current.currentEditedValueInString
 
@@ -335,6 +365,12 @@ const BasicNumberInput: React.FC<{
       onMouseDown={(e: React.MouseEvent) => {
         e.stopPropagation()
       }}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (stateRef.current.mode !== 'editingViaKeyboard') {
+          // Prevent the input from taking focus on touch, which would cancel the drag.
+          e.preventDefault()
+        }
+      }}
       onDoubleClick={(e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -344,7 +380,8 @@ const BasicNumberInput: React.FC<{
   )
 
   const {range} = propsA
-  const num = parseFloat(value)
+  const isDraggingValue = frozenInputValueRef.current != null
+  const num = isDraggingValue ? propsA.value : parseFloat(value)
 
   const fillIndicator = range ? (
     <FillIndicator
