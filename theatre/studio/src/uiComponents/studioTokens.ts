@@ -33,8 +33,8 @@ export const studioTokenCss = `
   --studio-glass-bg: rgba(33, 33, 33, 0.92);
   --studio-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.45);
 
-  --studio-radius: 8px;
-  --studio-radius-sm: 6px;
+  --studio-radius: 4px;
+  --studio-radius-sm: 3px;
   --studio-row-height: 36px;
   --studio-row-gap: 3px;
   --studio-panel-pad: 10px 12px;
@@ -44,7 +44,7 @@ export const studioTokenCss = `
 export const studioChipSurfaceCss = `
   background: var(--studio-surface);
   border-radius: var(--studio-radius);
-  box-shadow: inset 0 0 0 1px var(--studio-border);
+  box-shadow: inset 0 0 0 1px transparent;
   transition: background 150ms ease, box-shadow 150ms ease;
 
   &:hover {

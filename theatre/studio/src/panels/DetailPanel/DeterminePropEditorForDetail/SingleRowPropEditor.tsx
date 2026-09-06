@@ -48,7 +48,7 @@ const Chip = styled.div<{
   min-height: var(--studio-row-height);
   height: var(--studio-row-height);
   display: flex;
-  align-items: ${(props) => (props.$ownsLabel ? 'stretch' : 'center')};
+  align-items: stretch;
   gap: 12px;
   padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
   box-sizing: border-box;
@@ -81,10 +81,6 @@ const PropName = styled.div<{
       ? 'var(--studio-text-focus)'
       : 'var(--studio-text-label)'};
   ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
-
-  &:hover {
-    color: var(--studio-text-focus);
-  }
 `
 
 const InputSlot = styled.div<{

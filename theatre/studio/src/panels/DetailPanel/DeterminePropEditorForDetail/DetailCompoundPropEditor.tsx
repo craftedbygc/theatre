@@ -81,9 +81,6 @@ const PropName = deriver(styled.div<{
     props.isHighlighted === 'self'
       ? 'var(--studio-text-focus)'
       : 'var(--studio-text-label)'};
-  &:hover {
-    color: var(--studio-text-focus);
-  }
   ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
 `)
 

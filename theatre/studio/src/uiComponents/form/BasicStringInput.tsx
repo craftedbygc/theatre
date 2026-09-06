@@ -12,34 +12,65 @@ const Input = styled.input.attrs({type: 'text'})<{
 }>`
   background: transparent;
   border: none;
-  border-bottom: 1px solid transparent;
   color: var(--studio-text-value);
   padding: ${(p) => (p.$fitContent ? '0' : '0 10px')};
   font: inherit;
   font-size: 13px;
+  font-weight: ${(p) => (p.$fitContent ? 500 : 'inherit')};
+  font-family: ${(p) =>
+    p.$fitContent ? 'var(--studio-font-mono)' : 'inherit'};
   outline: none;
   cursor: text;
   text-align: right;
   width: ${(p) =>
     p.$fitContent ? `calc(${Math.max(p.$charCount ?? 4, 4)} * 1ch)` : '100%'};
   min-width: ${(p) => (p.$fitContent ? '4ch' : '0')};
-  height: 100%;
-  border-radius: ${(p) => (p.$fitContent ? '0' : 'var(--studio-radius, 8px)')};
+  /* Full chip height for normal fields; value-sized for fitContent (hex). */
+  height: ${(p) => (p.$fitContent ? 'auto' : '100%')};
+  min-height: ${(p) => (p.$fitContent ? '0' : '100%')};
+  line-height: ${(p) => (p.$fitContent ? 1.2 : 'inherit')};
+  border-radius: 0;
   box-sizing: border-box;
-  flex: ${(p) => (p.$fitContent ? '0 0 auto' : 'initial')};
+  flex: ${(p) => (p.$fitContent ? '0 0 auto' : '1 1 auto')};
+  align-self: ${(p) => (p.$fitContent ? 'center' : 'stretch')};
+  /* fitContent (hex): underline via border-bottom like number inputs.
+     Full-width text: underline via background-image so we don't lose 1px of height. */
+  border-bottom: ${(p) =>
+    p.$fitContent ? '1px solid transparent' : 'none'};
+  background-repeat: no-repeat;
+  background-position: left 10px bottom 0;
+  background-size: calc(100% - 20px) 0;
 
   &:hover {
     background-color: transparent;
   }
 
+  /* Straight 1px underline under the text (no rounded ends). */
   &:focus {
     cursor: text;
     background-color: transparent;
-    border-bottom-color: var(--studio-focus-ring);
+    ${(p) =>
+      p.$fitContent
+        ? `border-bottom-color: var(--studio-focus-ring);`
+        : `
+      background-image: linear-gradient(
+        var(--studio-focus-ring),
+        var(--studio-focus-ring)
+      );
+      background-size: calc(100% - 20px) 1px;
+      background-position: left 10px bottom 0;
+    `}
   }
 
   &.invalid {
-    border-bottom-color: #e25555;
+    ${(p) =>
+      p.$fitContent
+        ? `border-bottom-color: #e25555;`
+        : `
+      background-image: linear-gradient(#e25555, #e25555);
+      background-size: calc(100% - 20px) 1px;
+      background-position: left 10px bottom 0;
+    `}
   }
 `
 

@@ -36,7 +36,7 @@ const Trigger = styled.button`
   width: 100%;
   height: 100%;
   min-height: 28px;
-  border-radius: var(--studio-radius, 8px);
+  border-radius: var(--studio-radius, 4px);
   cursor: pointer;
   position: relative;
 
@@ -78,7 +78,7 @@ const Menu = styled.div`
   overflow: auto;
   padding: 4px;
   box-sizing: border-box;
-  border-radius: var(--studio-radius, 8px);
+  border-radius: var(--studio-radius, 4px);
   background: var(--studio-dropdown-bg);
   border: 1px solid var(--studio-border);
   box-shadow: var(--studio-shadow-dropdown);
@@ -102,7 +102,7 @@ const OptionButton = styled.button<{
   min-height: 32px;
   padding: 0 10px;
   box-sizing: border-box;
-  border-radius: var(--studio-radius-sm, 6px);
+  border-radius: var(--studio-radius-sm, 3px);
   background: ${(p) =>
     p.$highlighted || p.$active
       ? 'var(--studio-surface-active)'

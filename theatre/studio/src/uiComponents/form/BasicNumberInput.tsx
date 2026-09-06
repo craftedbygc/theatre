@@ -25,7 +25,7 @@ const Container = styled.div<{
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
-  border-radius: var(--studio-radius, 8px);
+  border-radius: var(--studio-radius, 4px);
   overflow: hidden;
   background: ${(p) =>
     p.$embedded
@@ -33,12 +33,7 @@ const Container = styled.div<{
       : p.$hasRange
       ? 'var(--studio-surface)'
       : 'transparent'};
-  box-shadow: ${(p) =>
-    p.$embedded
-      ? 'none'
-      : p.$hasRange
-      ? 'inset 0 0 0 1px var(--studio-border)'
-      : 'none'};
+  box-shadow: none;
   transition: background 150ms ease, box-shadow 150ms ease;
 
   &:hover,
@@ -51,11 +46,9 @@ const Container = styled.div<{
         ? 'var(--studio-surface-hover)'
         : 'transparent'};
     box-shadow: ${(p) =>
-      p.$embedded
+      p.$embedded || !p.$hasRange
         ? 'none'
-        : p.$hasRange
-        ? 'inset 0 0 0 1px var(--studio-border-hover)'
-        : 'none'};
+        : 'inset 0 0 0 1px var(--studio-border-hover)'};
   }
 `
 
@@ -66,7 +59,7 @@ const FillIndicator = styled.div`
   background: var(--studio-surface-fill);
   z-index: 0;
   pointer-events: none;
-  border-radius: var(--studio-radius, 8px) 0 0 var(--studio-radius, 8px);
+  border-radius: var(--studio-radius, 4px) 0 0 var(--studio-radius, 4px);
 `
 
 const Hashmarks = styled.div<{
@@ -157,6 +150,7 @@ const ValueSlot = styled.div`
   height: 100%;
   /* Always receive hits so only the value (not the whole chip) enters edit. */
   pointer-events: auto;
+  cursor: text;
 `
 
 const Input = styled.input<{
@@ -179,7 +173,7 @@ const Input = styled.input<{
   font-size: 13px;
   font-weight: 500;
   outline: none;
-  cursor: ${(p) => (p.$isEditing ? 'text' : 'ew-resize')};
+  cursor: text;
   text-align: right;
   width: calc(var(--value-ch, 4) * 1ch);
   min-width: 3ch;
