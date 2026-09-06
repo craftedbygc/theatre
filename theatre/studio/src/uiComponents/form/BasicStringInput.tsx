@@ -8,33 +8,32 @@ import useOnClickOutside from '@unseenco/theatre-studio/uiComponents/useOnClickO
 
 const Input = styled.input.attrs({type: 'text'})`
   background: transparent;
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 1px 6px;
+  border: none;
+  color: var(--studio-text-value);
+  padding: 0 10px;
   font: inherit;
+  font-size: 13px;
   outline: none;
   cursor: text;
-  text-align: left;
+  text-align: right;
   width: 100%;
-  height: calc(100% - 4px);
-  border-radius: 2px;
-  border: 1px solid transparent;
+  height: calc(100% - 2px);
+  border-radius: var(--studio-radius, 8px);
   box-sizing: border-box;
+  transition: box-shadow 120ms ease;
 
   &:hover {
-    background-color: #10101042;
-    border-color: #00000059;
+    background-color: transparent;
   }
 
-  &:hover,
   &:focus {
     cursor: text;
-    background-color: #10101042;
-    border-color: #00000059;
+    background-color: transparent;
+    box-shadow: inset 0 -2px 0 0 var(--studio-focus-ring);
   }
 
   &.invalid {
-    border-color: red;
+    box-shadow: inset 0 -2px 0 0 #e25555;
   }
 `
 

@@ -136,11 +136,13 @@ const Body = styled.div<{$docked: boolean}>`
   }
 
   scrollbar-width: none;
-  padding: 0;
+  padding: 6px 4px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-row-gap, 6px);
   user-select: none;
-
-  /* Set the font-size for input values in the detail panel */
-  font-size: 12px;
+  font-family: var(--studio-font-ui);
+  font-size: 13px;
 `
 
 export const contextMenuShownContext = createContext<

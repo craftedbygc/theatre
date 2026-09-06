@@ -1,4 +1,3 @@
-import {darken} from 'polished'
 import React, {useCallback} from 'react'
 import styled from 'styled-components'
 
@@ -6,41 +5,46 @@ const Container = styled.form`
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  vertical-align: middle;
   justify-content: stretch;
-  height: 24px;
+  height: 28px;
   width: 100%;
+  padding: 2px;
+  box-sizing: border-box;
+  border-radius: var(--studio-radius-sm, 6px);
+  background: rgba(0, 0, 0, 0.25);
+  position: relative;
+  gap: 0;
 `
+
 const Label = styled.label`
-  padding: 0 0.5em;
+  padding: 0 0.6em;
   background: transparent;
-  /* background: #373748; */
   display: flex;
   align-items: center;
   justify-content: center;
   flex-grow: 1;
-  color: #a7a7a7;
-  border: 1px solid transparent;
+  color: var(--studio-text-muted);
   box-sizing: border-box;
-  border-right-width: 0px;
-
-  & + &:last-child {
-    border-right-width: 1px;
-  }
+  border-radius: calc(var(--studio-radius-sm, 6px) - 2px);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  transition: color 120ms ease, background 120ms ease;
 
   ${Container}:hover > & {
-    border-color: #1c2123;
-    /* background-color: #373748; */
-    /* color: ${darken(0.1, 'white')}; */
+    color: var(--studio-text-label);
   }
 
   &&:hover {
-    background-color: #464654;
+    background: var(--studio-surface-hover);
   }
 
   &&[data-checked='true'] {
-    color: white;
-    background: #3f3f4c;
+    color: var(--studio-text-focus);
+    background: var(--studio-surface-active);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 `
 
@@ -73,7 +77,7 @@ function BasicSwitch<TLiteralOptions extends string>({
     <Container role="radiogroup">
       {Object.keys(options).map((key, i) => (
         <Label key={'label-' + i} data-checked={value === key}>
-          {options[key]}
+          {options[key as TLiteralOptions]}
           <Input
             type="radio"
             checked={value === key}

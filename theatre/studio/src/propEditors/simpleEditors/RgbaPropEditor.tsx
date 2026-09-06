@@ -18,7 +18,10 @@ const RowContainer = styled.div`
   display: flex;
   align-items: center;
   height: 100%;
-  gap: 4px;
+  width: 100%;
+  gap: 8px;
+  padding: 0 8px 0 10px;
+  box-sizing: border-box;
 `
 
 interface ColorPreviewPuckProps {
@@ -33,12 +36,17 @@ const ColorPreviewPuck = styled.div.attrs<ColorPreviewPuckProps>((props) => ({
   },
 }))<ColorPreviewPuckProps>`
   height: 18px;
+  width: 18px;
+  flex: 0 0 auto;
   aspect-ratio: 1;
   border-radius: 99999px;
+  box-shadow: inset 0 0 0 1px var(--studio-border);
+  cursor: pointer;
 `
 
 const HexInput = styled(BasicStringInput)`
   flex: 1;
+  min-width: 0;
 `
 
 const noop = () => {}

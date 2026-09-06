@@ -9,4 +9,6 @@ export type ISimplePropEditorReactProps<
   editingTools: IEditingTools<TPropTypeConfig['valueType']>
   value: TPropTypeConfig['valueType']
   autoFocus?: boolean
+  /** Details-pane Dialkit layout: label rendered inside the control. */
+  label?: string
 }

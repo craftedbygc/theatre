@@ -13,68 +13,125 @@ import {
   roundNumberToPrecision,
 } from '@unseenco/theatre-shared/propTypes/numberPrecision'
 
-const Container = styled.div`
+const Container = styled.div<{
+  $hasRange: boolean
+}>`
   height: 100%;
   width: 100%;
+  min-height: var(--studio-row-height, 36px);
   position: relative;
   z-index: 0;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-
-  &:after {
-    position: absolute;
-    inset: 1px 0 2px;
-    display: block;
-    content: ' ';
-    background-color: transparent;
-    border: 1px solid transparent;
-    z-index: -2;
-    box-sizing: border-box;
-    border-radius: 1px;
-  }
+  border-radius: var(--studio-radius, 8px);
+  overflow: hidden;
+  background: ${(p) =>
+    p.$hasRange ? 'var(--studio-surface)' : 'transparent'};
+  transition: background 150ms ease;
 
   &:hover,
   &.dragging,
   &.editingViaKeyboard {
-    &:after {
-      background-color: #10101042;
-      border-color: #00000059;
-    }
-  }
-`
-
-const Input = styled.input`
-  background: transparent;
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 1px 6px;
-  font: inherit;
-  outline: none;
-  cursor: ew-resize;
-  text-align: left;
-  width: 100%;
-  height: calc(100% - 4px);
-  border-radius: 2px;
-  touch-action: none;
-
-  &:focus {
-    cursor: text;
+    background: var(--studio-surface-hover);
   }
 `
 
 const FillIndicator = styled.div`
   position: absolute;
-  inset: 3px 2px 4px;
-  transform: scale(var(--percentage), 1);
-  transform-origin: top left;
-  background-color: #2d5561;
-  z-index: -1;
-  border-radius: 2px;
+  inset: 0 auto 0 0;
+  width: calc(var(--percentage) * 100%);
+  background: var(--studio-surface-fill);
+  z-index: 0;
   pointer-events: none;
+  border-radius: var(--studio-radius, 8px) 0 0 var(--studio-radius, 8px);
+`
 
-  ${Container}.dragging &, ${Container}.noFocus:hover & {
-    background-color: #338198;
+const Hashmarks = styled.div<{
+  $visible: boolean
+}>`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: ${(p) => (p.$visible ? 0.3 : 0)};
+  transition: opacity 120ms ease;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent calc(10% - 1px),
+    rgba(255, 255, 255, 0.18) calc(10% - 1px),
+    rgba(255, 255, 255, 0.18) 10%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 38%,
+    #000 46%,
+    #000 54%,
+    transparent 62%,
+    transparent 100%
+  );
+`
+
+const Handle = styled.div<{
+  $visible: boolean
+}>`
+  position: absolute;
+  top: 50%;
+  left: calc(var(--percentage) * 100%);
+  width: 3px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -1.5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: 2;
+  pointer-events: none;
+  opacity: ${(p) => (p.$visible ? 1 : 0)};
+  transition: opacity 120ms ease;
+`
+
+const LabelOverlay = styled.div`
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--studio-text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 48%;
+`
+
+const Input = styled.input`
+  background: transparent;
+  border: none;
+  color: var(--studio-text-value);
+  padding: 0 12px;
+  font-family: var(--studio-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: ew-resize;
+  text-align: right;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--studio-radius, 8px);
+  touch-action: none;
+  position: relative;
+  z-index: 4;
+  box-sizing: border-box;
+
+  &:focus {
+    cursor: text;
+    box-shadow: inset 0 -2px 0 0 var(--studio-focus-ring);
   }
 `
 
@@ -82,7 +139,10 @@ const DragWrap = styled.div`
   flex: 1;
   min-width: 0;
   width: 100%;
+  height: 100%;
   touch-action: none;
+  position: relative;
+  z-index: 4;
 `
 
 type IState_NoFocus = {
@@ -126,8 +186,11 @@ const BasicNumberInput: React.FC<{
   nudge: BasicNumberInputNudgeFn
   autoFocus?: boolean
   precision?: number
+  /** Optional label rendered inside the track (details pane Dialkit layout). */
+  label?: string
 }> = (propsA) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
+  const [isHot, setIsHot] = useState(false)
   const isValid = propsA.isValid ?? alwaysValid
   const precision = propsA.precision ?? DEFAULT_NUMBER_PRECISION
 
@@ -240,7 +303,7 @@ const BasicNumberInput: React.FC<{
 
     let inputWidth: number
 
-    const transitionToDraggingMode = () => {
+    const transitionToDraggingMode = (event: MouseEvent) => {
       const curValue = propsRef.current.value
       inputWidth = inputRef.current?.getBoundingClientRect().width!
 
@@ -256,6 +319,35 @@ const BasicNumberInput: React.FC<{
 
       let valueBeforeDragging = curValue
       let valueDuringDragging = curValue
+      const hasRange = !!propsRef.current.range
+
+      const valueFromClientX = (clientX: number) => {
+        const range = propsRef.current.range!
+        const el = inputRef.current
+        if (!el) return propsRef.current.value
+        const rect = el.getBoundingClientRect()
+        const ratio =
+          rect.width <= 0
+            ? 0
+            : clamp((clientX - rect.left) / rect.width, 0, 1)
+        return roundNumberToPrecision(
+          range[0] + ratio * (range[1] - range[0]),
+          getPrecision(),
+        )
+      }
+
+      if (hasRange) {
+        valueDuringDragging = valueFromClientX(event.clientX)
+        valueBeforeDragging = valueDuringDragging
+        frozenInputValueRef.current = format(
+          valueDuringDragging,
+          getPrecision(),
+        )
+        if (inputRef.current) {
+          inputRef.current.value = frozenInputValueRef.current
+        }
+        propsRef.current.temporarilySetValue(valueDuringDragging)
+      }
 
       bodyCursorBeforeDrag.current = document.body.style.cursor
 
@@ -269,28 +361,23 @@ const BasicNumberInput: React.FC<{
 
       return {
         onDrag(_dx: number, _dy: number, e: MouseEvent, mx: number) {
-          // We use `mx` here because it allows us to offer better UX when dragging
-          // a value beyond its range. If we were to use `_dx`, and the number had a range,
-          // and the user nudged the number beyond its range, they would have to un-nudge all
-          // the way back until the number's value is within its range. But with `mx`,
-          // as soon as they reverse their mouse drag, the number will jump back to its range.
-          const deltaX = e.altKey ? mx / 10 : mx
-          const newValue =
-            valueDuringDragging +
-            propsA.nudge({
-              deltaX,
-              deltaFraction: deltaX / inputWidth,
-              magnitude: 1,
-            })
-
-          valueDuringDragging = propsA.range
-            ? clamp(newValue, propsA.range[0], propsA.range[1])
-            : newValue
-
-          valueDuringDragging = roundNumberToPrecision(
-            valueDuringDragging,
-            getPrecision(),
-          )
+          if (hasRange) {
+            valueDuringDragging = valueFromClientX(e.clientX)
+          } else {
+            // Use `mx` so reversing direction after overshooting recovers quickly.
+            const deltaX = e.altKey ? mx / 10 : mx
+            const newValue =
+              valueDuringDragging +
+              propsA.nudge({
+                deltaX,
+                deltaFraction: deltaX / inputWidth,
+                magnitude: 1,
+              })
+            valueDuringDragging = roundNumberToPrecision(
+              newValue,
+              getPrecision(),
+            )
+          }
 
           updateDragDisplay(valueDuringDragging)
           propsRef.current.temporarilySetValue(valueDuringDragging)
@@ -302,7 +389,11 @@ const BasicNumberInput: React.FC<{
           }
 
           if (!happened) {
-            propsRef.current.discardTemporaryValue()
+            if (hasRange) {
+              propsRef.current.permanentlySetValue(valueDuringDragging)
+            } else {
+              propsRef.current.discardTemporaryValue()
+            }
             stateRef.current = {mode: 'noFocus'}
           } else {
             if (valueBeforeDragging === valueDuringDragging) {
@@ -383,28 +474,41 @@ const BasicNumberInput: React.FC<{
   const isDraggingValue = frozenInputValueRef.current != null
   const num = isDraggingValue ? propsA.value : parseFloat(value)
 
-  const fillIndicator = range ? (
-    <FillIndicator
-      style={{
-        // @ts-ignore
-        '--percentage': clamp((num - range[0]) / (range[1] - range[0]), 0, 1),
-      }}
-    />
-  ) : null
+  const percentage = range
+    ? clamp((num - range[0]) / ((range[1] - range[0]) || 1), 0, 1)
+    : 0
+
+  const showChrome =
+    isHot ||
+    stateRef.current.mode === 'dragging' ||
+    stateRef.current.mode === 'editingViaKeyboard'
 
   const [dragNode, setDragNode] = useState<HTMLDivElement | null>(null)
   useDrag(dragNode, {
     debugName: 'form/BasicNumberInput',
     onDragStart: callbacks.transitionToDraggingMode,
     lockCSSCursorTo: 'ew-resize',
-    shouldPointerLock: true,
+    shouldPointerLock: !range,
     disabled: stateRef.current.mode === 'editingViaKeyboard',
   })
 
   return (
-    <Container className={propsA.className + ' ' + stateRef.current.mode}>
+    <Container
+      className={(propsA.className ?? '') + ' ' + stateRef.current.mode}
+      $hasRange={!!range}
+      onMouseEnter={() => setIsHot(true)}
+      onMouseLeave={() => setIsHot(false)}
+      style={
+        range
+          ? ({['--percentage' as string]: percentage} as React.CSSProperties)
+          : undefined
+      }
+    >
+      {range ? <FillIndicator /> : null}
+      {range ? <Hashmarks $visible={showChrome} /> : null}
+      {range ? <Handle $visible={showChrome} /> : null}
+      {propsA.label ? <LabelOverlay>{propsA.label}</LabelOverlay> : null}
       <DragWrap ref={setDragNode}>{theInput}</DragWrap>
-      {fillIndicator}
     </Container>
   )
 }

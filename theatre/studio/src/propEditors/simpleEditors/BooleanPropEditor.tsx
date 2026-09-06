@@ -1,16 +1,7 @@
 import type {PropTypeConfig_Boolean} from '@unseenco/theatre-core/propTypes'
 import React, {useCallback} from 'react'
-import styled from 'styled-components'
-import BasicCheckbox from '@unseenco/theatre-studio/uiComponents/form/BasicCheckbox'
+import BasicToggle from '@unseenco/theatre-studio/uiComponents/form/BasicToggle'
 import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
-
-const Input = styled(BasicCheckbox)`
-  margin-left: 6px;
-
-  :focus {
-    outline: 1px solid #555;
-  }
-`
 
 function BooleanPropEditor({
   propConfig,
@@ -19,13 +10,13 @@ function BooleanPropEditor({
   autoFocus,
 }: ISimplePropEditorReactProps<PropTypeConfig_Boolean>) {
   const onChange = useCallback(
-    (el: React.ChangeEvent<HTMLInputElement>) => {
-      editingTools.permanentlySetValue(Boolean(el.target.checked))
+    (next: boolean) => {
+      editingTools.permanentlySetValue(next)
     },
     [propConfig, editingTools],
   )
 
-  return <Input checked={value} onChange={onChange} autoFocus={autoFocus} />
+  return <BasicToggle value={value} onChange={onChange} autoFocus={autoFocus} />
 }
 
 export default BooleanPropEditor

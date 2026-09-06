@@ -30,18 +30,21 @@ import {collapsedMap} from './collapsedMap'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 
 const Container = styled.div`
-  --step: 10px;
+  --step: 8px;
   /* Enough room for keyframe-cursor hover background + expanded chevrons */
-  --left-pad: 16px;
+  --left-pad: 14px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 40%;
 `
 
 const Header = styled.div<{isHighlighted: PropHighlighted}>`
-  height: 30px;
+  min-height: var(--studio-row-height);
   display: flex;
   align-items: stretch;
   position: relative;
+  border-top: 1px solid var(--studio-border);
+  border-bottom: 1px solid var(--studio-border);
+  margin: 2px 0;
 `
 
 const Padding = styled.div<{isVectorProp: boolean}>`
@@ -72,11 +75,19 @@ const PropName = deriver(styled.div<{
   align-items: center;
   gap: 4px;
   user-select: none;
-  &:hover {
-    color: white;
-  }
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
-
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: ${(props) =>
+    props.isHighlighted === 'self'
+      ? 'var(--studio-text-focus)'
+      : 'var(--studio-text-section)'};
+  &:hover {
+    color: var(--studio-text-focus);
+  }
   ${() => propNameTextCSS};
   ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
 `)
@@ -84,19 +95,18 @@ const PropName = deriver(styled.div<{
 const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
   width: 28px;
   height: 28px;
-  font-size: 9px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
 
-  transition: transform 0.05s ease-out, color 0.1s ease-out;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.12s ease-out;
   transform: rotateZ(${(props) => (props.isCollapsed ? 0 : 90)}deg);
-  color: #66686a;
+  color: var(--studio-text-muted);
 
   visibility: ${(props) =>
-    // If it's a vector, show the collapse icon only when it's expanded
     (!props.isVector && props.isCollapsed) ||
-    // If it's a regular compond prop, show the collapse icon only when it's collapsed
     (props.isVector && !props.isCollapsed)
       ? 'visible'
       : 'hidden'};
@@ -106,8 +116,7 @@ const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
   }
 
   &:hover {
-    transform: rotateZ(${(props) => (props.isCollapsed ? 15 : 75)}deg);
-    color: #c0c4c9;
+    color: var(--studio-text-focus);
   }
 `
 
