@@ -43,7 +43,7 @@ const LeftRowHead_Label = styled.span`
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 2px;
+  padding-right: 4px;
   line-height: 26px;
   flex: 0 1 auto;
   min-width: 0;
@@ -53,7 +53,6 @@ const LeftRowHead_Label = styled.span`
   }
 `
 
-/** Collapse control sits to the right of the name (same pattern as the details pane). */
 const LeftRowHead_Icon = styled.span<{isCollapsed: boolean}>`
   width: 18px;
   height: 26px;
@@ -126,7 +125,6 @@ const AnyCompositeRow: React.FC<{
         onClick={toggleSelect}
         isEven={leaf.n % 2 === 0}
       >
-        <LeftRowHead_Label>{label}</LeftRowHead_Label>
         <LeftRowHead_Icon
           isCollapsed={isCollapsed}
           onClick={(e) => {
@@ -136,6 +134,7 @@ const AnyCompositeRow: React.FC<{
         >
           <HiOutlineChevronRight />
         </LeftRowHead_Icon>
+        <LeftRowHead_Label>{label}</LeftRowHead_Label>
       </LeftRowHeader>
       {hasChildren && <LeftRowChildren>{children}</LeftRowChildren>}
     </LeftRowContainer>
