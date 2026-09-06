@@ -41,8 +41,8 @@ const boxObjectConfig = {
     }),
   }),
   pos: {
-    x: types.number(200),
-    y: types.number(200),
+    x: types.number(200, {range: [0, 1000]}),
+    y: types.number(200, {range: [0, 1000]}),
   },
   color: types.rgba({r: 1, g: 0, b: 0, a: 1}),
 }
