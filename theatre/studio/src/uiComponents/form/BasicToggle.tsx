@@ -9,7 +9,7 @@ const Container = styled.div`
   padding: 2px;
   box-sizing: border-box;
   border-radius: var(--studio-radius-sm, 6px);
-  background: rgba(0, 0, 0, 0.25);
+  background: transparent;
   position: relative;
   user-select: none;
 `
@@ -22,9 +22,8 @@ const Thumb = styled.div<{
   bottom: 2px;
   left: 2px;
   width: calc(50% - 2px);
-  border-radius: calc(var(--studio-radius-sm, 6px) - 2px);
+  border-radius: calc(var(--studio-radius-sm, 6px) - 1px);
   background: var(--studio-surface-active);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   transform: translateX(${(p) => (p.$on ? '100%' : '0%')});
   transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
   pointer-events: none;
@@ -46,7 +45,7 @@ const Option = styled.button<{
   color: ${(p) =>
     p.$active ? 'var(--studio-text-focus)' : 'var(--studio-text-muted)'};
   cursor: pointer;
-  border-radius: calc(var(--studio-radius-sm, 6px) - 2px);
+  border-radius: calc(var(--studio-radius-sm, 6px) - 1px);
 
   &:focus-visible {
     outline: 1px solid var(--studio-focus-ring);

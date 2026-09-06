@@ -167,22 +167,21 @@ export function SingleRowPropEditor<T>({
   return (
     <Container isHighlighted={isHighlighted}>
       <Gutter>{editingTools.controlIndicators}</Gutter>
-      <Chip data-detail-prop-chip="" $ownsLabel={ownsLabel} isHighlighted={isHighlighted}>
+      <Chip
+        data-detail-prop-chip=""
+        $ownsLabel={ownsLabel}
+        isHighlighted={isHighlighted}
+        ref={targetRef as $FixMe}
+      >
         {!ownsLabel && (
           <PropName
             isHighlighted={isHighlighted}
             $isTransient={isTransient}
-            ref={targetRef as $FixMe}
           >
             {label}
           </PropName>
         )}
-        <InputSlot
-          $fullBleed={ownsLabel}
-          ref={ownsLabel ? (targetRef as $FixMe) : undefined}
-        >
-          {editor}
-        </InputSlot>
+        <InputSlot $fullBleed={ownsLabel}>{editor}</InputSlot>
       </Chip>
     </Container>
   )
