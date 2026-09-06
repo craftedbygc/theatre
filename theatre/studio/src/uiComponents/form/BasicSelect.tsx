@@ -11,7 +11,6 @@ import ReactDOM from 'react-dom'
 import styled from 'styled-components'
 import {CgSelect} from 'react-icons/all'
 import {PortalContext} from 'reakit'
-import useOnClickOutside from '@unseenco/theatre-studio/uiComponents/useOnClickOutside'
 
 const Container = styled.div`
   width: 100%;
@@ -115,6 +114,20 @@ const OptionButton = styled.button<{
   }
 `
 
+const MENU_ATTR = 'data-basic-select-menu'
+
+function isInsideSelectUi(
+  event: MouseEvent,
+  trigger: Element | null,
+): boolean {
+  const path = event.composedPath()
+  if (trigger && path.includes(trigger)) return true
+  return path.some(
+    (node) =>
+      node instanceof Element && node.hasAttribute(MENU_ATTR),
+  )
+}
+
 function BasicSelect<TLiteralOptions extends string>({
   value,
   onChange,
@@ -140,16 +153,9 @@ function BasicSelect<TLiteralOptions extends string>({
 
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
-  // State (not just a ref) so outside-click effect rebinds after the portal mounts.
-  const [menuEl, setMenuEl] = useState<HTMLDivElement | null>(null)
+  // Ignore the click that follows a menu selection (it can land on the trigger).
+  const suppressTriggerClickRef = useRef(false)
   const portalLayer = useContext(PortalContext)
-
-  const outsideNodes = useMemo(
-    () => (open ? [triggerRef.current, menuEl] : null),
-    [open, menuEl],
-  )
-
-  useOnClickOutside(outsideNodes, () => setOpen(false), open)
 
   const syncMenuPosition = useCallback(() => {
     const el = triggerRef.current
@@ -179,14 +185,49 @@ function BasicSelect<TLiteralOptions extends string>({
     setHighlightIndex(Math.max(0, keys.indexOf(value)))
   }, [open, keys, value])
 
+  // Close on outside pointerdown. Use data-attribute matching so we do not
+  // depend on a menu element ref that may still be null on the first paint.
+  useEffect(() => {
+    if (!open) return
+
+    const onPointerDown = (e: MouseEvent) => {
+      if (!isInsideSelectUi(e, triggerRef.current)) {
+        setOpen(false)
+      }
+    }
+
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown, true)
+    }
+  }, [open])
+
   const selectValue = useCallback(
     (next: TLiteralOptions) => {
+      suppressTriggerClickRef.current = true
       onChange(next)
       setOpen(false)
-      triggerRef.current?.focus()
+      // Focus after the closing click has settled so we do not re-toggle open.
+      requestAnimationFrame(() => {
+        triggerRef.current?.focus()
+        // Clear after the synthetic click window.
+        window.setTimeout(() => {
+          suppressTriggerClickRef.current = false
+        }, 0)
+      })
     },
     [onChange],
   )
+
+  const onTriggerClick = (e: React.MouseEvent) => {
+    if (suppressTriggerClickRef.current) {
+      e.preventDefault()
+      e.stopPropagation()
+      suppressTriggerClickRef.current = false
+      return
+    }
+    setOpen((v) => !v)
+  }
 
   const onTriggerKeyDown = (e: React.KeyboardEvent) => {
     if (
@@ -244,15 +285,23 @@ function BasicSelect<TLiteralOptions extends string>({
     }
   }
 
+  const onOptionPointerDown = (
+    e: React.PointerEvent,
+    key: TLiteralOptions,
+  ) => {
+    // Handle in pointerdown (capture-friendly) so the value commits before any
+    // close/toggle logic from the falling click can run.
+    e.preventDefault()
+    e.stopPropagation()
+    selectValue(key)
+  }
+
   const menu =
     open && portalLayer
       ? ReactDOM.createPortal(
           <Menu
-            ref={(node) => {
-              menuRef.current = node
-              setMenuEl(node)
-            }}
-            data-basic-select-menu=""
+            ref={menuRef}
+            {...{[MENU_ATTR]: ''}}
             role="listbox"
             tabIndex={-1}
             style={{
@@ -261,10 +310,6 @@ function BasicSelect<TLiteralOptions extends string>({
               width: menuPos.width,
             }}
             onKeyDown={onMenuKeyDown}
-            onMouseDown={(e) => {
-              // Keep the menu open; option handlers select the value.
-              e.stopPropagation()
-            }}
           >
             {keys.map((key, i) => (
               <OptionButton
@@ -272,20 +317,11 @@ function BasicSelect<TLiteralOptions extends string>({
                 type="button"
                 role="option"
                 aria-selected={value === key}
+                data-basic-select-option={key}
                 $active={value === key}
                 $highlighted={highlightIndex === i}
                 onMouseEnter={() => setHighlightIndex(i)}
-                onMouseDown={(e) => {
-                  // Select on mousedown so outside-click handlers cannot steal the gesture.
-                  e.preventDefault()
-                  e.stopPropagation()
-                  selectValue(key)
-                }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  selectValue(key)
-                }}
+                onPointerDown={(e) => onOptionPointerDown(e, key)}
               >
                 {options[key]}
               </OptionButton>
@@ -299,10 +335,6 @@ function BasicSelect<TLiteralOptions extends string>({
     if (open && menuRef.current) {
       menuRef.current.focus()
     }
-  }, [open, menuEl])
-
-  useEffect(() => {
-    if (!open) setMenuEl(null)
   }, [open])
 
   return (
@@ -314,7 +346,7 @@ function BasicSelect<TLiteralOptions extends string>({
         aria-haspopup="listbox"
         aria-expanded={open}
         autoFocus={autoFocus}
-        onClick={() => setOpen((v) => !v)}
+        onClick={onTriggerClick}
         onKeyDown={onTriggerKeyDown}
       >
         {options[value]}
