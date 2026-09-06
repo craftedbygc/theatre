@@ -13,77 +13,217 @@ import {
   roundNumberToPrecision,
 } from '@unseenco/theatre-shared/propTypes/numberPrecision'
 
-const Container = styled.div`
+const Container = styled.div<{
+  $embedded: boolean
+  $hasRange: boolean
+}>`
   height: 100%;
   width: 100%;
+  min-height: var(--studio-row-height, 36px);
   position: relative;
   z-index: 0;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
-
-  &:after {
-    position: absolute;
-    inset: 1px 0 2px;
-    display: block;
-    content: ' ';
-    background-color: transparent;
-    border: 1px solid transparent;
-    z-index: -2;
-    box-sizing: border-box;
-    border-radius: 1px;
-  }
+  align-items: stretch;
+  border-radius: var(--studio-radius, 4px);
+  overflow: hidden;
+  background: ${(p) =>
+    p.$embedded
+      ? 'transparent'
+      : p.$hasRange
+      ? 'var(--studio-surface)'
+      : 'transparent'};
+  box-shadow: none;
+  transition: background 150ms ease, box-shadow 150ms ease;
 
   &:hover,
   &.dragging,
   &.editingViaKeyboard {
-    &:after {
-      background-color: #10101042;
-      border-color: #00000059;
-    }
+    background: ${(p) =>
+      p.$embedded
+        ? 'transparent'
+        : p.$hasRange
+        ? 'var(--studio-surface-hover)'
+        : 'transparent'};
+    box-shadow: ${(p) =>
+      p.$embedded || !p.$hasRange
+        ? 'none'
+        : 'inset 0 0 0 1px var(--studio-border-hover)'};
   }
 `
 
-const Input = styled.input`
-  background: transparent;
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 1px 6px;
-  font: inherit;
-  outline: none;
-  cursor: ew-resize;
-  text-align: left;
-  width: 100%;
-  height: calc(100% - 4px);
-  border-radius: 2px;
+const FillIndicator = styled.div`
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--percentage) * 100%);
+  background: var(--studio-surface-fill);
+  z-index: 0;
+  pointer-events: none;
+  border-radius: var(--studio-radius, 4px) 0 0 var(--studio-radius, 4px);
+`
+
+const Hashmarks = styled.div<{
+  $visible: boolean
+}>`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: ${(p) => (p.$visible ? 0.7 : 0)};
+  transition: opacity 120ms ease;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent calc(10% - 1px),
+    rgba(255, 255, 255, 0.42) calc(10% - 1px),
+    rgba(255, 255, 255, 0.42) 10%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 38%,
+    #000 46%,
+    #000 54%,
+    transparent 62%,
+    transparent 100%
+  );
+`
+
+const Handle = styled.div<{
+  $visible: boolean
+}>`
+  position: absolute;
+  top: 50%;
+  left: calc(var(--percentage) * 100%);
+  width: 3px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -1.5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: 2;
+  pointer-events: none;
+  opacity: ${(p) => (p.$visible ? 1 : 0)};
+  transition: opacity 120ms ease;
+`
+
+/** Full-chip drag hit target (sits under the value when editing). */
+const DragSurface = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 4;
   touch-action: none;
+  cursor: ew-resize;
+`
+
+const Content = styled.div`
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  padding: 0 10px;
+  box-sizing: border-box;
+  pointer-events: none;
+`
+
+const TextRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+`
+
+const LabelText = styled.div`
+  flex: 0 1 auto;
+  max-width: 48%;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--studio-text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+`
+
+const ValueSlot = styled.div`
+  margin-left: auto;
+  flex: 0 0 auto;
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  height: 16px;
+  /* Always receive hits so only the value (not the whole chip) enters edit. */
+  pointer-events: auto;
+  cursor: text;
+`
+
+/** Idle value: plain text so it shares metrics with the label (no <input> quirks). */
+const ValueText = styled.span`
+  font-family: var(--studio-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--studio-text-value);
+  display: block;
+  text-align: right;
+  min-width: 3ch;
+  pointer-events: none;
+  user-select: none;
+`
+
+const Input = styled.input<{
+  $isEditing: boolean
+  $invalid: boolean
+}>`
+  background: transparent;
+  border: none;
+  /* Underline via shadow so it does not change the 16px text box height. */
+  box-shadow: inset 0 -1px 0
+    ${(p) =>
+      p.$invalid
+        ? '#e25555'
+        : p.$isEditing
+        ? 'var(--studio-focus-ring)'
+        : 'transparent'};
+  border-radius: 0;
+  color: var(--studio-text-value);
+  margin: 0;
+  padding: 0;
+  font-family: var(--studio-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: text;
+  text-align: right;
+  width: calc(var(--value-ch, 4) * 1ch);
+  min-width: 3ch;
+  height: 16px;
+  line-height: 16px;
+  touch-action: none;
+  box-sizing: border-box;
+
+  /* Keep the input in-flow for focus/measure, hide glyphs while idle. */
+  ${(p) =>
+    p.$isEditing
+      ? ''
+      : `
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    min-width: 0;
+  `}
 
   &:focus {
     cursor: text;
   }
 `
 
-const FillIndicator = styled.div`
-  position: absolute;
-  inset: 3px 2px 4px;
-  transform: scale(var(--percentage), 1);
-  transform-origin: top left;
-  background-color: #2d5561;
-  z-index: -1;
-  border-radius: 2px;
-  pointer-events: none;
-
-  ${Container}.dragging &, ${Container}.noFocus:hover & {
-    background-color: #338198;
-  }
-`
-
-const DragWrap = styled.div`
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  touch-action: none;
-`
 
 type IState_NoFocus = {
   mode: 'noFocus'
@@ -102,6 +242,13 @@ type IState_Dragging = {
 type IState = IState_NoFocus | IState_EditingViaKeyboard | IState_Dragging
 
 const alwaysValid = (v: number) => true
+
+/** Absolute scrub / fill chrome only work when both ends are finite. */
+function isBoundedNumberRange(
+  range: [number, number] | undefined,
+): range is [number, number] {
+  return !!range && Number.isFinite(range[0]) && Number.isFinite(range[1])
+}
 
 export type BasicNumberInputNudgeFn = (params: {
   deltaX: number
@@ -126,10 +273,19 @@ const BasicNumberInput: React.FC<{
   nudge: BasicNumberInputNudgeFn
   autoFocus?: boolean
   precision?: number
+  /** Optional label rendered inside the track (details pane Dialkit layout). */
+  label?: string
+  /**
+   * When true, skip own chip surface (parent chip already paints it).
+   * Details-pane number rows pass this so brightness matches other controls.
+   */
+  embedded?: boolean
 }> = (propsA) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
+  const [isHot, setIsHot] = useState(false)
   const isValid = propsA.isValid ?? alwaysValid
   const precision = propsA.precision ?? DEFAULT_NUMBER_PRECISION
+  const embedded = !!propsA.embedded || !!propsA.label
 
   const propsRef = useRef(propsA)
   propsRef.current = propsA
@@ -138,6 +294,7 @@ const BasicNumberInput: React.FC<{
     propsRef.current.precision ?? DEFAULT_NUMBER_PRECISION
 
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   // While dragging on touch, React must not push new `value` props into the input —
   // that re-sync cancels the active pointer gesture. We freeze the prop and update
   // the DOM directly instead.
@@ -238,11 +395,14 @@ const BasicNumberInput: React.FC<{
       })
     }
 
-    let inputWidth: number
+    let trackWidth: number
 
-    const transitionToDraggingMode = () => {
+    const transitionToDraggingMode = (event: MouseEvent) => {
       const curValue = propsRef.current.value
-      inputWidth = inputRef.current?.getBoundingClientRect().width!
+      trackWidth =
+        containerRef.current?.getBoundingClientRect().width ||
+        inputRef.current?.getBoundingClientRect().width ||
+        1
 
       frozenInputValueRef.current = format(curValue, getPrecision())
       inputRef.current?.blur()
@@ -256,6 +416,37 @@ const BasicNumberInput: React.FC<{
 
       let valueBeforeDragging = curValue
       let valueDuringDragging = curValue
+      // Absolute X→value mapping needs a finite span. Open-ended ranges
+      // (e.g. [0, Infinity]) fall back to relative nudge + clamp.
+      const hasBoundedRange = isBoundedNumberRange(propsRef.current.range)
+
+      const valueFromClientX = (clientX: number) => {
+        const range = propsRef.current.range!
+        const el = containerRef.current
+        if (!el) return propsRef.current.value
+        const rect = el.getBoundingClientRect()
+        const ratio =
+          rect.width <= 0
+            ? 0
+            : clamp((clientX - rect.left) / rect.width, 0, 1)
+        return roundNumberToPrecision(
+          range[0] + ratio * (range[1] - range[0]),
+          getPrecision(),
+        )
+      }
+
+      if (hasBoundedRange) {
+        valueDuringDragging = valueFromClientX(event.clientX)
+        valueBeforeDragging = valueDuringDragging
+        frozenInputValueRef.current = format(
+          valueDuringDragging,
+          getPrecision(),
+        )
+        if (inputRef.current) {
+          inputRef.current.value = frozenInputValueRef.current
+        }
+        propsRef.current.temporarilySetValue(valueDuringDragging)
+      }
 
       bodyCursorBeforeDrag.current = document.body.style.cursor
 
@@ -269,28 +460,27 @@ const BasicNumberInput: React.FC<{
 
       return {
         onDrag(_dx: number, _dy: number, e: MouseEvent, mx: number) {
-          // We use `mx` here because it allows us to offer better UX when dragging
-          // a value beyond its range. If we were to use `_dx`, and the number had a range,
-          // and the user nudged the number beyond its range, they would have to un-nudge all
-          // the way back until the number's value is within its range. But with `mx`,
-          // as soon as they reverse their mouse drag, the number will jump back to its range.
-          const deltaX = e.altKey ? mx / 10 : mx
-          const newValue =
-            valueDuringDragging +
-            propsA.nudge({
-              deltaX,
-              deltaFraction: deltaX / inputWidth,
-              magnitude: 1,
-            })
-
-          valueDuringDragging = propsA.range
-            ? clamp(newValue, propsA.range[0], propsA.range[1])
-            : newValue
-
-          valueDuringDragging = roundNumberToPrecision(
-            valueDuringDragging,
-            getPrecision(),
-          )
+          if (hasBoundedRange) {
+            valueDuringDragging = valueFromClientX(e.clientX)
+          } else {
+            // Use `mx` so reversing direction after overshooting recovers quickly.
+            const deltaX = e.altKey ? mx / 10 : mx
+            let newValue =
+              valueDuringDragging +
+              propsA.nudge({
+                deltaX,
+                deltaFraction: deltaX / trackWidth,
+                magnitude: 1,
+              })
+            const range = propsRef.current.range
+            if (range) {
+              newValue = clamp(newValue, range[0], range[1])
+            }
+            valueDuringDragging = roundNumberToPrecision(
+              newValue,
+              getPrecision(),
+            )
+          }
 
           updateDragDisplay(valueDuringDragging)
           propsRef.current.temporarilySetValue(valueDuringDragging)
@@ -302,7 +492,11 @@ const BasicNumberInput: React.FC<{
           }
 
           if (!happened) {
-            propsRef.current.discardTemporaryValue()
+            if (hasBoundedRange) {
+              propsRef.current.permanentlySetValue(valueDuringDragging)
+            } else {
+              propsRef.current.discardTemporaryValue()
+            }
             stateRef.current = {mode: 'noFocus'}
           } else {
             if (valueBeforeDragging === valueDuringDragging) {
@@ -314,6 +508,9 @@ const BasicNumberInput: React.FC<{
           }
         },
         onClick() {
+          // Bounded-range chips: click-anywhere only scrubs / sets value — edit
+          // is reserved for clicks on the value itself (ValueSlot above the drag surface).
+          if (isBoundedNumberRange(propsRef.current.range)) return
           inputRef.current!.focus()
           inputRef.current!.setSelectionRange(0, 100)
         },
@@ -348,13 +545,26 @@ const BasicNumberInput: React.FC<{
     value = 'NaN'
   }
 
+  const valueStr = String(value)
+  const valueCh = Math.max(3, valueStr.length)
+
   const _refs = [inputRef]
   if (propsA.inputRef) _refs.push(propsA.inputRef)
+
+  const isEditing = stateRef.current.mode === 'editingViaKeyboard'
+  const valueIsValid =
+    !isEditing ||
+    (() => {
+      const n = parseFloat(valueStr)
+      return isFinite(n) && isValid(n)
+    })()
 
   const theInput = (
     <Input
       key="input"
       type="text"
+      $isEditing={isEditing}
+      $invalid={isEditing && !valueIsValid}
       onChange={callbacks.inputChange}
       value={value}
       onBlur={callbacks.onBlur}
@@ -366,45 +576,70 @@ const BasicNumberInput: React.FC<{
         e.stopPropagation()
       }}
       onPointerDown={(e: React.PointerEvent) => {
-        if (stateRef.current.mode !== 'editingViaKeyboard') {
-          // Prevent the input from taking focus on touch, which would cancel the drag.
-          e.preventDefault()
-        }
+        // Stop the drag surface under us from claiming this gesture so a
+        // click on the value can focus/edit (especially for ranged chips).
+        e.stopPropagation()
       }}
       onDoubleClick={(e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
       }}
       autoFocus={propsA.autoFocus}
+      style={{['--value-ch' as string]: valueCh} as React.CSSProperties}
     />
   )
 
   const {range} = propsA
+  const hasBoundedRange = isBoundedNumberRange(range)
   const isDraggingValue = frozenInputValueRef.current != null
   const num = isDraggingValue ? propsA.value : parseFloat(value)
 
-  const fillIndicator = range ? (
-    <FillIndicator
-      style={{
-        // @ts-ignore
-        '--percentage': clamp((num - range[0]) / (range[1] - range[0]), 0, 1),
-      }}
-    />
-  ) : null
+  const percentage = hasBoundedRange
+    ? clamp((num - range[0]) / ((range[1] - range[0]) || 1), 0, 1)
+    : 0
+
+  const showChrome =
+    isHot ||
+    stateRef.current.mode === 'dragging' ||
+    stateRef.current.mode === 'editingViaKeyboard'
 
   const [dragNode, setDragNode] = useState<HTMLDivElement | null>(null)
   useDrag(dragNode, {
     debugName: 'form/BasicNumberInput',
     onDragStart: callbacks.transitionToDraggingMode,
     lockCSSCursorTo: 'ew-resize',
-    shouldPointerLock: true,
+    // Pointer-lock relative scrub for unbounded / open-ended ranges.
+    shouldPointerLock: !hasBoundedRange,
     disabled: stateRef.current.mode === 'editingViaKeyboard',
   })
 
   return (
-    <Container className={propsA.className + ' ' + stateRef.current.mode}>
-      <DragWrap ref={setDragNode}>{theInput}</DragWrap>
-      {fillIndicator}
+    <Container
+      ref={containerRef}
+      className={(propsA.className ?? '') + ' ' + stateRef.current.mode}
+      $embedded={embedded}
+      $hasRange={hasBoundedRange}
+      onMouseEnter={() => setIsHot(true)}
+      onMouseLeave={() => setIsHot(false)}
+      style={
+        hasBoundedRange
+          ? ({['--percentage' as string]: percentage} as React.CSSProperties)
+          : undefined
+      }
+    >
+      {hasBoundedRange ? <FillIndicator /> : null}
+      {hasBoundedRange ? <Hashmarks $visible={showChrome} /> : null}
+      {hasBoundedRange ? <Handle $visible={showChrome} /> : null}
+      {!isEditing ? <DragSurface ref={setDragNode} /> : null}
+      <Content>
+        <TextRow>
+          {propsA.label ? <LabelText>{propsA.label}</LabelText> : null}
+          <ValueSlot>
+            {!isEditing ? <ValueText>{value}</ValueText> : null}
+            {theInput}
+          </ValueSlot>
+        </TextRow>
+      </Content>
     </Container>
   )
 }

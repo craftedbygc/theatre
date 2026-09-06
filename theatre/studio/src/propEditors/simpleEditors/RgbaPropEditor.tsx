@@ -17,8 +17,12 @@ import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
 const RowContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
-  gap: 4px;
+  width: 100%;
+  gap: 8px;
+  padding: 0 8px 0 10px;
+  box-sizing: border-box;
 `
 
 interface ColorPreviewPuckProps {
@@ -33,12 +37,17 @@ const ColorPreviewPuck = styled.div.attrs<ColorPreviewPuckProps>((props) => ({
   },
 }))<ColorPreviewPuckProps>`
   height: 18px;
+  width: 18px;
+  flex: 0 0 auto;
   aspect-ratio: 1;
-  border-radius: 99999px;
+  border-radius: var(--studio-radius, 4px);
+  box-shadow: inset 0 0 0 1px var(--studio-border);
+  cursor: pointer;
 `
 
 const HexInput = styled(BasicStringInput)`
-  flex: 1;
+  flex: 0 0 auto;
+  margin-left: auto;
 `
 
 const noop = () => {}
@@ -100,13 +109,6 @@ function RgbaPropEditor({
   return (
     <>
       <RowContainer>
-        <ColorPreviewPuck
-          rgbaColor={value}
-          ref={containerRef}
-          onClick={(e) => {
-            popover.toggle(e, containerRef.current)
-          }}
-        />
         <HexInput
           value={rgba2hex(value, {removeAlphaIfOpaque: true})}
           temporarilySetValue={noop}
@@ -114,6 +116,14 @@ function RgbaPropEditor({
           permanentlySetValue={onChange}
           isValid={(v) => !!v.match(validHexRegExp)}
           autoFocus={autoFocus}
+          fitContent
+        />
+        <ColorPreviewPuck
+          rgbaColor={value}
+          ref={containerRef}
+          onClick={(e) => {
+            popover.toggle(e, containerRef.current)
+          }}
         />
       </RowContainer>
       {popover.node}

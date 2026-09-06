@@ -22,7 +22,7 @@ const Container = styled.div`
   /* border: 1px solid var(--popover-inner-stroke); */
 
   color: white;
-  padding: 1px 2px 1px 10px;
+  padding: 4px 8px;
   margin: 0;
   cursor: default;
   ${pointerEventsAutoInNormalMode};

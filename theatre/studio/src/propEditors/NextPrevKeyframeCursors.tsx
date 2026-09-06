@@ -28,10 +28,16 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 18px;
+  /* Keep the same footprint as DefaultValueIndicator so sequenced chips
+     don't steal width from the prop chip when prev/next chevrons are present. */
+  width: 16px;
+  min-width: 16px;
+  max-width: 16px;
+  flex: 0 0 16px;
   height: 12px;
   margin: 0 0 0 2px;
   position: relative;
+  overflow: visible;
   z-index: 0;
 
   &:after {
@@ -155,10 +161,13 @@ const Prev = styled(PrevOrNextButton)<{
   flag: PresenceFlag | undefined
 }>`
   ${dimWhenIdle};
+  position: absolute;
+  left: 0;
+  top: 50%;
   /* 1px further out than the previous 2px / -2px idle tuck */
-  transform: translateX(1px);
+  transform: translate(-1px, -50%);
   ${Container}:hover & {
-    transform: translateX(-8px);
+    transform: translate(-8px, -50%);
   }
 `
 const Next = styled(PrevOrNextButton)<{
@@ -166,9 +175,12 @@ const Next = styled(PrevOrNextButton)<{
   flag: PresenceFlag | undefined
 }>`
   ${dimWhenIdle};
-  transform: translateX(-1px);
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(1px, -50%);
   ${Container}:hover & {
-    transform: translateX(8px);
+    transform: translate(8px, -50%);
   }
 `
 

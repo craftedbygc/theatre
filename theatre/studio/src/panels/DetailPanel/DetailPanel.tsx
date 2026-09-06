@@ -29,7 +29,6 @@ import BasePanel, {
 import PanelResizeHandle from '@unseenco/theatre-studio/panels/BasePanel/PanelResizeHandle'
 import type {UIPanelId} from '@unseenco/theatre-shared/utils/ids'
 import type {PanelPosition} from '@unseenco/theatre-studio/store/types'
-import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import {useLayoutMode} from '@unseenco/theatre-studio/UIRoot/LayoutModeContext'
 import DockResizeHandle from '@unseenco/theatre-studio/UIRoot/DockResizeHandle'
 
@@ -126,21 +125,24 @@ const Header = styled.div`
   align-items: center;
 `
 
-const Body = styled.div<{$docked: boolean}>`
+const Body = styled.div<{$docked: boolean; $noHeader?: boolean}>`
   ${pointerEventsAutoInNormalMode};
   max-height: ${({$docked}) => ($docked ? 'none' : 'calc(100vh - 100px)')};
-  height: ${({$docked}) => ($docked ? 'calc(100% - 32px)' : 'auto')};
+  height: ${({$docked, $noHeader}) =>
+    $docked ? ($noHeader ? '100%' : 'calc(100% - 32px)') : 'auto'};
   overflow-y: scroll;
   &::-webkit-scrollbar {
     display: none;
   }
 
   scrollbar-width: none;
-  padding: 0;
+  padding: 6px 2px 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-row-gap, 3px);
   user-select: none;
-
-  /* Set the font-size for input values in the detail panel */
-  font-size: 12px;
+  font-family: var(--studio-font-ui);
+  font-size: 13px;
 `
 
 export const contextMenuShownContext = createContext<
@@ -196,7 +198,6 @@ const DetailPanelContent: React.FC<{}> = () => {
     const obj = selection.find(isSheetObject)
 
     if (obj) {
-      const activeVariant = getStudioActiveSequenceVariant(obj.sheet.address)
       return (
         <Container
           data-testid="DetailPanel-Object"
@@ -212,20 +213,7 @@ const DetailPanelContent: React.FC<{}> = () => {
           }}
         >
           {resizeHandle}
-          <Header>
-            <Title
-              title={`${obj.sheet.address.sheetId}: ${activeVariant} > ${obj.address.objectKey}`}
-            >
-              <TitleBar_Piece>{obj.sheet.address.sheetId} </TitleBar_Piece>
-
-              <TitleBar_Punctuation>{':'}&nbsp;</TitleBar_Punctuation>
-              <TitleBar_Piece>{activeVariant} </TitleBar_Piece>
-
-              <TitleBar_Punctuation>&nbsp;&rarr;&nbsp;</TitleBar_Punctuation>
-              <TitleBar_Piece>{obj.address.objectKey}</TitleBar_Piece>
-            </Title>
-          </Header>
-          <Body $docked={isDocked}>
+          <Body $docked={isDocked} $noHeader>
             <ObjectDetails objects={[obj]} />
           </Body>
         </Container>

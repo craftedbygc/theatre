@@ -6,45 +6,67 @@ import React from 'react'
 import type {useEditingToolsForSimplePropInDetailsPanel} from '@unseenco/theatre-studio/propEditors/useEditingToolsForSimpleProp'
 import styled from 'styled-components'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
-import {propNameTextCSS} from '@unseenco/theatre-studio/propEditors/utils/propNameTextCSS'
 import type {PropHighlighted} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
 import {rowIndentationFormulaCSS} from './rowIndentationFormulaCSS'
 import {useVal} from '@unseenco/theatre-react'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
+import {studioChipSurfaceCss} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 const Container = styled.div<{
   isHighlighted: PropHighlighted
 }>`
   display: flex;
-  height: 30px;
+  min-height: var(--studio-row-height);
   justify-content: flex-start;
   align-items: stretch;
-  --right-width: 40%;
+  gap: 6px;
+  padding: 0 8px 0 0;
   position: relative;
+  box-sizing: border-box;
   ${pointerEventsAutoInNormalMode};
 `
 
-const Left = styled.div`
+const Gutter = styled.div`
   box-sizing: border-box;
   padding-left: ${rowIndentationFormulaCSS};
-  padding-right: 4px;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  align-items: stretch;
-  gap: 4px;
-  flex-grow: 0;
-  flex-shrink: 0;
-  width: calc(100% - var(--right-width));
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 18px;
+  line-height: 0;
 `
 
-const PropNameContainer = styled.div<{
+const Chip = styled.div<{
+  $ownsLabel: boolean
+  isHighlighted: PropHighlighted
+}>`
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--studio-row-height);
+  height: var(--studio-row-height);
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
+  box-sizing: border-box;
+  ${studioChipSurfaceCss};
+  ${(props) =>
+    props.isHighlighted === 'self'
+      ? 'background: var(--studio-surface-active);'
+      : props.isHighlighted === 'descendent'
+      ? 'background: var(--studio-surface-hover);'
+      : ''}
+`
+
+const PropName = styled.div<{
   isHighlighted: PropHighlighted
   $isTransient?: boolean
 }>`
-  text-align: left;
-  flex: 1 0;
+  flex: 0 1 auto;
+  max-width: 45%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -52,31 +74,36 @@ const PropNameContainer = styled.div<{
   align-items: center;
   user-select: none;
   cursor: default;
-
-  ${propNameTextCSS};
+  font-size: 13px;
+  font-weight: 500;
+  color: ${(props) =>
+    props.isHighlighted === 'self'
+      ? 'var(--studio-text-focus)'
+      : 'var(--studio-text-label)'};
   ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
-  &:hover {
-    color: white;
-  }
 `
 
-const ControlsContainer = styled.div`
-  flex: 0 0 auto;
+const InputSlot = styled.div<{
+  $fullBleed: boolean
+}>`
   display: flex;
   align-items: center;
-  line-height: 0;
-`
-
-const InputContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: stretch;
-  padding: 0 8px 0 2px;
+  align-self: stretch;
   box-sizing: border-box;
+  min-height: var(--studio-row-height);
   height: 100%;
-  width: var(--right-width);
-  flex-shrink: 0;
-  flex-grow: 0;
+  min-width: 0;
+  ${(props) =>
+    props.$fullBleed
+      ? `
+    flex: 1 1 auto;
+    width: 100%;
+    justify-content: stretch;
+  `
+      : `
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  `}
 `
 
 type ISingleRowPropEditorProps<T> = {
@@ -86,6 +113,10 @@ type ISingleRowPropEditorProps<T> = {
   isPropHighlightedD: Prism<PropHighlighted>
   objectKey: string
   isTransient?: boolean
+}
+
+function editorOwnsLabel(propConfig: propTypes.PropTypeConfig): boolean {
+  return propConfig.type === 'number'
 }
 
 export function SingleRowPropEditor<T>({
@@ -118,20 +149,40 @@ export function SingleRowPropEditor<T>({
     }
   })
 
+  const ownsLabel = editorOwnsLabel(propConfig)
+
+  const editor = ownsLabel
+    ? React.Children.map(children, (child) => {
+        if (!React.isValidElement(child)) return child
+        return React.cloneElement(
+          child as React.ReactElement<{label?: string; embedded?: boolean}>,
+          {
+            label: typeof label === 'string' ? label : String(label ?? ''),
+            embedded: true,
+          },
+        )
+      })
+    : children
+
   return (
     <Container isHighlighted={isHighlighted}>
-      <Left>
-        <ControlsContainer>{editingTools.controlIndicators}</ControlsContainer>
-        <PropNameContainer
-          isHighlighted={isHighlighted}
-          $isTransient={isTransient}
-          ref={targetRef as $FixMe}
-        >
-          {label}
-        </PropNameContainer>
-      </Left>
-
-      <InputContainer>{children}</InputContainer>
+      <Gutter>{editingTools.controlIndicators}</Gutter>
+      <Chip
+        data-detail-prop-chip=""
+        $ownsLabel={ownsLabel}
+        isHighlighted={isHighlighted}
+        ref={targetRef as $FixMe}
+      >
+        {!ownsLabel && (
+          <PropName
+            isHighlighted={isHighlighted}
+            $isTransient={isTransient}
+          >
+            {label}
+          </PropName>
+        )}
+        <InputSlot $fullBleed={ownsLabel}>{editor}</InputSlot>
+      </Chip>
     </Container>
   )
 }

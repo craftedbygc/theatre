@@ -16,31 +16,91 @@ import {
   getStudioTrackSequenceVariant,
 } from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
-const SingleKeyframePropEditorContainer = styled.div`
+import {studioChipSurfaceCss} from '@unseenco/theatre-studio/uiComponents/studioTokens'
+
+const SectionLabel = styled.div`
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 13px;
+  letter-spacing: 0.01em;
+  padding: 6px 4px 4px;
+  color: var(--studio-text-muted, #919191);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`
+
+const Row = styled.div`
   display: flex;
   align-items: stretch;
-  min-width: 200px;
+  min-width: 240px;
+  padding: 3px 0;
+  box-sizing: border-box;
 
   select {
     min-width: 100px;
   }
 `
-const SingleKeyframePropLabel = styled.div`
-  font-style: normal;
-  font-weight: 400;
-  font-size: 11px;
-  line-height: 13px;
-  letter-spacing: 0.01em;
-  padding: 6px 6px 6px 0;
 
-  width: 40%;
+/** Same Dialkit chip chrome as the details pane (`SingleRowPropEditor`). */
+const Chip = styled.div<{
+  $ownsLabel: boolean
+}>`
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--studio-row-height, 36px);
+  height: var(--studio-row-height, 36px);
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
+  box-sizing: border-box;
+  ${studioChipSurfaceCss};
+`
 
-  color: #919191;
-
+const PropName = styled.div`
+  flex: 0 1 auto;
+  max-width: 45%;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  cursor: default;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--studio-text-label);
+`
+
+const InputSlot = styled.div<{
+  $fullBleed: boolean
+}>`
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  box-sizing: border-box;
+  min-height: var(--studio-row-height, 36px);
+  height: 100%;
+  min-width: 0;
+  ${(props) =>
+    props.$fullBleed
+      ? `
+    flex: 1 1 auto;
+    width: 100%;
+    justify-content: stretch;
+  `
+      : `
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  `}
 `
 
 const INDENT_PX = 10
+
+function editorOwnsLabel(propType: string): boolean {
+  return propType === 'number'
+}
 
 /**
  * Given a propConfig, this function gives the corresponding prop editor for
@@ -58,11 +118,9 @@ export function DeterminePropEditorForKeyframeTree(
   if (p.type === 'sheetObject') {
     return (
       <>
-        <SingleKeyframePropLabel
-          style={{paddingLeft: `${p.indent * INDENT_PX}px`}}
-        >
+        <SectionLabel style={{paddingLeft: `${p.indent * INDENT_PX}px`}}>
           {p.sheetObject.address.objectKey}
-        </SingleKeyframePropLabel>
+        </SectionLabel>
         {p.children.map((c, i) => (
           <DeterminePropEditorForKeyframeTree
             key={i}
@@ -77,11 +135,9 @@ export function DeterminePropEditorForKeyframeTree(
     const label = p.propConfig.label ?? last(p.pathToProp)
     return (
       <>
-        <SingleKeyframePropLabel
-          style={{paddingLeft: `${p.indent * INDENT_PX}px`}}
-        >
+        <SectionLabel style={{paddingLeft: `${p.indent * INDENT_PX}px`}}>
           {label}
-        </SingleKeyframePropLabel>
+        </SectionLabel>
         {p.children.map((c, i) => (
           <DeterminePropEditorForKeyframeTree
             key={i}
@@ -103,43 +159,40 @@ export function DeterminePropEditorForKeyframeTree(
   }
 }
 
-const SingleKeyframeSimplePropEditorContainer = styled.div`
-  display: flex;
-  align-items: center;
-  width: 60%;
-`
-
 function PrimitivePropEditor(
   p: PrimitivePropEditingOptions & {autoFocusInput?: boolean; indent: number},
 ) {
   const label = p.propConfig.label ?? last(p.pathToProp)
   const editingTools = useEditingToolsForKeyframeEditorPopover(p)
+  const labelText = typeof label === 'string' ? label : String(label ?? '')
 
   if (p.propConfig.type === 'enum') {
     // notice: enums are not implemented, yet.
     return <></>
-  } else {
-    const PropEditor = simplePropEditorByPropType[
-      p.propConfig.type
-    ] as React.VFC<ISimplePropEditorReactProps<PropTypeConfig_AllSimples>>
-    return (
-      <SingleKeyframePropEditorContainer>
-        <SingleKeyframePropLabel>
-          <span style={{paddingLeft: `${p.indent * INDENT_PX}px`}}>
-            {label}
-          </span>
-        </SingleKeyframePropLabel>
-        <SingleKeyframeSimplePropEditorContainer>
+  }
+
+  const PropEditor = simplePropEditorByPropType[
+    p.propConfig.type
+  ] as React.VFC<ISimplePropEditorReactProps<PropTypeConfig_AllSimples>>
+
+  const ownsLabel = editorOwnsLabel(p.propConfig.type)
+
+  return (
+    <Row style={{paddingLeft: `${p.indent * INDENT_PX}px`}}>
+      <Chip data-detail-prop-chip="" $ownsLabel={ownsLabel}>
+        {!ownsLabel && <PropName>{labelText}</PropName>}
+        <InputSlot $fullBleed={ownsLabel}>
           <PropEditor
             editingTools={editingTools}
             propConfig={p.propConfig}
             value={valueInProp(p.keyframe.value, p.propConfig)}
             autoFocus={p.autoFocusInput}
+            {...(ownsLabel ? {label: labelText, embedded: true} : {})}
           />
-        </SingleKeyframeSimplePropEditorContainer>
-      </SingleKeyframePropEditorContainer>
-    )
-  }
+        </InputSlot>
+      </Chip>
+    </Row>
+  )
 }
 
 // These editing tools are distinct from the editing tools used in the
