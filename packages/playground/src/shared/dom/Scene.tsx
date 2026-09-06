@@ -41,8 +41,8 @@ const boxObjectConfig = {
     }),
   }),
   pos: {
-    x: types.number(200),
-    y: types.number(200),
+    x: types.number(200, {range: [0, 1000]}),
+    y: types.number(200, {range: [0, 1000]}),
     // Dummy axis so the details pane can exercise 3-component vector chips.
     z: types.number(0),
   },
