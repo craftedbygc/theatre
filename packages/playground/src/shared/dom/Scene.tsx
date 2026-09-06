@@ -81,21 +81,23 @@ const Box: React.FC<{
   sheet: ISheet
   selection: IStudio['selection']
 }> = ({id, sheet, selection}) => {
-  const defaultConfig = useMemo(
-    () =>
-      Object.assign({}, boxObjectConfig, {
-        // give the box initial values offset from each other
-        pos: {
-          x: ((id.codePointAt(0) ?? 0) % 15) * 100,
-          y: ((id.codePointAt(0) ?? 0) % 15) * 100,
-          z: 0,
-        },
-      }),
-    [id],
-  )
+  const defaultConfig = useMemo(() => {
+    const offset = ((id.codePointAt(0) ?? 0) % 15) * 100
+    return {
+      ...boxObjectConfig,
+      // Per-box defaults — keep the ranged number configs (plain numbers
+      // would replace the prop types and drop `{range: [0, 1000]}`).
+      pos: {
+        x: types.number(offset, {range: [0, 1000]}),
+        y: types.number(offset, {range: [0, 1000]}),
+        z: types.number(0),
+      },
+    }
+  }, [id])
 
   // This is cheap to call and always returns the same value, so no need for useMemo()
-  const obj = sheet.object(id, defaultConfig)
+  // `reconfigure: true` so ranged number configs apply if the object already exists.
+  const obj = sheet.object(id, defaultConfig, {reconfigure: true})
 
   const isSelected = selection.includes(obj)
 
