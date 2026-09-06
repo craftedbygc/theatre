@@ -257,6 +257,9 @@ function DetailCompoundPropEditor<
     return isCollapsedAtom ? val(isCollapsedAtom.pointer) : isVector
   }, [isCollapsedAtom, isVector])
 
+  // Root object folder is always open and has no chevron.
+  const showCollapsed = isRootProps ? false : isCollapsed
+
   const {targetRef} = useChordial(() => {
     const title = [
       obj.address.objectKey,
@@ -285,17 +288,19 @@ function DetailCompoundPropEditor<
           >
             <span>{label}</span>
           </PropName>
-          <CollapseIcon
-            isCollapsed={isCollapsed}
-            isVector={isVector}
-            onClick={() => {
-              isCollapsedAtom.set(!isCollapsedAtom.get())
-            }}
-          >
-            <HiOutlineChevronRight />
-          </CollapseIcon>
+          {!isRootProps && (
+            <CollapseIcon
+              isCollapsed={isCollapsed}
+              isVector={isVector}
+              onClick={() => {
+                isCollapsedAtom.set(!isCollapsedAtom.get())
+              }}
+            >
+              <HiOutlineChevronRight />
+            </CollapseIcon>
+          )}
         </Padding>
-        {isVector && isCollapsed && (
+        {isVector && showCollapsed && (
           <InputContainer>
             {[...allSubs].map(([subPropKey, subPropConfig]) => {
               return (
@@ -313,7 +318,7 @@ function DetailCompoundPropEditor<
         )}
       </Header>
 
-      {!isCollapsed && (
+      {!showCollapsed && (
         <SubProps
           // @ts-ignore
           // Match folder title indent so the first level lines up with the root title.

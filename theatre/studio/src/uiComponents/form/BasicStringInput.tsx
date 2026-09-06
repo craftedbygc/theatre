@@ -13,7 +13,8 @@ const Input = styled.input.attrs({type: 'text'})<{
   background: transparent;
   border: none;
   color: var(--studio-text-value);
-  padding: ${(p) => (p.$fitContent ? '0' : '0 10px')};
+  /* No horizontal padding — underline must end flush with the text’s right edge. */
+  padding: 0 0 4px;
   font: inherit;
   font-size: 13px;
   font-weight: ${(p) => (p.$fitContent ? 500 : 'inherit')};
@@ -22,36 +23,39 @@ const Input = styled.input.attrs({type: 'text'})<{
   outline: none;
   cursor: text;
   text-align: right;
+  /* Hug the value so the underline is only as wide as the text, right-aligned. */
+  field-sizing: content;
   width: ${(p) =>
-    p.$fitContent ? `calc(${Math.max(p.$charCount ?? 4, 4)} * 1ch)` : '100%'};
-  min-width: ${(p) => (p.$fitContent ? '4ch' : '0')};
-  /* Size to the text line so the underline sits under glyphs (like number/hex),
-     not along the bottom of the full-height chip. */
-  height: 16px;
-  min-height: 16px;
+    p.$fitContent
+      ? `calc(${Math.max(p.$charCount ?? 1, 1)} * 1ch)`
+      : 'auto'};
+  max-width: 100%;
+  min-width: ${(p) => (p.$fitContent ? '4ch' : '1ch')};
+  height: auto;
+  min-height: 0;
   line-height: 16px;
   border-radius: 0;
   box-sizing: border-box;
-  flex: ${(p) => (p.$fitContent ? '0 0 auto' : '1 1 auto')};
+  flex: 0 0 auto;
   align-self: center;
-  /* Underline via shadow so layout height stays 16px (same as number inputs). */
-  box-shadow: inset 0 -1px 0 transparent;
-  border-bottom: none;
+  margin-left: auto;
+  box-shadow: none;
   background-image: none;
+  /* 4px gap between baseline and underline via padding + border. */
+  border-bottom: 1px solid transparent;
 
   &:hover {
     background-color: transparent;
   }
 
-  /* Straight 1px underline directly under the text. */
   &:focus {
     cursor: text;
     background-color: transparent;
-    box-shadow: inset 0 -1px 0 var(--studio-focus-ring);
+    border-bottom-color: var(--studio-focus-ring);
   }
 
   &.invalid {
-    box-shadow: inset 0 -1px 0 #e25555;
+    border-bottom-color: #e25555;
   }
 `
 
@@ -213,7 +217,8 @@ const BasicStringInput: React.FC<{
       type="text"
       className={`${props.className ?? ''} ${!isValid(value) ? 'invalid' : ''}`}
       $fitContent={!!props.fitContent}
-      $charCount={String(value).length + (props.fitContent ? 1 : 0)}
+      $charCount={String(value).length}
+      size={Math.max(String(value).length, 1)}
       onChange={callbacks.inputChange}
       value={value}
       onBlur={callbacks.onBlur}
