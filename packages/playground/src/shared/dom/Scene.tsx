@@ -43,6 +43,8 @@ const boxObjectConfig = {
   pos: {
     x: types.number(200),
     y: types.number(200),
+    // Dummy axis so the details pane can exercise 3-component vector chips.
+    z: types.number(0),
   },
   color: types.rgba({r: 1, g: 0, b: 0, a: 1}),
 }
@@ -53,6 +55,7 @@ type State = {
   pos: {
     x: number
     y: number
+    z: number
   }
   test: string
   testLiteral: string
@@ -85,6 +88,7 @@ const Box: React.FC<{
         pos: {
           x: ((id.codePointAt(0) ?? 0) % 15) * 100,
           y: ((id.codePointAt(0) ?? 0) % 15) * 100,
+          z: 0,
         },
       }),
     [id],

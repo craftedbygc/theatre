@@ -19,6 +19,7 @@ import type {PropHighlighted} from '@unseenco/theatre-studio/panels/SequenceEdit
 import {whatPropIsHighlighted} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
 import {deriver} from '@unseenco/theatre-studio/utils/derive-utils'
 import NumberPropEditor from '@unseenco/theatre-studio/propEditors/simpleEditors/NumberPropEditor'
+import {studioChipSurfaceCss} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 import type {IDetailSimplePropEditorProps} from './DetailSimplePropEditor'
 import {useEditingToolsForSimplePropInDetailsPanel} from '@unseenco/theatre-studio/propEditors/useEditingToolsForSimpleProp'
 import {usePrism} from '@unseenco/theatre-react'
@@ -33,7 +34,7 @@ const Container = styled.div`
   /* Align first-level rows with the panel "Props" / object title (margin 10px). */
   --left-pad: 10px;
   ${pointerEventsAutoInNormalMode};
-  --right-width: 40%;
+  --right-width: 58%;
 `
 
 const Header = styled.div<{isHighlighted: PropHighlighted}>`
@@ -139,8 +140,8 @@ function VectorComponentEditor<TPropTypeConfig extends PropTypeConfig_Number>({
   propConfig,
   pointerToProp,
   obj,
-  SimpleEditorComponent: EditorComponent,
-}: IDetailSimplePropEditorProps<TPropTypeConfig>) {
+  label,
+}: IDetailSimplePropEditorProps<TPropTypeConfig> & {label: string}) {
   const editingTools = useEditingToolsForSimplePropInDetailsPanel(
     pointerToProp,
     obj,
@@ -148,19 +149,33 @@ function VectorComponentEditor<TPropTypeConfig extends PropTypeConfig_Number>({
   )
 
   return (
-    <NumberPropEditor
-      editingTools={editingTools}
-      propConfig={propConfig}
-      value={editingTools.value}
-    />
+    <MiniChip data-detail-prop-chip="">
+      <NumberPropEditor
+        editingTools={editingTools}
+        propConfig={propConfig}
+        value={editingTools.value}
+        label={label}
+        embedded
+      />
+    </MiniChip>
   )
 }
+
+const MiniChip = styled.div`
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--studio-row-height);
+  align-self: center;
+  overflow: hidden;
+  ${studioChipSurfaceCss};
+`
 
 const InputContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: stretch;
-  padding: 0 8px 0 2px;
+  gap: 4px;
+  padding: 0 8px 0 4px;
   box-sizing: border-box;
   height: 100%;
   width: var(--right-width);
@@ -281,6 +296,7 @@ function DetailCompoundPropEditor<
                   propConfig={subPropConfig}
                   pointerToProp={pointerToProp[subPropKey] as Pointer<$FixMe>}
                   obj={obj}
+                  label={subPropKey}
                 />
               )
             })}
