@@ -85,6 +85,9 @@ const Menu = styled.div`
   backdrop-filter: blur(12px);
   /* PortalLayer is pointer-events: none; re-enable hits like other popovers. */
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 `
 
 const OptionButton = styled.button<{
@@ -162,11 +165,15 @@ function BasicSelect<TLiteralOptions extends string>({
   const syncMenuPosition = useCallback(() => {
     const el = triggerRef.current
     if (!el) return
-    const rect = el.getBoundingClientRect()
+    // Align to the chip (not just the trigger) so the menu lines up with the chip's right edge.
+    const chip =
+      (el.closest('[data-detail-prop-chip]') as HTMLElement | null) ?? el
+    const rect = chip.getBoundingClientRect()
+    const width = Math.max(rect.width, 140)
     setMenuPos({
       top: rect.bottom + 4,
-      left: rect.left,
-      width: Math.max(rect.width, 140),
+      left: rect.right - width,
+      width,
     })
   }, [])
 

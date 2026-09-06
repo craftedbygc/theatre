@@ -92,15 +92,16 @@ const InputSlot = styled.div<{
 }>`
   display: flex;
   align-items: center;
+  align-self: stretch;
   box-sizing: border-box;
   min-height: var(--studio-row-height);
+  height: 100%;
   min-width: 0;
   ${(props) =>
     props.$fullBleed
       ? `
     flex: 1 1 auto;
     width: 100%;
-    height: 100%;
     justify-content: stretch;
   `
       : `
@@ -170,7 +171,7 @@ export function SingleRowPropEditor<T>({
   return (
     <Container isHighlighted={isHighlighted}>
       <Gutter>{editingTools.controlIndicators}</Gutter>
-      <Chip $ownsLabel={ownsLabel} isHighlighted={isHighlighted}>
+      <Chip data-detail-prop-chip="" $ownsLabel={ownsLabel} isHighlighted={isHighlighted}>
         {!ownsLabel && (
           <PropName
             isHighlighted={isHighlighted}

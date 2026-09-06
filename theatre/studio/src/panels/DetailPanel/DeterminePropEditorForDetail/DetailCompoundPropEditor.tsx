@@ -30,8 +30,8 @@ import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodr
 
 const Container = styled.div`
   --step: 12px;
-  /* Tighter to the panel edge; nest indent carries more of the hierarchy cue */
-  --left-pad: 8px;
+  /* Align first-level rows with the panel "Props" / object title (margin 10px). */
+  --left-pad: 10px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 40%;
 `
@@ -41,8 +41,6 @@ const Header = styled.div<{isHighlighted: PropHighlighted}>`
   display: flex;
   align-items: stretch;
   position: relative;
-  border-top: 1px solid var(--studio-border);
-  border-bottom: 1px solid var(--studio-border);
   margin: calc(var(--studio-row-gap, 3px) / 2) 0;
 `
 
@@ -296,7 +294,8 @@ function DetailCompoundPropEditor<
       {!isCollapsed && (
         <SubProps
           // @ts-ignore
-          style={{'--depth': visualIndentation}}
+          // Match folder title indent so the first level lines up with "Props".
+          style={{'--depth': Math.max(0, visualIndentation - 1)}}
           depth={visualIndentation}
           lastSubIsComposite={lastSubPropIsComposite}
         >

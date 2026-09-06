@@ -46,8 +46,8 @@ const ColorPreviewPuck = styled.div.attrs<ColorPreviewPuckProps>((props) => ({
 `
 
 const HexInput = styled(BasicStringInput)`
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
+  margin-left: auto;
 `
 
 const noop = () => {}
@@ -116,6 +116,7 @@ function RgbaPropEditor({
           permanentlySetValue={onChange}
           isValid={(v) => !!v.match(validHexRegExp)}
           autoFocus={autoFocus}
+          fitContent
         />
         <ColorPreviewPuck
           rgbaColor={value}

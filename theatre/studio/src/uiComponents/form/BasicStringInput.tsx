@@ -6,23 +6,27 @@ import {mergeRefs} from 'react-merge-refs'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import useOnClickOutside from '@unseenco/theatre-studio/uiComponents/useOnClickOutside'
 
-const Input = styled.input.attrs({type: 'text'})`
+const Input = styled.input.attrs({type: 'text'})<{
+  $fitContent?: boolean
+  $charCount?: number
+}>`
   background: transparent;
   border: none;
+  border-bottom: 1px solid transparent;
   color: var(--studio-text-value);
-  padding: 0 10px;
+  padding: ${(p) => (p.$fitContent ? '0' : '0 10px')};
   font: inherit;
   font-size: 13px;
   outline: none;
   cursor: text;
   text-align: right;
-  width: 100%;
-  height: calc(100% - 2px);
-  border-radius: var(--studio-radius, 8px);
+  width: ${(p) =>
+    p.$fitContent ? `calc(${Math.max(p.$charCount ?? 4, 4)} * 1ch)` : '100%'};
+  min-width: ${(p) => (p.$fitContent ? '4ch' : '0')};
+  height: 100%;
+  border-radius: ${(p) => (p.$fitContent ? '0' : 'var(--studio-radius, 8px)')};
   box-sizing: border-box;
-  background-repeat: no-repeat;
-  background-position: left 10px bottom 0;
-  background-size: calc(100% - 20px) 0;
+  flex: ${(p) => (p.$fitContent ? '0 0 auto' : 'initial')};
 
   &:hover {
     background-color: transparent;
@@ -31,16 +35,11 @@ const Input = styled.input.attrs({type: 'text'})`
   &:focus {
     cursor: text;
     background-color: transparent;
-    background-image: linear-gradient(
-      var(--studio-focus-ring),
-      var(--studio-focus-ring)
-    );
-    background-size: calc(100% - 20px) 1px;
+    border-bottom-color: var(--studio-focus-ring);
   }
 
   &.invalid {
-    background-image: linear-gradient(#e25555, #e25555);
-    background-size: calc(100% - 20px) 1px;
+    border-bottom-color: #e25555;
   }
 `
 
@@ -72,6 +71,11 @@ const BasicStringInput: React.FC<{
    */
   onBlur?: () => void
   autoFocus?: boolean
+  /**
+   * When true, the field sizes to its text (ch units) and the focus underline
+   * spans only that width — used for the color hex editor.
+   */
+  fitContent?: boolean
 }> = (props) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
   const isValid = props.isValid ?? alwaysValid
@@ -196,6 +200,8 @@ const BasicStringInput: React.FC<{
       key="input"
       type="text"
       className={`${props.className ?? ''} ${!isValid(value) ? 'invalid' : ''}`}
+      $fitContent={!!props.fitContent}
+      $charCount={String(value).length + (props.fitContent ? 1 : 0)}
       onChange={callbacks.inputChange}
       value={value}
       onBlur={callbacks.onBlur}

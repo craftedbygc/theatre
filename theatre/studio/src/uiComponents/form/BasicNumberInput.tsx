@@ -76,14 +76,14 @@ const Hashmarks = styled.div<{
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: ${(p) => (p.$visible ? 0.3 : 0)};
+  opacity: ${(p) => (p.$visible ? 0.7 : 0)};
   transition: opacity 120ms ease;
   background-image: repeating-linear-gradient(
     to right,
     transparent,
     transparent calc(10% - 1px),
-    rgba(255, 255, 255, 0.18) calc(10% - 1px),
-    rgba(255, 255, 255, 0.18) 10%
+    rgba(255, 255, 255, 0.42) calc(10% - 1px),
+    rgba(255, 255, 255, 0.42) 10%
   );
   mask-image: linear-gradient(
     to bottom,
@@ -149,15 +149,14 @@ const LabelText = styled.div`
   pointer-events: none;
 `
 
-const ValueSlot = styled.div<{
-  $isEditing: boolean
-}>`
+const ValueSlot = styled.div`
   margin-left: auto;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   height: 100%;
-  pointer-events: ${(p) => (p.$isEditing ? 'auto' : 'none')};
+  /* Always receive hits so only the value (not the whole chip) enters edit. */
+  pointer-events: auto;
 `
 
 const Input = styled.input<{
@@ -464,6 +463,9 @@ const BasicNumberInput: React.FC<{
           }
         },
         onClick() {
+          // Ranged chips: click-anywhere only scrubs / sets value — edit is
+          // reserved for clicks on the value itself (ValueSlot above the drag surface).
+          if (propsRef.current.range) return
           inputRef.current!.focus()
           inputRef.current!.setSelectionRange(0, 100)
         },
@@ -529,10 +531,9 @@ const BasicNumberInput: React.FC<{
         e.stopPropagation()
       }}
       onPointerDown={(e: React.PointerEvent) => {
-        if (stateRef.current.mode !== 'editingViaKeyboard') {
-          // Prevent the input from taking focus on touch, which would cancel the drag.
-          e.preventDefault()
-        }
+        // Stop the drag surface under us from claiming this gesture so a
+        // click on the value can focus/edit (especially for ranged chips).
+        e.stopPropagation()
       }}
       onDoubleClick={(e: React.MouseEvent) => {
         e.preventDefault()
@@ -585,7 +586,7 @@ const BasicNumberInput: React.FC<{
       {!isEditing ? <DragSurface ref={setDragNode} /> : null}
       <Content>
         {propsA.label ? <LabelText>{propsA.label}</LabelText> : null}
-        <ValueSlot $isEditing={isEditing}>{theInput}</ValueSlot>
+        <ValueSlot>{theInput}</ValueSlot>
       </Content>
     </Container>
   )
