@@ -19,7 +19,7 @@ const Container = styled.div<{
   display: flex;
   min-height: var(--studio-row-height);
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   gap: 6px;
   padding: 0 8px 0 0;
   position: relative;
@@ -46,8 +46,9 @@ const Chip = styled.div<{
   flex: 1 1 auto;
   min-width: 0;
   min-height: var(--studio-row-height);
+  height: var(--studio-row-height);
   display: flex;
-  align-items: center;
+  align-items: ${(props) => (props.$ownsLabel ? 'stretch' : 'center')};
   gap: 12px;
   padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
   box-sizing: border-box;
@@ -157,9 +158,10 @@ export function SingleRowPropEditor<T>({
     ? React.Children.map(children, (child) => {
         if (!React.isValidElement(child)) return child
         return React.cloneElement(
-          child as React.ReactElement<{label?: string}>,
+          child as React.ReactElement<{label?: string; embedded?: boolean}>,
           {
             label: typeof label === 'string' ? label : String(label ?? ''),
+            embedded: true,
           },
         )
       })

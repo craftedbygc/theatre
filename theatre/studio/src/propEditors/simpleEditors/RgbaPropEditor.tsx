@@ -17,6 +17,7 @@ import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
 const RowContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
   width: 100%;
   gap: 8px;
@@ -108,13 +109,6 @@ function RgbaPropEditor({
   return (
     <>
       <RowContainer>
-        <ColorPreviewPuck
-          rgbaColor={value}
-          ref={containerRef}
-          onClick={(e) => {
-            popover.toggle(e, containerRef.current)
-          }}
-        />
         <HexInput
           value={rgba2hex(value, {removeAlphaIfOpaque: true})}
           temporarilySetValue={noop}
@@ -122,6 +116,13 @@ function RgbaPropEditor({
           permanentlySetValue={onChange}
           isValid={(v) => !!v.match(validHexRegExp)}
           autoFocus={autoFocus}
+        />
+        <ColorPreviewPuck
+          rgbaColor={value}
+          ref={containerRef}
+          onClick={(e) => {
+            popover.toggle(e, containerRef.current)
+          }}
         />
       </RowContainer>
       {popover.node}

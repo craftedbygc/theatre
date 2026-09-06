@@ -11,7 +11,6 @@ import {darken, transparentize} from 'polished'
 import React, {useMemo} from 'react'
 import styled from 'styled-components'
 import {rowIndentationFormulaCSS} from '@unseenco/theatre-studio/panels/DetailPanel/DeterminePropEditorForDetail/rowIndentationFormulaCSS'
-import {propNameTextCSS} from '@unseenco/theatre-studio/propEditors/utils/propNameTextCSS'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import DeterminePropEditorForDetail from '@unseenco/theatre-studio/panels/DetailPanel/DeterminePropEditorForDetail'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
@@ -30,9 +29,9 @@ import {collapsedMap} from './collapsedMap'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 
 const Container = styled.div`
-  --step: 8px;
-  /* Enough room for keyframe-cursor hover background + expanded chevrons */
-  --left-pad: 14px;
+  --step: 12px;
+  /* Tighter to the panel edge; nest indent carries more of the hierarchy cue */
+  --left-pad: 8px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 40%;
 `
@@ -44,7 +43,7 @@ const Header = styled.div<{isHighlighted: PropHighlighted}>`
   position: relative;
   border-top: 1px solid var(--studio-border);
   border-bottom: 1px solid var(--studio-border);
-  margin: 2px 0;
+  margin: calc(var(--studio-row-gap, 3px) / 2) 0;
 `
 
 const Padding = styled.div<{isVectorProp: boolean}>`
@@ -79,16 +78,14 @@ const PropName = deriver(styled.div<{
   min-width: 0;
   overflow: hidden;
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 500;
   color: ${(props) =>
     props.isHighlighted === 'self'
       ? 'var(--studio-text-focus)'
-      : 'var(--studio-text-section)'};
+      : 'var(--studio-text-label)'};
   &:hover {
     color: var(--studio-text-focus);
   }
-  ${() => propNameTextCSS};
   ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
 `)
 
@@ -126,8 +123,9 @@ const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
 const color = transparentize(0.05, `#282b2f`)
 
 const SubProps = styled.div<{depth: number; lastSubIsComposite: boolean}>`
-  /* background: ${({depth}) => darken(depth * 0.03, color)}; */
-  /* padding: ${(props) => (props.lastSubIsComposite ? 0 : '4px')} 0; */
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-row-gap, 3px);
 `
 
 const isVectorProp = memoizeFn((propConfig: PropTypeConfig_Compound<any>) => {

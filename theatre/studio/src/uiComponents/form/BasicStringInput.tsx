@@ -20,7 +20,9 @@ const Input = styled.input.attrs({type: 'text'})`
   height: calc(100% - 2px);
   border-radius: var(--studio-radius, 8px);
   box-sizing: border-box;
-  transition: box-shadow 120ms ease;
+  background-repeat: no-repeat;
+  background-position: left 10px bottom 0;
+  background-size: calc(100% - 20px) 0;
 
   &:hover {
     background-color: transparent;
@@ -29,11 +31,16 @@ const Input = styled.input.attrs({type: 'text'})`
   &:focus {
     cursor: text;
     background-color: transparent;
-    box-shadow: inset 0 -2px 0 0 var(--studio-focus-ring);
+    background-image: linear-gradient(
+      var(--studio-focus-ring),
+      var(--studio-focus-ring)
+    );
+    background-size: calc(100% - 20px) 1px;
   }
 
   &.invalid {
-    box-shadow: inset 0 -2px 0 0 #e25555;
+    background-image: linear-gradient(#e25555, #e25555);
+    background-size: calc(100% - 20px) 1px;
   }
 `
 

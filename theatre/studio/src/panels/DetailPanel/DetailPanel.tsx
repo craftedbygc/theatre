@@ -136,10 +136,10 @@ const Body = styled.div<{$docked: boolean}>`
   }
 
   scrollbar-width: none;
-  padding: 6px 4px 10px;
+  padding: 6px 2px 10px 0;
   display: flex;
   flex-direction: column;
-  gap: var(--studio-row-gap, 6px);
+  gap: var(--studio-row-gap, 3px);
   user-select: none;
   font-family: var(--studio-font-ui);
   font-size: 13px;

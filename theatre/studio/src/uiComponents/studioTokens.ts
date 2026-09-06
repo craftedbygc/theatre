@@ -36,7 +36,7 @@ export const studioTokenCss = `
   --studio-radius: 8px;
   --studio-radius-sm: 6px;
   --studio-row-height: 36px;
-  --studio-row-gap: 6px;
+  --studio-row-gap: 3px;
   --studio-panel-pad: 10px 12px;
 `
 

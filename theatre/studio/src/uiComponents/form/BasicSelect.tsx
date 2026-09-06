@@ -47,7 +47,13 @@ const Trigger = styled.button`
   }
 
   &:focus-visible {
-    box-shadow: inset 0 -2px 0 0 var(--studio-focus-ring);
+    background-image: linear-gradient(
+      var(--studio-focus-ring),
+      var(--studio-focus-ring)
+    );
+    background-size: calc(100% - 38px) 1px;
+    background-position: left 10px bottom 0;
+    background-repeat: no-repeat;
   }
 `
 
@@ -134,13 +140,16 @@ function BasicSelect<TLiteralOptions extends string>({
 
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
+  // State (not just a ref) so outside-click effect rebinds after the portal mounts.
+  const [menuEl, setMenuEl] = useState<HTMLDivElement | null>(null)
   const portalLayer = useContext(PortalContext)
 
-  useOnClickOutside(
-    open ? [triggerRef.current, menuRef.current] : null,
-    () => setOpen(false),
-    open,
+  const outsideNodes = useMemo(
+    () => (open ? [triggerRef.current, menuEl] : null),
+    [open, menuEl],
   )
+
+  useOnClickOutside(outsideNodes, () => setOpen(false), open)
 
   const syncMenuPosition = useCallback(() => {
     const el = triggerRef.current
@@ -239,7 +248,11 @@ function BasicSelect<TLiteralOptions extends string>({
     open && portalLayer
       ? ReactDOM.createPortal(
           <Menu
-            ref={menuRef}
+            ref={(node) => {
+              menuRef.current = node
+              setMenuEl(node)
+            }}
+            data-basic-select-menu=""
             role="listbox"
             tabIndex={-1}
             style={{
@@ -248,6 +261,10 @@ function BasicSelect<TLiteralOptions extends string>({
               width: menuPos.width,
             }}
             onKeyDown={onMenuKeyDown}
+            onMouseDown={(e) => {
+              // Keep the menu open; option handlers select the value.
+              e.stopPropagation()
+            }}
           >
             {keys.map((key, i) => (
               <OptionButton
@@ -267,6 +284,7 @@ function BasicSelect<TLiteralOptions extends string>({
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
+                  selectValue(key)
                 }}
               >
                 {options[key]}
@@ -281,6 +299,10 @@ function BasicSelect<TLiteralOptions extends string>({
     if (open && menuRef.current) {
       menuRef.current.focus()
     }
+  }, [open, menuEl])
+
+  useEffect(() => {
+    if (!open) setMenuEl(null)
   }, [open])
 
   return (

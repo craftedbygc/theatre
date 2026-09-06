@@ -14,8 +14,8 @@ import {
 } from '@unseenco/theatre-shared/propTypes/numberPrecision'
 
 const Container = styled.div<{
+  $embedded: boolean
   $hasRange: boolean
-  $hasLabel: boolean
 }>`
   height: 100%;
   width: 100%;
@@ -24,13 +24,19 @@ const Container = styled.div<{
   z-index: 0;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   border-radius: var(--studio-radius, 8px);
   overflow: hidden;
   background: ${(p) =>
-    p.$hasRange || p.$hasLabel ? 'var(--studio-surface)' : 'transparent'};
+    p.$embedded
+      ? 'transparent'
+      : p.$hasRange
+      ? 'var(--studio-surface)'
+      : 'transparent'};
   box-shadow: ${(p) =>
-    p.$hasRange || p.$hasLabel
+    p.$embedded
+      ? 'none'
+      : p.$hasRange
       ? 'inset 0 0 0 1px var(--studio-border)'
       : 'none'};
   transition: background 150ms ease, box-shadow 150ms ease;
@@ -38,9 +44,16 @@ const Container = styled.div<{
   &:hover,
   &.dragging,
   &.editingViaKeyboard {
-    background: var(--studio-surface-hover);
+    background: ${(p) =>
+      p.$embedded
+        ? 'transparent'
+        : p.$hasRange
+        ? 'var(--studio-surface-hover)'
+        : 'transparent'};
     box-shadow: ${(p) =>
-      p.$hasRange || p.$hasLabel
+      p.$embedded
+        ? 'none'
+        : p.$hasRange
         ? 'inset 0 0 0 1px var(--studio-border-hover)'
         : 'none'};
   }
@@ -101,57 +114,84 @@ const Handle = styled.div<{
   transition: opacity 120ms ease;
 `
 
-const LabelOverlay = styled.div`
+/** Full-chip drag hit target (sits under the value when editing). */
+const DragSurface = styled.div`
   position: absolute;
-  left: 10px;
-  top: 0;
-  bottom: 0;
-  z-index: 3;
+  inset: 0;
+  z-index: 4;
+  touch-action: none;
+  cursor: ew-resize;
+`
+
+const Content = styled.div`
+  position: relative;
+  z-index: 5;
   display: flex;
   align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  padding: 0 10px;
+  box-sizing: border-box;
   pointer-events: none;
+`
+
+const LabelText = styled.div`
+  flex: 0 1 auto;
+  max-width: 48%;
   font-size: 13px;
   font-weight: 500;
   color: var(--studio-text-label);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 48%;
+  pointer-events: none;
 `
 
-const Input = styled.input`
+const ValueSlot = styled.div<{
+  $isEditing: boolean
+}>`
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  pointer-events: ${(p) => (p.$isEditing ? 'auto' : 'none')};
+`
+
+const Input = styled.input<{
+  $isEditing: boolean
+  $invalid: boolean
+}>`
   background: transparent;
   border: none;
+  border-bottom: 1px solid
+    ${(p) =>
+      p.$invalid
+        ? '#e25555'
+        : p.$isEditing
+        ? 'var(--studio-focus-ring)'
+        : 'transparent'};
+  border-radius: 0;
   color: var(--studio-text-value);
-  padding: 0 12px;
+  padding: 0;
   font-family: var(--studio-font-mono);
   font-size: 13px;
   font-weight: 500;
   outline: none;
-  cursor: ew-resize;
+  cursor: ${(p) => (p.$isEditing ? 'text' : 'ew-resize')};
   text-align: right;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--studio-radius, 8px);
+  width: calc(var(--value-ch, 4) * 1ch);
+  min-width: 3ch;
+  height: auto;
+  line-height: 1.2;
   touch-action: none;
-  position: relative;
-  z-index: 4;
-  box-sizing: border-box;
+  box-sizing: content-box;
 
   &:focus {
     cursor: text;
-    box-shadow: inset 0 -2px 0 0 var(--studio-focus-ring);
   }
-`
-
-const DragWrap = styled.div`
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  height: 100%;
-  touch-action: none;
-  position: relative;
-  z-index: 4;
 `
 
 type IState_NoFocus = {
@@ -197,11 +237,17 @@ const BasicNumberInput: React.FC<{
   precision?: number
   /** Optional label rendered inside the track (details pane Dialkit layout). */
   label?: string
+  /**
+   * When true, skip own chip surface (parent chip already paints it).
+   * Details-pane number rows pass this so brightness matches other controls.
+   */
+  embedded?: boolean
 }> = (propsA) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
   const [isHot, setIsHot] = useState(false)
   const isValid = propsA.isValid ?? alwaysValid
   const precision = propsA.precision ?? DEFAULT_NUMBER_PRECISION
+  const embedded = !!propsA.embedded || !!propsA.label
 
   const propsRef = useRef(propsA)
   propsRef.current = propsA
@@ -210,6 +256,7 @@ const BasicNumberInput: React.FC<{
     propsRef.current.precision ?? DEFAULT_NUMBER_PRECISION
 
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   // While dragging on touch, React must not push new `value` props into the input —
   // that re-sync cancels the active pointer gesture. We freeze the prop and update
   // the DOM directly instead.
@@ -310,11 +357,14 @@ const BasicNumberInput: React.FC<{
       })
     }
 
-    let inputWidth: number
+    let trackWidth: number
 
     const transitionToDraggingMode = (event: MouseEvent) => {
       const curValue = propsRef.current.value
-      inputWidth = inputRef.current?.getBoundingClientRect().width!
+      trackWidth =
+        containerRef.current?.getBoundingClientRect().width ||
+        inputRef.current?.getBoundingClientRect().width ||
+        1
 
       frozenInputValueRef.current = format(curValue, getPrecision())
       inputRef.current?.blur()
@@ -332,7 +382,7 @@ const BasicNumberInput: React.FC<{
 
       const valueFromClientX = (clientX: number) => {
         const range = propsRef.current.range!
-        const el = inputRef.current
+        const el = containerRef.current
         if (!el) return propsRef.current.value
         const rect = el.getBoundingClientRect()
         const ratio =
@@ -379,7 +429,7 @@ const BasicNumberInput: React.FC<{
               valueDuringDragging +
               propsA.nudge({
                 deltaX,
-                deltaFraction: deltaX / inputWidth,
+                deltaFraction: deltaX / trackWidth,
                 magnitude: 1,
               })
             valueDuringDragging = roundNumberToPrecision(
@@ -448,13 +498,26 @@ const BasicNumberInput: React.FC<{
     value = 'NaN'
   }
 
+  const valueStr = String(value)
+  const valueCh = Math.max(3, valueStr.length)
+
   const _refs = [inputRef]
   if (propsA.inputRef) _refs.push(propsA.inputRef)
+
+  const isEditing = stateRef.current.mode === 'editingViaKeyboard'
+  const valueIsValid =
+    !isEditing ||
+    (() => {
+      const n = parseFloat(valueStr)
+      return isFinite(n) && isValid(n)
+    })()
 
   const theInput = (
     <Input
       key="input"
       type="text"
+      $isEditing={isEditing}
+      $invalid={isEditing && !valueIsValid}
       onChange={callbacks.inputChange}
       value={value}
       onBlur={callbacks.onBlur}
@@ -476,6 +539,7 @@ const BasicNumberInput: React.FC<{
         e.stopPropagation()
       }}
       autoFocus={propsA.autoFocus}
+      style={{['--value-ch' as string]: valueCh} as React.CSSProperties}
     />
   )
 
@@ -503,9 +567,10 @@ const BasicNumberInput: React.FC<{
 
   return (
     <Container
+      ref={containerRef}
       className={(propsA.className ?? '') + ' ' + stateRef.current.mode}
+      $embedded={embedded}
       $hasRange={!!range}
-      $hasLabel={!!propsA.label}
       onMouseEnter={() => setIsHot(true)}
       onMouseLeave={() => setIsHot(false)}
       style={
@@ -517,8 +582,11 @@ const BasicNumberInput: React.FC<{
       {range ? <FillIndicator /> : null}
       {range ? <Hashmarks $visible={showChrome} /> : null}
       {range ? <Handle $visible={showChrome} /> : null}
-      {propsA.label ? <LabelOverlay>{propsA.label}</LabelOverlay> : null}
-      <DragWrap ref={setDragNode}>{theInput}</DragWrap>
+      {!isEditing ? <DragSurface ref={setDragNode} /> : null}
+      <Content>
+        {propsA.label ? <LabelText>{propsA.label}</LabelText> : null}
+        <ValueSlot $isEditing={isEditing}>{theInput}</ValueSlot>
+      </Content>
     </Container>
   )
 }
