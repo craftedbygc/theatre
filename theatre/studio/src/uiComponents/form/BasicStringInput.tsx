@@ -13,8 +13,9 @@ const Input = styled.input.attrs({type: 'text'})<{
   background: transparent;
   border: none;
   color: var(--studio-text-value);
-  /* No horizontal padding — underline must end flush with the text’s right edge. */
-  padding: 0 0 4px;
+  /* No horizontal padding — underline must end flush with the text’s right edge.
+     No vertical padding — keeps hex text optically centered with the swatch. */
+  padding: 0;
   font: inherit;
   font-size: 13px;
   font-weight: ${(p) => (p.$fitContent ? 500 : 'inherit')};
@@ -31,18 +32,18 @@ const Input = styled.input.attrs({type: 'text'})<{
       : 'auto'};
   max-width: 100%;
   min-width: ${(p) => (p.$fitContent ? '4ch' : '1ch')};
-  height: auto;
-  min-height: 0;
-  line-height: 16px;
+  /* Match swatch (18px): same height for hex/string so underline distance matches. */
+  height: 18px;
+  min-height: 18px;
+  line-height: 18px;
   border-radius: 0;
   box-sizing: border-box;
   flex: 0 0 auto;
   align-self: center;
   margin-left: auto;
-  box-shadow: none;
   background-image: none;
-  /* 4px gap between baseline and underline via padding + border. */
-  border-bottom: 1px solid transparent;
+  /* Inset shadow keeps layout height stable (no padding-bottom skew). */
+  box-shadow: inset 0 -1px 0 transparent;
 
   &:hover {
     background-color: transparent;
@@ -51,11 +52,11 @@ const Input = styled.input.attrs({type: 'text'})<{
   &:focus {
     cursor: text;
     background-color: transparent;
-    border-bottom-color: var(--studio-focus-ring);
+    box-shadow: inset 0 -1px 0 var(--studio-focus-ring);
   }
 
   &.invalid {
-    border-bottom-color: #e25555;
+    box-shadow: inset 0 -1px 0 #e25555;
   }
 `
 
