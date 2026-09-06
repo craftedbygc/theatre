@@ -43,25 +43,35 @@ const LeftRowHead_Label = styled.span`
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 4px;
+  padding-right: 2px;
   line-height: 26px;
-  flex-wrap: nowrap;
+  flex: 0 1 auto;
+  min-width: 0;
 
   ${LeftRowHeader}:hover & {
     color: #ccc;
   }
 `
 
+/** Collapse control sits to the right of the name (same pattern as the details pane). */
 const LeftRowHead_Icon = styled.span<{isCollapsed: boolean}>`
-  width: 12px;
-  padding: 8px;
-  font-size: 9px;
+  width: 18px;
+  height: 26px;
+  font-size: 11px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  cursor: pointer;
 
-  transition: transform 0.05s ease-out, color 0.1s ease-out;
+  transition: transform 0.05s ease-out, color 0.1s ease-out, opacity 0.1s ease-out;
   transform: rotateZ(${(props) => (props.isCollapsed ? 0 : 90)}deg);
-  color: #66686a;
+  color: #8b8e92;
+  opacity: ${(props) => (props.isCollapsed ? 1 : 0.7)};
+
+  ${LeftRowHeader}:hover & {
+    opacity: 1;
+  }
 
   &:hover {
     transform: rotateZ(${(props) => (props.isCollapsed ? 15 : 75)}deg);
@@ -116,10 +126,16 @@ const AnyCompositeRow: React.FC<{
         onClick={toggleSelect}
         isEven={leaf.n % 2 === 0}
       >
-        <LeftRowHead_Icon isCollapsed={isCollapsed} onClick={toggleCollapsed}>
+        <LeftRowHead_Label>{label}</LeftRowHead_Label>
+        <LeftRowHead_Icon
+          isCollapsed={isCollapsed}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleCollapsed()
+          }}
+        >
           <HiOutlineChevronRight />
         </LeftRowHead_Icon>
-        <LeftRowHead_Label>{label}</LeftRowHead_Label>
       </LeftRowHeader>
       {hasChildren && <LeftRowChildren>{children}</LeftRowChildren>}
     </LeftRowContainer>
