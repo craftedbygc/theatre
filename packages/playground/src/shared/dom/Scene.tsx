@@ -37,7 +37,7 @@ const boxObjectConfig = {
     // if needing more compounds, consider adding weight with different units
     price: types.compound({
       currency: types.stringLiteral('USD', {USD: 'USD', EUR: 'EUR'}),
-      amount: types.number(10, {range: [0, 1000], label: '$'}),
+      amount: types.number(10, {range: [0, Infinity], label: '$'}),
     }),
   }),
   pos: {
