@@ -243,6 +243,13 @@ type IState = IState_NoFocus | IState_EditingViaKeyboard | IState_Dragging
 
 const alwaysValid = (v: number) => true
 
+/** Absolute scrub / fill chrome only work when both ends are finite. */
+function isBoundedNumberRange(
+  range: [number, number] | undefined,
+): range is [number, number] {
+  return !!range && Number.isFinite(range[0]) && Number.isFinite(range[1])
+}
+
 export type BasicNumberInputNudgeFn = (params: {
   deltaX: number
   deltaFraction: number
@@ -409,7 +416,9 @@ const BasicNumberInput: React.FC<{
 
       let valueBeforeDragging = curValue
       let valueDuringDragging = curValue
-      const hasRange = !!propsRef.current.range
+      // Absolute X→value mapping needs a finite span. Open-ended ranges
+      // (e.g. [0, Infinity]) fall back to relative nudge + clamp.
+      const hasBoundedRange = isBoundedNumberRange(propsRef.current.range)
 
       const valueFromClientX = (clientX: number) => {
         const range = propsRef.current.range!
@@ -426,7 +435,7 @@ const BasicNumberInput: React.FC<{
         )
       }
 
-      if (hasRange) {
+      if (hasBoundedRange) {
         valueDuringDragging = valueFromClientX(event.clientX)
         valueBeforeDragging = valueDuringDragging
         frozenInputValueRef.current = format(
@@ -451,18 +460,22 @@ const BasicNumberInput: React.FC<{
 
       return {
         onDrag(_dx: number, _dy: number, e: MouseEvent, mx: number) {
-          if (hasRange) {
+          if (hasBoundedRange) {
             valueDuringDragging = valueFromClientX(e.clientX)
           } else {
             // Use `mx` so reversing direction after overshooting recovers quickly.
             const deltaX = e.altKey ? mx / 10 : mx
-            const newValue =
+            let newValue =
               valueDuringDragging +
               propsA.nudge({
                 deltaX,
                 deltaFraction: deltaX / trackWidth,
                 magnitude: 1,
               })
+            const range = propsRef.current.range
+            if (range) {
+              newValue = clamp(newValue, range[0], range[1])
+            }
             valueDuringDragging = roundNumberToPrecision(
               newValue,
               getPrecision(),
@@ -479,7 +492,7 @@ const BasicNumberInput: React.FC<{
           }
 
           if (!happened) {
-            if (hasRange) {
+            if (hasBoundedRange) {
               propsRef.current.permanentlySetValue(valueDuringDragging)
             } else {
               propsRef.current.discardTemporaryValue()
@@ -495,9 +508,9 @@ const BasicNumberInput: React.FC<{
           }
         },
         onClick() {
-          // Ranged chips: click-anywhere only scrubs / sets value — edit is
-          // reserved for clicks on the value itself (ValueSlot above the drag surface).
-          if (propsRef.current.range) return
+          // Bounded-range chips: click-anywhere only scrubs / sets value — edit
+          // is reserved for clicks on the value itself (ValueSlot above the drag surface).
+          if (isBoundedNumberRange(propsRef.current.range)) return
           inputRef.current!.focus()
           inputRef.current!.setSelectionRange(0, 100)
         },
@@ -577,10 +590,11 @@ const BasicNumberInput: React.FC<{
   )
 
   const {range} = propsA
+  const hasBoundedRange = isBoundedNumberRange(range)
   const isDraggingValue = frozenInputValueRef.current != null
   const num = isDraggingValue ? propsA.value : parseFloat(value)
 
-  const percentage = range
+  const percentage = hasBoundedRange
     ? clamp((num - range[0]) / ((range[1] - range[0]) || 1), 0, 1)
     : 0
 
@@ -594,7 +608,8 @@ const BasicNumberInput: React.FC<{
     debugName: 'form/BasicNumberInput',
     onDragStart: callbacks.transitionToDraggingMode,
     lockCSSCursorTo: 'ew-resize',
-    shouldPointerLock: !range,
+    // Pointer-lock relative scrub for unbounded / open-ended ranges.
+    shouldPointerLock: !hasBoundedRange,
     disabled: stateRef.current.mode === 'editingViaKeyboard',
   })
 
@@ -603,18 +618,18 @@ const BasicNumberInput: React.FC<{
       ref={containerRef}
       className={(propsA.className ?? '') + ' ' + stateRef.current.mode}
       $embedded={embedded}
-      $hasRange={!!range}
+      $hasRange={hasBoundedRange}
       onMouseEnter={() => setIsHot(true)}
       onMouseLeave={() => setIsHot(false)}
       style={
-        range
+        hasBoundedRange
           ? ({['--percentage' as string]: percentage} as React.CSSProperties)
           : undefined
       }
     >
-      {range ? <FillIndicator /> : null}
-      {range ? <Hashmarks $visible={showChrome} /> : null}
-      {range ? <Handle $visible={showChrome} /> : null}
+      {hasBoundedRange ? <FillIndicator /> : null}
+      {hasBoundedRange ? <Hashmarks $visible={showChrome} /> : null}
+      {hasBoundedRange ? <Handle $visible={showChrome} /> : null}
       {!isEditing ? <DragSurface ref={setDragNode} /> : null}
       <Content>
         <TextRow>
