@@ -121,7 +121,6 @@ const Content = styled.div`
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 8px;
   width: 100%;
   height: 100%;
   min-height: inherit;
@@ -130,11 +129,20 @@ const Content = styled.div`
   pointer-events: none;
 `
 
+const TextRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+`
+
 const LabelText = styled.div`
   flex: 0 1 auto;
   max-width: 48%;
   font-size: 13px;
   font-weight: 500;
+  line-height: 16px;
   color: var(--studio-text-label);
   white-space: nowrap;
   overflow: hidden;
@@ -145,12 +153,27 @@ const LabelText = styled.div`
 const ValueSlot = styled.div`
   margin-left: auto;
   flex: 0 0 auto;
+  position: relative;
   display: flex;
-  align-items: center;
-  height: 100%;
+  align-items: baseline;
+  height: 16px;
   /* Always receive hits so only the value (not the whole chip) enters edit. */
   pointer-events: auto;
   cursor: text;
+`
+
+/** Idle value: plain text so it shares metrics with the label (no <input> quirks). */
+const ValueText = styled.span`
+  font-family: var(--studio-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--studio-text-value);
+  display: block;
+  text-align: right;
+  min-width: 3ch;
+  pointer-events: none;
+  user-select: none;
 `
 
 const Input = styled.input<{
@@ -159,7 +182,8 @@ const Input = styled.input<{
 }>`
   background: transparent;
   border: none;
-  border-bottom: 1px solid
+  /* Underline via shadow so it does not change the 16px text box height. */
+  box-shadow: inset 0 -1px 0
     ${(p) =>
       p.$invalid
         ? '#e25555'
@@ -168,6 +192,7 @@ const Input = styled.input<{
         : 'transparent'};
   border-radius: 0;
   color: var(--studio-text-value);
+  margin: 0;
   padding: 0;
   font-family: var(--studio-font-mono);
   font-size: 13px;
@@ -177,15 +202,28 @@ const Input = styled.input<{
   text-align: right;
   width: calc(var(--value-ch, 4) * 1ch);
   min-width: 3ch;
-  height: auto;
-  line-height: 1.2;
+  height: 16px;
+  line-height: 16px;
   touch-action: none;
-  box-sizing: content-box;
+  box-sizing: border-box;
+
+  /* Keep the input in-flow for focus/measure, hide glyphs while idle. */
+  ${(p) =>
+    p.$isEditing
+      ? ''
+      : `
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    min-width: 0;
+  `}
 
   &:focus {
     cursor: text;
   }
 `
+
 
 type IState_NoFocus = {
   mode: 'noFocus'
@@ -579,8 +617,13 @@ const BasicNumberInput: React.FC<{
       {range ? <Handle $visible={showChrome} /> : null}
       {!isEditing ? <DragSurface ref={setDragNode} /> : null}
       <Content>
-        {propsA.label ? <LabelText>{propsA.label}</LabelText> : null}
-        <ValueSlot>{theInput}</ValueSlot>
+        <TextRow>
+          {propsA.label ? <LabelText>{propsA.label}</LabelText> : null}
+          <ValueSlot>
+            {!isEditing ? <ValueText>{value}</ValueText> : null}
+            {theInput}
+          </ValueSlot>
+        </TextRow>
       </Content>
     </Container>
   )
