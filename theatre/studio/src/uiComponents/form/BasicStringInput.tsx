@@ -25,52 +25,33 @@ const Input = styled.input.attrs({type: 'text'})<{
   width: ${(p) =>
     p.$fitContent ? `calc(${Math.max(p.$charCount ?? 4, 4)} * 1ch)` : '100%'};
   min-width: ${(p) => (p.$fitContent ? '4ch' : '0')};
-  /* Full chip height for normal fields; value-sized for fitContent (hex). */
-  height: ${(p) => (p.$fitContent ? 'auto' : '100%')};
-  min-height: ${(p) => (p.$fitContent ? '0' : '100%')};
-  line-height: ${(p) => (p.$fitContent ? 1.2 : 'inherit')};
+  /* Size to the text line so the underline sits under glyphs (like number/hex),
+     not along the bottom of the full-height chip. */
+  height: 16px;
+  min-height: 16px;
+  line-height: 16px;
   border-radius: 0;
   box-sizing: border-box;
   flex: ${(p) => (p.$fitContent ? '0 0 auto' : '1 1 auto')};
-  align-self: ${(p) => (p.$fitContent ? 'center' : 'stretch')};
-  /* fitContent (hex): underline via border-bottom like number inputs.
-     Full-width text: underline via background-image so we don't lose 1px of height. */
-  border-bottom: ${(p) =>
-    p.$fitContent ? '1px solid transparent' : 'none'};
-  background-repeat: no-repeat;
-  background-position: left 10px bottom 0;
-  background-size: calc(100% - 20px) 0;
+  align-self: center;
+  /* Underline via shadow so layout height stays 16px (same as number inputs). */
+  box-shadow: inset 0 -1px 0 transparent;
+  border-bottom: none;
+  background-image: none;
 
   &:hover {
     background-color: transparent;
   }
 
-  /* Straight 1px underline under the text (no rounded ends). */
+  /* Straight 1px underline directly under the text. */
   &:focus {
     cursor: text;
     background-color: transparent;
-    ${(p) =>
-      p.$fitContent
-        ? `border-bottom-color: var(--studio-focus-ring);`
-        : `
-      background-image: linear-gradient(
-        var(--studio-focus-ring),
-        var(--studio-focus-ring)
-      );
-      background-size: calc(100% - 20px) 1px;
-      background-position: left 10px bottom 0;
-    `}
+    box-shadow: inset 0 -1px 0 var(--studio-focus-ring);
   }
 
   &.invalid {
-    ${(p) =>
-      p.$fitContent
-        ? `border-bottom-color: #e25555;`
-        : `
-      background-image: linear-gradient(#e25555, #e25555);
-      background-size: calc(100% - 20px) 1px;
-      background-position: left 10px bottom 0;
-    `}
+    box-shadow: inset 0 -1px 0 #e25555;
   }
 `
 

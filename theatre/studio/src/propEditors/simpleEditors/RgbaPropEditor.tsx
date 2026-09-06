@@ -40,7 +40,7 @@ const ColorPreviewPuck = styled.div.attrs<ColorPreviewPuckProps>((props) => ({
   width: 18px;
   flex: 0 0 auto;
   aspect-ratio: 1;
-  border-radius: 99999px;
+  border-radius: var(--studio-radius, 4px);
   box-shadow: inset 0 0 0 1px var(--studio-border);
   cursor: pointer;
 `

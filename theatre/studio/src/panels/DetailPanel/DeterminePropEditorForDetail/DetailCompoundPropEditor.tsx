@@ -28,10 +28,11 @@ import {HiOutlineChevronRight} from 'react-icons/all'
 import memoizeFn from '@unseenco/theatre-shared/utils/memoizeFn'
 import {collapsedMap} from './collapsedMap'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
   --step: 12px;
-  /* Align first-level rows with the panel "Props" / object title (margin 10px). */
+  /* Align first-level rows with the root folder title (margin 10px). */
   --left-pad: 10px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 58%;
@@ -217,7 +218,15 @@ function DetailCompoundPropEditor<
     propConfig,
   )
 
-  const label: string = propName || 'Props'
+  const isRootProps = getPointerParts(pointerToProp).path.length === 0
+  const activeVariant = usePrism(
+    () => getStudioActiveSequenceVariant(obj.sheet.address),
+    [obj.sheet.address],
+  )
+  // Root folder shows the object path (was the detail panel title bar).
+  const label: string = isRootProps
+    ? `${obj.sheet.address.sheetId} : ${activeVariant} → ${obj.address.objectKey}`
+    : propName || 'Props'
 
   const lastSubPropIsComposite = compositeSubs.length > 0
 
@@ -307,7 +316,7 @@ function DetailCompoundPropEditor<
       {!isCollapsed && (
         <SubProps
           // @ts-ignore
-          // Match folder title indent so the first level lines up with "Props".
+          // Match folder title indent so the first level lines up with the root title.
           style={{'--depth': Math.max(0, visualIndentation - 1)}}
           depth={visualIndentation}
           lastSubIsComposite={lastSubPropIsComposite}
