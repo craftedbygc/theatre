@@ -258,7 +258,16 @@ function BasicSelect<TLiteralOptions extends string>({
                 $active={value === key}
                 $highlighted={highlightIndex === i}
                 onMouseEnter={() => setHighlightIndex(i)}
-                onClick={() => selectValue(key)}
+                onMouseDown={(e) => {
+                  // Select on mousedown so outside-click handlers cannot steal the gesture.
+                  e.preventDefault()
+                  e.stopPropagation()
+                  selectValue(key)
+                }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
               >
                 {options[key]}
               </OptionButton>

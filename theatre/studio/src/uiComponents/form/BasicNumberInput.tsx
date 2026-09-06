@@ -15,6 +15,7 @@ import {
 
 const Container = styled.div<{
   $hasRange: boolean
+  $hasLabel: boolean
 }>`
   height: 100%;
   width: 100%;
@@ -27,13 +28,21 @@ const Container = styled.div<{
   border-radius: var(--studio-radius, 8px);
   overflow: hidden;
   background: ${(p) =>
-    p.$hasRange ? 'var(--studio-surface)' : 'transparent'};
-  transition: background 150ms ease;
+    p.$hasRange || p.$hasLabel ? 'var(--studio-surface)' : 'transparent'};
+  box-shadow: ${(p) =>
+    p.$hasRange || p.$hasLabel
+      ? 'inset 0 0 0 1px var(--studio-border)'
+      : 'none'};
+  transition: background 150ms ease, box-shadow 150ms ease;
 
   &:hover,
   &.dragging,
   &.editingViaKeyboard {
     background: var(--studio-surface-hover);
+    box-shadow: ${(p) =>
+      p.$hasRange || p.$hasLabel
+        ? 'inset 0 0 0 1px var(--studio-border-hover)'
+        : 'none'};
   }
 `
 
@@ -496,6 +505,7 @@ const BasicNumberInput: React.FC<{
     <Container
       className={(propsA.className ?? '') + ' ' + stateRef.current.mode}
       $hasRange={!!range}
+      $hasLabel={!!propsA.label}
       onMouseEnter={() => setIsHot(true)}
       onMouseLeave={() => setIsHot(false)}
       style={

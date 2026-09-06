@@ -101,18 +101,21 @@ const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
   justify-content: center;
   flex: 0 0 auto;
 
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.12s ease-out;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.12s ease-out,
+    opacity 0.12s ease-out;
   transform: rotateZ(${(props) => (props.isCollapsed ? 0 : 90)}deg);
   color: var(--studio-text-muted);
 
-  visibility: ${(props) =>
+  /* Always visible so Dialkit-style folders remain discoverable. */
+  visibility: visible;
+  opacity: ${(props) =>
     (!props.isVector && props.isCollapsed) ||
     (props.isVector && !props.isCollapsed)
-      ? 'visible'
-      : 'hidden'};
+      ? 1
+      : 0.55};
 
   ${Header}:hover & {
-    visibility: visible;
+    opacity: 1;
   }
 
   &:hover {

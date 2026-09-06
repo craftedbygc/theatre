@@ -56,12 +56,12 @@ const GlobalStyle =
     ? createGlobalStyle`
   :host {
     all: initial;
+    ${studioTokenCss}
     color: white;
     font-family: var(--studio-font-ui);
     font-size: 13px;
     font-weight: 400;
     line-height: 1.3;
-    ${studioTokenCss}
   }
 
   * {
