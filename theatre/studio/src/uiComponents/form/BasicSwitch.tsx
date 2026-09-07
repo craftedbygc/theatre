@@ -8,7 +8,8 @@ const Container = styled.form`
   justify-content: stretch;
   height: 28px;
   width: 100%;
-  padding: 2px;
+  /* Flush with the chip’s right inset (same as text/number values). */
+  padding: 2px 0 2px 2px;
   box-sizing: border-box;
   border-radius: var(--studio-radius-sm, 6px);
   background: rgba(0, 0, 0, 0.25);

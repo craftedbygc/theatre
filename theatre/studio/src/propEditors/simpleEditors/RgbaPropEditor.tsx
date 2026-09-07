@@ -21,7 +21,8 @@ const RowContainer = styled.div`
   height: 100%;
   width: 100%;
   gap: 8px;
-  padding: 0 8px 0 10px;
+  /* Chip already provides the outer horizontal inset. */
+  padding: 0;
   box-sizing: border-box;
 `
 

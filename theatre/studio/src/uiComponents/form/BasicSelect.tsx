@@ -27,7 +27,8 @@ const Trigger = styled.button`
   border: none;
   box-sizing: border-box;
   color: var(--studio-text-value);
-  padding: 0 28px 0 10px;
+  /* Room for the chevron only — chip already supplies the outer right inset. */
+  padding: 0 16px 0 0;
   font: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -50,15 +51,15 @@ const Trigger = styled.button`
       var(--studio-focus-ring),
       var(--studio-focus-ring)
     );
-    background-size: calc(100% - 38px) 1px;
-    background-position: left 10px bottom 0;
+    background-size: calc(100% - 16px) 1px;
+    background-position: left 0 bottom 0;
     background-repeat: no-repeat;
   }
 `
 
 const IconContainer = styled.div`
   position: absolute;
-  right: 8px;
+  right: 0;
   top: 0;
   bottom: 0;
   width: 1em;

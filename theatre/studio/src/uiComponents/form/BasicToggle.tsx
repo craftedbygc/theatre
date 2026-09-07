@@ -6,7 +6,8 @@ const Container = styled.div`
   align-items: stretch;
   height: 28px;
   min-width: 92px;
-  padding: 2px;
+  /* No right padding — sit flush with the chip’s right inset like text/number. */
+  padding: 2px 0 2px 2px;
   box-sizing: border-box;
   border-radius: var(--studio-radius-sm, 6px);
   background: transparent;
@@ -21,7 +22,7 @@ const Thumb = styled.div<{
   top: 2px;
   bottom: 2px;
   left: 2px;
-  width: calc(50% - 2px);
+  width: calc(50% - 1px);
   border-radius: calc(var(--studio-radius-sm, 6px) - 1px);
   background: var(--studio-surface-active);
   transform: translateX(${(p) => (p.$on ? '100%' : '0%')});
