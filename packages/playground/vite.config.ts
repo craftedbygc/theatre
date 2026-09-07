@@ -43,9 +43,6 @@ const config = defineConfig(async ({command}) => {
     plugins: [react()],
     appType: 'mpa',
     server: {
-      // Bind IPv4 explicitly — without this, Vite may listen on ::1 only and
-      // http://127.0.0.1:8082/ fails with ERR_CONNECTION_REFUSED.
-      host: '127.0.0.1',
       port: 8082,
       // base: '/playground/',
     },
