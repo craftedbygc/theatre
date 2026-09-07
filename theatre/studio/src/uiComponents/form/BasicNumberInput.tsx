@@ -33,8 +33,13 @@ const Container = styled.div<{
       : p.$hasRange
       ? 'var(--studio-surface)'
       : 'transparent'};
-  box-shadow: none;
-  transition: background 150ms ease, box-shadow 150ms ease;
+  /* Embedded rows live inside a chip — no extra chrome. Standalone ranged
+     inputs use outline so hover doesn’t shrink the fixed row height. */
+  border: none;
+  outline: ${(p) =>
+    p.$embedded || !p.$hasRange ? 'none' : '1px solid transparent'};
+  outline-offset: -1px;
+  transition: background 150ms ease, outline-color 150ms ease;
 
   &:hover,
   &.dragging,
@@ -45,10 +50,10 @@ const Container = styled.div<{
         : p.$hasRange
         ? 'var(--studio-surface-hover)'
         : 'transparent'};
-    box-shadow: ${(p) =>
+    outline-color: ${(p) =>
       p.$embedded || !p.$hasRange
-        ? 'none'
-        : 'inset 0 0 0 1px var(--studio-border-hover)'};
+        ? 'transparent'
+        : 'var(--studio-border-hover)'};
   }
 `
 
@@ -131,7 +136,7 @@ const Content = styled.div`
 
 const TextRow = styled.div`
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   width: 100%;
   min-width: 0;
@@ -154,7 +159,7 @@ const ValueSlot = styled.div`
   flex: 0 0 auto;
   position: relative;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   height: 16px;
   /* Always receive hits so only the value (not the whole chip) enters edit. */
   pointer-events: auto;
@@ -181,14 +186,24 @@ const Input = styled.input<{
 }>`
   background: transparent;
   border: none;
-  /* Underline via shadow so it does not change the 16px text box height. */
-  box-shadow: inset 0 -1px 0
+  /* Underline via background so it does not change the 16px text box height. */
+  background-image: linear-gradient(
     ${(p) =>
       p.$invalid
         ? '#e25555'
         : p.$isEditing
         ? 'var(--studio-focus-ring)'
-        : 'transparent'};
+        : 'transparent'},
+    ${(p) =>
+      p.$invalid
+        ? '#e25555'
+        : p.$isEditing
+        ? 'var(--studio-focus-ring)'
+        : 'transparent'}
+  );
+  background-size: 100% 1px;
+  background-position: left 0 bottom 0;
+  background-repeat: no-repeat;
   border-radius: 0;
   color: var(--studio-text-value);
   margin: 0;

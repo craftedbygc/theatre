@@ -37,9 +37,7 @@ const Gradient = styled.div.attrs<GradientProps>(({colorFrom, colorTo}) => ({
   bottom: 0;
   pointer-events: none;
   border-radius: inherit;
-
-  // Improve rendering on light backgrounds
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 `
 
 const StyledPointer = styled(Pointer)`

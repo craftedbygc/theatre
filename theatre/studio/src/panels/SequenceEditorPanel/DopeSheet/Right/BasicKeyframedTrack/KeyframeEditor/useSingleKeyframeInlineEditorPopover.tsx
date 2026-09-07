@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
 import BasicPopover from '@unseenco/theatre-studio/uiComponents/Popover/BasicPopover'
 import {DeterminePropEditorForKeyframeTree} from './DeterminePropEditorForSingleKeyframe'
@@ -13,12 +14,33 @@ import type {
 import type {PathToProp} from '@unseenco/theatre-shared/utils/addresses'
 import type {UnknownValidCompoundProps} from '@unseenco/theatre-core/propTypes/internals'
 
+/**
+ * The popover *is* the edit chip: same fill as the chip, arrow in that color,
+ * no outer chrome around a nested chip.
+ *
+ * `&&` raises specificity so these vars beat BasicPopover’s defaults on the
+ * same node (otherwise the arrow tip keeps the gray outer-stroke).
+ */
+const KeyframeInlineEditorPopover = styled(BasicPopover)`
+  && {
+    --popover-bg: var(--studio-chip-bg, #393c40);
+    --popover-outer-stroke: var(--studio-chip-bg, #393c40);
+    --popover-inner-stroke: var(--studio-chip-bg, #393c40);
+
+    background: var(--studio-chip-bg, #393c40);
+    border: none;
+    border-radius: var(--studio-radius, 4px);
+    padding: 0;
+    overflow: visible;
+  }
+`
+
 /** The editor that pops up when directly clicking a Keyframe. */
 export function useKeyframeInlineEditorPopover(
   props: EditingOptionsTree[] | null,
 ) {
   return usePopover({debugName: 'useKeyframeInlineEditorPopover'}, () => (
-    <BasicPopover showPopoverEdgeTriangle>
+    <KeyframeInlineEditorPopover showPopoverEdgeTriangle>
       {!Array.isArray(props)
         ? undefined
         : props.map((prop, i) => (
@@ -30,7 +52,7 @@ export function useKeyframeInlineEditorPopover(
               indent={0}
             />
           ))}
-    </BasicPopover>
+    </KeyframeInlineEditorPopover>
   ))
 }
 

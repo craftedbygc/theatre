@@ -23,10 +23,8 @@ export const Container = styled.button`
 
   color: #a8a8a9;
 
-  background: rgba(40, 43, 47, 0.8);
-  backdrop-filter: blur(14px);
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--studio-panel-bg, #282b2f);
+  border: 1px solid var(--studio-border);
   border-radius: var(--studio-radius);
 
   svg {
@@ -35,29 +33,30 @@ export const Container = styled.button`
   }
 
   &:hover {
-    background: rgba(59, 63, 69, 0.8);
+    background: #3b3f45;
+    border-color: var(--studio-border-hover);
   }
 
   &:active {
-    background: rgba(82, 88, 96, 0.8);
+    background: #525860;
   }
 
   &.selected {
     color: rgba(255, 255, 255, 0.8);
-    background: rgba(30, 88, 102, 0.7);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1e5866;
+    border-color: var(--studio-border);
 
     &:hover {
-      background: rgba(30, 88, 102, 0.85);
+      background: #246a7a;
+      border-color: var(--studio-border-hover);
     }
 
     &:active {
-      background: rgba(30, 88, 102, 0.95);
+      background: #2a7a8c;
     }
   }
 
   ${ToolbarSwitchSelectContainer} > & {
-    backdrop-filter: none;
     filter: none;
     border-radius: 0;
 
@@ -70,10 +69,6 @@ export const Container = styled.button`
       border-bottom-right-radius: var(--studio-radius);
       border-top-right-radius: var(--studio-radius);
     }
-  }
-
-  @supports not (backdrop-filter: blur()) {
-    background: rgba(40, 43, 47, 0.95);
   }
 `
 

@@ -16,14 +16,12 @@ import {
   getStudioTrackSequenceVariant,
 } from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
-import {studioChipSurfaceCss} from '@unseenco/theatre-studio/uiComponents/studioTokens'
-
 const SectionLabel = styled.div`
   font-size: 11px;
   font-weight: 500;
   line-height: 13px;
   letter-spacing: 0.01em;
-  padding: 6px 4px 4px;
+  padding: 6px 10px 4px;
   color: var(--studio-text-muted, #919191);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -33,8 +31,11 @@ const SectionLabel = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: stretch;
-  min-width: 240px;
-  padding: 3px 0;
+  /* Hug the control; don’t force a wide empty chip. */
+  width: max-content;
+  min-width: 160px;
+  max-width: 320px;
+  padding: 0;
   box-sizing: border-box;
 
   select {
@@ -42,7 +43,10 @@ const Row = styled.div`
   }
 `
 
-/** Same Dialkit chip chrome as the details pane (`SingleRowPropEditor`). */
+/**
+ * Content row inside the keyframe popover. The popover shell itself is the
+ * chip surface (see KeyframeInlineEditorPopover); this only lays out label + value.
+ */
 const Chip = styled.div<{
   $ownsLabel: boolean
   $interactive: boolean
@@ -56,8 +60,13 @@ const Chip = styled.div<{
   gap: 12px;
   padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
   box-sizing: border-box;
+  background: transparent;
+  border-radius: var(--studio-radius);
   ${(props) => (props.$interactive ? 'cursor: pointer;' : '')}
-  ${studioChipSurfaceCss};
+
+  &:hover {
+    background: var(--studio-chip-bg-hover, #3e4248);
+  }
 `
 
 const PropName = styled.div<{

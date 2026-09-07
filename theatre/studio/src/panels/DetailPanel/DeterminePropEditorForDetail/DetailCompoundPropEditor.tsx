@@ -33,7 +33,7 @@ import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/act
 const Container = styled.div`
   --step: 12px;
   /* Align first-level rows with the root folder title (margin 10px). */
-  --left-pad: 10px;
+  --left-pad: 5px;
   ${pointerEventsAutoInNormalMode};
   --right-width: 58%;
 `

@@ -15,7 +15,6 @@ const Container = styled.div`
   background-color: #fff;
   border: 1px solid #ffffff00;
   border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
   ${StyledInteractive}:focus & {
     transform: translate(-50%, -50%) scale(1.1);

@@ -72,17 +72,15 @@ const minDims = {width: 280, height: 200}
 const Container = styled.div<{pin: boolean; $docked: boolean}>`
   ${pointerEventsAutoInNormalMode};
   background-color: ${({$docked}) =>
-    $docked ? 'transparent' : 'rgba(40, 43, 47, 0.8)'};
+    $docked ? 'transparent' : 'var(--studio-panel-bg, #282b2f)'};
   position: ${({$docked}) => ($docked ? 'relative' : 'absolute')};
   height: ${({$docked}) => ($docked ? '100%' : 'fit-content')};
   z-index: ${panelZIndexes.propsPanel};
 
-  box-shadow: ${({$docked}) =>
-    $docked
-      ? 'none'
-      : '0 1px 1px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15)'};
-  backdrop-filter: ${({$docked}) => ($docked ? 'none' : 'blur(14px)')};
+  border: ${({$docked}) =>
+    $docked ? 'none' : '1px solid var(--studio-border)'};
   border-radius: ${({$docked}) => ($docked ? '0' : 'var(--studio-radius)')};
+  box-sizing: border-box;
 
   display: ${({pin}) => (pin ? 'block' : 'none')};
 
@@ -100,11 +98,6 @@ const Container = styled.div<{pin: boolean; $docked: boolean}>`
     css`
       display: none !important;
     `};
-
-  @supports not (backdrop-filter: blur()) {
-    background: ${({$docked}) =>
-      $docked ? 'transparent' : 'rgba(40, 43, 47, 0.95)'};
-  }
 `
 
 const Title = styled.div`

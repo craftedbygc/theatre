@@ -97,8 +97,6 @@ const Menu = styled.div`
   border-radius: var(--studio-radius, 4px);
   background: var(--studio-dropdown-bg);
   border: 1px solid var(--studio-border);
-  box-shadow: var(--studio-shadow-dropdown);
-  backdrop-filter: blur(12px);
   /* PortalLayer is pointer-events: none; re-enable hits like other popovers. */
   pointer-events: auto;
   display: flex;

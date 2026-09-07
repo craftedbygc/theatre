@@ -12,6 +12,8 @@ export const studioTokenCss = `
   --studio-font-ui: ${studioFontUi};
   --studio-font-mono: ${studioFontMono};
 
+  --studio-panel-bg: #282b2f;
+
   --studio-surface: rgba(255, 255, 255, 0.08);
   --studio-surface-hover: rgba(255, 255, 255, 0.11);
   --studio-surface-active: rgba(255, 255, 255, 0.16);
@@ -30,8 +32,10 @@ export const studioTokenCss = `
   --studio-focus-ring: rgba(255, 255, 255, 0.55);
 
   --studio-dropdown-bg: #2a2a2a;
-  --studio-glass-bg: rgba(33, 33, 33, 0.92);
-  --studio-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --studio-popover-bg: #282b2f;
+  /* Opaque chip fill ≈ panel-bg + --studio-surface (8% white) */
+  --studio-chip-bg: #393c40;
+  --studio-chip-bg-hover: #3e4248;
 
   --studio-radius: 4px;
   --studio-radius-sm: 3px;
@@ -44,11 +48,13 @@ export const studioTokenCss = `
 export const studioChipSurfaceCss = `
   background: var(--studio-surface);
   border-radius: var(--studio-radius);
-  box-shadow: inset 0 0 0 1px transparent;
-  transition: background 150ms ease, box-shadow 150ms ease;
+  /* Outline keeps hover chrome from eating into the fixed row height. */
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: background 150ms ease, outline-color 150ms ease;
 
   &:hover {
     background: var(--studio-surface-hover);
-    box-shadow: inset 0 0 0 1px var(--studio-border-hover);
+    outline-color: var(--studio-border-hover);
   }
 `

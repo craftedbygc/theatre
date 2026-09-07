@@ -44,9 +44,11 @@ const Input = styled.input.attrs({type: 'text'})<{
   margin-left: auto;
   overflow: hidden;
   text-overflow: ellipsis;
-  background-image: none;
-  /* Inset shadow keeps layout height stable (no padding-bottom skew). */
-  box-shadow: inset 0 -1px 0 transparent;
+  /* Underline via background so layout height stays stable. */
+  background-image: linear-gradient(transparent, transparent);
+  background-size: 100% 1px;
+  background-position: left 0 bottom 0;
+  background-repeat: no-repeat;
 
   &:hover {
     background-color: transparent;
@@ -55,11 +57,14 @@ const Input = styled.input.attrs({type: 'text'})<{
   &:focus {
     cursor: text;
     background-color: transparent;
-    box-shadow: inset 0 -1px 0 var(--studio-focus-ring);
+    background-image: linear-gradient(
+      var(--studio-focus-ring),
+      var(--studio-focus-ring)
+    );
   }
 
   &.invalid {
-    box-shadow: inset 0 -1px 0 #e25555;
+    background-image: linear-gradient(#e25555, #e25555);
   }
 `
 
