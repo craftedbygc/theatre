@@ -48,11 +48,13 @@ export const studioTokenCss = `
 export const studioChipSurfaceCss = `
   background: var(--studio-surface);
   border-radius: var(--studio-radius);
-  border: 1px solid transparent;
-  transition: background 150ms ease, border-color 150ms ease;
+  /* Outline keeps hover chrome from eating into the fixed row height. */
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: background 150ms ease, outline-color 150ms ease;
 
   &:hover {
     background: var(--studio-surface-hover);
-    border-color: var(--studio-border-hover);
+    outline-color: var(--studio-border-hover);
   }
 `

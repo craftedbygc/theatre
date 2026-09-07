@@ -31,7 +31,10 @@ const SectionLabel = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: stretch;
-  min-width: 240px;
+  /* Hug the control; don’t force a wide empty chip. */
+  width: max-content;
+  min-width: 160px;
+  max-width: 320px;
   padding: 0;
   box-sizing: border-box;
 
