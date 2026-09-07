@@ -17,6 +17,9 @@ import type {IContextMenuItem} from '@unseenco/theatre-studio/uiComponents/simpl
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 import {mergeRefs} from 'react-merge-refs'
+import {ObjectStatusCircle} from '@unseenco/theatre-studio/uiComponents/icons'
+import {objectHasDivergedFromSavedState} from '@unseenco/theatre-studio/propEditors/objectHasDivergedFromSavedState'
+import {DIVERGED_FROM_SAVED_STATE_TITLE} from '@unseenco/theatre-studio/propEditors/SavedStateDiamondWrapper'
 
 export const ObjectItem: React.VFC<{
   sheetObject: SheetObject
@@ -47,6 +50,11 @@ export const ObjectItem: React.VFC<{
       ? 'selected'
       : 'not-selected'
   }, [sheetObject, variant])
+
+  const hasDivergedFromSavedState = usePrism(
+    () => objectHasDivergedFromSavedState(sheetObject),
+    [sheetObject],
+  )
 
   const contextMenuItems = usePrism((): IContextMenuItem[] => {
     const sheetAddress = sheetObject.sheet.address
@@ -131,6 +139,18 @@ export const ObjectItem: React.VFC<{
         depth={depth}
         selectionStatus={selectionStatus}
         headerRef={mergeRefs([headerRef, targetRef])}
+        leafIcon={
+          <span
+            title={
+              hasDivergedFromSavedState
+                ? DIVERGED_FROM_SAVED_STATE_TITLE
+                : undefined
+            }
+            style={{display: 'flex', lineHeight: 0}}
+          >
+            <ObjectStatusCircle filled={hasDivergedFromSavedState} />
+          </span>
+        }
       />
     </>
   )
