@@ -72,13 +72,10 @@ const Head_Label = styled.span`
   ${outlineItemFont};
 
   ${pointerEventsAutoInNormalMode};
-  position: relative;
-  // Compensate for border bottom
-  top: 0.5px;
   display: flex;
-  height: 20px;
   align-items: center;
   box-sizing: border-box;
+  line-height: 1;
 `
 
 const Head_IconContainer = styled.div`
@@ -88,6 +85,7 @@ const Head_IconContainer = styled.div`
   align-items: center;
   position: relative;
   opacity: 0.99;
+  line-height: 0;
 `
 
 const Head_Icon_WithDescendants = styled.span`
