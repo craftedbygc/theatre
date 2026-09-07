@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import styled from 'styled-components'
 
 import type {PropTypeConfig_AllSimples} from '@unseenco/theatre-core/propTypes'
@@ -45,6 +45,7 @@ const Row = styled.div`
 /** Same Dialkit chip chrome as the details pane (`SingleRowPropEditor`). */
 const Chip = styled.div<{
   $ownsLabel: boolean
+  $interactive: boolean
 }>`
   flex: 1 1 auto;
   min-width: 0;
@@ -55,17 +56,20 @@ const Chip = styled.div<{
   gap: 12px;
   padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
   box-sizing: border-box;
+  ${(props) => (props.$interactive ? 'cursor: pointer;' : '')}
   ${studioChipSurfaceCss};
 `
 
-const PropName = styled.div`
+const PropName = styled.div<{
+  $interactive?: boolean
+}>`
   /* Labels keep full natural width; only the value slot may shrink. */
   flex: 0 0 auto;
   white-space: nowrap;
   display: flex;
   align-items: center;
   user-select: none;
-  cursor: default;
+  cursor: ${(props) => (props.$interactive ? 'pointer' : 'default')};
   font-size: 13px;
   font-weight: 500;
   color: var(--studio-text-label);
@@ -99,6 +103,12 @@ const INDENT_PX = 10
 
 function editorOwnsLabel(propType: string): boolean {
   return propType === 'number'
+}
+
+function chipHostClickable(propType: string): boolean {
+  return (
+    propType === 'boolean' || propType === 'string' || propType === 'rgba'
+  )
 }
 
 /**
@@ -164,6 +174,7 @@ function PrimitivePropEditor(
   const label = p.propConfig.label ?? last(p.pathToProp)
   const editingTools = useEditingToolsForKeyframeEditorPopover(p)
   const labelText = typeof label === 'string' ? label : String(label ?? '')
+  const hostClickRef = useRef<((e: React.MouseEvent) => void) | null>(null)
 
   if (p.propConfig.type === 'enum') {
     // notice: enums are not implemented, yet.
@@ -175,11 +186,25 @@ function PrimitivePropEditor(
   ] as React.VFC<ISimplePropEditorReactProps<PropTypeConfig_AllSimples>>
 
   const ownsLabel = editorOwnsLabel(p.propConfig.type)
+  const interactive = chipHostClickable(p.propConfig.type)
 
   return (
     <Row style={{paddingLeft: `${p.indent * INDENT_PX}px`}}>
-      <Chip data-detail-prop-chip="" $ownsLabel={ownsLabel}>
-        {!ownsLabel && <PropName>{labelText}</PropName>}
+      <Chip
+        data-detail-prop-chip=""
+        $ownsLabel={ownsLabel}
+        $interactive={interactive}
+        onClick={
+          interactive
+            ? (e) => {
+                hostClickRef.current?.(e)
+              }
+            : undefined
+        }
+      >
+        {!ownsLabel && (
+          <PropName $interactive={interactive}>{labelText}</PropName>
+        )}
         <InputSlot $fullBleed={ownsLabel}>
           <PropEditor
             editingTools={editingTools}
@@ -187,6 +212,7 @@ function PrimitivePropEditor(
             value={valueInProp(p.keyframe.value, p.propConfig)}
             autoFocus={p.autoFocusInput}
             {...(ownsLabel ? {label: labelText, embedded: true} : {})}
+            {...(interactive ? {hostClickRef} : {})}
           />
         </InputSlot>
       </Chip>

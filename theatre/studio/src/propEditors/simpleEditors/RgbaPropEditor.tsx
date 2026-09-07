@@ -6,7 +6,7 @@ import {
   rgba2hex,
   parseRgbaFromHex,
 } from '@unseenco/theatre-shared/utils/color'
-import React, {useCallback, useRef} from 'react'
+import React, {useCallback, useLayoutEffect, useRef} from 'react'
 import {RgbaColorPicker} from '@unseenco/theatre-studio/uiComponents/colorPicker'
 import styled from 'styled-components'
 import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
@@ -59,7 +59,7 @@ const RgbaPopover = styled.div`
   color: white;
   margin: 0;
   cursor: default;
-  border-radius: 3px;
+  border-radius: var(--studio-radius);
   z-index: 10000;
   backdrop-filter: blur(8px);
 
@@ -74,6 +74,7 @@ function RgbaPropEditor({
   editingTools,
   value,
   autoFocus,
+  hostClickRef,
 }: ISimplePropEditorReactProps<PropTypeConfig_Rgba>) {
   const containerRef = useRef<HTMLDivElement>(null!)
 
@@ -107,6 +108,21 @@ function RgbaPropEditor({
     </RgbaPopover>
   ))
 
+  const openPicker = useCallback(
+    (e: React.MouseEvent) => {
+      popover.toggle(e, containerRef.current)
+    },
+    [popover.toggle],
+  )
+
+  useLayoutEffect(() => {
+    if (!hostClickRef) return
+    hostClickRef.current = openPicker
+    return () => {
+      hostClickRef.current = null
+    }
+  }, [hostClickRef, openPicker])
+
   return (
     <>
       <RowContainer>
@@ -123,7 +139,9 @@ function RgbaPropEditor({
           rgbaColor={value}
           ref={containerRef}
           onClick={(e) => {
-            popover.toggle(e, containerRef.current)
+            // Don't also fire the chip host handler (would toggle twice).
+            e.stopPropagation()
+            openPicker(e)
           }}
         />
       </RowContainer>

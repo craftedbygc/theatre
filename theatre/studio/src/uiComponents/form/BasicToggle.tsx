@@ -65,8 +65,13 @@ export default function BasicToggle({
   autoFocus?: boolean
   className?: string
 }) {
-  const setOff = useCallback(() => onChange(false), [onChange])
-  const setOn = useCallback(() => onChange(true), [onChange])
+  const toggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      onChange(!value)
+    },
+    [onChange, value],
+  )
 
   return (
     <Container className={className} role="radiogroup" aria-label="Toggle">
@@ -76,7 +81,7 @@ export default function BasicToggle({
         role="radio"
         aria-checked={!value}
         $active={!value}
-        onClick={setOff}
+        onClick={toggle}
         autoFocus={autoFocus && !value}
       >
         Off
@@ -86,7 +91,7 @@ export default function BasicToggle({
         role="radio"
         aria-checked={value}
         $active={value}
-        onClick={setOn}
+        onClick={toggle}
         autoFocus={autoFocus && value}
       >
         On

@@ -2,7 +2,7 @@ import type * as propTypes from '@unseenco/theatre-core/propTypes'
 import {getPointerParts} from '@unseenco/theatre-dataverse'
 import type {Pointer, Prism} from '@unseenco/theatre-dataverse'
 import {last} from 'lodash-es'
-import React from 'react'
+import React, {useRef} from 'react'
 import type {useEditingToolsForSimplePropInDetailsPanel} from '@unseenco/theatre-studio/propEditors/useEditingToolsForSimpleProp'
 import styled from 'styled-components'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
@@ -41,6 +41,7 @@ const Gutter = styled.div`
 
 const Chip = styled.div<{
   $ownsLabel: boolean
+  $interactive: boolean
   isHighlighted: PropHighlighted
 }>`
   flex: 1 1 auto;
@@ -52,6 +53,7 @@ const Chip = styled.div<{
   gap: 12px;
   padding: ${(props) => (props.$ownsLabel ? '0' : '0 10px')};
   box-sizing: border-box;
+  ${(props) => (props.$interactive ? 'cursor: pointer;' : '')}
   ${studioChipSurfaceCss};
   ${(props) =>
     props.isHighlighted === 'self'
@@ -64,6 +66,7 @@ const Chip = styled.div<{
 const PropName = styled.div<{
   isHighlighted: PropHighlighted
   $isTransient?: boolean
+  $interactive?: boolean
 }>`
   /* Labels keep full natural width; only the value slot may shrink. */
   flex: 0 0 auto;
@@ -71,7 +74,7 @@ const PropName = styled.div<{
   display: flex;
   align-items: center;
   user-select: none;
-  cursor: default;
+  cursor: ${(props) => (props.$interactive ? 'pointer' : 'default')};
   font-size: 13px;
   font-weight: 500;
   color: ${(props) =>
@@ -118,6 +121,15 @@ function editorOwnsLabel(propConfig: propTypes.PropTypeConfig): boolean {
   return propConfig.type === 'number'
 }
 
+/** Whole-chip click targets (label + empty chrome) for these editors. */
+function chipHostClickable(propConfig: propTypes.PropTypeConfig): boolean {
+  return (
+    propConfig.type === 'boolean' ||
+    propConfig.type === 'string' ||
+    propConfig.type === 'rgba'
+  )
+}
+
 export function SingleRowPropEditor<T>({
   propConfig,
   pointerToProp,
@@ -149,19 +161,28 @@ export function SingleRowPropEditor<T>({
   })
 
   const ownsLabel = editorOwnsLabel(propConfig)
+  const interactive = chipHostClickable(propConfig)
+  const hostClickRef = useRef<((e: React.MouseEvent) => void) | null>(null)
 
-  const editor = ownsLabel
-    ? React.Children.map(children, (child) => {
-        if (!React.isValidElement(child)) return child
-        return React.cloneElement(
-          child as React.ReactElement<{label?: string; embedded?: boolean}>,
-          {
-            label: typeof label === 'string' ? label : String(label ?? ''),
-            embedded: true,
-          },
-        )
-      })
-    : children
+  const editor = React.Children.map(children, (child) => {
+    if (!React.isValidElement(child)) return child
+    return React.cloneElement(
+      child as React.ReactElement<{
+        label?: string
+        embedded?: boolean
+        hostClickRef?: typeof hostClickRef
+      }>,
+      {
+        ...(ownsLabel
+          ? {
+              label: typeof label === 'string' ? label : String(label ?? ''),
+              embedded: true,
+            }
+          : null),
+        ...(interactive ? {hostClickRef} : null),
+      },
+    )
+  })
 
   return (
     <Container isHighlighted={isHighlighted}>
@@ -169,13 +190,22 @@ export function SingleRowPropEditor<T>({
       <Chip
         data-detail-prop-chip=""
         $ownsLabel={ownsLabel}
+        $interactive={interactive}
         isHighlighted={isHighlighted}
         ref={targetRef as $FixMe}
+        onClick={
+          interactive
+            ? (e) => {
+                hostClickRef.current?.(e)
+              }
+            : undefined
+        }
       >
         {!ownsLabel && (
           <PropName
             isHighlighted={isHighlighted}
             $isTransient={isTransient}
+            $interactive={interactive}
           >
             {label}
           </PropName>
