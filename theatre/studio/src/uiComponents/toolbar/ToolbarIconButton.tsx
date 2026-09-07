@@ -24,8 +24,7 @@ export const Container = styled.button`
   color: #a8a8a9;
 
   background: var(--studio-panel-bg, #282b2f);
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--studio-border);
   border-radius: var(--studio-radius);
 
   svg {
@@ -35,6 +34,7 @@ export const Container = styled.button`
 
   &:hover {
     background: #3b3f45;
+    border-color: var(--studio-border-hover);
   }
 
   &:active {
@@ -44,10 +44,11 @@ export const Container = styled.button`
   &.selected {
     color: rgba(255, 255, 255, 0.8);
     background: #1e5866;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-color: var(--studio-border);
 
     &:hover {
       background: #246a7a;
+      border-color: var(--studio-border-hover);
     }
 
     &:active {

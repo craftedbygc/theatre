@@ -35,10 +35,10 @@ const Header = styled(BaseHeader)`
   white-space: nowrap;
 
   border-radius: var(--studio-radius);
+  border: 1px solid var(--studio-border);
 
   color: rgba(255, 255, 255, 0.9);
   background: var(--studio-panel-bg, #282b2f);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   &.descendant-is-selected {
     background: #1d353b;
@@ -47,18 +47,17 @@ const Header = styled(BaseHeader)`
   ${pointerEventsAutoInNormalMode};
   &:not(.not-selectable):not(.selected):hover {
     background: #3b3f45;
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+    border-color: var(--studio-border-hover);
   }
 
   &:not(.not-selectable):not(.selected):active {
     background: #525860;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+    border-color: var(--studio-border-hover);
   }
 
   &.selected {
     background: #1e5866;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-color: var(--studio-border);
   }
 `
 

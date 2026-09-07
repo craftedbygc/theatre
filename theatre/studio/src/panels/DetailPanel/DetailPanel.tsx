@@ -77,7 +77,10 @@ const Container = styled.div<{pin: boolean; $docked: boolean}>`
   height: ${({$docked}) => ($docked ? '100%' : 'fit-content')};
   z-index: ${panelZIndexes.propsPanel};
 
+  border: ${({$docked}) =>
+    $docked ? 'none' : '1px solid var(--studio-border)'};
   border-radius: ${({$docked}) => ($docked ? '0' : 'var(--studio-radius)')};
+  box-sizing: border-box;
 
   display: ${({pin}) => (pin ? 'block' : 'none')};
 

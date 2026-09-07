@@ -35,8 +35,11 @@ import {transportStripHeight} from './PlaybackControls/constants'
 
 const Container = styled(PanelWrapper)<{$docked?: boolean}>`
   z-index: ${panelZIndexes.sequenceEditorPanel};
+  border: ${({$docked}) =>
+    $docked ? 'none' : '1px solid var(--studio-border)'};
   border-radius: ${({$docked}) =>
     $docked ? '0' : 'var(--studio-radius)'};
+  box-sizing: border-box;
   overflow: ${({$docked}) => ($docked ? 'visible' : 'hidden')};
 `
 
