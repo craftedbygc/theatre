@@ -12,7 +12,6 @@ import {isProject, isSheetObject} from '@unseenco/theatre-shared/instanceTypes'
 import {
   panelZIndexes,
   TitleBar_Piece,
-  TitleBar_Punctuation,
 } from '@unseenco/theatre-studio/panels/BasePanel/common'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import ObjectDetails from './ObjectDetails'
