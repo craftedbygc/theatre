@@ -78,6 +78,9 @@ export default function usePopover(
 
   const close = useCallback<CloseFn>((reason: string): void => {
     _debug(`closing due to "${reason}"`)
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePopover.tsx:close',message:'popover close',data:{reason,debugName:typeof optsRef.current==='function'?optsRef.current().debugName:optsRef.current.debugName,wasOpen:stateRef.current.isOpen,isPointerBeingCaptured:isPointerBeingCaptured()},timestamp:Date.now(),hypothesisId:'H1-H4'})}).catch(()=>{})
+    // #endregion
     stateRef.current = {isOpen: false}
   }, [])
 
@@ -105,7 +108,10 @@ export default function usePopover(
           ? undefined
           : {
               threshold: opts.pointerDistanceThreshold ?? 100,
-              callback: () => {
+              callback: (e: MouseEvent) => {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePopover.tsx:onPointerOutside',message:'pointer outside callback',data:{childHasFocus:lock.childHasFocusRef.current,isPointerBeingCaptured:isPointerBeingCaptured(),clientX:e.clientX,clientY:e.clientY,buttons:e.buttons},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{})
+                // #endregion
                 if (lock.childHasFocusRef.current) return
                 // this is a bit weird, because when you stop capturing, then the popover can close on you...
                 // TODO: Better fixes?
@@ -117,6 +123,9 @@ export default function usePopover(
   }, [])
 
   const toggle = useCallback<OpenFn>((...args) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePopover.tsx:toggle',message:'popover toggle',data:{wasOpen:stateRef.current.isOpen},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{})
+    // #endregion
     if (stateRef.current.isOpen) {
       close('toggled')
     } else {

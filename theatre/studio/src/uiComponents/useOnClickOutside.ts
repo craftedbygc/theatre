@@ -19,6 +19,9 @@ export default function useOnClickOutside(
       if (
         containers.every((container) => !e.composedPath().includes(container))
       ) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useOnClickOutside.ts:onMouseDown',message:'click outside detected',data:{clientX:e.clientX,clientY:e.clientY,targetTag:e.target instanceof Element?e.target.tagName:null},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{})
+        // #endregion
         onOutside(e)
       }
     }
