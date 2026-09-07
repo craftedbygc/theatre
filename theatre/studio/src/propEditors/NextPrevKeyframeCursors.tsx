@@ -42,10 +42,9 @@ const Container = styled.div`
 
   &:after {
     position: absolute;
-    /* Match expanded chevron tips (±11px); slightly narrower than the old
-       -12px padding so the chrome sits further from the pane’s left edge. */
-    left: -11px;
-    right: -11px;
+    /* Keep horizontal overflow tight so hover chrome clears the pane’s left edge. */
+    left: -8px;
+    right: -8px;
     /* Optical icon center is ~1px below geometric mid (SVG content at y=7/12) */
     top: -3px;
     height: 20px;
@@ -64,9 +63,14 @@ const Container = styled.div`
   }
 `
 
-const dimWhenIdle = css`
+/** Prev/next only show while the diamond control is hovered. */
+const hideWhenIdle = css`
+  opacity: 0;
   ${Container}:not(:hover) & {
-    opacity: 0.7;
+    pointer-events: none !important;
+  }
+  ${Container}:hover & {
+    opacity: 1;
   }
 `
 
@@ -74,7 +78,7 @@ const Button = styled.div`
   background: none;
   position: relative;
   border: 0;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
   z-index: 0;
   outline: none;
   cursor: pointer;
@@ -161,13 +165,13 @@ const Prev = styled(PrevOrNextButton)<{
   available: boolean
   flag: PresenceFlag | undefined
 }>`
-  ${dimWhenIdle};
+  ${hideWhenIdle};
   position: absolute;
   left: 0;
   top: 50%;
-  /* Idle: slight tuck. Hover: clear the diamond tip by a few px. */
-  transform: translate(-1px, -50%);
+  transform: translate(-2px, -50%);
   ${Container}:hover & {
+    /* Clear the diamond tip; may sit slightly past the tight hover chrome. */
     transform: translate(-11px, -50%);
   }
 `
@@ -175,11 +179,11 @@ const Next = styled(PrevOrNextButton)<{
   available: boolean
   flag: PresenceFlag | undefined
 }>`
-  ${dimWhenIdle};
+  ${hideWhenIdle};
   position: absolute;
   right: 0;
   top: 50%;
-  transform: translate(1px, -50%);
+  transform: translate(2px, -50%);
   ${Container}:hover & {
     transform: translate(11px, -50%);
   }
