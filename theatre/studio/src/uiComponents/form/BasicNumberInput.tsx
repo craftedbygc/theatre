@@ -150,13 +150,11 @@ const LabelText = styled.div`
 
 const ValueSlot = styled.div`
   margin-left: auto;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
+  /* Hug the digits only — empty chip space must hit DragSurface for scrubbing. */
+  flex: 0 0 auto;
   position: relative;
   display: flex;
   align-items: baseline;
-  justify-content: flex-end;
   height: 16px;
   /* Always receive hits so only the value (not the whole chip) enters edit. */
   pointer-events: auto;
@@ -172,11 +170,7 @@ const ValueText = styled.span`
   color: var(--studio-text-value);
   display: block;
   text-align: right;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 3ch;
   pointer-events: none;
   user-select: none;
 `
