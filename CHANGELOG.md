@@ -1,5 +1,22 @@
 # Theatre.js changelog
 
+## 0.2.0
+
+- New features
+  - Studio:
+    - UI revamp — shared design tokens and restyled details-pane controls (number chips/sliders, toggles, strings, selects, color fields), opaque panes without blur/shadows, bordered surfaces, and keyframe edit popovers that match the chip chrome. Collapsed vector compounds show compact labeled mini-chips; accent colors derive from a single hex token.
+    - Custom tween names on sequencer connector bars (Name / Edit / Clear via context menu); labels persist in project state and show in-bar with ellipsis + hover tooltip.
+    - Outline sheet objects use a dirty-state circle instead of the Package icon — hollow when matching loaded JSON state, filled when any static override or sequence track has diverged.
+    - Details pane prop context menu: "Revert to saved value" (and "Revert all to saved value" for compounds) when a prop has diverged from the JSON state passed to `getProject()`.
+    - Touch support for drag interactions (`useDrag` via Pointer Events), including number-input scrubbing on touch devices.
+  - Core:
+    - Configurable number precision — project-level `numberPrecision` on `getProject()` (default 3 decimal places) and per-prop override via `types.number(default, {precision})`. Studio number inputs round and format using the resolved precision.
+- Bug fixes
+  - Studio:
+    - Color picker no longer closes when releasing the mouse after dragging in the saturation panel.
+    - Dope-sheet keyframe snap works again after pointer-capture changes in drag handling.
+    - Touch number-input drag no longer cancels mid-gesture.
+
 ## 0.1.18
 
 - New features
