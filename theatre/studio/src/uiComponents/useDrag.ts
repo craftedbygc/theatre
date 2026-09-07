@@ -222,9 +222,7 @@ export default function useDrag(
     }
 
     const isPointerLockUsedForEvent = (pointerType: string) =>
-      optsRef.current.shouldPointerLock &&
-      !isSafari &&
-      pointerType === 'mouse'
+      optsRef.current.shouldPointerLock && !isSafari && pointerType === 'mouse'
 
     const dragHandler = (event: PointerEvent) => {
       if (!stateRef.current.domDragStarted) return
@@ -395,15 +393,20 @@ export default function useDrag(
         event.preventDefault()
       }
 
-      const captureEl = getPointerCaptureElement(target, event)
-      pointerCaptureElementRef.current = captureEl
-      try {
-        captureEl.setPointerCapture(event.pointerId)
-      } catch {
-        // setPointerCapture may fail in some edge cases
-      }
-
+      // Pointer capture is only for touch. Capturing mouse pointers retargets
+      // pointer/mouse events and :hover to the capture element, which breaks
+      // hit-testing features like dope-sheet keyframe snap (composedPath +
+      // crosshair :hover on KeyframeSnapTarget hit zones).
+      // Document-level pointermove/up listeners already keep mouse drags alive.
       if (event.pointerType === 'touch') {
+        const captureEl = getPointerCaptureElement(target, event)
+        pointerCaptureElementRef.current = captureEl
+        try {
+          captureEl.setPointerCapture(event.pointerId)
+        } catch {
+          // setPointerCapture may fail in some edge cases
+        }
+
         const touchActionTarget =
           event.target instanceof Element ? event.target : captureEl
         if (
