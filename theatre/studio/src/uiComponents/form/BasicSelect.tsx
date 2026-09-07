@@ -71,7 +71,21 @@ const IconContainer = styled.div`
   pointer-events: none;
 `
 
+const menuIn = `
+  @keyframes basicSelectMenuIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+`
+
 const Menu = styled.div`
+  ${menuIn};
   position: fixed;
   z-index: 10000;
   min-width: 120px;
@@ -88,7 +102,13 @@ const Menu = styled.div`
   pointer-events: auto;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
+  transform-origin: top center;
+  animation: basicSelectMenuIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `
 
 const OptionButton = styled.button<{
