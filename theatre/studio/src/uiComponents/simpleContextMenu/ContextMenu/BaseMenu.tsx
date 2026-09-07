@@ -3,7 +3,6 @@ import React from 'react'
 import Item from './Item'
 import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
 import styled from 'styled-components'
-import {transparentize} from 'polished'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 
 const minWidth = 190
@@ -14,12 +13,10 @@ const MenuContainer = styled.ul`
   position: absolute;
   min-width: ${minWidth}px;
   z-index: 10000;
-  background: ${transparentize(0.8, '#000000')};
-  backdrop-filter: blur(8px) saturate(300%) contrast(65%) brightness(70%);
+  background: var(--studio-popover-bg, #282b2f);
   color: white;
   border: 0.5px solid #6262622c;
   box-sizing: border-box;
-  box-shadow: ${transparentize(0.75, '#000000')} 0px 4px 20px;
   list-style-type: none;
   padding: 0;
   margin: 0;

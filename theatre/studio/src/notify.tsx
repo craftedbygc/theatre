@@ -90,13 +90,7 @@ const NotificationContainer = styled.div`
   display: flex;
   gap: 12px;
   ${pointerEventsAutoInNormalMode};
-  background-color: rgba(40, 43, 47, 0.8);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(14px);
-
-  @supports not (backdrop-filter: blur()) {
-    background: rgba(40, 43, 47, 0.95);
-  }
+  background-color: var(--studio-panel-bg, #282b2f);
 `
 
 const NotificationTitle = styled.div`
@@ -281,9 +275,7 @@ const Button = styled.button<{danger?: boolean}>`
   align-items: center;
   gap: 12px;
   ${pointerEventsAutoInNormalMode};
-  background-color: rgba(40, 43, 47, 0.8);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(14px);
+  background-color: var(--studio-panel-bg, #282b2f);
   border: none;
   padding: 12px;
   color: #fff;
@@ -298,10 +290,6 @@ const Button = styled.button<{danger?: boolean}>`
   :hover::before {
     background: ${({danger}) =>
       danger ? 'rgba(255, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'};
-  }
-
-  @supports not (backdrop-filter: blur()) {
-    background: rgba(40, 43, 47, 0.95);
   }
 `
 

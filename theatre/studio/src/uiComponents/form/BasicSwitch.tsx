@@ -45,7 +45,6 @@ const Label = styled.label`
   &&[data-checked='true'] {
     color: var(--studio-text-focus);
     background: var(--studio-surface-active);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 `
 

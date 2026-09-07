@@ -44,7 +44,6 @@ const EasingTooltip = styled(BasicPopover)`
   --popover-bg: black;
   --popover-outer-stroke: transparent;
   --popover-inner-stroke: transparent;
-  box-shadow: none;
 `
 
 type IProps = {

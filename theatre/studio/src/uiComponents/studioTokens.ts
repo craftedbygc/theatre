@@ -12,6 +12,8 @@ export const studioTokenCss = `
   --studio-font-ui: ${studioFontUi};
   --studio-font-mono: ${studioFontMono};
 
+  --studio-panel-bg: #282b2f;
+
   --studio-surface: rgba(255, 255, 255, 0.08);
   --studio-surface-hover: rgba(255, 255, 255, 0.11);
   --studio-surface-active: rgba(255, 255, 255, 0.16);
@@ -30,8 +32,7 @@ export const studioTokenCss = `
   --studio-focus-ring: rgba(255, 255, 255, 0.55);
 
   --studio-dropdown-bg: #2a2a2a;
-  --studio-glass-bg: rgba(33, 33, 33, 0.92);
-  --studio-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --studio-popover-bg: #282b2f;
 
   --studio-radius: 4px;
   --studio-radius-sm: 3px;
@@ -44,11 +45,11 @@ export const studioTokenCss = `
 export const studioChipSurfaceCss = `
   background: var(--studio-surface);
   border-radius: var(--studio-radius);
-  box-shadow: inset 0 0 0 1px transparent;
-  transition: background 150ms ease, box-shadow 150ms ease;
+  border: 1px solid transparent;
+  transition: background 150ms ease, border-color 150ms ease;
 
   &:hover {
     background: var(--studio-surface-hover);
-    box-shadow: inset 0 0 0 1px var(--studio-border-hover);
+    border-color: var(--studio-border-hover);
   }
 `

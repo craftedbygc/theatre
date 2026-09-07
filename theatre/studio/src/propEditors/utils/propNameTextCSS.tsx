@@ -2,8 +2,7 @@ import type {PropHighlighted} from '@unseenco/theatre-studio/panels/SequenceEdit
 import {css} from 'styled-components'
 
 export const propNameTextCSS = css<{isHighlighted?: PropHighlighted}>`
-  font-weight: 400;
-  font-size: 11px;
+  font-weight: 500;
+  font-size: 12px;
   color: ${(props) => (props.isHighlighted === 'self' ? '#CCC' : '#919191')};
-  text-shadow: 0.5px 0.5px 2px rgba(0, 0, 0, 0.3);
 `

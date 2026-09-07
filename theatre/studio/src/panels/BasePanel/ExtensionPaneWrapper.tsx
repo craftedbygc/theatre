@@ -45,7 +45,6 @@ const Container = styled(PanelWrapper)`
   display: flex;
   flex-direction: column;
 
-  box-shadow: 0px 5px 12px -4px rgb(0 0 0 / 22%);
   z-index: ${panelZIndexes.pluginPanes};
 `
 

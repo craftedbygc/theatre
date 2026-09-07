@@ -35,36 +35,30 @@ const Header = styled(BaseHeader)`
   white-space: nowrap;
 
   border-radius: var(--studio-radius);
-  box-shadow: 0 3px 4px -1px rgba(0, 0, 0, 0.48);
 
   color: rgba(255, 255, 255, 0.9);
-  background: rgba(40, 43, 47, 0.65);
-  backdrop-filter: blur(14px);
+  background: var(--studio-panel-bg, #282b2f);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   &.descendant-is-selected {
-    background: rgba(29, 53, 59, 0.7);
+    background: #1d353b;
   }
 
   ${pointerEventsAutoInNormalMode};
   &:not(.not-selectable):not(.selected):hover {
-    background: rgba(59, 63, 69, 0.9);
+    background: #3b3f45;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.24);
   }
 
   &:not(.not-selectable):not(.selected):active {
-    background: rgba(82, 88, 96, 0.9);
+    background: #525860;
     border-bottom: 1px solid rgba(255, 255, 255, 0.24);
   }
 
   &.selected {
-    background: rgba(30, 88, 102, 0.7);
+    background: #1e5866;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  @supports not (backdrop-filter: blur()) {
-    background: rgba(40, 43, 47, 0.95);
   }
 `
 

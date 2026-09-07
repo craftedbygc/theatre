@@ -70,7 +70,6 @@ const NumberOfConflictsIndicator = styled.div`
   left: -6px;
   top: -11px;
   margin-right: -14px;
-  box-shadow: 0 4px 6px -4px #00000059;
 `
 
 const SubContainer = styled.div`

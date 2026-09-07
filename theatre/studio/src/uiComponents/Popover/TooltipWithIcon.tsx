@@ -23,7 +23,6 @@ const IconContainer = styled.div`
   font-size: 10px;
   /* margin: 0; */
   margin-left: 12px;
-  box-shadow: black 0px 2px 8px -4px;
   flex-wrap: nowrap;
 `
 

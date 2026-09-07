@@ -33,8 +33,8 @@ const Container = styled.div<{
       : p.$hasRange
       ? 'var(--studio-surface)'
       : 'transparent'};
-  box-shadow: none;
-  transition: background 150ms ease, box-shadow 150ms ease;
+  border: 1px solid transparent;
+  transition: background 150ms ease, border-color 150ms ease;
 
   &:hover,
   &.dragging,
@@ -45,10 +45,10 @@ const Container = styled.div<{
         : p.$hasRange
         ? 'var(--studio-surface-hover)'
         : 'transparent'};
-    box-shadow: ${(p) =>
+    border-color: ${(p) =>
       p.$embedded || !p.$hasRange
-        ? 'none'
-        : 'inset 0 0 0 1px var(--studio-border-hover)'};
+        ? 'transparent'
+        : 'var(--studio-border-hover)'};
   }
 `
 
@@ -181,14 +181,24 @@ const Input = styled.input<{
 }>`
   background: transparent;
   border: none;
-  /* Underline via shadow so it does not change the 16px text box height. */
-  box-shadow: inset 0 -1px 0
+  /* Underline via background so it does not change the 16px text box height. */
+  background-image: linear-gradient(
     ${(p) =>
       p.$invalid
         ? '#e25555'
         : p.$isEditing
         ? 'var(--studio-focus-ring)'
-        : 'transparent'};
+        : 'transparent'},
+    ${(p) =>
+      p.$invalid
+        ? '#e25555'
+        : p.$isEditing
+        ? 'var(--studio-focus-ring)'
+        : 'transparent'}
+  );
+  background-size: 100% 1px;
+  background-position: left 0 bottom 0;
+  background-repeat: no-repeat;
   border-radius: 0;
   color: var(--studio-text-value);
   margin: 0;

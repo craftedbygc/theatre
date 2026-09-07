@@ -42,7 +42,7 @@ const ColorPreviewPuck = styled.div.attrs<ColorPreviewPuckProps>((props) => ({
   flex: 0 0 auto;
   aspect-ratio: 1;
   border-radius: var(--studio-radius, 4px);
-  box-shadow: inset 0 0 0 1px var(--studio-border);
+  border: 1px solid var(--studio-border);
   cursor: pointer;
 `
 
@@ -61,13 +61,11 @@ const RgbaPopover = styled.div`
   cursor: default;
   border-radius: var(--studio-radius);
   z-index: 10000;
-  backdrop-filter: blur(8px);
 
   padding: 4px;
   pointer-events: all;
 
   border: none;
-  box-shadow: none;
 `
 
 function RgbaPropEditor({

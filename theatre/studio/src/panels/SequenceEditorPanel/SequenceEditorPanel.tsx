@@ -35,8 +35,6 @@ import {transportStripHeight} from './PlaybackControls/constants'
 
 const Container = styled(PanelWrapper)<{$docked?: boolean}>`
   z-index: ${panelZIndexes.sequenceEditorPanel};
-  box-shadow: ${({$docked}) =>
-    $docked ? 'none' : '2px 2px 0 rgb(0 0 0 / 11%)'};
   border-radius: ${({$docked}) =>
     $docked ? '0' : 'var(--studio-radius)'};
   overflow: ${({$docked}) => ($docked ? 'visible' : 'hidden')};
@@ -44,7 +42,7 @@ const Container = styled(PanelWrapper)<{$docked?: boolean}>`
 
 const LeftBackground = styled.div<{$docked?: boolean}>`
   background-color: ${({$docked}) =>
-    $docked ? DOCKED_PANE_BACKGROUND : 'rgba(40, 43, 47, 0.99)'};
+    $docked ? DOCKED_PANE_BACKGROUND : 'var(--studio-panel-bg, #282b2f)'};
   position: absolute;
   left: 0;
   top: 0;
