@@ -43,16 +43,16 @@ export const Container = styled.button`
 
   &.selected {
     color: rgba(255, 255, 255, 0.8);
-    background: #1e5866;
+    background: var(--studio-accent);
     border-color: var(--studio-border);
 
     &:hover {
-      background: #246a7a;
+      background: var(--studio-accent-hover);
       border-color: var(--studio-border-hover);
     }
 
     &:active {
-      background: #2a7a8c;
+      background: var(--studio-accent-active);
     }
   }
 

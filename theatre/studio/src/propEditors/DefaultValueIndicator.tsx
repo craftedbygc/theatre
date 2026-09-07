@@ -14,6 +14,7 @@ import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/act
 import SavedStateDiamondWrapper, {
   DIVERGED_FROM_SAVED_STATE_TITLE,
 } from './SavedStateDiamondWrapper'
+import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 const theme = {
   defaultState: {
@@ -21,7 +22,7 @@ const theme = {
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
   withStaticOverride: {
-    color: transparentize(0.2, `#339cb5`),
+    color: transparentize(0.2, studioAccent.staticIndicator),
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
 }

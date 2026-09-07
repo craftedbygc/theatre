@@ -8,6 +8,7 @@ import type {CubicBezierHandles} from './shared'
 import {useFreezableMemo} from './useFreezableMemo'
 import {COLOR_BASE} from './colors'
 import type {KeyframeConnectionWithAddress} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
+import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 // Defines the dimensions of the SVG viewbox space
 const VIEWBOX_PADDING = 0.12
@@ -17,18 +18,18 @@ const PATTERN_DOT_SIZE = 0.01
 const PATTERN_DOT_COUNT = 8
 const PATTERN_GRID_SIZE = (1 - PATTERN_DOT_SIZE) / (PATTERN_DOT_COUNT - 1)
 
-// The curve supports a gradient but currently is solid cyan
-const CURVE_START_OVERSHOOT_COLOR = '#3EAAA4'
-const CURVE_START_COLOR = '#3EAAA4'
-const CURVE_MID_START_COLOR = '#3EAAA4'
-const CURVE_MID_COLOR = '#3EAAA4'
-const CURVE_MID_END_COLOR = '#3EAAA4'
-const CURVE_END_COLOR = '#3EAAA4'
-const CURVE_END_OVERSHOOT_COLOR = '#3EAAA4'
+// The curve supports a gradient but currently is solid accent-soft
+const CURVE_START_OVERSHOOT_COLOR = studioAccent.soft
+const CURVE_START_COLOR = studioAccent.soft
+const CURVE_MID_START_COLOR = studioAccent.soft
+const CURVE_MID_COLOR = studioAccent.soft
+const CURVE_MID_END_COLOR = studioAccent.soft
+const CURVE_END_COLOR = studioAccent.soft
+const CURVE_END_OVERSHOOT_COLOR = studioAccent.soft
 
 const CONTROL_COLOR = '#B3B3B3'
-const HANDLE_COLOR = '#3eaaa4'
-const HANDLE_HOVER_COLOR = '#67dfd8'
+const HANDLE_COLOR = studioAccent.soft
+const HANDLE_HOVER_COLOR = studioAccent.softHover
 
 const BACKGROUND_CURVE_COLORS = [
   'goldenrod',
