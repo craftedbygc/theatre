@@ -103,9 +103,6 @@ function RgbaPropEditor({
           editingTools.temporarilySetValue(rgba)
         }}
         permanentlySetValue={(color) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RgbaPropEditor.tsx:permanentlySetValue',message:'permanentlySetValue from picker',data:{color},timestamp:Date.now(),hypothesisId:'H2',runId:'post-fix'})}).catch(()=>{})
-          // #endregion
           const rgba = decorateRgba(color)
           editingTools.permanentlySetValue(rgba)
         }}
@@ -116,12 +113,9 @@ function RgbaPropEditor({
 
   const openPicker = useCallback(
     (e: React.MouseEvent) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RgbaPropEditor.tsx:openPicker',message:'openPicker invoked',data:{eventType:e.type,wasOpen:popover.isOpen,targetTag:e.target instanceof Element?e.target.tagName:null,currentTargetTag:e.currentTarget instanceof Element?e.currentTarget.tagName:null},timestamp:Date.now(),hypothesisId:'H3',runId:'post-fix'})}).catch(()=>{})
-      // #endregion
       popover.toggle(e, containerRef.current)
     },
-    [popover.toggle, popover.isOpen],
+    [popover.toggle],
   )
 
   useLayoutEffect(() => {

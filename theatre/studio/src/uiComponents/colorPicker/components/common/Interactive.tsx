@@ -116,9 +116,6 @@ const InteractiveBase = ({onMove, onKey, ...rest}: Props) => {
 
       el.focus()
       setEditing(true)
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Interactive.tsx:handleMoveStart',message:'color drag start',data:{isTouch:isTouch(nativeEvent),type:nativeEvent.type},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{})
-      // #endregion
       onMoveCallback(getRelativePosition(el, nativeEvent, touchId.current))
       toggleDocumentEvents(true)
     }
@@ -151,9 +148,6 @@ const InteractiveBase = ({onMove, onKey, ...rest}: Props) => {
     // Use move-end anyway (see above) so we can terminate early if we receive one
     // instead of having to wait for the user to move the mouse, which they might not do.
     const handleMoveEnd = (event: MouseEvent | TouchEvent) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Interactive.tsx:handleMoveEnd',message:'color drag end (mouseup)',data:{type:event.type,isTouch:isTouch(event),clientX:!isTouch(event)?(event as MouseEvent).clientX:undefined,clientY:!isTouch(event)?(event as MouseEvent).clientY:undefined},timestamp:Date.now(),hypothesisId:'H1-H2'})}).catch(()=>{})
-      // #endregion
       setEditing(false)
       toggleDocumentEvents(false)
     }
