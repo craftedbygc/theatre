@@ -85,7 +85,12 @@ function RgbaPropEditor({
   )
 
   const popover = usePopover({debugName: 'RgbaPropEditor'}, () => (
-    <RgbaPopover>
+    <RgbaPopover
+      // Portal content still bubbles through the React tree to the chip host.
+      // Stop that so a saturation/hue drag mouseup→click does not toggle-close.
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       <RgbaColorPicker
         color={{
           r: value.r,
