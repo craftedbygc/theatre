@@ -31,16 +31,19 @@ const Input = styled.input.attrs({type: 'text'})<{
       ? `calc(${Math.max(p.$charCount ?? 1, 1)} * 1ch)`
       : 'auto'};
   max-width: 100%;
-  min-width: ${(p) => (p.$fitContent ? '4ch' : '1ch')};
+  /* Allow long values to shrink inside the chip; labels stay full-width. */
+  min-width: ${(p) => (p.$fitContent ? '4ch' : '0')};
   /* Match swatch (18px): same height for hex/string so underline distance matches. */
   height: 18px;
   min-height: 18px;
   line-height: 18px;
   border-radius: 0;
   box-sizing: border-box;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   align-self: center;
   margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background-image: none;
   /* Inset shadow keeps layout height stable (no padding-bottom skew). */
   box-shadow: inset 0 -1px 0 transparent;

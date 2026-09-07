@@ -59,11 +59,9 @@ const Chip = styled.div<{
 `
 
 const PropName = styled.div`
-  flex: 0 1 auto;
-  max-width: 45%;
+  /* Labels keep full natural width; only the value slot may shrink. */
+  flex: 0 0 auto;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   display: flex;
   align-items: center;
   user-select: none;
@@ -83,6 +81,7 @@ const InputSlot = styled.div<{
   min-height: var(--studio-row-height, 36px);
   height: 100%;
   min-width: 0;
+  overflow: hidden;
   ${(props) =>
     props.$fullBleed
       ? `

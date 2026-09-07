@@ -138,24 +138,25 @@ const TextRow = styled.div`
 `
 
 const LabelText = styled.div`
-  flex: 0 1 auto;
-  max-width: 48%;
+  /* Labels keep full natural width; only the value may shrink. */
+  flex: 0 0 auto;
   font-size: 13px;
   font-weight: 500;
   line-height: 16px;
   color: var(--studio-text-label);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   pointer-events: none;
 `
 
 const ValueSlot = styled.div`
   margin-left: auto;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
   position: relative;
   display: flex;
   align-items: baseline;
+  justify-content: flex-end;
   height: 16px;
   /* Always receive hits so only the value (not the whole chip) enters edit. */
   pointer-events: auto;
@@ -171,7 +172,11 @@ const ValueText = styled.span`
   color: var(--studio-text-value);
   display: block;
   text-align: right;
-  min-width: 3ch;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   pointer-events: none;
   user-select: none;
 `
