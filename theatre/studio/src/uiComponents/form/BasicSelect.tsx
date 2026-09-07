@@ -27,7 +27,7 @@ const Trigger = styled.button`
   border: none;
   box-sizing: border-box;
   color: var(--studio-text-value);
-  /* Tight gap before the chevron so the value optically matches other chips. */
+  /* Keep the value→chevron gap; icon is shifted into the chip inset (see IconContainer). */
   padding: 0 12px 0 0;
   font: inherit;
   font-size: 13px;
@@ -59,7 +59,8 @@ const Trigger = styled.button`
 
 const IconContainer = styled.div`
   position: absolute;
-  right: 0;
+  /* Pull into the chip’s right inset so the chevron sits closer to the edge. */
+  right: -4px;
   top: 0;
   bottom: 0;
   width: 1em;
