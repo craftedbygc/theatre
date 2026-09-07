@@ -49,7 +49,10 @@ describe('objectHasDivergedFromSavedState', () => {
   test('returns true when a sequence track is added for the object', async () => {
     const {studio, obj} = await setupTestSheet(emptySheetState)
     const pathToProp = ['position', 'x']
-    const propConfig = getPropConfigByPath(obj.template.config, pathToProp)!
+    const propConfig = getPropConfigByPath(
+      obj.template.staticConfig,
+      pathToProp,
+    )!
 
     studio.transaction(({stateEditors}) => {
       stateEditors.coreByProject.historic.sheetsById.sequence.setPrimitivePropAsSequenced(
