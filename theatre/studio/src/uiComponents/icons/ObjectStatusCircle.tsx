@@ -23,10 +23,10 @@ function ObjectStatusCircle(
       <circle
         cx={8}
         cy={8}
-        r={3.25}
+        r={filled ? 3.5 : 3.25}
         fill={filled ? 'currentColor' : 'none'}
         stroke="currentColor"
-        strokeWidth={1.25}
+        strokeWidth={filled ? 0 : 1.5}
       />
     </svg>
   )
