@@ -27,8 +27,8 @@ const Trigger = styled.button`
   border: none;
   box-sizing: border-box;
   color: var(--studio-text-value);
-  /* Room for the chevron only — chip already supplies the outer right inset. */
-  padding: 0 16px 0 0;
+  /* Tight gap before the chevron so the value optically matches other chips. */
+  padding: 0 12px 0 0;
   font: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -51,7 +51,7 @@ const Trigger = styled.button`
       var(--studio-focus-ring),
       var(--studio-focus-ring)
     );
-    background-size: calc(100% - 16px) 1px;
+    background-size: calc(100% - 12px) 1px;
     background-position: left 0 bottom 0;
     background-repeat: no-repeat;
   }
