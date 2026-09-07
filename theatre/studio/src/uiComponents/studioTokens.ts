@@ -33,6 +33,9 @@ export const studioTokenCss = `
 
   --studio-dropdown-bg: #2a2a2a;
   --studio-popover-bg: #282b2f;
+  /* Opaque chip fill ≈ panel-bg + --studio-surface (8% white) */
+  --studio-chip-bg: #393c40;
+  --studio-chip-bg-hover: #3e4248;
 
   --studio-radius: 4px;
   --studio-radius-sm: 3px;
