@@ -133,6 +133,8 @@ const BaseItem: React.FC<{
   collapsed?: boolean
   setIsCollapsed?: (v: boolean) => void
   headerRef?: React.Ref<HTMLDivElement>
+  /** Replaces the default leaf Package icon when the item has no children. */
+  leafIcon?: React.ReactNode
 }> = ({
   label,
   children,
@@ -143,6 +145,7 @@ const BaseItem: React.FC<{
   collapsed = false,
   setIsCollapsed,
   headerRef,
+  leafIcon,
 }) => {
   const canContainChildren = children !== undefined
 
@@ -172,7 +175,7 @@ const BaseItem: React.FC<{
               <ChevronDown />
             </Head_Icon_WithDescendants>
           ) : (
-            <Package />
+            (leafIcon ?? <Package />)
           )}
         </Head_IconContainer>
 
