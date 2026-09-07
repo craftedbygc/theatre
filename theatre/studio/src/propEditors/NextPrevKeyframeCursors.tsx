@@ -42,12 +42,13 @@ const Container = styled.div`
 
   &:after {
     position: absolute;
-    /* Cover expanded chevrons on hover, with a little padding past the tips */
-    left: -12px;
-    right: -12px;
+    /* Cover expanded chevrons on hover; keep horizontal padding tight so the
+       chrome doesn’t crowd the details pane’s left edge. */
+    left: -13px;
+    right: -13px;
     /* Optical icon center is ~1px below geometric mid (SVG content at y=7/12) */
-    top: -1px;
-    height: 16px;
+    top: -3px;
+    height: 20px;
     border-radius: 2px;
     content: ' ';
     display: none;
@@ -164,10 +165,10 @@ const Prev = styled(PrevOrNextButton)<{
   position: absolute;
   left: 0;
   top: 50%;
-  /* 1px further out than the previous 2px / -2px idle tuck */
+  /* Idle: slight tuck. Hover: clear the diamond tip by a few px. */
   transform: translate(-1px, -50%);
   ${Container}:hover & {
-    transform: translate(-8px, -50%);
+    transform: translate(-11px, -50%);
   }
 `
 const Next = styled(PrevOrNextButton)<{
@@ -180,7 +181,7 @@ const Next = styled(PrevOrNextButton)<{
   top: 50%;
   transform: translate(1px, -50%);
   ${Container}:hover & {
-    transform: translate(8px, -50%);
+    transform: translate(11px, -50%);
   }
 `
 
