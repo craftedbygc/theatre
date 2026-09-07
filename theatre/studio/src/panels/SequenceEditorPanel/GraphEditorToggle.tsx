@@ -12,7 +12,7 @@ const Container = styled.button`
   outline: none;
   background-color: #1c1d21;
   border: 1px solid #191919;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   display: flex;
   bottom: 14px;
   right: 8px;

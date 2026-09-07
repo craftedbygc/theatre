@@ -27,7 +27,7 @@ export const Container = styled.button`
   backdrop-filter: blur(14px);
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
 
   svg {
     display: block;
@@ -62,13 +62,13 @@ export const Container = styled.button`
     border-radius: 0;
 
     &:first-child {
-      border-top-left-radius: 2px;
-      border-bottom-left-radius: 2px;
+      border-top-left-radius: var(--studio-radius);
+      border-bottom-left-radius: var(--studio-radius);
     }
 
     &:last-child {
-      border-bottom-right-radius: 2px;
-      border-top-right-radius: 2px;
+      border-bottom-right-radius: var(--studio-radius);
+      border-top-right-radius: var(--studio-radius);
     }
   }
 

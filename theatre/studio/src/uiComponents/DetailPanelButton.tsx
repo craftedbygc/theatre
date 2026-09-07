@@ -3,7 +3,7 @@ import styled from 'styled-components'
 const DetailPanelButton = styled.button<{disabled?: boolean}>`
   text-align: center;
   padding: 8px;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   border: 1px solid #627b7b87;
   background-color: #4b787d3d;
   color: #eaeaea;

@@ -5,7 +5,7 @@ const Container = styled(Group)`
   display: flex;
   height: fit-content;
   backdrop-filter: blur(14px);
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
 `
 
 export default Container

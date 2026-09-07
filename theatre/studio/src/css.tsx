@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 import {PortalContext} from 'reakit'
 import useRefAndState from './utils/useRefAndState'
+import {studioTokenCss} from './uiComponents/studioTokens'
 
 /**
  * This CSS string is used to correctly set pointer-events on an element
@@ -55,9 +56,12 @@ const GlobalStyle =
     ? createGlobalStyle`
   :host {
     all: initial;
+    ${studioTokenCss}
     color: white;
-    font: 11px -apple-system, BlinkMacSystemFont, Segoe WPC, Segoe Editor,
-      HelveticaNeue-Light, Ubuntu, Droid Sans, sans-serif;
+    font-family: var(--studio-font-ui);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
   }
 
   * {
@@ -67,6 +71,7 @@ const GlobalStyle =
     font: inherit;
     vertical-align: baseline;
     list-style: none;
+    box-sizing: border-box;
   }
 `
     : ({} as ReturnType<typeof createGlobalStyle>)

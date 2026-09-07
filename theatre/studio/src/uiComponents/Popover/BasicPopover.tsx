@@ -12,7 +12,7 @@ const Container = styled.div`
   --popover-inner-stroke: #505159;
   --popover-outer-stroke: rgb(86 100 110 / 46%);
 
-  border-radius: 4px;
+  border-radius: var(--studio-radius);
   box-shadow: rgb(0 0 0 / 25%) 0px 2px 4px;
   backdrop-filter: blur(8px) saturate(300%) contrast(65%) brightness(55%);
   /* background-color: rgb(45 46 66 / 50%); */
@@ -22,7 +22,7 @@ const Container = styled.div`
   /* border: 1px solid var(--popover-inner-stroke); */
 
   color: white;
-  padding: 1px 2px 1px 10px;
+  padding: 4px 8px;
   margin: 0;
   cursor: default;
   ${pointerEventsAutoInNormalMode};

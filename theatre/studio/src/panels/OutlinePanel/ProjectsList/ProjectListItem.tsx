@@ -15,7 +15,7 @@ const ConflictNotice = styled.div`
   margin-left: 11px;
   background: #4c282d;
   padding: 2px 8px;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   font-size: 10px;
   box-shadow: 0 2px 8px -4px black;
 `

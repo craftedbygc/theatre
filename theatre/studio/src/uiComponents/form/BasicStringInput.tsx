@@ -6,35 +6,60 @@ import {mergeRefs} from 'react-merge-refs'
 import useRefAndState from '@unseenco/theatre-studio/utils/useRefAndState'
 import useOnClickOutside from '@unseenco/theatre-studio/uiComponents/useOnClickOutside'
 
-const Input = styled.input.attrs({type: 'text'})`
+const Input = styled.input.attrs({type: 'text'})<{
+  $fitContent?: boolean
+  $charCount?: number
+}>`
   background: transparent;
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 1px 6px;
+  border: none;
+  color: var(--studio-text-value);
+  /* No horizontal padding — underline must end flush with the text’s right edge.
+     No vertical padding — keeps hex text optically centered with the swatch. */
+  padding: 0;
   font: inherit;
+  font-size: 13px;
+  font-weight: ${(p) => (p.$fitContent ? 500 : 'inherit')};
+  font-family: ${(p) =>
+    p.$fitContent ? 'var(--studio-font-mono)' : 'inherit'};
   outline: none;
   cursor: text;
-  text-align: left;
-  width: 100%;
-  height: calc(100% - 4px);
-  border-radius: 2px;
-  border: 1px solid transparent;
+  text-align: right;
+  /* Hug the value so the underline is only as wide as the text, right-aligned. */
+  field-sizing: content;
+  width: ${(p) =>
+    p.$fitContent
+      ? `calc(${Math.max(p.$charCount ?? 1, 1)} * 1ch)`
+      : 'auto'};
+  max-width: 100%;
+  /* Allow long values to shrink inside the chip; labels stay full-width. */
+  min-width: ${(p) => (p.$fitContent ? '4ch' : '0')};
+  /* Match swatch (18px): same height for hex/string so underline distance matches. */
+  height: 18px;
+  min-height: 18px;
+  line-height: 18px;
+  border-radius: 0;
   box-sizing: border-box;
+  flex: 0 1 auto;
+  align-self: center;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-image: none;
+  /* Inset shadow keeps layout height stable (no padding-bottom skew). */
+  box-shadow: inset 0 -1px 0 transparent;
 
   &:hover {
-    background-color: #10101042;
-    border-color: #00000059;
+    background-color: transparent;
   }
 
-  &:hover,
   &:focus {
     cursor: text;
-    background-color: #10101042;
-    border-color: #00000059;
+    background-color: transparent;
+    box-shadow: inset 0 -1px 0 var(--studio-focus-ring);
   }
 
   &.invalid {
-    border-color: red;
+    box-shadow: inset 0 -1px 0 #e25555;
   }
 `
 
@@ -66,6 +91,11 @@ const BasicStringInput: React.FC<{
    */
   onBlur?: () => void
   autoFocus?: boolean
+  /**
+   * When true, the field sizes to its text (ch units) and the focus underline
+   * spans only that width — used for the color hex editor.
+   */
+  fitContent?: boolean
 }> = (props) => {
   const [stateRef] = useRefAndState<IState>({mode: 'noFocus'})
   const isValid = props.isValid ?? alwaysValid
@@ -190,6 +220,9 @@ const BasicStringInput: React.FC<{
       key="input"
       type="text"
       className={`${props.className ?? ''} ${!isValid(value) ? 'invalid' : ''}`}
+      $fitContent={!!props.fitContent}
+      $charCount={String(value).length}
+      size={Math.max(String(value).length, 1)}
       onChange={callbacks.inputChange}
       value={value}
       onBlur={callbacks.onBlur}

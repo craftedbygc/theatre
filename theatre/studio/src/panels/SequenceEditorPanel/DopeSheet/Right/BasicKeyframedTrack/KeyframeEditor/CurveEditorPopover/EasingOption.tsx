@@ -17,7 +17,7 @@ const Wrapper = styled.div<{isSelected: boolean}>`
 
   transition: background-color 0.15s;
   background-color: ${COLOR_BASE};
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   cursor: pointer;
   outline: none;
 

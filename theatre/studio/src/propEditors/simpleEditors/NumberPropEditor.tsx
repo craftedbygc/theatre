@@ -9,7 +9,11 @@ function NumberPropEditor({
   editingTools,
   value,
   autoFocus,
-}: ISimplePropEditorReactProps<PropTypeConfig_Number>) {
+  label,
+  embedded,
+}: ISimplePropEditorReactProps<PropTypeConfig_Number> & {
+  embedded?: boolean
+}) {
   const precision = useMemo(
     () => getNumberPrecisionFromPropConfig(propConfig),
     [propConfig],
@@ -32,6 +36,8 @@ function NumberPropEditor({
       nudge={nudge}
       precision={precision}
       autoFocus={autoFocus}
+      label={label}
+      embedded={embedded}
     />
   )
 }

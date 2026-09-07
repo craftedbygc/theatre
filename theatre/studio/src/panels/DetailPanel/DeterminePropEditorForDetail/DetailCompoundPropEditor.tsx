@@ -11,7 +11,6 @@ import {darken, transparentize} from 'polished'
 import React, {useMemo} from 'react'
 import styled from 'styled-components'
 import {rowIndentationFormulaCSS} from '@unseenco/theatre-studio/panels/DetailPanel/DeterminePropEditorForDetail/rowIndentationFormulaCSS'
-import {propNameTextCSS} from '@unseenco/theatre-studio/propEditors/utils/propNameTextCSS'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
 import DeterminePropEditorForDetail from '@unseenco/theatre-studio/panels/DetailPanel/DeterminePropEditorForDetail'
 import type SheetObject from '@unseenco/theatre-core/sheetObjects/SheetObject'
@@ -20,6 +19,7 @@ import type {PropHighlighted} from '@unseenco/theatre-studio/panels/SequenceEdit
 import {whatPropIsHighlighted} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/whatPropIsHighlighted'
 import {deriver} from '@unseenco/theatre-studio/utils/derive-utils'
 import NumberPropEditor from '@unseenco/theatre-studio/propEditors/simpleEditors/NumberPropEditor'
+import {studioChipSurfaceCss} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 import type {IDetailSimplePropEditorProps} from './DetailSimplePropEditor'
 import {useEditingToolsForSimplePropInDetailsPanel} from '@unseenco/theatre-studio/propEditors/useEditingToolsForSimpleProp'
 import {usePrism} from '@unseenco/theatre-react'
@@ -28,20 +28,22 @@ import {HiOutlineChevronRight} from 'react-icons/all'
 import memoizeFn from '@unseenco/theatre-shared/utils/memoizeFn'
 import {collapsedMap} from './collapsedMap'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
+import {getStudioActiveSequenceVariant} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 
 const Container = styled.div`
-  --step: 10px;
-  /* Enough room for keyframe-cursor hover background + expanded chevrons */
-  --left-pad: 16px;
+  --step: 12px;
+  /* Align first-level rows with the root folder title (margin 10px). */
+  --left-pad: 10px;
   ${pointerEventsAutoInNormalMode};
-  --right-width: 40%;
+  --right-width: 58%;
 `
 
 const Header = styled.div<{isHighlighted: PropHighlighted}>`
-  height: 30px;
+  min-height: var(--studio-row-height);
   display: flex;
   align-items: stretch;
   position: relative;
+  margin: calc(var(--studio-row-gap, 3px) / 2) 0;
 `
 
 const Padding = styled.div<{isVectorProp: boolean}>`
@@ -72,50 +74,55 @@ const PropName = deriver(styled.div<{
   align-items: center;
   gap: 4px;
   user-select: none;
-  &:hover {
-    color: white;
-  }
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
-
-  ${() => propNameTextCSS};
+  font-size: 13px;
+  font-weight: 500;
+  color: ${(props) =>
+    props.isHighlighted === 'self'
+      ? 'var(--studio-text-focus)'
+      : 'var(--studio-text-label)'};
   ${(props) => (props.$isTransient ? 'font-style: italic;' : '')}
 `)
 
 const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
   width: 28px;
   height: 28px;
-  font-size: 9px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
 
-  transition: transform 0.05s ease-out, color 0.1s ease-out;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.12s ease-out,
+    opacity 0.12s ease-out;
   transform: rotateZ(${(props) => (props.isCollapsed ? 0 : 90)}deg);
-  color: #66686a;
+  color: var(--studio-text-muted);
 
-  visibility: ${(props) =>
-    // If it's a vector, show the collapse icon only when it's expanded
+  /* Always visible so Dialkit-style folders remain discoverable. */
+  visibility: visible;
+  opacity: ${(props) =>
     (!props.isVector && props.isCollapsed) ||
-    // If it's a regular compond prop, show the collapse icon only when it's collapsed
     (props.isVector && !props.isCollapsed)
-      ? 'visible'
-      : 'hidden'};
+      ? 1
+      : 0.55};
 
   ${Header}:hover & {
-    visibility: visible;
+    opacity: 1;
   }
 
   &:hover {
-    transform: rotateZ(${(props) => (props.isCollapsed ? 15 : 75)}deg);
-    color: #c0c4c9;
+    color: var(--studio-text-focus);
   }
 `
 
 const color = transparentize(0.05, `#282b2f`)
 
 const SubProps = styled.div<{depth: number; lastSubIsComposite: boolean}>`
-  /* background: ${({depth}) => darken(depth * 0.03, color)}; */
-  /* padding: ${(props) => (props.lastSubIsComposite ? 0 : '4px')} 0; */
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-row-gap, 3px);
 `
 
 const isVectorProp = memoizeFn((propConfig: PropTypeConfig_Compound<any>) => {
@@ -134,8 +141,8 @@ function VectorComponentEditor<TPropTypeConfig extends PropTypeConfig_Number>({
   propConfig,
   pointerToProp,
   obj,
-  SimpleEditorComponent: EditorComponent,
-}: IDetailSimplePropEditorProps<TPropTypeConfig>) {
+  label,
+}: IDetailSimplePropEditorProps<TPropTypeConfig> & {label: string}) {
   const editingTools = useEditingToolsForSimplePropInDetailsPanel(
     pointerToProp,
     obj,
@@ -143,19 +150,33 @@ function VectorComponentEditor<TPropTypeConfig extends PropTypeConfig_Number>({
   )
 
   return (
-    <NumberPropEditor
-      editingTools={editingTools}
-      propConfig={propConfig}
-      value={editingTools.value}
-    />
+    <MiniChip data-detail-prop-chip="">
+      <NumberPropEditor
+        editingTools={editingTools}
+        propConfig={propConfig}
+        value={editingTools.value}
+        label={label}
+        embedded
+      />
+    </MiniChip>
   )
 }
+
+const MiniChip = styled.div`
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--studio-row-height);
+  align-self: center;
+  overflow: hidden;
+  ${studioChipSurfaceCss};
+`
 
 const InputContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: stretch;
-  padding: 0 8px 0 2px;
+  gap: 4px;
+  padding: 0 8px 0 4px;
   box-sizing: border-box;
   height: 100%;
   width: var(--right-width);
@@ -197,7 +218,15 @@ function DetailCompoundPropEditor<
     propConfig,
   )
 
-  const label: string = propName || 'Props'
+  const isRootProps = getPointerParts(pointerToProp).path.length === 0
+  const activeVariant = usePrism(
+    () => getStudioActiveSequenceVariant(obj.sheet.address),
+    [obj.sheet.address],
+  )
+  // Root folder shows the object path (was the detail panel title bar).
+  const label: string = isRootProps
+    ? `${obj.sheet.address.sheetId} : ${activeVariant} → ${obj.address.objectKey}`
+    : propName || 'Props'
 
   const lastSubPropIsComposite = compositeSubs.length > 0
 
@@ -228,6 +257,9 @@ function DetailCompoundPropEditor<
     return isCollapsedAtom ? val(isCollapsedAtom.pointer) : isVector
   }, [isCollapsedAtom, isVector])
 
+  // Root object folder is always open and has no chevron.
+  const showCollapsed = isRootProps ? false : isCollapsed
+
   const {targetRef} = useChordial(() => {
     const title = [
       obj.address.objectKey,
@@ -256,17 +288,19 @@ function DetailCompoundPropEditor<
           >
             <span>{label}</span>
           </PropName>
-          <CollapseIcon
-            isCollapsed={isCollapsed}
-            isVector={isVector}
-            onClick={() => {
-              isCollapsedAtom.set(!isCollapsedAtom.get())
-            }}
-          >
-            <HiOutlineChevronRight />
-          </CollapseIcon>
+          {!isRootProps && (
+            <CollapseIcon
+              isCollapsed={isCollapsed}
+              isVector={isVector}
+              onClick={() => {
+                isCollapsedAtom.set(!isCollapsedAtom.get())
+              }}
+            >
+              <HiOutlineChevronRight />
+            </CollapseIcon>
+          )}
         </Padding>
-        {isVector && isCollapsed && (
+        {isVector && showCollapsed && (
           <InputContainer>
             {[...allSubs].map(([subPropKey, subPropConfig]) => {
               return (
@@ -276,6 +310,7 @@ function DetailCompoundPropEditor<
                   propConfig={subPropConfig}
                   pointerToProp={pointerToProp[subPropKey] as Pointer<$FixMe>}
                   obj={obj}
+                  label={subPropKey}
                 />
               )
             })}
@@ -283,10 +318,11 @@ function DetailCompoundPropEditor<
         )}
       </Header>
 
-      {!isCollapsed && (
+      {!showCollapsed && (
         <SubProps
           // @ts-ignore
-          style={{'--depth': visualIndentation}}
+          // Match folder title indent so the first level lines up with the root title.
+          style={{'--depth': Math.max(0, visualIndentation - 1)}}
           depth={visualIndentation}
           lastSubIsComposite={lastSubPropIsComposite}
         >

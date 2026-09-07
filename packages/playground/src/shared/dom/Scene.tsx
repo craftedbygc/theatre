@@ -37,12 +37,14 @@ const boxObjectConfig = {
     // if needing more compounds, consider adding weight with different units
     price: types.compound({
       currency: types.stringLiteral('USD', {USD: 'USD', EUR: 'EUR'}),
-      amount: types.number(10, {range: [0, 1000], label: '$'}),
+      amount: types.number(10, {range: [0, Infinity], label: '$'}),
     }),
   }),
   pos: {
-    x: types.number(200),
-    y: types.number(200),
+    x: types.number(200, {range: [0, 1000]}),
+    y: types.number(200, {range: [0, 1000]}),
+    // Dummy axis so the details pane can exercise 3-component vector chips.
+    z: types.number(0),
   },
   color: types.rgba({r: 1, g: 0, b: 0, a: 1}),
 }
@@ -53,6 +55,7 @@ type State = {
   pos: {
     x: number
     y: number
+    z: number
   }
   test: string
   testLiteral: string
@@ -78,20 +81,23 @@ const Box: React.FC<{
   sheet: ISheet
   selection: IStudio['selection']
 }> = ({id, sheet, selection}) => {
-  const defaultConfig = useMemo(
-    () =>
-      Object.assign({}, boxObjectConfig, {
-        // give the box initial values offset from each other
-        pos: {
-          x: ((id.codePointAt(0) ?? 0) % 15) * 100,
-          y: ((id.codePointAt(0) ?? 0) % 15) * 100,
-        },
-      }),
-    [id],
-  )
+  const defaultConfig = useMemo(() => {
+    const offset = ((id.codePointAt(0) ?? 0) % 15) * 100
+    return {
+      ...boxObjectConfig,
+      // Per-box defaults — keep the ranged number configs (plain numbers
+      // would replace the prop types and drop `{range: [0, 1000]}`).
+      pos: {
+        x: types.number(offset, {range: [0, 1000]}),
+        y: types.number(offset, {range: [0, 1000]}),
+        z: types.number(0),
+      },
+    }
+  }, [id])
 
   // This is cheap to call and always returns the same value, so no need for useMemo()
-  const obj = sheet.object(id, defaultConfig)
+  // `reconfigure: true` so ranged number configs apply if the object already exists.
+  const obj = sheet.object(id, defaultConfig, {reconfigure: true})
 
   const isSelected = selection.includes(obj)
 

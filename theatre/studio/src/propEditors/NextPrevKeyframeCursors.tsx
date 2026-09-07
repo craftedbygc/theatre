@@ -28,20 +28,26 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 18px;
+  /* Keep the same footprint as DefaultValueIndicator so sequenced chips
+     don't steal width from the prop chip when prev/next chevrons are present. */
+  width: 16px;
+  min-width: 16px;
+  max-width: 16px;
+  flex: 0 0 16px;
   height: 12px;
   margin: 0 0 0 2px;
   position: relative;
+  overflow: visible;
   z-index: 0;
 
   &:after {
     position: absolute;
-    /* Cover expanded chevrons on hover, with a little padding past the tips */
-    left: -12px;
-    right: -12px;
+    /* Keep horizontal overflow tight so hover chrome clears the pane’s left edge. */
+    left: -8px;
+    right: -8px;
     /* Optical icon center is ~1px below geometric mid (SVG content at y=7/12) */
-    top: -1px;
-    height: 16px;
+    top: -3px;
+    height: 20px;
     border-radius: 2px;
     content: ' ';
     display: none;
@@ -57,9 +63,14 @@ const Container = styled.div`
   }
 `
 
-const dimWhenIdle = css`
+/** Prev/next only show while the diamond control is hovered. */
+const hideWhenIdle = css`
+  opacity: 0;
   ${Container}:not(:hover) & {
-    opacity: 0.7;
+    pointer-events: none !important;
+  }
+  ${Container}:hover & {
+    opacity: 1;
   }
 `
 
@@ -67,7 +78,7 @@ const Button = styled.div`
   background: none;
   position: relative;
   border: 0;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
   z-index: 0;
   outline: none;
   cursor: pointer;
@@ -154,21 +165,27 @@ const Prev = styled(PrevOrNextButton)<{
   available: boolean
   flag: PresenceFlag | undefined
 }>`
-  ${dimWhenIdle};
-  /* 1px further out than the previous 2px / -2px idle tuck */
-  transform: translateX(1px);
+  ${hideWhenIdle};
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-2px, -50%);
   ${Container}:hover & {
-    transform: translateX(-8px);
+    /* Clear the diamond tip; may sit slightly past the tight hover chrome. */
+    transform: translate(-11px, -50%);
   }
 `
 const Next = styled(PrevOrNextButton)<{
   available: boolean
   flag: PresenceFlag | undefined
 }>`
-  ${dimWhenIdle};
-  transform: translateX(-1px);
+  ${hideWhenIdle};
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(2px, -50%);
   ${Container}:hover & {
-    transform: translateX(8px);
+    transform: translate(11px, -50%);
   }
 `
 

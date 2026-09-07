@@ -67,7 +67,7 @@ const ClosePanelButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   font-size: 11px;
   height: 10px;
   width: 18px;

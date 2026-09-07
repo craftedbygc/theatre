@@ -61,7 +61,7 @@ const NumberOfConflictsIndicator = styled.div`
   width: 14px;
   height: 14px;
   background: #d00;
-  border-radius: 4px;
+  border-radius: var(--studio-radius);
   text-align: center;
   line-height: 14px;
   font-weight: 600;

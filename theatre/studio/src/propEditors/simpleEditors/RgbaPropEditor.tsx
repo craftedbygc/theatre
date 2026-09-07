@@ -6,7 +6,7 @@ import {
   rgba2hex,
   parseRgbaFromHex,
 } from '@unseenco/theatre-shared/utils/color'
-import React, {useCallback, useRef} from 'react'
+import React, {useCallback, useLayoutEffect, useRef} from 'react'
 import {RgbaColorPicker} from '@unseenco/theatre-studio/uiComponents/colorPicker'
 import styled from 'styled-components'
 import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover'
@@ -17,8 +17,13 @@ import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
 const RowContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
-  gap: 4px;
+  width: 100%;
+  gap: 8px;
+  /* Chip already provides the outer horizontal inset. */
+  padding: 0;
+  box-sizing: border-box;
 `
 
 interface ColorPreviewPuckProps {
@@ -33,12 +38,17 @@ const ColorPreviewPuck = styled.div.attrs<ColorPreviewPuckProps>((props) => ({
   },
 }))<ColorPreviewPuckProps>`
   height: 18px;
+  width: 18px;
+  flex: 0 0 auto;
   aspect-ratio: 1;
-  border-radius: 99999px;
+  border-radius: var(--studio-radius, 4px);
+  box-shadow: inset 0 0 0 1px var(--studio-border);
+  cursor: pointer;
 `
 
 const HexInput = styled(BasicStringInput)`
-  flex: 1;
+  flex: 0 0 auto;
+  margin-left: auto;
 `
 
 const noop = () => {}
@@ -49,7 +59,7 @@ const RgbaPopover = styled.div`
   color: white;
   margin: 0;
   cursor: default;
-  border-radius: 3px;
+  border-radius: var(--studio-radius);
   z-index: 10000;
   backdrop-filter: blur(8px);
 
@@ -64,6 +74,7 @@ function RgbaPropEditor({
   editingTools,
   value,
   autoFocus,
+  hostClickRef,
 }: ISimplePropEditorReactProps<PropTypeConfig_Rgba>) {
   const containerRef = useRef<HTMLDivElement>(null!)
 
@@ -97,16 +108,24 @@ function RgbaPropEditor({
     </RgbaPopover>
   ))
 
+  const openPicker = useCallback(
+    (e: React.MouseEvent) => {
+      popover.toggle(e, containerRef.current)
+    },
+    [popover.toggle],
+  )
+
+  useLayoutEffect(() => {
+    if (!hostClickRef) return
+    hostClickRef.current = openPicker
+    return () => {
+      hostClickRef.current = null
+    }
+  }, [hostClickRef, openPicker])
+
   return (
     <>
       <RowContainer>
-        <ColorPreviewPuck
-          rgbaColor={value}
-          ref={containerRef}
-          onClick={(e) => {
-            popover.toggle(e, containerRef.current)
-          }}
-        />
         <HexInput
           value={rgba2hex(value, {removeAlphaIfOpaque: true})}
           temporarilySetValue={noop}
@@ -114,6 +133,16 @@ function RgbaPropEditor({
           permanentlySetValue={onChange}
           isValid={(v) => !!v.match(validHexRegExp)}
           autoFocus={autoFocus}
+          fitContent
+        />
+        <ColorPreviewPuck
+          rgbaColor={value}
+          ref={containerRef}
+          onClick={(e) => {
+            // Don't also fire the chip host handler (would toggle twice).
+            e.stopPropagation()
+            openPicker(e)
+          }}
         />
       </RowContainer>
       {popover.node}

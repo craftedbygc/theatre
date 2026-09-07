@@ -67,7 +67,7 @@ const OptionsContainer = styled.div`
 const SearchBox = styled.input.attrs({type: 'text'})`
   background-color: ${COLOR_BASE};
   border: none;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   color: rgba(255, 255, 255, 0.8);
   padding: 6px;
   font-size: 12px;
