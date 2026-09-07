@@ -42,10 +42,10 @@ const Container = styled.div`
 
   &:after {
     position: absolute;
-    /* Cover expanded chevrons on hover; keep horizontal padding tight so the
-       chrome doesn’t crowd the details pane’s left edge. */
-    left: -13px;
-    right: -13px;
+    /* Match expanded chevron tips (±11px); slightly narrower than the old
+       -12px padding so the chrome sits further from the pane’s left edge. */
+    left: -11px;
+    right: -11px;
     /* Optical icon center is ~1px below geometric mid (SVG content at y=7/12) */
     top: -3px;
     height: 20px;
