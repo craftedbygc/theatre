@@ -23,7 +23,7 @@ const ItemContainer = styled.li<{enabled: boolean}>`
     content: ' ';
     pointer-events: none;
     z-index: -1;
-    border-radius: 4px;
+    border-radius: var(--studio-radius);
   }
 
   &:hover:after {

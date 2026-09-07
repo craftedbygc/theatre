@@ -144,7 +144,7 @@ const TransportButton = styled.button`
   padding: 0;
   outline: none;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   color: #a8a8a9;
   background: transparent;
   cursor: pointer;

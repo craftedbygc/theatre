@@ -37,6 +37,9 @@ const Container = styled(PanelWrapper)<{$docked?: boolean}>`
   z-index: ${panelZIndexes.sequenceEditorPanel};
   box-shadow: ${({$docked}) =>
     $docked ? 'none' : '2px 2px 0 rgb(0 0 0 / 11%)'};
+  border-radius: ${({$docked}) =>
+    $docked ? '0' : 'var(--studio-radius)'};
+  overflow: ${({$docked}) => ($docked ? 'visible' : 'hidden')};
 `
 
 const LeftBackground = styled.div<{$docked?: boolean}>`

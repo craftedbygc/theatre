@@ -72,7 +72,7 @@ const RangeHandle = styled.div`
     display: block;
     content: ' ';
     background: var(--bg-inactive);
-    border-radius: 0 2px 2px 0;
+    border-radius: 0 var(--studio-radius) var(--studio-radius) 0;
   }
 
   &:after {
@@ -102,7 +102,7 @@ const Tooltip = styled.div<{active: boolean}>`
   padding: 0 4px;
   transform: translateX(-50%);
   background: #131d1f;
-  border-radius: 4px;
+  border-radius: var(--studio-radius);
   color: #fff;
   font-size: 10px;
   line-height: 18px;

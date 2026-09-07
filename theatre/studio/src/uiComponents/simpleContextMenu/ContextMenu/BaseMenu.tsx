@@ -25,7 +25,7 @@ const MenuContainer = styled.ul`
   margin: 0;
   cursor: default;
   ${pointerEventsAutoInNormalMode};
-  border-radius: 4px;
+  border-radius: var(--studio-radius);
 `
 
 const MenuTitle = styled.div`

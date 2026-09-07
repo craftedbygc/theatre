@@ -82,7 +82,7 @@ const Container = styled.div<{pin: boolean; $docked: boolean}>`
       ? 'none'
       : '0 1px 1px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15)'};
   backdrop-filter: ${({$docked}) => ($docked ? 'none' : 'blur(14px)')};
-  border-radius: ${({$docked}) => ($docked ? '0' : '2px')};
+  border-radius: ${({$docked}) => ($docked ? '0' : 'var(--studio-radius)')};
 
   display: ${({pin}) => (pin ? 'block' : 'none')};
 

@@ -19,7 +19,7 @@ const ActionButton = styled.button`
   align-items: center;
   justify-content: center;
   outline: none;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
 
   color: #a8a8a9;
   background: rgba(255, 255, 255, 0.1);
@@ -40,7 +40,7 @@ const ShowPropsOfSection = styled.fieldset`
   margin: 10px 6px 6px;
   padding: 4px 0 6px;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 3px;
+  border-radius: var(--studio-radius);
   min-width: 0;
 `
 

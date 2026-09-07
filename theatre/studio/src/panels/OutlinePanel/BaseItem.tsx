@@ -34,7 +34,7 @@ const Header = styled(BaseHeader)`
   pointer-events: none;
   white-space: nowrap;
 
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   box-shadow: 0 3px 4px -1px rgba(0, 0, 0, 0.48);
 
   color: rgba(255, 255, 255, 0.9);

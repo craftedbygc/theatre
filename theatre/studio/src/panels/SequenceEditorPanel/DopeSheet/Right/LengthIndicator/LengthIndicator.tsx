@@ -73,7 +73,7 @@ const Tooltip = styled.div`
   font-size: 10px;
   white-space: nowrap;
   padding: 2px 8px;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   ${pointerEventsAutoInNormalMode};
   cursor: ew-resize;
   color: #464646;
@@ -91,7 +91,7 @@ const Tumb = styled.div`
   font-size: 10px;
   white-space: nowrap;
   padding: 1px 2px;
-  border-radius: 2px;
+  border-radius: var(--studio-radius);
   ${pointerEventsAutoInNormalMode};
   justify-content: center;
   align-items: center;
