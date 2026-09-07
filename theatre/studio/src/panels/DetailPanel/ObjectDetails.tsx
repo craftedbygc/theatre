@@ -103,9 +103,9 @@ const ObjectDetails: React.FC<{
           source={source}
         />
       ))}
-      <ActionButtonContainer>
-        {actions &&
-          Object.entries(actions).map(([actionName, action]) => {
+      {actions && Object.keys(actions).length > 0 ? (
+        <ActionButtonContainer>
+          {Object.entries(actions).map(([actionName, action]) => {
             return (
               <ActionButton
                 key={actionName}
@@ -117,7 +117,8 @@ const ObjectDetails: React.FC<{
               </ActionButton>
             )
           })}
-      </ActionButtonContainer>
+        </ActionButtonContainer>
+      ) : null}
     </>
   )
 }
