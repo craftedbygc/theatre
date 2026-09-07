@@ -85,7 +85,7 @@ const TheDiv = styled.div<{enabled: boolean; type: 'start' | 'end'}>`
 
   #pointer-root.draggingPositionInSequenceEditor &:hover {
     --bg: ${focusRangeStripTheme.dragging.backgroundColor};
-    stroke: #40aaa4;
+    stroke: var(--studio-accent-soft);
   }
 
   background-color: var(--bg);

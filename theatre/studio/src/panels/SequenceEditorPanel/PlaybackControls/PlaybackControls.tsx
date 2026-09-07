@@ -167,14 +167,14 @@ const TransportButton = styled.button`
 
   &.selected {
     color: rgba(255, 255, 255, 0.85);
-    background: rgba(30, 88, 102, 0.7);
+    background: var(--studio-accent-70);
 
     &:hover {
-      background: rgba(30, 88, 102, 0.85);
+      background: var(--studio-accent-85);
     }
 
     &:active {
-      background: rgba(30, 88, 102, 0.95);
+      background: var(--studio-accent-95);
     }
   }
 `

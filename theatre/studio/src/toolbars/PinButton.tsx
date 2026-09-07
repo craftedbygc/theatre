@@ -5,20 +5,20 @@ import {mergeRefs} from 'react-merge-refs'
 import {Container as ToolbarIconButtonContainer} from '@unseenco/theatre-studio/uiComponents/toolbar/ToolbarIconButton'
 import useChordial from '@unseenco/theatre-studio/uiComponents/chordial/useChodrial'
 
-// Matches OutlinePanel/BaseItem `.selected` / ToolbarIconButton `.selected`.
-const outlineSelectedBackground = '#1e5866'
-
 const Container = styled(ToolbarIconButtonContainer)<{pinned?: boolean}>`
   color: ${({pinned}) => (pinned ? 'rgba(255, 255, 255, 0.8)' : '#A8A8A9')};
 
-  background: ${({pinned}) => (pinned ? outlineSelectedBackground : undefined)};
+  background: ${({pinned}) =>
+    pinned ? 'var(--studio-accent)' : undefined};
 
   &:hover {
-    background: ${({pinned}) => (pinned ? '#246a7a' : undefined)};
+    background: ${({pinned}) =>
+      pinned ? 'var(--studio-accent-hover)' : undefined};
   }
 
   &:active {
-    background: ${({pinned}) => (pinned ? '#2a7a8c' : undefined)};
+    background: ${({pinned}) =>
+      pinned ? 'var(--studio-accent-active)' : undefined};
   }
 `
 

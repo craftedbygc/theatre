@@ -5,6 +5,7 @@ import {mergeRefs} from 'react-merge-refs'
 import {DOT_SIZE_PX} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/Right/BasicKeyframedTrack/KeyframeEditor/SingleKeyframeDot'
 import useTooltip from '@unseenco/theatre-studio/uiComponents/Popover/useTooltip'
 import MinimalTooltip from '@unseenco/theatre-studio/uiComponents/Popover/MinimalTooltip'
+import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 const CONNECTOR_HEIGHT = DOT_SIZE_PX / 2 + 1
 const CONNECTOR_HEIGHT_WITH_LABEL = 12
@@ -16,7 +17,7 @@ export type IConnectorThemeValues = {
 }
 
 export const CONNECTOR_THEME = {
-  normalColor: `#365b59`, // (greenish-blueish)ish
+  normalColor: studioAccent.softDark,
   selectedColor: `#8A7842`,
   barColor: (values: IConnectorThemeValues) => {
     const base = values.isSelected

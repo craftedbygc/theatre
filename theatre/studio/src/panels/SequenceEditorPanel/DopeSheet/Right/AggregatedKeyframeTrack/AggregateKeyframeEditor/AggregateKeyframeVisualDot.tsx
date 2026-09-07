@@ -4,6 +4,7 @@ import {PresenceFlag} from '@unseenco/theatre-studio/uiComponents/usePresence'
 import styled from 'styled-components'
 import {absoluteDims} from '@unseenco/theatre-studio/utils/absoluteDims'
 import {pointerEventsAutoInNormalMode} from '@unseenco/theatre-studio/css'
+import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 const DOT_SIZE_PX = 16
 const DOT_HOVER_SIZE_PX = DOT_SIZE_PX + 2
@@ -59,8 +60,8 @@ type IDotThemeValues = {
   flag: PresenceFlag | undefined
 }
 const SELECTED_COLOR = '#F2C95C'
-const DEFAULT_PRIMARY_COLOR = '#40AAA4'
-const DEFAULT_SECONDARY_COLOR = '#45747C'
+const DEFAULT_PRIMARY_COLOR = studioAccent.soft
+const DEFAULT_SECONDARY_COLOR = studioAccent.secondary
 const selectionColorAll = (theme: IDotThemeValues) =>
   theme.isSelected === AggregateKeyframePositionIsSelected.AllSelected
     ? SELECTED_COLOR

@@ -41,7 +41,7 @@ const Header = styled(BaseHeader)`
   background: var(--studio-panel-bg, #282b2f);
 
   &.descendant-is-selected {
-    background: #1d353b;
+    background: var(--studio-accent-muted);
   }
 
   ${pointerEventsAutoInNormalMode};
@@ -56,7 +56,7 @@ const Header = styled(BaseHeader)`
   }
 
   &.selected {
-    background: #1e5866;
+    background: var(--studio-accent);
     border-color: var(--studio-border);
   }
 `

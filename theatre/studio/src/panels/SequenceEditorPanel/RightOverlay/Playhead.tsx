@@ -35,7 +35,7 @@ import usePopover from '@unseenco/theatre-studio/uiComponents/Popover/usePopover
 import {transportStripHeight} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/PlaybackControls/constants'
 
 const Container = styled.div<{isVisible: boolean}>`
-  --thumbColor: #00e0ff;
+  --thumbColor: var(--studio-accent-playhead);
   position: absolute;
   top: ${transportStripHeight}px;
   left: 0;
@@ -52,7 +52,7 @@ const Rod = styled.div`
   top: 8px;
   width: 0;
   height: calc(100% - 8px);
-  border-left: 1px solid #27e0fd;
+  border-left: 1px solid var(--studio-accent-playhead-line);
   z-index: 10;
   pointer-events: none;
 
@@ -78,7 +78,7 @@ const Thumb = styled.div`
   left: -2px;
   z-index: 11;
   cursor: ew-resize;
-  --sunblock-color: #1f2b2b;
+  --sunblock-color: var(--studio-accent-sunblock-idle);
 
   ${pointerEventsAutoInNormalMode};
 
@@ -95,7 +95,7 @@ const Thumb = styled.div`
 
   ${Container}.playheadattachedtofocusrange > & {
     top: -8px;
-    --sunblock-color: #005662;
+    --sunblock-color: var(--studio-accent-sunblock);
     &:before,
     &:after {
       border-bottom-width: 8px;
