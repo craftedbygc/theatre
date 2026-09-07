@@ -25,7 +25,8 @@ export function useKeyframeInlineEditorPopover(
             <DeterminePropEditorForKeyframeTree
               key={i}
               {...prop}
-              autoFocusInput={i === 0}
+              // Don't autofocus the value — leave the popover ready for scrub
+              // or a deliberate click-to-type on the value.
               indent={0}
             />
           ))}
