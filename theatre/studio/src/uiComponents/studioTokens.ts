@@ -1,5 +1,5 @@
 /**
- * Shared design tokens for Studio UI (Dialkit-inspired).
+ * Shared design tokens for Studio UI.
  * Injected as CSS custom properties on `:host` via css.tsx GlobalStyle.
  * Prefer `var(--studio-*)` in styled-components over hard-coded colors.
  */
@@ -22,7 +22,7 @@ export const studioFontMono = `ui-monospace, 'SF Mono', Menlo, Consolas, monospa
  *
  * Historical teal was `#1e5866` (rgb(30, 88, 102)). Previewing light green.
  */
-export const studioAccentHex = '#6BCF7A'
+export const studioAccentHex = '#617a8d'
 
 /** Derive the accent palette from {@link studioAccentHex}. */
 export function deriveStudioAccent(base: string = studioAccentHex) {
