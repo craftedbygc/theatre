@@ -21,16 +21,12 @@ const AddImage = styled.div`
   &:hover {
     --checker-color: #ededed77;
   }
-  // checkerboard background with 4px squares
-  background-image: linear-gradient(
-      45deg,
-      var(--checker-color) 25%,
-      transparent 25%
-    ),
-    linear-gradient(-45deg, var(--checker-color) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--checker-color) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--checker-color) 75%);
-  background-size: 5px 5px;
+  /* Axis-aligned square checkerboard (empty texture). */
+  background-image: repeating-conic-gradient(
+    var(--checker-color) 0deg 90deg,
+    transparent 90deg 180deg
+  );
+  background-size: 8px 8px;
 `
 
 const PreviewBox = styled.div`
