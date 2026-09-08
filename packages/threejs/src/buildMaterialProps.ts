@@ -58,6 +58,25 @@ const MATERIAL_NUMBER_PROPS = [
   'transmission',
 ] as const
 
+/** Scalars Three.js documents as a 0–1 factor (not a physical distance, IOR, or HDR intensity). */
+const UNIT_INTERVAL_MATERIAL_PROPS = new Set<string>([
+  'alphaTest',
+  'aoMapIntensity',
+  'anisotropy',
+  'clearcoat',
+  'clearcoatRoughness',
+  'iridescence',
+  'metalness',
+  'opacity',
+  'reflectivity',
+  'refractionRatio',
+  'roughness',
+  'sheen',
+  'sheenRoughness',
+  'specularIntensity',
+  'transmission',
+])
+
 const MATERIAL_COLOR_PROPS = [
   'attenuationColor',
   'color',
@@ -281,7 +300,7 @@ function buildMaterialPropConfig(
     const sanitized = value === Infinity ? 1000 : value
     return types.number(sanitized, {
       label: key,
-      range: [0, Infinity],
+      range: UNIT_INTERVAL_MATERIAL_PROPS.has(key) ? [0, 1] : [0, Infinity],
       nudgeMultiplier: 0.01,
     })
   }
