@@ -14,7 +14,7 @@ export type ISimplePropEditorReactProps<
   label?: string
   /**
    * When the surrounding chip is clicked (label / empty chrome), the editor
-   * registers a handler here so bool/color/text can respond to whole-chip hits.
+   * registers a handler here so bool/color/text/image can respond to whole-chip hits.
    */
   hostClickRef?: MutableRefObject<((e: MouseEvent) => void) | null>
 }

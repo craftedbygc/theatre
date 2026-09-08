@@ -1,22 +1,22 @@
 import type {PropTypeConfig_Image} from '@unseenco/theatre-core/propTypes'
 import type {$FixMe} from '@unseenco/theatre-shared/utils/types'
 import {Trash} from '@unseenco/theatre-studio/uiComponents/icons'
-import React, {useCallback, useEffect} from 'react'
-import styled, {css} from 'styled-components'
+import React, {useCallback, useEffect, useLayoutEffect, useRef} from 'react'
+import styled from 'styled-components'
 import type {ISimplePropEditorReactProps} from './ISimplePropEditorReactProps'
 
-const Container = styled.div<{empty: boolean}>`
+const Container = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
+  width: 100%;
   gap: 4px;
 `
 
 const AddImage = styled.div`
   position: absolute;
-  inset: -5px;
-  // rotate 45deg
-  transform: rotate(45deg);
+  inset: 0;
   --checker-color: #ededed36;
   &:hover {
     --checker-color: #ededed77;
@@ -33,12 +33,14 @@ const AddImage = styled.div`
   background-size: 5px 5px;
 `
 
-const InputLabel = styled.label<{empty: boolean}>`
+const PreviewBox = styled.div`
   position: relative;
-  cursor: default;
+  cursor: pointer;
   box-sizing: border-box;
 
   height: 18px;
+  width: 18px;
+  flex: 0 0 auto;
   aspect-ratio: 1;
   display: flex;
   justify-content: center;
@@ -51,13 +53,8 @@ const InputLabel = styled.label<{empty: boolean}>`
     color: white;
   }
 
-  border-radius: 99999px;
-  border: 1px solid hwb(220deg 40% 52%);
-  &:hover {
-    border-color: hwb(220deg 45% 52%);
-  }
-
-  ${(props) => (props.empty ? css`` : css``)}
+  border-radius: var(--studio-radius, 4px);
+  border: 1px solid var(--studio-border);
 `
 
 // file input
@@ -81,10 +78,12 @@ const DeleteButton = styled.button`
   outline: none;
   background: transparent;
   color: #a8a8a9;
+  cursor: pointer;
 
   border: none;
   height: 100%;
   aspect-ratio: 1/1;
+  flex: 0 0 auto;
 
   opacity: 0;
 
@@ -103,8 +102,10 @@ function ImagePropEditor({
   editingTools,
   value,
   autoFocus,
+  hostClickRef,
 }: ISimplePropEditorReactProps<PropTypeConfig_Image>) {
   const [previewUrl, setPreviewUrl] = React.useState<string>()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (value) {
@@ -113,6 +114,18 @@ function ImagePropEditor({
       setPreviewUrl(undefined)
     }
   }, [value])
+
+  const openFileDialog = useCallback(() => {
+    inputRef.current?.click()
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!hostClickRef) return
+    hostClickRef.current = openFileDialog
+    return () => {
+      hostClickRef.current = null
+    }
+  }, [hostClickRef, openFileDialog])
 
   const onChange = useCallback(
     async (event: React.ChangeEvent<$FixMe>) => {
@@ -136,32 +149,37 @@ function ImagePropEditor({
   const empty = !value?.id
 
   return (
-    <Container empty={empty}>
-      <InputLabel
-        empty={empty}
-        title={
-          empty ? 'Upload image' : `"${value.id}" (Click to upload new image)`
-        }
-      >
-        <Input
-          type="file"
-          onChange={onChange}
-          accept="image/*,.hdr"
-          autoFocus={autoFocus}
-        />
-        {previewUrl ? <Preview src={previewUrl} /> : <AddImage />}
-      </InputLabel>
-
+    <Container>
+      <Input
+        ref={inputRef}
+        type="file"
+        onChange={onChange}
+        onClick={(e) => e.stopPropagation()}
+        accept="image/*,.hdr"
+        autoFocus={autoFocus}
+      />
       {!empty && (
         <DeleteButton
           title="Delete image"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation()
             editingTools.permanentlySetValue({type: 'image', id: undefined})
           }}
         >
           <Trash />
         </DeleteButton>
       )}
+      <PreviewBox
+        title={
+          empty ? 'Upload image' : `"${value.id}" (Click to upload new image)`
+        }
+        onClick={(e) => {
+          e.stopPropagation()
+          openFileDialog()
+        }}
+      >
+        {previewUrl ? <Preview src={previewUrl} /> : <AddImage />}
+      </PreviewBox>
     </Container>
   )
 }

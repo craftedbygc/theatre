@@ -126,7 +126,8 @@ function chipHostClickable(propConfig: propTypes.PropTypeConfig): boolean {
   return (
     propConfig.type === 'boolean' ||
     propConfig.type === 'string' ||
-    propConfig.type === 'rgba'
+    propConfig.type === 'rgba' ||
+    propConfig.type === 'image'
   )
 }
 

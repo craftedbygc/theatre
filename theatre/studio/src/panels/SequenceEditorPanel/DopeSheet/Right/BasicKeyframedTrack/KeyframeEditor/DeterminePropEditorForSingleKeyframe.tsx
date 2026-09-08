@@ -116,7 +116,10 @@ function editorOwnsLabel(propType: string): boolean {
 
 function chipHostClickable(propType: string): boolean {
   return (
-    propType === 'boolean' || propType === 'string' || propType === 'rgba'
+    propType === 'boolean' ||
+    propType === 'string' ||
+    propType === 'rgba' ||
+    propType === 'image'
   )
 }
 
@@ -190,9 +193,9 @@ function PrimitivePropEditor(
     return <></>
   }
 
-  const PropEditor = simplePropEditorByPropType[
-    p.propConfig.type
-  ] as React.VFC<ISimplePropEditorReactProps<PropTypeConfig_AllSimples>>
+  const PropEditor = simplePropEditorByPropType[p.propConfig.type] as React.VFC<
+    ISimplePropEditorReactProps<PropTypeConfig_AllSimples>
+  >
 
   const ownsLabel = editorOwnsLabel(p.propConfig.type)
   const interactive = chipHostClickable(p.propConfig.type)
