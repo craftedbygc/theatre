@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom'
 import type {$IntentionalAny} from '@unseenco/theatre-shared/utils/types'
 import {PortalContext} from 'reakit'
 import useRefAndState from './utils/useRefAndState'
-import {studioTokenCss} from './uiComponents/studioTokens'
+import {getStudioTokenCss} from './uiComponents/studioTokens'
 
 /**
  * This CSS string is used to correctly set pointer-events on an element
@@ -56,7 +56,7 @@ const GlobalStyle =
     ? createGlobalStyle`
   :host {
     all: initial;
-    ${studioTokenCss}
+    ${() => getStudioTokenCss()}
     color: white;
     font-family: var(--studio-font-ui);
     font-size: 13px;

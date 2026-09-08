@@ -2,7 +2,6 @@ import type {Pointer} from '@unseenco/theatre-dataverse'
 import {val} from '@unseenco/theatre-dataverse'
 import {useVal} from '@unseenco/theatre-react'
 import getStudio from '@unseenco/theatre-studio/getStudio'
-import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 import {
   lockedCursorCssVarName,
   useCssCursorLock,
@@ -65,7 +64,7 @@ const MarkerVisualDot = React.memo(() => (
       >
         <path
           d="M12 5H0V7H2.71973L5.96237 10.2426L9.20501 7H12V5Z"
-          fill={studioAccent.soft}
+          fill="var(--studio-accent-soft)"
         />
       </svg>
     }

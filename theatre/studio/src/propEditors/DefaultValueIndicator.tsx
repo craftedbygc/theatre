@@ -22,7 +22,9 @@ const theme = {
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
   withStaticOverride: {
-    color: transparentize(0.2, studioAccent.staticIndicator),
+    get color() {
+      return transparentize(0.2, studioAccent.staticIndicator)
+    },
     hoverColor: transparentize(0.15, nextPrevCursorsTheme.onColor),
   },
 }

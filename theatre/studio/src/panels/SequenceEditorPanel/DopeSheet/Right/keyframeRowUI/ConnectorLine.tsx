@@ -17,7 +17,9 @@ export type IConnectorThemeValues = {
 }
 
 export const CONNECTOR_THEME = {
-  normalColor: studioAccent.softDark,
+  get normalColor() {
+    return studioAccent.softDark
+  },
   selectedColor: `#8A7842`,
   barColor: (values: IConnectorThemeValues) => {
     const base = values.isSelected

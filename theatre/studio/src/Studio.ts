@@ -24,12 +24,16 @@ import {defer} from '@unseenco/theatre-shared/utils/defer'
 import type {ProjectId} from '@unseenco/theatre-shared/utils/ids'
 import shallowEqual from 'shallowequal'
 import {createStore} from './IDBStorage'
-import {getAllPossibleAssetIDs, isDirectAssetUrl} from '@unseenco/theatre-shared/utils/assets'
+import {
+  getAllPossibleAssetIDs,
+  isDirectAssetUrl,
+} from '@unseenco/theatre-shared/utils/assets'
 import {notify} from './notify'
 import type {RafDriverPrivateAPI} from '@unseenco/theatre-core/rafDrivers'
 import {syncAllStudioPreviewVariants} from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import {STUDIO_PROJECT_ID} from '@unseenco/theatre-studio/panels/OutlinePanel/outlinePanelUtils'
 import {val} from '@unseenco/theatre-dataverse'
+import {setStudioAccentHex} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 const DEFAULT_PERSISTENCE_KEY = 'theatre-0.4'
 
@@ -149,13 +153,21 @@ export class Studio {
     if (this._initializeFnCalled) {
       return this._initializedDeferred.promise
     }
+
+    if (opts?.accentHex !== undefined) {
+      setStudioAccentHex(opts.accentHex)
+    }
+
     this._initializeFnCalled = true
 
     if (this._didWarnAboutNotInitializing) {
       console.warn(STUDIO_INITIALIZED_LATE_MSG)
     }
 
-    const storeOpts: Parameters<typeof this._store['initialize']>[0] = {
+    const storeOpts: {
+      persistenceKey: string
+      usePersistentStorage: boolean
+    } = {
       persistenceKey: DEFAULT_PERSISTENCE_KEY,
       usePersistentStorage: true,
     }

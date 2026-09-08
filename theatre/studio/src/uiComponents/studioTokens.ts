@@ -9,22 +9,30 @@ import {
   desaturate,
   lighten,
   mix,
+  parseToRgb,
   saturate,
   transparentize,
 } from 'polished'
+import userReadableTypeOfValue from '@unseenco/theatre-shared/utils/userReadableTypeOfValue'
 
 export const studioFontUi = `system-ui, -apple-system, 'SF Pro Display', sans-serif`
 export const studioFontMono = `ui-monospace, 'SF Mono', Menlo, Consolas, monospace`
 
 /**
- * Single source of truth for Studio’s accent (selection, outline, keyframes,
- * playhead, focus-range chrome, etc.). Change this hex to retheme them all.
+ * Default source hex for Studio’s accent (selection, outline, keyframes,
+ * playhead, focus-range chrome, etc.). Override at runtime with
+ * `studio.initialize({accentHex})`.
  *
- * Historical teal was `#1e5866` (rgb(30, 88, 102)). Previewing light green.
+ * Historical teal was `#1e5866` (rgb(30, 88, 102)).
  */
 export const studioAccentHex = '#617a8d'
 
-/** Derive the accent palette from {@link studioAccentHex}. */
+const ACCENT_HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
+
+let currentStudioAccentHex = studioAccentHex
+let cachedStudioAccent: ReturnType<typeof deriveStudioAccent> | undefined
+
+/** Derive the accent palette from a source hex. */
 export function deriveStudioAccent(base: string = studioAccentHex) {
   return {
     /** Selected buttons / outline items — was `#1e5866`. */
@@ -64,10 +72,112 @@ export function deriveStudioAccent(base: string = studioAccentHex) {
   } as const
 }
 
-export const studioAccent = deriveStudioAccent()
+export type StudioAccentPalette = {
+  [K in keyof ReturnType<typeof deriveStudioAccent>]: string
+}
 
-const accentCss = (() => {
-  const a = studioAccent
+function getStudioAccentPalette(): StudioAccentPalette {
+  if (!cachedStudioAccent) {
+    cachedStudioAccent = deriveStudioAccent(currentStudioAccentHex)
+  }
+  return cachedStudioAccent
+}
+
+export function getStudioAccentHex() {
+  return currentStudioAccentHex
+}
+
+/**
+ * Set the source hex used to derive Studio’s accent palette.
+ * Called from `studio.initialize({accentHex})`.
+ */
+export function setStudioAccentHex(hex: unknown) {
+  if (typeof hex !== 'string' || !ACCENT_HEX_RE.test(hex)) {
+    throw new Error(
+      `studio.initialize({accentHex}) must be a CSS hex color such as '#617a8d'. ${userReadableTypeOfValue(
+        hex,
+      )} given.`,
+    )
+  }
+
+  try {
+    parseToRgb(hex)
+  } catch {
+    throw new Error(
+      `studio.initialize({accentHex}) must be a CSS hex color such as '#617a8d'. ${userReadableTypeOfValue(
+        hex,
+      )} given.`,
+    )
+  }
+
+  currentStudioAccentHex = hex
+  cachedStudioAccent = undefined
+}
+
+/**
+ * Live accent palette. Property access always reflects the current
+ * {@link getStudioAccentHex} so `studio.initialize({accentHex})` can retheme
+ * JS-painted chrome (connectors, static-value indicators, etc.).
+ */
+export const studioAccent: StudioAccentPalette = {
+  get base() {
+    return getStudioAccentPalette().base
+  },
+  get hover() {
+    return getStudioAccentPalette().hover
+  },
+  get active() {
+    return getStudioAccentPalette().active
+  },
+  get muted() {
+    return getStudioAccentPalette().muted
+  },
+  get soft() {
+    return getStudioAccentPalette().soft
+  },
+  get softHover() {
+    return getStudioAccentPalette().softHover
+  },
+  get softDark() {
+    return getStudioAccentPalette().softDark
+  },
+  get secondary() {
+    return getStudioAccentPalette().secondary
+  },
+  get playhead() {
+    return getStudioAccentPalette().playhead
+  },
+  get playheadLine() {
+    return getStudioAccentPalette().playheadLine
+  },
+  get sunblock() {
+    return getStudioAccentPalette().sunblock
+  },
+  get sunblockIdle() {
+    return getStudioAccentPalette().sunblockIdle
+  },
+  get focusOutline() {
+    return getStudioAccentPalette().focusOutline
+  },
+  get staticIndicator() {
+    return getStudioAccentPalette().staticIndicator
+  },
+  get softTint() {
+    return getStudioAccentPalette().softTint
+  },
+  get alpha70() {
+    return getStudioAccentPalette().alpha70
+  },
+  get alpha85() {
+    return getStudioAccentPalette().alpha85
+  },
+  get alpha95() {
+    return getStudioAccentPalette().alpha95
+  },
+}
+
+export function getStudioAccentCss(base: string = getStudioAccentHex()) {
+  const a = deriveStudioAccent(base)
   return `
   --studio-accent: ${a.base};
   --studio-accent-hover: ${a.hover};
@@ -88,10 +198,11 @@ const accentCss = (() => {
   --studio-accent-85: ${a.alpha85};
   --studio-accent-95: ${a.alpha95};
 `
-})()
+}
 
 /** CSS custom property declarations for `:host` (string fragment). */
-export const studioTokenCss = `
+export function getStudioTokenCss() {
+  return `
   --studio-font-ui: ${studioFontUi};
   --studio-font-mono: ${studioFontMono};
 
@@ -120,7 +231,7 @@ export const studioTokenCss = `
   --studio-chip-bg: #393c40;
   --studio-chip-bg-hover: #3e4248;
 
-  ${accentCss}
+  ${getStudioAccentCss()}
 
   --studio-radius: 4px;
   --studio-radius-sm: 3px;
@@ -128,6 +239,7 @@ export const studioTokenCss = `
   --studio-row-gap: 3px;
   --studio-panel-pad: 10px 12px;
 `
+}
 
 /** Shared chip / control surface for styled-components */
 export const studioChipSurfaceCss = `

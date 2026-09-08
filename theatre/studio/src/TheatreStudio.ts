@@ -272,6 +272,19 @@ export interface _StudioInitializeOpts {
   usePersistentStorage?: boolean
 
   __experimental_rafDriver?: IRafDriver | undefined
+
+  /**
+   * Source hex for Studio’s accent palette (selection, outline, keyframes,
+   * playhead, etc.). All other accent colors are derived from this value.
+   *
+   * Default: `"#617a8d"`
+   *
+   * @example
+   * ```ts
+   * studio.initialize({accentHex: '#c026d3'})
+   * ```
+   */
+  accentHex?: string
 }
 
 /**
@@ -283,6 +296,14 @@ export interface _StudioInitializeOpts {
  * import studio from '@unseenco/theatre-studio'
  *
  * studio.initialize()
+ * ```
+ *
+ * @example
+ * Custom accent color:
+ * ```ts
+ * import studio from '@unseenco/theatre-studio'
+ *
+ * studio.initialize({accentHex: '#c026d3'})
  * ```
  *
  * @example

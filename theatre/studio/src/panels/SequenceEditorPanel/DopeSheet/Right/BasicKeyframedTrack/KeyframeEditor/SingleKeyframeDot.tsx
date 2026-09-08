@@ -34,16 +34,14 @@ import {
 } from '@unseenco/theatre-studio/utils/activeSequenceVariant'
 import {valTracksByObjectForSheetVariant} from '@unseenco/theatre-studio/utils/sequenceVariantHelpers'
 
-import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
-
 export const DOT_SIZE_PX = 6
 const DOT_HOVER_SIZE_PX = DOT_SIZE_PX + 2
 
 const dotTheme = {
-  normalColor: studioAccent.soft,
+  normalColor: 'var(--studio-accent-soft)',
   selectedColor: '#F2C95C',
   inlineEditorOpenColor: '#FCF3DC',
-  selectedAndInlineEditorOpenColor: studioAccent.softTint,
+  selectedAndInlineEditorOpenColor: 'var(--studio-accent-soft-tint)',
 }
 
 const selectBackgroundForDiamond = ({

@@ -8,7 +8,6 @@ import type {CubicBezierHandles} from './shared'
 import {useFreezableMemo} from './useFreezableMemo'
 import {COLOR_BASE} from './colors'
 import type {KeyframeConnectionWithAddress} from '@unseenco/theatre-studio/panels/SequenceEditorPanel/DopeSheet/selections'
-import {studioAccent} from '@unseenco/theatre-studio/uiComponents/studioTokens'
 
 // Defines the dimensions of the SVG viewbox space
 const VIEWBOX_PADDING = 0.12
@@ -19,17 +18,11 @@ const PATTERN_DOT_COUNT = 8
 const PATTERN_GRID_SIZE = (1 - PATTERN_DOT_SIZE) / (PATTERN_DOT_COUNT - 1)
 
 // The curve supports a gradient but currently is solid accent-soft
-const CURVE_START_OVERSHOOT_COLOR = studioAccent.soft
-const CURVE_START_COLOR = studioAccent.soft
-const CURVE_MID_START_COLOR = studioAccent.soft
-const CURVE_MID_COLOR = studioAccent.soft
-const CURVE_MID_END_COLOR = studioAccent.soft
-const CURVE_END_COLOR = studioAccent.soft
-const CURVE_END_OVERSHOOT_COLOR = studioAccent.soft
+const CURVE_COLOR = 'var(--studio-accent-soft)'
 
 const CONTROL_COLOR = '#B3B3B3'
-const HANDLE_COLOR = studioAccent.soft
-const HANDLE_HOVER_COLOR = studioAccent.softHover
+const HANDLE_COLOR = 'var(--studio-accent-soft)'
+const HANDLE_HOVER_COLOR = 'var(--studio-accent-soft-hover)'
 
 const BACKGROUND_CURVE_COLORS = [
   'goldenrod',
@@ -125,19 +118,13 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
       fill="none"
     >
       <linearGradient id="myGradient" gradientTransform="rotate(90)">
-        <stop
-          offset={toExtremumSpace(-1)}
-          stopColor={CURVE_END_OVERSHOOT_COLOR}
-        />
-        <stop offset={toExtremumSpace(0)} stopColor={CURVE_END_COLOR} />
-        <stop offset={toExtremumSpace(0.3)} stopColor={CURVE_MID_END_COLOR} />
-        <stop offset={toExtremumSpace(0.5)} stopColor={CURVE_MID_COLOR} />
-        <stop offset={toExtremumSpace(0.7)} stopColor={CURVE_MID_START_COLOR} />
-        <stop offset={toExtremumSpace(1)} stopColor={CURVE_START_COLOR} />
-        <stop
-          offset={toExtremumSpace(2)}
-          stopColor={CURVE_START_OVERSHOOT_COLOR}
-        />
+        <stop offset={toExtremumSpace(-1)} stopColor={CURVE_COLOR} />
+        <stop offset={toExtremumSpace(0)} stopColor={CURVE_COLOR} />
+        <stop offset={toExtremumSpace(0.3)} stopColor={CURVE_COLOR} />
+        <stop offset={toExtremumSpace(0.5)} stopColor={CURVE_COLOR} />
+        <stop offset={toExtremumSpace(0.7)} stopColor={CURVE_COLOR} />
+        <stop offset={toExtremumSpace(1)} stopColor={CURVE_COLOR} />
+        <stop offset={toExtremumSpace(2)} stopColor={CURVE_COLOR} />
       </linearGradient>
 
       {/* Unit space, opaque white dot pattern */}
@@ -231,7 +218,7 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
             cx={0}
             cy={toExtremumSpace(1)}
             r="0.025"
-            stroke={CURVE_START_COLOR}
+            stroke={CURVE_COLOR}
             strokeWidth="0.02"
             fill={COLOR_BASE}
           />
@@ -240,7 +227,7 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
             cx={1}
             cy={toExtremumSpace(0)}
             r="0.025"
-            stroke={CURVE_END_COLOR}
+            stroke={CURVE_COLOR}
             strokeWidth="0.02"
             fill={COLOR_BASE}
           />
@@ -250,7 +237,7 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
             ref={refLeft}
             cx={left.handles[2]}
             cy={toExtremumSpace(1 - left.handles[3])}
-            fill={CURVE_START_COLOR}
+            fill={CURVE_COLOR}
             opacity={0.2}
           />
           <Circle
@@ -262,7 +249,7 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
             ref={refRight}
             cx={right.handles[0]}
             cy={toExtremumSpace(1 - right.handles[1])}
-            fill={CURVE_END_COLOR}
+            fill={CURVE_COLOR}
             opacity={0.2}
           />
           <Circle
@@ -292,7 +279,7 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
             cx={0}
             cy={1}
             r="0.025"
-            stroke={CURVE_END_COLOR}
+            stroke={CURVE_COLOR}
             strokeWidth="0.02"
             fill={COLOR_BASE}
           />
@@ -300,7 +287,7 @@ const CurveSegmentEditor: React.VFC<ICurveSegmentEditorProps> = (props) => {
             cx={1}
             cy={0}
             r="0.025"
-            stroke={CURVE_END_COLOR}
+            stroke={CURVE_COLOR}
             strokeWidth="0.02"
             fill={COLOR_BASE}
           />

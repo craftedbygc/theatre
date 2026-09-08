@@ -4,7 +4,7 @@
 
 - New features
   - Studio:
-    - UI revamp — shared design tokens and restyled details-pane controls (number chips/sliders, toggles, strings, selects, color fields), opaque panes without blur/shadows, bordered surfaces, and keyframe edit popovers that match the chip chrome. Collapsed vector compounds show compact labeled mini-chips; accent colors derive from a single hex token.
+    - UI revamp — shared design tokens and restyled details-pane controls (number chips/sliders, toggles, strings, selects, color fields), opaque panes without blur/shadows, bordered surfaces, and keyframe edit popovers that match the chip chrome. Collapsed vector compounds show compact labeled mini-chips; accent colors derive from a single hex token, overridable via `studio.initialize({accentHex})`.
     - Custom tween names on sequencer connector bars (Name / Edit / Clear via context menu); labels persist in project state and show in-bar with ellipsis + hover tooltip.
     - Outline sheet objects use a dirty-state circle instead of the Package icon — hollow when matching loaded JSON state, filled when any static override or sequence track has diverged.
     - Details pane prop context menu: "Revert to saved value" (and "Revert all to saved value" for compounds) when a prop has diverged from the JSON state passed to `getProject()`.
