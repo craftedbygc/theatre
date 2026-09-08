@@ -37,7 +37,7 @@ export function deriveStudioAccent(base: string = studioAccentHex) {
     muted: mix(0.4, '#0a0c0d', desaturate(0.2, base)),
     /** Keyframe dots, markers, info badges — was `#40AAA4`. */
     soft: lighten(0.18, saturate(0.12, base)),
-    /** Soft hover (curve handles) — was `#67dfd8`. */
+    /** Soft hover (curve handles, snap crosshair) — was `#67dfd8`. */
     softHover: lighten(0.28, saturate(0.18, base)),
     /** Dope-sheet connector fill — was `#365b59`. */
     softDark: mix(0.25, '#0a0c0d', lighten(0.1, desaturate(0.05, base))),

@@ -39,10 +39,12 @@ export const DopeSnapHitZoneUI = {
       height: ${SNAP_CURSOR_SIZE_PX}px;
       display: block;
       content: ' ';
+      background-color: var(--studio-accent-soft-hover);
       // Must be quoted: esbuild inlines the SVG as a data URL, and an unquoted
       // data-URL url() is invalid CSS (playground still works because Vite
       // resolves the import to a plain file path).
-      background: url('${SnapCursor}') no-repeat center / 100% 100%;
+      mask: url('${SnapCursor}') no-repeat center / 100% 100%;
+      -webkit-mask: url('${SnapCursor}') no-repeat center / 100% 100%;
       // This icon might also fit: GiConvergenceTarget
     }
   `,
