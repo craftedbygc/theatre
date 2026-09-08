@@ -95,8 +95,8 @@ const CollapseIcon = styled.span<{isCollapsed: boolean; isVector: boolean}>`
   justify-content: center;
   flex: 0 0 auto;
 
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.12s ease-out,
-    opacity 0.12s ease-out;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.12s ease-out, opacity 0.12s ease-out;
   transform: rotateZ(${(props) => (props.isCollapsed ? 0 : 90)}deg);
   color: var(--studio-text-muted);
 
@@ -191,6 +191,8 @@ export type ICompoundPropDetailEditorProps<
   pointerToProp: Pointer<TPropTypeConfig['valueType']>
   obj: SheetObject
   visualIndentation: number
+  /** Skip this compound's diamond + label row and show children in its place. */
+  hideRootHeader?: boolean
 }
 
 function DetailCompoundPropEditor<
@@ -200,6 +202,7 @@ function DetailCompoundPropEditor<
   obj,
   propConfig,
   visualIndentation,
+  hideRootHeader = false,
 }: ICompoundPropDetailEditorProps<TPropTypeConfig>) {
   const propName =
     propConfig.label ?? (last(getPointerParts(pointerToProp).path) as string)
@@ -258,7 +261,11 @@ function DetailCompoundPropEditor<
   }, [isCollapsedAtom, isVector])
 
   // Root object folder is always open and has no chevron.
-  const showCollapsed = isRootProps ? false : isCollapsed
+  // Flattened roots (showPropsOf) stay expanded so children replace the hidden row.
+  const showCollapsed = isRootProps || hideRootHeader ? false : isCollapsed
+  const childIndentation = hideRootHeader
+    ? visualIndentation
+    : visualIndentation + 1
 
   const {targetRef} = useChordial(() => {
     const title = [
@@ -274,49 +281,51 @@ function DetailCompoundPropEditor<
 
   return (
     <Container>
-      <Header
-        // @ts-ignore
-        style={{'--depth': visualIndentation - 1}}
-      >
-        <Padding isVectorProp={isVector}>
-          <ControlIndicators>{tools.controlIndicators}</ControlIndicators>
+      {!hideRootHeader && (
+        <Header
+          // @ts-ignore
+          style={{'--depth': visualIndentation - 1}}
+        >
+          <Padding isVectorProp={isVector}>
+            <ControlIndicators>{tools.controlIndicators}</ControlIndicators>
 
-          <PropName
-            isHighlighted={isPropHighlightedD}
-            $isTransient={isTransient}
-            ref={targetRef}
-          >
-            <span>{label}</span>
-          </PropName>
-          {!isRootProps && (
-            <CollapseIcon
-              isCollapsed={isCollapsed}
-              isVector={isVector}
-              onClick={() => {
-                isCollapsedAtom.set(!isCollapsedAtom.get())
-              }}
+            <PropName
+              isHighlighted={isPropHighlightedD}
+              $isTransient={isTransient}
+              ref={targetRef}
             >
-              <HiOutlineChevronRight />
-            </CollapseIcon>
+              <span>{label}</span>
+            </PropName>
+            {!isRootProps && (
+              <CollapseIcon
+                isCollapsed={isCollapsed}
+                isVector={isVector}
+                onClick={() => {
+                  isCollapsedAtom.set(!isCollapsedAtom.get())
+                }}
+              >
+                <HiOutlineChevronRight />
+              </CollapseIcon>
+            )}
+          </Padding>
+          {isVector && showCollapsed && (
+            <InputContainer>
+              {[...allSubs].map(([subPropKey, subPropConfig]) => {
+                return (
+                  <VectorComponentEditor
+                    key={'prop-' + subPropKey}
+                    // @ts-ignore
+                    propConfig={subPropConfig}
+                    pointerToProp={pointerToProp[subPropKey] as Pointer<$FixMe>}
+                    obj={obj}
+                    label={subPropKey}
+                  />
+                )
+              })}
+            </InputContainer>
           )}
-        </Padding>
-        {isVector && showCollapsed && (
-          <InputContainer>
-            {[...allSubs].map(([subPropKey, subPropConfig]) => {
-              return (
-                <VectorComponentEditor
-                  key={'prop-' + subPropKey}
-                  // @ts-ignore
-                  propConfig={subPropConfig}
-                  pointerToProp={pointerToProp[subPropKey] as Pointer<$FixMe>}
-                  obj={obj}
-                  label={subPropKey}
-                />
-              )
-            })}
-          </InputContainer>
-        )}
-      </Header>
+        </Header>
+      )}
 
       {!showCollapsed && (
         <SubProps
@@ -334,7 +343,7 @@ function DetailCompoundPropEditor<
                   propConfig={subPropConfig}
                   pointerToProp={pointerToProp[subPropKey] as Pointer<$FixMe>}
                   obj={obj}
-                  visualIndentation={visualIndentation + 1}
+                  visualIndentation={childIndentation}
                 />
               )
             },

@@ -23,7 +23,7 @@ import DetailSimplePropEditor from './DeterminePropEditorForDetail/DetailSimpleP
  */
 const DeterminePropEditorForDetail: React.VFC<
   IDeterminePropEditorForDetailProps<PropTypeConfig['type']>
-> = ({propConfig, visualIndentation, pointerToProp, obj}) => {
+> = ({propConfig, visualIndentation, pointerToProp, obj, hideRootHeader}) => {
   if (propConfig.type === 'compound') {
     return (
       <DetailCompoundPropEditor
@@ -31,6 +31,7 @@ const DeterminePropEditorForDetail: React.VFC<
         visualIndentation={visualIndentation}
         pointerToProp={pointerToProp}
         propConfig={propConfig}
+        hideRootHeader={hideRootHeader}
       />
     )
   } else if (propConfig.type === 'enum') {
@@ -60,6 +61,11 @@ export default DeterminePropEditorForDetail
 type IDeterminePropEditorForDetailProps<K extends PropTypeConfig['type']> =
   IDetailEditablePropertyProps<K> & {
     visualIndentation: number
+    /**
+     * When true, skip the compound's own name row (diamond + label) and show
+     * its children as the first level. Used by showPropsOf fieldsets.
+     */
+    hideRootHeader?: boolean
   }
 type IDetailEditablePropertyProps<K extends PropTypeConfig['type']> = {
   obj: SheetObject

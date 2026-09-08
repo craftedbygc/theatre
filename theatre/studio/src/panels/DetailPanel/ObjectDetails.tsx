@@ -6,6 +6,7 @@ import DeterminePropEditorForDetail from './DeterminePropEditorForDetail'
 import {useVal} from '@unseenco/theatre-react'
 import uniqueKeyForAnyObject from '@unseenco/theatre-shared/utils/uniqueKeyForAnyObject'
 import styled from 'styled-components'
+import getStudio from '@unseenco/theatre-studio/getStudio'
 
 const ActionButtonContainer = styled.div`
   display: flex;
@@ -47,10 +48,24 @@ const ShowPropsOfSection = styled.fieldset`
 const ShowPropsOfLegend = styled.legend`
   margin-left: 8px;
   padding: 0 6px;
+`
+
+const ShowPropsOfLegendButton = styled.button`
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
   color: #a9a9a9;
+  font: inherit;
   font-size: 10px;
   letter-spacing: 0.02em;
   text-transform: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--studio-text-focus);
+  }
 `
 
 const ShowPropsOfObjectSection: React.FC<{source: SheetObject}> = ({
@@ -63,15 +78,32 @@ const ShowPropsOfObjectSection: React.FC<{source: SheetObject}> = ({
     return null
   }
 
+  const objectKey = source.address.objectKey
+
   return (
     <ShowPropsOfSection>
-      <ShowPropsOfLegend>{source.address.objectKey}</ShowPropsOfLegend>
+      <ShowPropsOfLegend>
+        <ShowPropsOfLegendButton
+          type="button"
+          title={`Show ${objectKey} in the details pane`}
+          onClick={() => {
+            getStudio().transaction(({stateEditors}) => {
+              stateEditors.studio.historic.panels.outline.selection.set([
+                source,
+              ])
+            })
+          }}
+        >
+          {objectKey}
+        </ShowPropsOfLegendButton>
+      </ShowPropsOfLegend>
       <DeterminePropEditorForDetail
         key={uniqueKeyForAnyObject(source)}
         obj={source}
         pointerToProp={source.propsP as Pointer<$FixMe>}
         propConfig={sourceConfig}
         visualIndentation={1}
+        hideRootHeader
       />
     </ShowPropsOfSection>
   )
