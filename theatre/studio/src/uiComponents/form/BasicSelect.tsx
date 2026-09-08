@@ -141,16 +141,65 @@ const OptionButton = styled.button<{
 
 const MENU_ATTR = 'data-basic-select-menu'
 
-function isInsideSelectUi(
-  event: MouseEvent,
-  trigger: Element | null,
-): boolean {
+function isInsideSelectUi(event: MouseEvent, trigger: Element | null): boolean {
   const path = event.composedPath()
   if (trigger && path.includes(trigger)) return true
   return path.some(
-    (node) =>
-      node instanceof Element && node.hasAttribute(MENU_ATTR),
+    (node) => node instanceof Element && node.hasAttribute(MENU_ATTR),
   )
+}
+
+function isOverflowScrollable(el: Element): boolean {
+  const {overflow, overflowX, overflowY} = getComputedStyle(el)
+  return /(auto|scroll|overlay)/.test(overflow + overflowX + overflowY)
+}
+
+/**
+ * `scroll` is not a composed event, so a capture listener on `window` never
+ * sees scrolling inside Theatre's shadow root. Walk overflow ancestors (and
+ * shadow hosts) and listen on those instead.
+ */
+function collectScrollListenTargets(start: Element): EventTarget[] {
+  const targets: EventTarget[] = [window]
+  let node: Node | null = start.parentNode
+  while (node) {
+    if (node instanceof Element) {
+      if (isOverflowScrollable(node)) targets.push(node)
+      node = node.parentNode
+    } else if (node instanceof ShadowRoot) {
+      targets.push(node)
+      node = node.host
+    } else {
+      break
+    }
+  }
+  return targets
+}
+
+function isRectVisibleInScrollAncestors(
+  start: Element,
+  rect: DOMRect,
+): boolean {
+  let node: Node | null = start.parentNode
+  while (node) {
+    if (node instanceof Element) {
+      if (isOverflowScrollable(node)) {
+        const parentRect = node.getBoundingClientRect()
+        const overlaps =
+          rect.bottom > parentRect.top &&
+          rect.top < parentRect.bottom &&
+          rect.right > parentRect.left &&
+          rect.left < parentRect.right
+        if (!overlaps) return false
+      }
+      node = node.parentNode
+    } else if (node instanceof ShadowRoot) {
+      node = node.host
+    } else {
+      break
+    }
+  }
+  return true
 }
 
 function BasicSelect<TLiteralOptions extends string>({
@@ -189,23 +238,49 @@ function BasicSelect<TLiteralOptions extends string>({
     const chip =
       (el.closest('[data-detail-prop-chip]') as HTMLElement | null) ?? el
     const rect = chip.getBoundingClientRect()
+    if (!isRectVisibleInScrollAncestors(chip, rect)) {
+      setOpen(false)
+      return
+    }
     const width = Math.max(rect.width, 140)
-    setMenuPos({
+    const next = {
       top: rect.bottom + 4,
       left: rect.right - width,
       width,
-    })
+    }
+    setMenuPos((prev) =>
+      prev.top === next.top &&
+      prev.left === next.left &&
+      prev.width === next.width
+        ? prev
+        : next,
+    )
   }, [])
 
   useLayoutEffect(() => {
     if (!open) return
+    const el = triggerRef.current
+    if (!el) return
     syncMenuPosition()
-    const onReposition = () => syncMenuPosition()
+    let raf = 0
+    const onReposition = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        syncMenuPosition()
+      })
+    }
+    const scrollTargets = collectScrollListenTargets(el)
     window.addEventListener('resize', onReposition)
-    window.addEventListener('scroll', onReposition, true)
+    for (const target of scrollTargets) {
+      target.addEventListener('scroll', onReposition, true)
+    }
     return () => {
       window.removeEventListener('resize', onReposition)
-      window.removeEventListener('scroll', onReposition, true)
+      for (const target of scrollTargets) {
+        target.removeEventListener('scroll', onReposition, true)
+      }
+      if (raf) cancelAnimationFrame(raf)
     }
   }, [open, syncMenuPosition])
 
@@ -307,17 +382,12 @@ function BasicSelect<TLiteralOptions extends string>({
     // Typeahead: jump to first option whose label starts with the typed char
     if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
       const ch = e.key.toLowerCase()
-      const idx = keys.findIndex((k) =>
-        options[k].toLowerCase().startsWith(ch),
-      )
+      const idx = keys.findIndex((k) => options[k].toLowerCase().startsWith(ch))
       if (idx >= 0) setHighlightIndex(idx)
     }
   }
 
-  const onOptionPointerDown = (
-    e: React.PointerEvent,
-    key: TLiteralOptions,
-  ) => {
+  const onOptionPointerDown = (e: React.PointerEvent, key: TLiteralOptions) => {
     // Handle in pointerdown (capture-friendly) so the value commits before any
     // close/toggle logic from the falling click can run.
     e.preventDefault()
